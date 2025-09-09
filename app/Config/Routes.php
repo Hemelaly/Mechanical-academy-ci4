@@ -37,6 +37,7 @@ $routes->group('student', ['namespace' => 'App\Controllers\Student'], function (
     $routes->get('dashboard/cursos', 'Dashboard::courses');
     $routes->get('dashboard/ver_aulas/(:num)', 'Dashboard::lessons/$1');
     $routes->get('dashboard/perfil', 'Dashboard::profile');
+    $routes->get('dashboard/enroll/(:num)', 'CourseController::enroll/$1');
 });
 
 

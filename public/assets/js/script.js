@@ -280,19 +280,19 @@ document.addEventListener("DOMContentLoaded", () => {
         return formData;
     }
 
-    publishBtn?.addEventListener("click", () => {
-        const data = collectCourseData();
-        fetch(form.action, { method: 'POST', body: data })
-        .then(res => res.json())
-        .then(resp => { alert("Curso publicado com sucesso! 🎉"); console.log(resp); })
-        .catch(err => { console.error(err); alert("Erro ao publicar."); });
-    });
+    // publishBtn?.addEventListener("click", () => {
+    //     const data = collectCourseData();
+    //     fetch(form.action, { method: 'POST', body: data })
+    //     .then(res => res.json())
+    //     .then(resp => { alert("Curso publicado com sucesso! 🎉"); console.log(resp); })
+    //     .catch(err => { console.error(err); alert("Erro ao publicar."); });
+    // });
 
-    saveDraftBtn?.addEventListener("click", () => {
-        const data = collectCourseData();
-        console.log("Rascunho salvo:", data);
-        alert("Rascunho salvo! 💾");
-    });
+    // saveDraftBtn?.addEventListener("click", () => {
+    //     const data = collectCourseData();
+    //     console.log("Rascunho salvo:", data);
+    //     alert("Rascunho salvo! 💾");
+    // });
 });
 
 // ======================

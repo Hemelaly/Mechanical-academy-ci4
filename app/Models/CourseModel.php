@@ -12,7 +12,7 @@ class CourseModel extends Model
     protected $returnType       = 'object';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['title_course', 'subtitle_course', 'id_instructor_course','description_course', 'image_course', 'status_course', 'price_course', 'created_at', 'updated_at'];
+    protected $allowedFields    = ['title_course', 'subtitle_course', 'id_instructor_course', 'description_course', 'image_course', 'status_course', 'price_course', 'created_at', 'updated_at'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -76,5 +76,21 @@ class CourseModel extends Model
     public function getCoursesByInstructor($instructorId)
     {
         return $this->where('id_instructor_course', $instructorId)->findAll();
+    }
+
+    public function getRelInstructor()
+    {
+        return $this->select('
+            courses.id_course,
+            courses.title_course,
+            courses.image_course,
+            courses.description_course,
+            courses.price_course,
+            instructors.id_instructor,
+            instructors.name_instructor,
+            instructors.email_instructor
+        ')
+            ->join('instructors', 'instructors.id_instructor = courses.id_instructor_course')
+            ->findAll();
     }
 }

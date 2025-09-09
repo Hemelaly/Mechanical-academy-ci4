@@ -14,20 +14,32 @@ class CourseController extends BaseController
 
         // Receber formData (multipart/form-data)
         $data = $this->request->getPost();
-        $data['modules'] = isset($data['modules']) ? json_decode($data['modules'], true) : [];
-        $data['tags'] = isset($data['tags']) ? json_decode($data['tags'], true) : [];
 
-        // 1. Salvar curso
+        // Processar módulos
+        $data['modules'] = [];
+        if ($this->request->getPost('modules')) {
+            $modulesRaw = $this->request->getPost('modules');
+            $data['modules'] = is_string($modulesRaw) ? json_decode($modulesRaw, true) : $modulesRaw;
+        }
+
+        // Processar tags (se houver)
+        $data['tags'] = [];
+        if ($this->request->getPost('tags')) {
+            $tagsRaw = $this->request->getPost('tags');
+            $data['tags'] = is_string($tagsRaw) ? json_decode($tagsRaw, true) : $tagsRaw;
+        }
+
+        // 1. Preparar dados do curso
         $courseData = [
-            'title_course'        => $data['title_course'] ?? '',
-            'subtitle_course'     => $data['subtitle_course'] ?? '',
-            'description_course'  => $data['description_course'] ?? '',
+            'title_course'         => $data['title_course'] ?? '',
+            'subtitle_course'      => $data['subtitle_course'] ?? '',
+            'description_course'   => $data['description_course'] ?? '',
             'id_instructor_course' => auth()->id(),
-            'status_course'       => 'Rascunho',
-            'price_course'        => ($data['courseType'] ?? 'free') === 'paid' ? ($data['price_course'] ?? 0) : 0,
+            'status_course'        => 'Rascunho',
+            'price_course'         => ($data['courseType'] ?? 'free') === 'paid' ? ($data['price_course'] ?? 0) : 0,
         ];
 
-        // Imagem
+        // Upload de imagem
         if ($file = $this->request->getFile('image_course')) {
             if ($file->isValid() && !$file->hasMoved()) {
                 $newName = $file->getRandomName();
@@ -36,11 +48,12 @@ class CourseController extends BaseController
             }
         }
 
-        $success = $courseModel->insert($courseData);
-        if (!$success) {
-            return $this->response->setJSON(['errors' => $courseModel->errors()])->setStatusCode(400);
+        // Validar e inserir curso
+        if (!$courseModel->validate($courseData)) {
+            return redirect()->back()->withInput()->with('errors', $courseModel->errors());
         }
 
+        $courseModel->insert($courseData);
         $courseId = $courseModel->insertID();
 
         // 2. Salvar módulos e aulas
@@ -52,6 +65,7 @@ class CourseController extends BaseController
                     'description_module' => $module['description'] ?? '',
                     'position_module'    => $mIndex + 1,
                 ];
+
                 $moduleModel->insert($moduleInsert);
                 $moduleId = $moduleModel->insertID();
 
@@ -71,7 +85,7 @@ class CourseController extends BaseController
             }
         }
 
-        return $this->response->setJSON(['success' => true, 'course_id' => $courseId]);
+        return redirect()->to('instructor/dashboard/meus_cursos')->with('success', 'Curso criado com sucesso!');
     }
 
     public function editar($id = null)
@@ -85,7 +99,6 @@ class CourseController extends BaseController
         }
 
         $course = $courseModel->find($id);
-
         if (!$course) {
             return redirect()->back()->with('error', 'Curso não encontrado');
         }
@@ -94,8 +107,14 @@ class CourseController extends BaseController
             return redirect()->back()->with('error', 'Acesso negado');
         }
 
-        // Receber dados do form
         $data = $this->request->getPost();
+
+        // Processar módulos
+        $data['modules'] = [];
+        if ($this->request->getPost('modules')) {
+            $modulesRaw = $this->request->getPost('modules');
+            $data['modules'] = is_string($modulesRaw) ? json_decode($modulesRaw, true) : $modulesRaw;
+        }
 
         // Atualizar curso
         $courseData = [
@@ -118,14 +137,14 @@ class CourseController extends BaseController
 
         // Atualizar módulos e aulas
         if (!empty($data['modules'])) {
-            // Limpar módulos antigos
+            // Remover antigos
             $oldModules = $moduleModel->where('id_course_module', $id)->findAll();
             foreach ($oldModules as $mod) {
                 $lessonModel->where('id_module_lesson', $mod->id_module)->delete();
             }
             $moduleModel->where('id_course_module', $id)->delete();
 
-            // Inserir novos módulos e aulas
+            // Inserir novos
             foreach ($data['modules'] as $mIndex => $module) {
                 $moduleInsert = [
                     'id_course_module'   => $id,
@@ -155,7 +174,6 @@ class CourseController extends BaseController
         return redirect()->back()->with('success', 'Curso atualizado com sucesso!');
     }
 
-
     public function deletar($id = null)
     {
         $courseModel = new \App\Models\CourseModel();
@@ -167,7 +185,6 @@ class CourseController extends BaseController
         }
 
         $course = $courseModel->find($id);
-
         if (!$course) {
             return redirect()->back()->with('error', 'Curso não encontrado');
         }

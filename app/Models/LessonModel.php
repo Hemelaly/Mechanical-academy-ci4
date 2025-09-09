@@ -72,4 +72,11 @@ class LessonModel extends Model
         return $this->where('id_module_lesson', $moduleId)->orderBy('position_lesson', 'ASC')->findAll();
     }
 
+    public function getFirstLessonByCourse($courseId)
+    {
+        return $this->join('modules', 'modules.id_module = lessons.id_module_lesson')
+            ->where('modules.id_course_module', $courseId)
+            ->orderBy('position_lesson', 'ASC')
+            ->first();
+    }
 }

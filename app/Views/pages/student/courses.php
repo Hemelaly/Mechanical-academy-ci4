@@ -189,35 +189,38 @@
             <div class="tw-card p-3 p-md-4">
                 <div class="d-flex align-items-center justify-content-between mb-3">
                     <h5 class="tw-title mb-0"><i class="bi bi-collection me-2"></i>Todos os cursos disponíveis</h5>
-                    <div class="tw-sub small">6 cursos</div>
+                    <div class="tw-sub small"><?= count($courses) ?> Cursos</div>
                 </div>
 
                 <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-3 tw-grid-gap">
-                    <?php foreach($courses as $key => $course): ?>
-                    <div class="col">
-                        <div class="p-3 h-100 d-flex flex-column justify-content-between" style="background: var(--tw-soft); border:1px solid var(--tw-border); border-radius: .875rem;">
-                            <div>
-                                <div class="image">
-                                    <img src="<?= base_url('assets/instructor/img/courses/'. $course->image_course) ?>" class="img-fluid rounded mb-2" alt="">
-                                </div>
-                                <div class="d-flex align-items-start justify-content-between gap-3">
-                                    <div>
-                                        <div class="fw-semibold mb-1" style="color:#e5e7eb;"><?= $course->title_course ?></div>
-                                        <div class="tw-sub small mb-2">Instrutor: <?= $course->name_instructor ?></div>
+                    <?php foreach ($courses as $key => $course): ?>
+                        <div class="col">
+                            <div class="p-3 h-100 d-flex flex-column justify-content-between" style="background: var(--tw-soft); border:1px solid var(--tw-border); border-radius: .875rem;">
+                                <div>
+                                    <div class="image">
+                                        <img src="<?= base_url('assets/instructor/img/courses/' . $course->image_course) ?>" class="img-fluid rounded mb-2" alt="">
                                     </div>
-                                    <span class="badge badge-soft">Avançado</span>
+                                    <div class="d-flex align-items-start justify-content-between gap-3">
+                                        <div>
+                                            <div class="fw-semibold mb-1" style="color:#e5e7eb;"><?= $course->title_course ?></div>
+                                            <div class="tw-sub small mb-2">Instrutor: <?= $course->name_instructor ?? '' ?></div>
+                                        </div>
+                                        <span class="badge badge-soft">Avançado</span>
+                                    </div>
+                                    <div class="tw-sub small"><?= $course->description_course ?></div>
                                 </div>
-                                <div class="tw-sub small">Aprenda Laravel para construir aplicações web robustas…</div>
-                            </div>
-                            <div class="d-flex align-items-center justify-content-between mt-3 pt-2" style="border-top:1px dashed #1b2941;">
-                                <div class="fw-semibold">MT 2.500,00</div>
-                                <div class="d-flex gap-2">
-                                    <a href="#" class="btn btn-sm btn-tw"><i class="bi bi-eye me-1"></i>Ver</a>
-                                    <a href="#" class="btn btn-sm btn-accent"><i class="bi bi-plus-circle me-1"></i>Inscrever</a>
+                                <div class="d-flex align-items-center justify-content-between mt-3 pt-2" style="border-top:1px dashed #1b2941;">
+                                    <div class="fw-semibold">MT <?= $course->price_course ?></div>
+                                    <div class="d-flex gap-2">
+                                        <a href="#" class="btn btn-sm btn-tw"><i class="bi bi-eye me-1"></i>Ver</a>
+                                        <a href="<?= site_url('/student/dashboard/enroll/' . $course->id_course) ?>"
+                                            class="btn btn-sm btn-accent">
+                                            Inscrever-se
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
                     <?php endforeach ?>
 
                     <!-- <div class="col">

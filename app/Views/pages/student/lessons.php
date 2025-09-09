@@ -4,9 +4,10 @@
 
 <?= $this->section('lessons') ?>
 <style>
-    .sidebar2{
+    .sidebar2 {
         padding: 20px 0;
     }
+
     .main-container {
         padding: 20px;
         max-width: 1400px;
@@ -366,7 +367,7 @@
     <div class="breadcrumb-nav">
         <a href="/student/dashboard/meus_cursos">← Voltar aos Cursos</a>
         <span class="separator">/</span>
-        <span>JavaScript Avançado</span>
+        <span><?= $course->title_course ?></span>
     </div>
 
     <!-- Progress Section -->

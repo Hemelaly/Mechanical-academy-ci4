@@ -1,5 +1,6 @@
 <?= $this->extend('layouts/master') ?>
 
+
 <?= $this->section('title') ?>Meus Cursos<?= $this->endSection() ?>
 
 <?= $this->section('my_courses') ?>
@@ -63,7 +64,7 @@
         <i class="fas fa-clock me-1"></i> Não Iniciados
       </button>
     </div>
-    
+
     <!-- Courses Grid -->
     <div class="row g-4">
       <!-- Curso 1 -->
@@ -95,9 +96,11 @@
 
               <!-- Ações -->
               <div class="d-flex gap-2">
-                <a href="/student/dashboard/ver_aulas/<?= $course->id_course ?>" class="btn btn-info flex-fill">
+                <a href="/student/dashboard/ver_aulas/<?= $course->firstLessonId ?>" class="btn btn-info flex-fill">
                   <i class="fas fa-play me-1"></i> Continuar
                 </a>
+
+
               </div>
             </div>
           </div>

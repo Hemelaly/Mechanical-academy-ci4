@@ -4,11 +4,9 @@ namespace App\Controllers\Student;
 
 use App\Controllers\BaseController;
 use App\Models\CourseModel;
-use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\EnrollmentModel;
 use App\Models\ModuleModel;
 use App\Models\LessonModel;
-use App\Models\CourseSettingModel;
 
 class Dashboard extends BaseController
 {
@@ -18,7 +16,7 @@ class Dashboard extends BaseController
             ['label' => 'Início', 'icon' => 'bi-house-door', 'url' => '/student/dashboard'],
             ['label' => 'Meus Cursos', 'icon' => 'bi-book', 'url' => '/student/dashboard/meus_cursos'],
             ['label' => 'Todos Cursos', 'icon' => 'bi-book', 'url' => '/student/dashboard/cursos'],
-            ['label' => 'User Profile', 'icon' => 'bi-person-circle', 'url' => '/student/dashboard/perfil'],
+            ['label' => 'Perfil', 'icon' => 'bi-person-circle', 'url' => '/student/dashboard/perfil'],
         ];
     }
 
@@ -35,48 +33,82 @@ class Dashboard extends BaseController
 
     public function my_courses()
     {
-        $enrollmentModel = new EnrollmentModel();
+        $enrollmentModel = new \App\Models\EnrollmentModel();
+        $lessonModel = new \App\Models\LessonModel();
         $user = service('auth')->user();
-        $enrollment = $enrollmentModel->getStudentEnrolledCourses($user->id);
+
+        // Pega os cursos nos quais o aluno está inscrito
+        $courses = $enrollmentModel->getStudentEnrolledCourses($user->id);
+
+        // Para cada curso, pega a primeira aula (ordenada por posição do módulo e da aula)
+        foreach ($courses as &$course) {
+            $firstLesson = $lessonModel
+                ->select('lessons.id_lesson')
+                ->join('modules', 'modules.id_module = lessons.id_module_lesson')
+                ->where('modules.id_course_module', $course->id_course)
+                ->orderBy('modules.position_module', 'ASC')
+                ->orderBy('lessons.position_lesson', 'ASC')
+                ->first();
+
+            $course->firstLessonId = $firstLesson->id_lesson ?? null;
+        }
 
         return view('pages/student/my_courses', [
             'user' => $user,
-            'courses' => $enrollment,
+            'courses' => $courses,
             'sidebarLinks' => $this->sidebarLinks(),
             'currentUrl' => current_url()
         ]);
     }
 
+
     public function lessons($id)
     {
         $lessonModel = new LessonModel();
-        $moduleModel = new \App\Models\ModuleModel();
-        $courseModel = new \App\Models\CourseModel();
+        $moduleModel = new ModuleModel();
+        $courseModel = new CourseModel();
 
-        $idLesson = (int) $id;
-        $lesson = $lessonModel->find($idLesson);
+        $id = (int) $id;
 
+        // Tenta encontrar a aula pelo ID
+        $lesson = $lessonModel->find($id);
+
+        // Se não existir, assume que é o ID do curso e pega a primeira aula
         if (!$lesson) {
-            return redirect()->back()->with('error', 'Aula não encontrada');
+            $firstLesson = $lessonModel
+                ->join('modules', 'modules.id_module = lessons.id_module_lesson')
+                ->where('modules.id_course_module', $id)
+                ->orderBy('position_lesson', 'ASC')
+                ->first();
+
+            if (!$firstLesson) {
+                return redirect()->back()->with('error', 'Nenhuma aula encontrada para este curso.');
+            }
+
+            return redirect()->to('/student/dashboard/ver_aulas/' . $firstLesson->id_lesson);
         }
 
+        // Pega módulo e curso da aula
         $module = $moduleModel->find($lesson->id_module_lesson);
         $course = $courseModel->find($module->id_course_module);
 
-        // pega todos os módulos e suas aulas do curso para a sidebar
-        $modules = $moduleModel->where('id_course_module', $course->id_course)->findAll();
+        // Pega todos os módulos do curso e suas aulas
+        $modules = $moduleModel->where('id_course_module', $course->id_course)->orderBy('position_module')->findAll();
         foreach ($modules as &$m) {
-            $m->lessons = $lessonModel->where('id_module_lesson', $m->id_module)->findAll();
+            $m->lessons = $lessonModel->where('id_module_lesson', $m->id_module)->orderBy('position_lesson')->findAll();
         }
 
-        $user = service('auth')->user();
-
-        $allLessons = $lessonModel->where('id_module_lesson', $lesson->id_module_lesson)->orderBy('id_lesson')->findAll();
+        // Navegação entre aulas do módulo atual
+        $allLessons = $lessonModel->where('id_module_lesson', $lesson->id_module_lesson)
+            ->orderBy('position_lesson')
+            ->findAll();
         $lessonKeys = array_column($allLessons, 'id_lesson');
         $currentIndex = array_search($lesson->id_lesson, $lessonKeys);
 
         $prevLesson = $lessonKeys[$currentIndex - 1] ?? null;
         $nextLesson = $lessonKeys[$currentIndex + 1] ?? null;
+
+        $user = service('auth')->user();
 
         return view('pages/student/lessons', [
             'course' => $course,
@@ -90,17 +122,15 @@ class Dashboard extends BaseController
         ]);
     }
 
-
     public function courses()
     {
-
         $coursesModel = new CourseModel();
-        $Courses = $coursesModel->findAll();
+        $courses = $coursesModel->findAll();
         $user = service('auth')->user();
 
         return view('pages/student/courses', [
             'user' => $user,
-            'courses' => $Courses,
+            'courses' => $courses,
             'sidebarLinks' => $this->sidebarLinks(),
             'currentUrl' => current_url()
         ]);
