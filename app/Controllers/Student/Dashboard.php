@@ -49,14 +49,47 @@ class Dashboard extends BaseController
 
     public function lessons($id)
     {
+        $lessonModel = new LessonModel();
+        $moduleModel = new \App\Models\ModuleModel();
+        $courseModel = new \App\Models\CourseModel();
+
+        $idLesson = (int) $id;
+        $lesson = $lessonModel->find($idLesson);
+
+        if (!$lesson) {
+            return redirect()->back()->with('error', 'Aula não encontrada');
+        }
+
+        $module = $moduleModel->find($lesson->id_module_lesson);
+        $course = $courseModel->find($module->id_course_module);
+
+        // pega todos os módulos e suas aulas do curso para a sidebar
+        $modules = $moduleModel->where('id_course_module', $course->id_course)->findAll();
+        foreach ($modules as &$m) {
+            $m->lessons = $lessonModel->where('id_module_lesson', $m->id_module)->findAll();
+        }
+
         $user = service('auth')->user();
 
+        $allLessons = $lessonModel->where('id_module_lesson', $lesson->id_module_lesson)->orderBy('id_lesson')->findAll();
+        $lessonKeys = array_column($allLessons, 'id_lesson');
+        $currentIndex = array_search($lesson->id_lesson, $lessonKeys);
+
+        $prevLesson = $lessonKeys[$currentIndex - 1] ?? null;
+        $nextLesson = $lessonKeys[$currentIndex + 1] ?? null;
+
         return view('pages/student/lessons', [
+            'course' => $course,
+            'modules' => $modules,
+            'lesson' => $lesson,
+            'prevLesson' => $prevLesson,
+            'nextLesson' => $nextLesson,
             'user' => $user,
             'sidebarLinks' => $this->sidebarLinks(),
             'currentUrl' => current_url()
         ]);
     }
+
 
     public function courses()
     {
@@ -83,5 +116,4 @@ class Dashboard extends BaseController
             'currentUrl' => current_url()
         ]);
     }
-
 }

@@ -3,6 +3,27 @@
 <?= $this->section('title') ?>Meus Cursos<?= $this->endSection() ?>
 
 <?= $this->section('my_courses') ?>
+<!-- CSS opcional para dar efeito hover/active mais elegante -->
+<style>
+  .filter-btn {
+    transition: all 0.3s;
+    border-radius: 999px;
+    /* deixa os botões em formato pill */
+  }
+
+  .filter-btn:hover {
+    background-color: #9e42c3ff;
+    color: #fff;
+    border-color: #9e42c3ff;
+  }
+
+  .filter-btn.active {
+    background-color: #9e42c3ff;
+    color: #fff;
+    border-color: #9e42c3ff;
+  }
+</style>
+
 <!-- Cursos -->
 <div class="container-fluid my-4">
   <h4 class="fw-bold mb-4">Cursos</h4>
@@ -10,13 +31,11 @@
   <!-- Filtros + Ações -->
   <div class="row d-flex justify-content-between align-items-center mb-4">
     <!-- Botões de Filtro -->
-    <div class="col-lg-6 d-flex align-items-center mb-2">
-      <div class="btn-group" role="group" aria-label="Filtros de cursos">
-        <button type="button" class="btn btn-outline-primary active filter-btn" data-filter="all">Todos</button>
-        <button type="button" class="btn btn-outline-primary filter-btn" data-filter="Ativo">Ativos</button>
-        <button type="button" class="btn btn-outline-primary filter-btn" data-filter="Rascunho">Rascunhos</button>
-        <button type="button" class="btn btn-outline-primary filter-btn" data-filter="Arquivado">Arquivados</button>
-      </div>
+    <div class="col-lg-6 d-flex flex-wrap gap-2 mb-2">
+      <button type="button" class="btn btn-outline-primary filter-btn active" data-filter="all">Todos</button>
+      <button type="button" class="btn btn-outline-primary filter-btn" data-filter="Ativo">Ativos</button>
+      <button type="button" class="btn btn-outline-primary filter-btn" data-filter="Rascunho">Rascunhos</button>
+      <button type="button" class="btn btn-outline-primary filter-btn" data-filter="Arquivado">Arquivados</button>
     </div>
 
     <!-- Ações -->
@@ -27,7 +46,7 @@
         class="form-control rounded-pill"
         placeholder="Procurar cursos..."
         style="max-width: 250px" />
-      <a href="novo_curso" class="btn btn-primary rounded-pill fw-semibold btn-sm">
+      <a href="novo_curso" class="btn btn-primary rounded-pill fw-semibold btn-sm d-flex">
         <i class="bi bi-plus-circle me-2"></i> Criar Novo Curso
       </a>
     </div>
@@ -37,12 +56,14 @@
   <div class="row d-flex g-4" id="coursesContainer">
     <?php foreach ($courses as $course): ?>
       <div class="col-md-4 course-card" data-status="<?= $course->status_course ?>" data-title="<?= strtolower($course->title_course) ?>">
-        <div class="card bg-modern-dark border-0 shadow-sm h-100">
+        <div class="card bg-modern-dark border-0 shadow-sm">
           <div class="position-relative">
-            <img
-              src="<?= base_url('assets/instructor/img/courses/' . $course->image_course) ?>"
-              class="card-img-top"
-              alt="Curso <?= $course->title_course ?>" />
+            <div class="imagem" style="width: 100%; height: 100%;">
+              <img
+                src="<?= base_url('assets/instructor/img/courses/' . $course->image_course) ?>"
+                class="img-fluid rounded"
+                alt="Curso <?= $course->title_course ?>" width="100%" height="100%" />
+            </div>
             <span class="badge bg-success position-absolute top-0 end-0 m-2"><?= $course->status_course ?></span>
           </div>
           <div class="card-body text-white">
@@ -54,9 +75,9 @@
               <span><i class="bi bi-check2-circle me-1"></i>Avançado</span>
             </div>
             <div class="d-flex gap-2">
-              <button class="btn btn-outline-primary btn-sm rounded-pill">Editar</button>
+              <a href="/instructor/dashboard/meus_cursos/editar/<?= $course->id_course ?>" class="btn btn-outline-primary btn-sm rounded-pill">Editar</a>
               <form action="/instructor/dashboard/meus_cursos/deletar/<?= $course->id_course ?>" method="POST" onsubmit="return confirm('Tem certeza que deseja deletar este curso?');">
-                <button type="submit" class="btn btn-danger btn-sm rounded-pill">Deletar</button>
+                <button type="submit" class="btn btn-danger btn-sm rounded-pill">Eliminar</button>
               </form>
             </div>
           </div>

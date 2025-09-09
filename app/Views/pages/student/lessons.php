@@ -4,18 +4,9 @@
 
 <?= $this->section('lessons') ?>
 <style>
-    * {
-        box-sizing: border-box;
+    .sidebar2{
+        padding: 20px 0;
     }
-
-    body {
-        background-color: #1e1b4b;
-        color: #ffffff;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        margin: 0;
-        padding: 0;
-    }
-
     .main-container {
         padding: 20px;
         max-width: 1400px;
@@ -26,7 +17,7 @@
         display: flex;
         align-items: center;
         margin-bottom: 20px;
-        color: #a78bfa;
+        color: #8159fbff;
         font-size: 14px;
     }
 
@@ -40,7 +31,7 @@
     }
 
     .progress-section {
-        background: linear-gradient(135deg, #3730a3 0%, #1e1b4b 100%);
+        background: linear-gradient(135deg, #1a1473ff 0%, #1e1b4b 100%);
         border-radius: 12px;
         padding: 24px;
         margin-bottom: 20px;
@@ -157,6 +148,11 @@
         display: flex;
         align-items: center;
         gap: 6px;
+    }
+
+    .lesson-item {
+        text-decoration: none;
+        color: #fff;
     }
 
     .lesson-description {
@@ -364,10 +360,11 @@
         }
     }
 </style>
+
 <div class="main-container">
     <!-- Breadcrumb -->
     <div class="breadcrumb-nav">
-        <a href="#" onclick="goBack()">← Voltar aos Cursos</a>
+        <a href="/student/dashboard/meus_cursos">← Voltar aos Cursos</a>
         <span class="separator">/</span>
         <span>JavaScript Avançado</span>
     </div>
@@ -383,239 +380,233 @@
 
     <!-- Main Content Grid -->
     <div class="content-grid">
-        <!-- Video Section -->
+        <!-- Vídeo -->
         <div class="video-section">
-            <div class="video-player" id="videoPlayer">
-                <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&h=450&fit=crop"
-                    alt="Video Thumbnail" class="video-thumbnail" id="videoThumbnail">
-                <div class="play-button" id="playButton">▶</div>
-            </div>
-            <div class="video-controls">
-                <button class="play-button" id="controlPlayButton" style="background: none; border: none; color: white; font-size: 16px; cursor: pointer;">▶</button>
-                <div class="time-display" id="timeDisplay">0:00 / 12:24</div>
+            <div class="video-player">
+                <?php
+                function getYouTubeId($url)
+                {
+                    preg_match(
+                        '/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/',
+                        $url,
+                        $matches
+                    );
+                    return $matches[1] ?? null;
+                }
+                $videoId = getYouTubeId($lesson->video_url_lesson);
+                ?>
+                <?php if ($videoId): ?>
+                    <iframe width="100%" height="100%"
+                        src="https://www.youtube.com/embed/<?= esc($videoId) ?>?rel=0&autoplay=0"
+                        title="<?= esc($lesson->title_lesson) ?>"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen>
+                    </iframe>
+                <?php else: ?>
+                    <p class="text-danger">Link de vídeo inválido</p>
+                <?php endif; ?>
             </div>
 
-            <!-- Lesson Info -->
+            <!-- Info -->
             <div class="lesson-info">
-                <h2 class="lesson-title" id="lessonTitle">Higher-Order Components</h2>
+                <h2 class="lesson-title"><?= esc($lesson->title_lesson) ?></h2>
                 <div class="lesson-meta">
-                    <div class="lesson-meta-item">
-                        <span>⏱</span>
-                        <span id="lessonDuration">35 minutos</span>
-                    </div>
-                    <div class="lesson-meta-item">
-                        <span>👁</span>
-                        <span>1,234 visualizações</span>
-                    </div>
-                    <div class="lesson-meta-item">
-                        <span>📅</span>
-                        <span>Publicado em 15/01/2024</span>
-                    </div>
+                    <div class="lesson-meta-item">⏱ <?= esc($lesson->duration_lesson) ?> minutos</div>
+                    <div class="lesson-meta-item">📅 <?= date('d/m/Y', strtotime($lesson->created_at)) ?></div>
                 </div>
-                <p class="lesson-description" id="lessonDescription">
-                    Nesta aula, você aprenderá como criar e utilizar hooks personalizados no React. Vamos explorar casos práticos e boas práticas para reutilização de lógica entre componentes.
-                </p>
-                <div class="lesson-actions">
-                    <button class="btn-primary-custom" onclick="markAsCompleted()">✓ Marcar como Concluída</button>
-                    <button class="btn-secondary-custom" onclick="addNote()">📝 Adicionar Nota</button>
-                    <button class="btn-secondary-custom" onclick="addToFavorites()">⭐ Favoritar</button>
-                </div>
+                <p class="lesson-description"><?= esc($lesson->content_lesson) ?></p>
             </div>
         </div>
+
 
         <!-- Sidebar -->
-        <div class="sidebar">
+        <div class="sidebar2" style="background: transparent;">
             <div class="sidebar-header">
                 <h3 class="sidebar-title">Conteúdo do Curso</h3>
-                <button class="collapse-all-btn" onclick="collapseAll()">🔄 Recolher Tudo</button>
             </div>
 
-            <!-- Module 1 -->
-            <div class="module-item">
-                <div class="module-header" onclick="toggleModule('module1')">
-                    <div class="module-info">
-                        <div class="module-icon"></div>
-                        <span class="module-title">Módulo 1: Introdução</span>
-                    </div>
-                    <div class="module-progress">
-                        <span>3/3</span>
-                        <span>✓</span>
-                    </div>
-                </div>
-                <div class="lessons-container" id="module1">
-                    <div class="lesson-item completed" onclick="selectLesson('Configuração do Ambiente', 15, 'Aprenda a configurar seu ambiente de desenvolvimento para React.')">
-                        <div class="lesson-info-item">
-                            <div class="lesson-status completed">✓</div>
-                            <span>Configuração do Ambiente</span>
+            <div class="accordion" id="courseAccordion">
+                <?php foreach ($modules as $index => $m): ?>
+                    <div class="accordion-item mb-2" style="background-color: #1e1b4b; border-radius: 8px; border: none;">
+                        <h2 class="accordion-header" id="heading<?= $index ?>">
+                            <button class="accordion-button collapsed" type="button"
+                                data-bs-toggle="collapse" data-bs-target="#collapse<?= $index ?>"
+                                aria-expanded="false" aria-controls="collapse<?= $index ?>"
+                                style="background-color: #1e1b4b; color: #a78bfa; font-weight: 600; border-radius: 8px;">
+                                <div class="module-info d-flex align-items-center gap-2">
+                                    <div class="module-icon" style="width: 8px; height: 8px; border-radius: 50%; background-color: #8b5cf6;"></div>
+                                    <span class="module-title"><?= esc($m->title_module) ?></span>
+                                </div>
+                            </button>
+                        </h2>
+                        <div id="collapse<?= $index ?>" class="accordion-collapse collapse <?php if ($index === 0) echo 'show'; ?>" aria-labelledby="heading<?= $index ?>">
+                            <div class="accordion-body p-0">
+                                <?php foreach ($m->lessons as $l): ?>
+                                    <a href="<?= site_url('student/dashboard/ver_aulas/' . $l->id_lesson) ?>"
+                                        class="lesson-item <?= $l->id_lesson == $lesson->id_lesson ? 'current' : '' ?>"
+                                        style="display: flex; justify-content: space-between; padding: 12px 20px; border-bottom: 1px solid #4c1d95; color: #cbd5e1; text-decoration: none; transition: background 0.3s;">
+                                        <div class="lesson-info-item d-flex align-items-center gap-2">
+                                            <div class="lesson-status <?= $l->id_lesson == $lesson->id_lesson ? 'current' : 'pending' ?>"
+                                                style="width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; background-color: <?= $l->id_lesson == $lesson->id_lesson ? '#8b5cf6' : '#4c1d95' ?>;">
+                                                <?= $l->id_lesson == $lesson->id_lesson ? '▶' : '○' ?>
+                                            </div>
+                                            <span><?= esc($l->title_lesson) ?></span>
+                                        </div>
+                                        <div class="lesson-duration"><?= esc($l->duration_lesson) ?> min</div>
+                                    </a>
+                                <?php endforeach; ?>
+                            </div>
                         </div>
-                        <div class="lesson-duration">15 min</div>
                     </div>
-                    <div class="lesson-item completed" onclick="selectLesson('Conceitos Básicos', 22, 'Revisão dos conceitos fundamentais do React.')">
-                        <div class="lesson-info-item">
-                            <div class="lesson-status completed">✓</div>
-                            <span>Conceitos Básicos</span>
-                        </div>
-                        <div class="lesson-duration">22 min</div>
-                    </div>
-                    <div class="lesson-item completed" onclick="selectLesson('Exercício Prático 1', 30, 'Primeiro exercício prático do curso.')">
-                        <div class="lesson-info-item">
-                            <div class="lesson-status completed">✓</div>
-                            <span>Exercício Prático 1</span>
-                        </div>
-                        <div class="lesson-duration">30 min</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Module 2 -->
-            <div class="module-item">
-                <div class="module-header active" onclick="toggleModule('module2')">
-                    <div class="module-info">
-                        <div class="module-icon"></div>
-                        <span class="module-title">Módulo 2: Componentes Avançados</span>
-                    </div>
-                    <div class="module-progress">
-                        <span>2/4</span>
-                        <span>⏳</span>
-                    </div>
-                </div>
-                <div class="lessons-container show" id="module2">
-                    <div class="lesson-item current" onclick="selectLesson('Higher-Order Components', 35, 'Nesta aula, você aprenderá como criar e utilizar hooks personalizados no React. Vamos explorar casos práticos e boas práticas para reutilização de lógica entre componentes.')">
-                        <div class="lesson-info-item">
-                            <div class="lesson-status current">▶</div>
-                            <span>Higher-Order Components</span>
-                        </div>
-                        <div class="lesson-duration">26 min</div>
-                    </div>
-                    <div class="lesson-item completed" onclick="selectLesson('Render Props', 25, 'Aprenda sobre o padrão Render Props no React.')">
-                        <div class="lesson-info-item">
-                            <div class="lesson-status completed">✓</div>
-                            <span>Render Props</span>
-                        </div>
-                        <div class="lesson-duration">25 min</div>
-                    </div>
-                    <div class="lesson-item pending" onclick="selectLesson('Projeto Prático', 45, 'Desenvolva um projeto prático aplicando os conceitos aprendidos.')">
-                        <div class="lesson-info-item">
-                            <div class="lesson-status pending">○</div>
-                            <span>Projeto Prático</span>
-                        </div>
-                        <div class="lesson-duration">45 min</div>
-                    </div>
-                    <div class="lesson-item pending" onclick="selectLesson('Exercícios Avançados', 40, 'Exercícios mais complexos para fixar o conhecimento.')">
-                        <div class="lesson-info-item">
-                            <div class="lesson-status pending">○</div>
-                            <span>Exercícios Avançados</span>
-                        </div>
-                        <div class="lesson-duration">40 min</div>
-                    </div>
-                </div>
+                <?php endforeach; ?>
             </div>
         </div>
+
     </div>
 
     <!-- Navigation Buttons -->
     <div class="navigation-buttons">
-        <button class="nav-btn secondary" onclick="previousLesson()">← Aula Anterior</button>
-        <button class="nav-btn" onclick="nextLesson()">Próxima Aula →</button>
+        <?php if ($prevLesson): ?>
+            <a href="<?= site_url('student/dashboard/ver_aulas/' . $prevLesson) ?>" class="nav-btn secondary">← Aula Anterior</a>
+        <?php endif; ?>
+        <?php if ($nextLesson): ?>
+            <a href="<?= site_url('student/dashboard/ver_aulas/' . $nextLesson) ?>" class="nav-btn">Próxima Aula →</a>
+        <?php endif; ?>
     </div>
 </div>
 
-<script>
-    // State management
-    let isPlaying = false;
-    let currentTime = 0;
-    let totalTime = 744; // 12:24 in seconds
+<!-- <script>
+    // Estado
     let currentLesson = 'Higher-Order Components';
 
-    // Lesson data
+    // Dados das aulas com ID do YouTube
     const lessons = {
         'Configuração do Ambiente': {
             duration: 15,
             description: 'Aprenda a configurar seu ambiente de desenvolvimento para React.',
-            completed: true
+            completed: true,
+            youtubeId: 'abc123xyz'
         },
         'Conceitos Básicos': {
             duration: 22,
             description: 'Revisão dos conceitos fundamentais do React.',
-            completed: true
+            completed: true,
+            youtubeId: 'def456uvw'
         },
         'Exercício Prático 1': {
             duration: 30,
             description: 'Primeiro exercício prático do curso.',
-            completed: true
+            completed: true,
+            youtubeId: 'ghi789rst'
         },
         'Higher-Order Components': {
             duration: 35,
-            description: 'Nesta aula, você aprenderá como criar e utilizar hooks personalizados no React. Vamos explorar casos práticos e boas práticas para reutilização de lógica entre componentes.',
-            completed: false
+            description: 'Nesta aula, você aprenderá como criar e utilizar hooks personalizados no React...',
+            completed: false,
+            youtubeId: 'jkl012mno'
         },
         'Render Props': {
             duration: 25,
             description: 'Aprenda sobre o padrão Render Props no React.',
-            completed: true
+            completed: true,
+            youtubeId: 'pqr345stu'
         },
         'Projeto Prático': {
             duration: 45,
             description: 'Desenvolva um projeto prático aplicando os conceitos aprendidos.',
-            completed: false
+            completed: false,
+            youtubeId: 'vwx678yz1'
         },
         'Exercícios Avançados': {
             duration: 40,
             description: 'Exercícios mais complexos para fixar o conhecimento.',
-            completed: false
+            completed: false,
+            youtubeId: '234abc567'
         }
     };
 
-    // Video controls
-    function togglePlay() {
-        isPlaying = !isPlaying;
-        const playButton = document.getElementById('playButton');
-        const controlPlayButton = document.getElementById('controlPlayButton');
+    // Seleciona uma aula
+    function selectLesson(title) {
+        currentLesson = title;
 
-        if (isPlaying) {
-            playButton.innerHTML = '⏸';
-            controlPlayButton.innerHTML = '⏸';
-            // Simulate video playing
-            startTimeUpdate();
-        } else {
-            playButton.innerHTML = '▶';
-            controlPlayButton.innerHTML = '▶';
-            stopTimeUpdate();
+        const lesson = lessons[title];
+
+        // Atualiza informações da aula
+        document.getElementById('lessonTitle').textContent = title;
+        document.getElementById('lessonDuration').textContent = `${lesson.duration} minutos`;
+        document.getElementById('lessonDescription').textContent = lesson.description;
+
+        // Atualiza vídeo do YouTube
+        const videoPlayer = document.getElementById('youtubePlayer');
+        videoPlayer.src = `https://www.youtube.com/embed/${lesson.youtubeId}?rel=0&autoplay=1`;
+
+        // Atualiza barra lateral
+        document.querySelectorAll('.lesson-item').forEach(item => {
+            item.classList.remove('current');
+            if (item.textContent.includes(title)) item.classList.add('current');
+        });
+
+        showNotification(`Agora assistindo: ${title}`);
+    }
+
+    // Marcar aula como concluída
+    function markAsCompleted() {
+        if (!lessons[currentLesson].completed) {
+            lessons[currentLesson].completed = true;
+            showNotification('Aula marcada como concluída!');
+
+            // Atualiza sidebar
+            document.querySelectorAll('.lesson-item').forEach(item => {
+                if (item.textContent.includes(currentLesson)) {
+                    const status = item.querySelector('.lesson-status');
+                    item.classList.remove('current', 'pending');
+                    item.classList.add('completed');
+                    status.classList.remove('current', 'pending');
+                    status.classList.add('completed');
+                    status.innerHTML = '✓';
+                }
+            });
+
+            updateProgress();
         }
     }
 
-    let timeInterval;
-
-    function startTimeUpdate() {
-        timeInterval = setInterval(() => {
-            if (currentTime < totalTime) {
-                currentTime++;
-                updateTimeDisplay();
-            } else {
-                togglePlay();
-            }
-        }, 1000);
+    // Adicionar nota
+    function addNote() {
+        const note = prompt('Digite sua nota:');
+        if (note) showNotification('Nota adicionada com sucesso!');
     }
 
-    function stopTimeUpdate() {
-        clearInterval(timeInterval);
+    // Favoritar
+    function addToFavorites() {
+        showNotification('Aula adicionada aos favoritos!');
     }
 
-    function updateTimeDisplay() {
-        const minutes = Math.floor(currentTime / 60);
-        const seconds = currentTime % 60;
-        const totalMinutes = Math.floor(totalTime / 60);
-        const totalSeconds = totalTime % 60;
+    // Atualiza progresso do curso
+    function updateProgress() {
+        const totalLessons = Object.keys(lessons).length;
+        const completedLessons = Object.values(lessons).filter(l => l.completed).length;
+        const percentage = Math.round((completedLessons / totalLessons) * 100);
 
-        document.getElementById('timeDisplay').textContent =
-            `${minutes}:${seconds.toString().padStart(2, '0')} / ${totalMinutes}:${totalSeconds.toString().padStart(2, '0')}`;
+        document.getElementById('progressPercentage').textContent = `${percentage}%`;
+        document.getElementById('progressBar').style.width = `${percentage}%`;
     }
 
-    // Event listeners for video controls
-    document.getElementById('playButton').addEventListener('click', togglePlay);
-    document.getElementById('controlPlayButton').addEventListener('click', togglePlay);
+    // Navegação entre aulas
+    function previousLesson() {
+        const lessonTitles = Object.keys(lessons);
+        const index = lessonTitles.indexOf(currentLesson);
+        if (index > 0) selectLesson(lessonTitles[index - 1]);
+    }
 
-    // Module controls
+    function nextLesson() {
+        const lessonTitles = Object.keys(lessons);
+        const index = lessonTitles.indexOf(currentLesson);
+        if (index < lessonTitles.length - 1) selectLesson(lessonTitles[index + 1]);
+    }
+
+    // Colapsar módulos
     function toggleModule(moduleId) {
         const module = document.getElementById(moduleId);
         const header = module.previousElementSibling;
@@ -625,138 +616,44 @@
     }
 
     function collapseAll() {
-        const modules = document.querySelectorAll('.lessons-container');
-        const headers = document.querySelectorAll('.module-header');
-
-        modules.forEach(module => module.classList.remove('show'));
-        headers.forEach(header => header.classList.remove('active'));
+        document.querySelectorAll('.lessons-container').forEach(m => m.classList.remove('show'));
+        document.querySelectorAll('.module-header').forEach(h => h.classList.remove('active'));
     }
 
-    // Lesson selection
-    function selectLesson(title, duration, description) {
-        currentLesson = title;
-
-        // Update UI
-        document.getElementById('lessonTitle').textContent = title;
-        document.getElementById('lessonDuration').textContent = `${duration} minutos`;
-        document.getElementById('lessonDescription').textContent = description;
-
-        // Update current lesson in sidebar
-        document.querySelectorAll('.lesson-item').forEach(item => {
-            item.classList.remove('current');
-            if (item.textContent.includes(title)) {
-                item.classList.add('current');
-            }
-        });
-
-        // Reset video state
-        isPlaying = false;
-        currentTime = 0;
-        totalTime = duration * 60;
-        document.getElementById('playButton').innerHTML = '▶';
-        document.getElementById('controlPlayButton').innerHTML = '▶';
-        updateTimeDisplay();
-
-        // Show notification
-        showNotification(`Agora assistindo: ${title}`);
-    }
-
-    // Action functions
-    function markAsCompleted() {
-        lessons[currentLesson].completed = true;
-        showNotification('Aula marcada como concluída!');
-
-        // Update progress
-        updateProgress();
-
-        // Update lesson status in sidebar
-        document.querySelectorAll('.lesson-item').forEach(item => {
-            if (item.textContent.includes(currentLesson)) {
-                item.classList.remove('current', 'pending');
-                item.classList.add('completed');
-                const status = item.querySelector('.lesson-status');
-                status.classList.remove('current', 'pending');
-                status.classList.add('completed');
-                status.innerHTML = '✓';
-            }
-        });
-    }
-
-    function addNote() {
-        const note = prompt('Digite sua nota:');
-        if (note) {
-            showNotification('Nota adicionada com sucesso!');
-        }
-    }
-
-    function addToFavorites() {
-        showNotification('Aula adicionada aos favoritos!');
-    }
-
-    function updateProgress() {
-        const totalLessons = Object.keys(lessons).length;
-        const completedLessons = Object.values(lessons).filter(lesson => lesson.completed).length;
-        const percentage = Math.round((completedLessons / totalLessons) * 100);
-
-        document.getElementById('progressPercentage').textContent = `${percentage}%`;
-        document.getElementById('progressBar').style.width = `${percentage}%`;
-    }
-
-    // Navigation functions
-    function previousLesson() {
-        showNotification('Voltando para aula anterior...');
-    }
-
-    function nextLesson() {
-        showNotification('Avançando para próxima aula...');
-    }
-
-    function goBack() {
-        showNotification('Voltando aos cursos...');
-    }
-
-    // Notification system
+    // Notificações
     function showNotification(message) {
-        // Create notification element
         const notification = document.createElement('div');
         notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background-color: #8b5cf6;
-                color: white;
-                padding: 12px 20px;
-                border-radius: 8px;
-                z-index: 1000;
-                font-weight: 500;
-                transform: translateX(100%);
-                transition: transform 0.3s ease;
-            `;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #8b5cf6;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 1000;
+            font-weight: 500;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        `;
         notification.textContent = message;
-
         document.body.appendChild(notification);
 
-        // Animate in
-        setTimeout(() => {
-            notification.style.transform = 'translateX(0)';
-        }, 100);
-
-        // Remove after 3 seconds
+        setTimeout(() => notification.style.transform = 'translateX(0)', 100);
         setTimeout(() => {
             notification.style.transform = 'translateX(100%)';
-            setTimeout(() => {
-                document.body.removeChild(notification);
-            }, 300);
+            setTimeout(() => document.body.removeChild(notification), 300);
         }, 3000);
     }
 
-    // Initialize
-    updateTimeDisplay();
+    // Inicialização
     updateProgress();
+    selectLesson(currentLesson);
 
-    // Show welcome notification
-    setTimeout(() => {
-        showNotification('Bem-vindo ao curso JavaScript Avançado!');
-    }, 1000);
-</script>
+    // Botão voltar
+    function goBack() {
+        showNotification('Voltando aos cursos...');
+    }
+</script> -->
+
 <?= $this->endSection() ?>

@@ -82,6 +82,7 @@ public function getStudentEnrolledCourses($studentId)
                     
                     courses.id_course,
                     courses.title_course,
+                    courses.image_course,
                     courses.description_course,
                     courses.price_course,
                     

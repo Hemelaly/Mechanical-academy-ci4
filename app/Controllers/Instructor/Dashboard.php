@@ -58,6 +58,21 @@ class Dashboard extends BaseController
         ]);
     }
 
+    public function edit_course($id)
+    {
+        $user = service('auth')->user();
+
+        $courseModel = new CourseModel();
+        $course = $courseModel->find($id);
+
+        return view('pages/instructor/edit_course', [
+            'user' => $user,
+            'course' => $course,
+            'sidebarLinks' => $this->sidebarLinks(),
+            'currentUrl' => current_url()
+        ]);
+    }
+
     public function students()
     {
         $user = service('auth')->user();

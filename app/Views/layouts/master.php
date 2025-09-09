@@ -51,6 +51,8 @@
 
                         <?= $this->renderSection('add_course') ?>
 
+                        <?= $this->renderSection('edit_course') ?>
+
                         <?= $this->renderSection('students') ?>
 
                         <?= $this->renderSection('financial') ?>

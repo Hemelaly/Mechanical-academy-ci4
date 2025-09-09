@@ -198,12 +198,12 @@
                         <div class="p-3 h-100 d-flex flex-column justify-content-between" style="background: var(--tw-soft); border:1px solid var(--tw-border); border-radius: .875rem;">
                             <div>
                                 <div class="image">
-                                    <img src="<?= base_url('assets/img/courses/'. $course->image_course) ?>" class="img-fluid rounded mb-2" alt="">
+                                    <img src="<?= base_url('assets/instructor/img/courses/'. $course->image_course) ?>" class="img-fluid rounded mb-2" alt="">
                                 </div>
                                 <div class="d-flex align-items-start justify-content-between gap-3">
                                     <div>
-                                        <div class="fw-semibold mb-1" style="color:#e5e7eb;">Curso de Laravel</div>
-                                        <div class="tw-sub small mb-2">Instrutor: Pedro Lima</div>
+                                        <div class="fw-semibold mb-1" style="color:#e5e7eb;"><?= $course->title_course ?></div>
+                                        <div class="tw-sub small mb-2">Instrutor: <?= $course->name_instructor ?></div>
                                     </div>
                                     <span class="badge badge-soft">Avançado</span>
                                 </div>
