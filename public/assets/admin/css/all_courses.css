@@ -1,0 +1,25 @@
+#myTab {
+  gap: 10px;
+  border: 0;
+}
+
+#myTab button.nav-link {
+  border: none;
+  border-radius: 5px;
+  color: var(--text-primary);
+  background-color: #1e2330 !important;
+  display: flex;
+  gap: 5px;
+}
+
+#myTab button.nav-link:hover {
+  background-color: #2c3346 !important;
+}
+
+#myTab button.nav-link.active {
+  background-color: #2e3447 !important;
+}
+
+.tab-content {
+  background-color: #2c3141;
+}

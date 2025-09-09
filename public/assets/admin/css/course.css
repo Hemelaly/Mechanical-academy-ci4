@@ -1,0 +1,128 @@
+.card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+        }
+
+        .form-control {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .form-control:focus {
+            background-color: var(--bg-card);
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.25);
+            color: var(--text-primary);
+        }
+
+        .accordion-item {
+            background-color: transparent;
+            border: none;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .accordion-button {
+            background-color: transparent;
+            color: var(--text-primary);
+            border: none;
+            padding: 1rem;
+            font-weight: 500;
+        }
+
+        .accordion-button:not(.collapsed) {
+            background-color: transparent;
+            color: var(--text-primary);
+            box-shadow: none;
+        }
+
+        .accordion-button:focus {
+            box-shadow: none;
+            border: none;
+        }
+
+        .accordion-body {
+            background-color: transparent;
+            color: var(--text-secondary);
+            padding: 0 1rem 1rem 1rem;
+        }
+
+        .lesson-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 0;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .lesson-item.active {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .lesson-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .lesson-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .lesson-icon.completed {
+            background-color: #10b981;
+        }
+
+        .lesson-content {
+            flex-grow: 1;
+        }
+
+        .lesson-title {
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .lesson-duration {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .module-progress {
+            background-color: var(--accent-blue);
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            margin-left: auto;
+        }
+
+        .bi-chevron-down {
+            transition: transform 0.3s ease;
+        }
+
+        .accordion-button:not(.collapsed) .bi-chevron-down {
+            transform: rotate(180deg);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+        }

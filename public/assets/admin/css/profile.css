@@ -1,0 +1,83 @@
+.card {
+    background-color: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+}
+
+.card-header {
+    background-color: transparent !important;
+    border-bottom-color: var(--border-color) !important;
+}
+
+.form-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Profile picture hover effect */
+.position-relative:hover .position-absolute {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+/* Social media buttons */
+.btn-outline-light:hover {
+    background-color: var(--accent-blue);
+    border-color: var(--accent-blue);
+}
+
+/* Edit buttons */
+.btn-primary {
+    background-color: var(--accent-blue);
+    border-color: var(--accent-blue);
+}
+
+.btn-primary:hover {
+    background-color: #4338ca;
+    border-color: #4338ca;
+}
+
+/* Responsive adjustments for profile page */
+@media (max-width: 768px) {
+    .d-flex.gap-2 {
+        flex-wrap: wrap;
+        gap: 0.5rem !important;
+    }
+    
+    .btn-sm {
+        padding: 0.375rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    .col-auto .d-flex {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .col-auto .d-flex .d-flex {
+        flex-direction: row;
+        justify-content: center;
+        margin-bottom: 0.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .card-header .d-flex {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .card-header .btn {
+        align-self: flex-end;
+    }
+    
+    .row.align-items-center {
+        text-align: center;
+    }
+    
+    .row.align-items-center .col {
+        margin-top: 1rem;
+    }
+}
