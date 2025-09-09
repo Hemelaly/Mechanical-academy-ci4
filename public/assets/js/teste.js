@@ -2,6 +2,7 @@
 // Global Variables
 // ======================
 let currentStep = 1;
+let courseData = {};
 let tags = [];
 
 // ======================
@@ -79,7 +80,6 @@ document.addEventListener("DOMContentLoaded", function () {
 // ======================
 document.addEventListener("DOMContentLoaded", () => {
     const editor = document.getElementById("courseDescription");
-    if (!editor) return;
 
     function updatePlaceholder() {
         editor.classList.toggle("empty", editor.textContent.trim() === "");
@@ -247,51 +247,40 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ======================
-// Publish / Save Draft (com envio de FormData para permitir upload de imagem)
+// Publish / Save Draft
 // ======================
 document.addEventListener("DOMContentLoaded", () => {
-    const form = document.getElementById("courseForm");
     const publishBtn = document.getElementById("publish-course");
     const saveDraftBtn = document.getElementById("save-draft");
+    const form = document.getElementById("courseForm");
 
     function collectCourseData() {
+        courseData = {};
         const formData = new FormData(form);
+        formData.forEach((value, key) => { courseData[key] = value; });
 
-        // Adicionar tags
-        formData.append('tags', JSON.stringify(tags));
+        // Add tags
+        courseData.tags = tags;
 
-        // Adicionar módulos e aulas
-        const modules = [];
-        document.querySelectorAll(".module-card").forEach((modCard, i) => {
-            const moduleTitle = modCard.querySelector(`input[name^="modules"][name$="[title]"]`)?.value || `Módulo ${i+1}`;
-            const moduleDescription = modCard.querySelector(`textarea[name^="modules"][name$="[description]"]`)?.value || '';
-            const lessons = [];
-            modCard.querySelectorAll(".lesson-item").forEach((lessonEl, j) => {
-                const title = lessonEl.querySelector(`input[name$="[title]"]`)?.value || `Aula ${j+1}`;
-                const type = lessonEl.querySelector(`select[name$="[type]"]`)?.value || 'text';
-                const duration = lessonEl.querySelector(`input[name$="[duration]"]`)?.value || 0;
-                const video_url = lessonEl.querySelector(`input[name$="[video_url]"]`)?.value || null;
-                lessons.push({ title, type, duration, video_url });
-            });
-            modules.push({ title: moduleTitle, description: moduleDescription, lessons });
-        });
-
-        formData.append('modules', JSON.stringify(modules));
-        return formData;
+        // Modules and lessons can be collected here if needed
     }
 
     publishBtn?.addEventListener("click", () => {
-        const data = collectCourseData();
-        fetch(form.action, { method: 'POST', body: data })
+        collectCourseData();
+        fetch("instructor/dashboard/novo_curso/criar", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(courseData)
+        })
         .then(res => res.json())
-        .then(resp => { alert("Curso publicado com sucesso! 🎉"); console.log(resp); })
+        .then(data => { alert("Curso publicado com sucesso! 🎉"); console.log(data); })
         .catch(err => { console.error(err); alert("Erro ao publicar."); });
     });
 
     saveDraftBtn?.addEventListener("click", () => {
-        const data = collectCourseData();
-        console.log("Rascunho salvo:", data);
+        collectCourseData();
         alert("Rascunho salvo! 💾");
+        console.log(courseData);
     });
 });
 

@@ -55,7 +55,9 @@
             </div>
             <div class="d-flex gap-2">
               <button class="btn btn-outline-primary btn-sm rounded-pill">Editar</button>
-              <button class="btn btn-danger btn-sm rounded-pill">Eliminar</button>
+              <form action="/instructor/dashboard/meus_cursos/deletar/<?= $course->id_course ?>" method="POST" onsubmit="return confirm('Tem certeza que deseja deletar este curso?');">
+                <button type="submit" class="btn btn-danger btn-sm rounded-pill">Deletar</button>
+              </form>
             </div>
           </div>
         </div>
