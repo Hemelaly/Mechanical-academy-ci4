@@ -32,7 +32,7 @@ class EnrollmentModel extends Model
         'id_student_enrollment' => 'required|integer|is_not_unique[students.id_student]',
         'id_course_enrollment'  => 'required|integer|is_not_unique[courses.id_course]',
         'enrolled_at_enrollment'       => 'required|valid_date',
-        'status_enrollment'     => 'required|in_list[active,completed,cancelled]',
+        'status_enrollment'     => 'required|in_list[Ativo,Pendente,Cancelado]',
     ];
     protected $validationMessages   = [
         'id_student_enrollment' => [
@@ -69,9 +69,9 @@ class EnrollmentModel extends Model
     protected $afterDelete    = [];
 
 
-public function getStudentEnrolledCourses($studentId)
-{
-    return $this->select('
+    public function getStudentEnrolledCourses($studentId)
+    {
+        return $this->select('
                     enrollments.id_enrollment,
                     enrollments.enrolled_at_enrollment,
                     enrollments.status_enrollment,
@@ -90,24 +90,28 @@ public function getStudentEnrolledCourses($studentId)
                     instructors.name_instructor,
                     instructors.email_instructor
                 ')
-        ->join('students', 'students.id_student = enrollments.id_student_enrollment')
-        ->join('courses', 'courses.id_course = enrollments.id_course_enrollment')
-        ->join('instructors', 'instructors.id_instructor = courses.id_instructor_course') // join com instrutor
-        ->where('enrollments.id_student_enrollment', $studentId)
-        ->findAll();
-}
-
-    public function getWithRelations()
-    {
-        return $this->select('
-                        enrollments.id_enrollment,
-                        enrollments.enrolled_at_enrollment,
-                        enrollments.status_enrollment,
-                        students.name_student,
-                        courses.title_course
-                    ')
             ->join('students', 'students.id_student = enrollments.id_student_enrollment')
             ->join('courses', 'courses.id_course = enrollments.id_course_enrollment')
+            ->join('instructors', 'instructors.id_instructor = courses.id_instructor_course') // join com instrutor
+            ->where('enrollments.id_student_enrollment', $studentId)
+            ->findAll();
+    }
+
+    public function getInstructorEnrollments($instructorId)
+    {
+        return $this->select('
+                    enrollments.id_enrollment,
+                    enrollments.enrolled_at_enrollment,
+                    enrollments.status_enrollment,
+                    students.id_student,
+                    students.name_student,
+                    students.email_student,
+                    courses.id_course,
+                    courses.title_course
+                ')
+            ->join('students', 'students.id_student = enrollments.id_student_enrollment')
+            ->join('courses', 'courses.id_course = enrollments.id_course_enrollment')
+            ->where('courses.id_instructor_course', $instructorId)
             ->findAll();
     }
 }

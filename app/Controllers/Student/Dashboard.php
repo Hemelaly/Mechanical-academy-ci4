@@ -13,10 +13,30 @@ class Dashboard extends BaseController
     private function sidebarLinks()
     {
         return [
-            ['label' => 'Início', 'icon' => 'bi-house-door', 'url' => '/student/dashboard'],
-            ['label' => 'Meus Cursos', 'icon' => 'bi-book', 'url' => '/student/dashboard/meus_cursos'],
-            ['label' => 'Todos Cursos', 'icon' => 'bi-book', 'url' => '/student/dashboard/cursos'],
-            ['label' => 'Perfil', 'icon' => 'bi-person-circle', 'url' => '/student/dashboard/perfil'],
+            [
+                'label' => 'Início',
+                'icon' => 'bi-house-door',
+                'url' => '/student/dashboard',
+                'pattern' => '/student/dashboard' // Apenas correspondência exata
+            ],
+            [
+                'label' => 'Meus Cursos',
+                'icon' => 'bi-book',
+                'url' => '/student/dashboard/meus_cursos',
+                'pattern' => '/student/dashboard/meus_cursos*' // Com * para subpáginas
+            ],
+            [
+                'label' => 'Todos Cursos',
+                'icon' => 'bi-book',
+                'url' => '/student/dashboard/cursos',
+                'pattern' => '/student/dashboard/cursos*' // Com * para subpáginas
+            ],
+            [
+                'label' => 'Perfil',
+                'icon' => 'bi-person-circle',
+                'url' => '/student/dashboard/perfil',
+                'pattern' => '/student/dashboard/perfil*' // Com * para subpáginas
+            ],
         ];
     }
 
@@ -124,13 +144,60 @@ class Dashboard extends BaseController
 
     public function courses()
     {
+        $enrollmentModel = new \App\Models\EnrollmentModel();
         $coursesModel = new CourseModel();
         $courses = $coursesModel->findAll();
         $user = service('auth')->user();
+        $enrollmentModel = new \App\Models\EnrollmentModel();
+
+        // Pega todas as inscrições do usuário
+        $enrollments = $enrollmentModel->where('id_student_enrollment', $user->id)
+            ->findAll();
+
+        // Cria um array com os IDs de cursos ativos
+        $activeCourseIds = [];
+        foreach ($enrollments as $enr) {
+            if ($enr->status_enrollment === 'Ativo') {
+                $activeCourseIds[] = $enr->id_course_enrollment;
+            }
+        }
+
+        $pendingCourseIds = [];
+        foreach ($enrollments as $enr) {
+            if ($enr->status_enrollment === 'Pendente') {
+                $pendingCourseIds[] = $enr->id_course_enrollment;
+            }
+        }
 
         return view('pages/student/courses', [
             'user' => $user,
             'courses' => $courses,
+            'activeCourseIds' => $activeCourseIds,
+            'pendingCourseIds' => $pendingCourseIds,
+            'sidebarLinks' => $this->sidebarLinks(),
+            'currentUrl' => current_url()
+        ]);
+    }
+
+    public function checkout($idCourse)
+    {
+        $courseModel = new CourseModel();
+        $course = $courseModel->find($idCourse);
+
+        $enrollmentModel = new EnrollmentModel();
+        $existingEnrollment = $enrollmentModel
+            ->select('enrollments.*, courses.title_course')
+            ->join('courses', 'courses.id_course = enrollments.id_course_enrollment')
+            ->where('id_student_enrollment', service('auth')->user()->id)
+            ->where('id_course_enrollment', $idCourse)
+            ->first();
+
+        $user = service('auth')->user();
+
+        return view('pages/student/checkout', [
+            'user' => $user,
+            'course' => $course,
+            'enrollment' => $existingEnrollment,
             'sidebarLinks' => $this->sidebarLinks(),
             'currentUrl' => current_url()
         ]);

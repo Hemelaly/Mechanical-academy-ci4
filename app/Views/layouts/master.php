@@ -77,6 +77,8 @@
 
                         <?= $this->renderSection('all_courses') ?>
 
+                        <?= $this->renderSection('checkout') ?>
+
                         <?= $this->renderSection('lessons') ?>
 
                         <?= $this->renderSection('profile') ?>

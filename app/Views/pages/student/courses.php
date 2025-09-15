@@ -132,55 +132,34 @@
                 </div>
 
                 <div class="d-flex flex-column gap-3">
-                    <div class="p-3" style="background: var(--tw-soft); border:1px solid var(--tw-border); border-radius: .875rem;">
-                        <div class="d-flex align-items-start justify-content-between gap-3">
-                            <div>
-                                <div class="d-flex align-items-center gap-2 mb-1">
-                                    <span class="fw-semibold" style="color:#e5e7eb;">Curso de PHP</span>
-                                    <span class="badge badge-soft ms-1">Backend</span>
+                    <?php foreach ($courses as $course): ?>
+                        <?php if (in_array($course->id_course,  $activeCourseIds)): ?>
+                            <div class="p-3" style="background: var(--tw-soft); border:1px solid var(--tw-border); border-radius: .875rem;">
+                                <div class="d-flex align-items-start justify-content-between gap-3">
+                                    <div>
+                                        <div class="d-flex align-items-center gap-2 mb-1">
+                                            <span class="fw-semibold" style="color:#e5e7eb;"><?= $course->title_course ?></span>
+                                            <span class="badge badge-soft ms-1"><?= $course->category ?? 'Curso' ?></span>
+                                        </div>
+                                        <div class="tw-sub small mb-2">Instrutor: <?= $course->name_instructor ?? 'N/A' ?></div>
+                                    </div>
+                                    <a href="/student/dashboard/lessons/<?= $course->id_course ?>" class="btn btn-sm btn-accent">
+                                        <i class="bi bi-arrow-right-circle me-1"></i>Continuar
+                                    </a>
                                 </div>
-                                <div class="tw-sub small mb-2">Instrutor: João Silva</div>
-                            </div>
-                            <a href="#" class="btn btn-sm btn-accent">
-                                <i class="bi bi-arrow-right-circle me-1"></i>Continuar
-                            </a>
-                        </div>
-                        <div class="mt-3">
-                            <div class="d-flex justify-content-between small tw-sub mb-1">
-                                <span>Progresso</span>
-                                <span>40%</span>
-                            </div>
-                            <div class="progress">
-                                <div class="progress-bar" role="progressbar" style="width: 40%;" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="p-3" style="background: var(--tw-soft); border:1px solid var(--tw-border); border-radius: .875rem;">
-                        <div class="d-flex align-items-start justify-content-between gap-3">
-                            <div>
-                                <div class="d-flex align-items-center gap-2 mb-1">
-                                    <span class="fw-semibold" style="color:#e5e7eb;">Curso de JavaScript</span>
-                                    <span class="badge badge-soft ms-1">Frontend</span>
+                                <div class="mt-3">
+                                    <div class="d-flex justify-content-between small tw-sub mb-1">
+                                        <span>Progresso</span>
+                                        <span>40%</span>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" style="width:40%;" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
                                 </div>
-                                <div class="tw-sub small mb-2">Instrutor: Maria Santos</div>
                             </div>
-                            <a href="#" class="btn btn-sm btn-accent">
-                                <i class="bi bi-arrow-right-circle me-1"></i>Continuar
-                            </a>
-                        </div>
-                        <div class="mt-3">
-                            <div class="d-flex justify-content-between small tw-sub mb-1">
-                                <span>Progresso</span>
-                                <span>70%</span>
-                            </div>
-                            <div class="progress">
-                                <div class="progress-bar" role="progressbar" style="width: 70%;" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
-                        </div>
-                    </div>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
                 </div>
-
             </div>
         </div>
 
@@ -213,15 +192,20 @@
                                     <div class="fw-semibold">MT <?= $course->price_course ?></div>
                                     <div class="d-flex gap-2">
                                         <a href="#" class="btn btn-sm btn-tw"><i class="bi bi-eye me-1"></i>Ver</a>
-                                        <a href="<?= site_url('/student/dashboard/enroll/' . $course->id_course) ?>"
-                                            class="btn btn-sm btn-accent">
-                                            Inscrever-se
-                                        </a>
+
+                                        <?php if (in_array($course->id_course,  $activeCourseIds)): ?>
+                                            <a href="/student/dashboard/meus_cursos" class="btn btn-sm btn-success"><i class="bi bi-check-circle me-1"></i>Inscrito</a>
+                                        <?php elseif (in_array($course->id_course,  $pendingCourseIds)): ?>
+                                            <a href="/student/dashboard/meus_cursos" class="btn btn-sm btn-warning"><i class="bi bi-activity"></i>Pendente</a>
+                                        <?php else: ?>
+                                            <a href="/student/dashboard/checkout/<?= $course->id_course ?>" class="btn btn-sm btn-tw"><i class="bi bi-book me-1"></i>Inscreva-se</a>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     <?php endforeach ?>
+
 
                     <!-- <div class="col">
               <div class="p-3 h-100 d-flex flex-column justify-content-between" style="background: var(--tw-soft); border:1px solid var(--tw-border); border-radius: .875rem;">

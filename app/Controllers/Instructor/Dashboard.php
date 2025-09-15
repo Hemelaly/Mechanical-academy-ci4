@@ -77,8 +77,12 @@ class Dashboard extends BaseController
     {
         $user = service('auth')->user();
 
+        $enrollmentModel = new \App\Models\EnrollmentModel();
+        $enrollment = $enrollmentModel->getInstructorEnrollments($user->id);
+
         return view('pages/instructor/students', [
             'user' => $user,
+            'enrollments' => $enrollment,
             'sidebarLinks' => $this->sidebarLinks(),
             'currentUrl' => current_url()
         ]);
@@ -106,4 +110,33 @@ class Dashboard extends BaseController
         ]);
     }
 
+    public function updateEnrollment($idEnrollment)
+    {
+        $request = service('request');
+        $enrollmentModel = new \App\Models\EnrollmentModel();
+        $paymentModel = new \App\Models\PaymentModel();
+
+        // Dados vindos do formulário
+        $statusEnrollment = $request->getPost('status_enrollment');
+        $statusPayment = $request->getPost('status_payment');
+
+        // Atualizar inscrição (se foi aceito, muda para Ativo)
+        if ($statusEnrollment) {
+            $enrollmentModel->update($idEnrollment, [
+                'status_enrollment' => $statusEnrollment,
+            ]);
+        }
+
+        // Atualizar pagamento correspondente
+        if ($statusPayment) {
+            $payment = $paymentModel->where('id_enrollment_payment', $idEnrollment)->first();
+            if ($payment) {
+                $paymentModel->update($payment->id_payment, [
+                    'status_payment' => $statusPayment,
+                ]);
+            }
+        }
+
+        return redirect()->back()->with('success', 'Decisão aplicada com sucesso!');
+    }
 }

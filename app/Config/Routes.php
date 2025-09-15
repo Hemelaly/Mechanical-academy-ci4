@@ -12,7 +12,7 @@ $routes->get('/', 'Home::index');
 service('auth')->routes($routes);
 
 // Admin
-$routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($routes) {
+$routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'role:admin'], function ($routes) {
     $routes->get('dashboard', 'Dashboard::index');
 });
 
@@ -28,16 +28,23 @@ $routes->group('instructor', ['namespace' => 'App\Controllers\Instructor', 'filt
     $routes->get('dashboard/meus_estudantes', 'Dashboard::students');
     $routes->get('dashboard/financas', 'Dashboard::financial');
     $routes->get('dashboard/perfil', 'Dashboard::profile');
+    $routes->post('dashboard/meus_estudantes/(:num)', 'Dashboard::updateEnrollment/$1');
+
 });
 
 // Student
-$routes->group('student', ['namespace' => 'App\Controllers\Student'], function ($routes) {
+$routes->group('student', ['namespace' => 'App\Controllers\Student', 'filter' => 'role:student'], function ($routes) {
     $routes->get('dashboard', 'Dashboard::index');
     $routes->get('dashboard/meus_cursos', 'Dashboard::my_courses');
     $routes->get('dashboard/cursos', 'Dashboard::courses');
     $routes->get('dashboard/ver_aulas/(:num)', 'Dashboard::lessons/$1');
+    $routes->get('dashboard/checkout/(:num)', 'Dashboard::checkout/$1');
     $routes->get('dashboard/perfil', 'Dashboard::profile');
-    $routes->get('dashboard/enroll/(:num)', 'CourseController::enroll/$1');
 });
 
+// Pagamentos
+$routes->post('checkout/(:num)', 'PaymentController::createPayment/$1');
+// $routes->post('student/payment/mpesa/(:num)', 'Student\PaymentController::mpesa/$1');
+// $routes->post('pay/(:num)', 'Student\PaymentController::pay/$1');
+// $routes->post('mpesa/webhook', 'MpesaWebhookController::receive');
 

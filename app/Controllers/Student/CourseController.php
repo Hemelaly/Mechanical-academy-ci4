@@ -11,25 +11,26 @@ class CourseController extends BaseController
     {
         $user = service('auth')->user();
         $enrollmentModel = new \App\Models\EnrollmentModel();
+        $courseModel = new \App\Models\CourseModel(); // Modelo do curso
 
-        // Verifica se já está inscrito
+        // Busca o curso
+        $course = $courseModel->find($idCourse);
+        if (!$course) {
+            return redirect()->back()->with('error', 'Curso não encontrado.');
+        }
+
+        // Verifica duplicidade
         $existing = $enrollmentModel->where('id_student_enrollment', $user->id)
             ->where('id_course_enrollment', $idCourse)
             ->first();
         if ($existing) {
-            return redirect()->back()->with('message', 'Você já está inscrito nesse curso.');
+            return redirect()->back()->with('message', 'Você já está inscrito neste curso.');
         }
 
-        // Cria a matrícula
-        $enrollmentModel->insert([
-            'id_student_enrollment' => $user->id,
-            'id_course_enrollment' => $idCourse,
-            'status_enrollment' => 'active',
-            'progress_enrollment' => 0,
-            'enrolled_at_enrollment' => date('Y-m-d H:i:s')
-        ]);
+        // Salva course_id na session para usar no callback
+        session()->set('course_id_payment', $idCourse);
 
-        return redirect()->to('/student/dashboard/meus_cursos')
-            ->with('success', 'Inscrição realizada com sucesso!');
+        // Redireciona para o checkout do Flutterwave com o valor correto
+        return redirect()->to(base_url("payment/checkout?course_id={$idCourse}&amount={$course->price_course}"));
     }
 }
