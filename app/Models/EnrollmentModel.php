@@ -29,7 +29,7 @@ class EnrollmentModel extends Model
 
     // Validation
     protected $validationRules      = [
-        'id_student_enrollment' => 'required|integer|is_not_unique[students.id_student]',
+        'id_student_enrollment' => 'required|integer|is_not_unique[students.id_user_student]',
         'id_course_enrollment'  => 'required|integer|is_not_unique[courses.id_course]',
         'enrolled_at_enrollment'       => 'required|valid_date',
         'status_enrollment'     => 'required|in_list[Ativo,Pendente,Cancelado]',
@@ -90,7 +90,7 @@ class EnrollmentModel extends Model
                     instructors.name_instructor,
                     instructors.email_instructor
                 ')
-            ->join('students', 'students.id_student = enrollments.id_student_enrollment')
+            ->join('students', 'students.id_user_student = enrollments.id_student_enrollment')
             ->join('courses', 'courses.id_course = enrollments.id_course_enrollment')
             ->join('instructors', 'instructors.id_instructor = courses.id_instructor_course') // join com instrutor
             ->where('enrollments.id_student_enrollment', $studentId)
