@@ -4,7 +4,9 @@ namespace Config;
 
 use CodeIgniter\Events\Events;
 use CodeIgniter\Exceptions\FrameworkException;
+use CodeIgniter\Shield\Authentication\Events\AuthEvents;
 use CodeIgniter\HotReloader\HotReloader;
+use App\Models\StudentModel;
 
 /*
  * --------------------------------------------------------------------
@@ -22,6 +24,22 @@ use CodeIgniter\HotReloader\HotReloader;
  * Example:
  *      Events::on('create', [$myInstance, 'myMethod']);
  */
+Events::on('register', function ($user) {
+    $request = service('request');
+    $post = $request->getPost();
+
+    // Pega os dados personalizados do formulário
+    $email    = $post['email'] ?? null;
+    $username = $post['username'] ?? null;
+
+    // Inserir na tabela students
+    $studentModel = new StudentModel();
+    $studentModel->insert([
+        'id_user_student' => $user->id,  // chave estrangeira para tabela users
+        'email_student'   => $email,
+        'name_student'    => $username
+    ]);
+});
 
 Events::on('login', function ($user) {
     // Verifica role

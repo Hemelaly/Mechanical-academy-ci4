@@ -100,17 +100,17 @@ class EnrollmentModel extends Model
     public function getInstructorEnrollments($instructorId)
     {
         return $this->select('
-                    enrollments.id_enrollment,
-                    enrollments.enrolled_at_enrollment,
-                    enrollments.status_enrollment,
-                    students.id_student,
-                    students.name_student,
-                    students.email_student,
-                    courses.id_course,
-                    courses.title_course
-                ')
-            ->join('students', 'students.id_student = enrollments.id_student_enrollment')
+                enrollments.id_enrollment,
+                enrollments.enrolled_at_enrollment,
+                enrollments.status_enrollment,
+                students.id_student,
+                students.name_student,
+                students.email_student,
+                courses.id_course,
+                courses.title_course
+            ')
             ->join('courses', 'courses.id_course = enrollments.id_course_enrollment')
+            ->join('students', 'students.id_user_student = enrollments.id_student_enrollment')
             ->where('courses.id_instructor_course', $instructorId)
             ->findAll();
     }

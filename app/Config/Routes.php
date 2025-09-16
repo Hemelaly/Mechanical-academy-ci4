@@ -11,6 +11,9 @@ $routes->get('/', 'Home::index');
 // Rotas do Shield (login, logout, etc.)
 service('auth')->routes($routes);
 
+$routes->get('register', 'Register::showForm'); // se quiser mostrar o form
+$routes->post('register', 'Register::register');
+
 // Admin
 $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'role:admin'], function ($routes) {
     $routes->get('dashboard', 'Dashboard::index');

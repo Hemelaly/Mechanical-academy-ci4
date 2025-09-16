@@ -191,12 +191,10 @@
                                 <div class="d-flex align-items-center justify-content-between mt-3 pt-2" style="border-top:1px dashed #1b2941;">
                                     <div class="fw-semibold">MT <?= $course->price_course ?></div>
                                     <div class="d-flex gap-2">
-                                        <a href="#" class="btn btn-sm btn-tw"><i class="bi bi-eye me-1"></i>Ver</a>
-
                                         <?php if (in_array($course->id_course,  $activeCourseIds)): ?>
-                                            <a href="/student/dashboard/meus_cursos" class="btn btn-sm btn-success"><i class="bi bi-check-circle me-1"></i>Inscrito</a>
+                                            <a href="/student/dashboard/meus_cursos" class="btn btn-sm btn-success"><i class="bi bi-check-circle me-1"></i>Começar a assistir</a>
                                         <?php elseif (in_array($course->id_course,  $pendingCourseIds)): ?>
-                                            <a href="/student/dashboard/meus_cursos" class="btn btn-sm btn-warning"><i class="bi bi-activity"></i>Pendente</a>
+                                            <a href="/student/dashboard/checkout/<?= $course->id_course ?>" class="btn btn-sm btn-warning"><i class="bi bi-activity"></i>Pendente</a>
                                         <?php else: ?>
                                             <a href="/student/dashboard/checkout/<?= $course->id_course ?>" class="btn btn-sm btn-tw"><i class="bi bi-book me-1"></i>Inscreva-se</a>
                                         <?php endif; ?>
