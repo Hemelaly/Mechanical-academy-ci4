@@ -6,6 +6,52 @@ $user = service('auth')->user();
 <?= $this->section('title') ?>Criar Novo Curso<?= $this->endSection() ?>
 
 <?= $this->section('add_course') ?>
+<style>
+    /* Caixa central com bordas suaves */
+    #courseImageDropzone {
+        border: 2px dashed #0d6efd;
+        border-radius: 12px;
+        background: #f8f9fa;
+        padding: 30px;
+        transition: 0.3s;
+    }
+
+    #courseImageDropzone:hover {
+        background: #eef5ff;
+    }
+
+    /* Mensagem padrão */
+    #courseImageDropzone .dz-message {
+        font-size: 1rem;
+        color: #6c757d;
+    }
+
+    #courseImageDropzone .dz-message::before {
+        content: "\f382";
+        /* ícone upload da FontAwesome */
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        font-size: 2.5rem;
+        display: block;
+        margin-bottom: 10px;
+        color: #0d6efd;
+    }
+
+    /* Preview das imagens */
+    #courseImageDropzone .dz-preview .dz-image img {
+        border-radius: 10px;
+        max-height: 140px;
+        object-fit: cover;
+    }
+
+    /* Botão remover */
+    #courseImageDropzone .dz-remove {
+        color: #dc3545 !important;
+        font-weight: 500;
+    }
+</style>
+
+
 <div class="container-fluid">
     <div class="mb-5">
         <!-- Header Section -->
@@ -114,10 +160,52 @@ $user = service('auth')->user();
                                     </div>
                                     <div class="col-lg-4">
                                         <div class="mb-4">
-                                            <label for="courseImage" class="form-label fw-semibold">
-                                                <i class="fas fa-image me-2 text-primary"></i>Imagem de Capa *
+                                            <label
+                                                for="courseImage"
+                                                class="form-label fw-semibold">
+                                                <i class="fas fa-image me-2 text-primary"></i>
+                                                Imagem de Capa *
                                             </label>
-                                            <input type="file" class="form-control" id="courseImage" name="image_course" accept="image/*" />
+                                            <div class="upload-area" id="upload-area">
+                                                <i
+                                                    class="fas fa-cloud-upload-alt fs-1 text-primary mb-3"></i>
+                                                <h6 class="mb-2">
+                                                    Arraste uma imagem ou clique para selecionar
+                                                </h6>
+                                                <p class="text-muted small mb-3">
+                                                    Recomendado: 1280x720px, máx. 2MB
+                                                </p>
+                                                <input
+                                                    type="file"
+                                                    class="form-control"
+                                                    id="courseImage"
+                                                    name="image_course"
+                                                    accept="image/*"
+                                                    style="display: none" />
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-outline-primary"
+                                                    onclick="document.getElementById('courseImage').click()">
+                                                    <i class="fas fa-folder-open me-2"></i>Selecionar
+                                                    Arquivo
+                                                </button>
+                                            </div>
+                                            <div
+                                                class="mt-3"
+                                                id="image-preview"
+                                                style="display: none">
+                                                <img
+                                                    id="preview-img"
+                                                    src=""
+                                                    alt="Preview"
+                                                    class="img-fluid rounded-3 shadow-sm" />
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-danger btn-sm mt-2 w-100"
+                                                    id="remove-image">
+                                                    <i class="fas fa-times me-1"></i>Remover Imagem
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -201,4 +289,72 @@ $user = service('auth')->user();
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const fileInput = document.getElementById("courseImage");
+        const previewContainer = document.getElementById("image-preview");
+        const previewImg = document.getElementById("preview-img");
+        const removeBtn = document.getElementById("remove-image");
+        const uploadArea = document.getElementById("upload-area");
+
+        // Quando seleciona uma imagem
+        fileInput.addEventListener("change", (event) => {
+            const file = event.target.files[0];
+
+            if (file && file.type.startsWith("image/")) {
+                const reader = new FileReader();
+
+                reader.onload = (e) => {
+                    previewImg.src = e.target.result;
+                    previewContainer.style.display = "block";
+                    uploadArea.style.display = "none";
+                };
+
+                reader.readAsDataURL(file);
+            } else {
+                alert("Por favor selecione um arquivo de imagem válido.");
+                fileInput.value = "";
+            }
+        });
+
+        // Remover imagem
+        removeBtn.addEventListener("click", () => {
+            fileInput.value = "";
+            previewImg.src = "";
+            previewContainer.style.display = "none";
+            uploadArea.style.display = "block";
+        });
+
+        // Permitir arrastar e soltar
+        uploadArea.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            uploadArea.classList.add("border-primary");
+        });
+
+        uploadArea.addEventListener("dragleave", () => {
+            uploadArea.classList.remove("border-primary");
+        });
+
+        uploadArea.addEventListener("drop", (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove("border-primary");
+
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith("image/")) {
+                fileInput.files = e.dataTransfer.files;
+
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    previewImg.src = ev.target.result;
+                    previewContainer.style.display = "block";
+                    uploadArea.style.display = "none";
+                };
+                reader.readAsDataURL(file);
+            } else {
+                alert("Por favor arraste apenas arquivos de imagem.");
+            }
+        });
+    });
+</script>
 <?= $this->endSection() ?>

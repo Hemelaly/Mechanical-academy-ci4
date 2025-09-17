@@ -29,10 +29,10 @@ class EnrollmentModel extends Model
 
     // Validation
     protected $validationRules      = [
-        'id_student_enrollment' => 'required|integer|is_not_unique[students.id_user_student]',
-        'id_course_enrollment'  => 'required|integer|is_not_unique[courses.id_course]',
-        'enrolled_at_enrollment'       => 'required|valid_date',
-        'status_enrollment'     => 'required|in_list[Ativo,Pendente,Cancelado]',
+        'id_student_enrollment'   => 'required|integer|is_not_unique[students.id_user_student]',
+        'id_course_enrollment'    => 'required|integer|is_not_unique[courses.id_course]',
+        'enrolled_at_enrollment'  => 'required|valid_date',
+        'status_enrollment'       => 'required|in_list[Ativo,Pendente,Cancelado]',
     ];
     protected $validationMessages   = [
         'id_student_enrollment' => [
