@@ -88,90 +88,105 @@ class CourseController extends BaseController
         return redirect()->to('instructor/dashboard/meus_cursos')->with('success', 'Curso criado com sucesso!');
     }
 
-    public function editar($id = null)
+    public function editar($id)
     {
         $courseModel = new \App\Models\CourseModel();
         $moduleModel = new \App\Models\ModuleModel();
         $lessonModel = new \App\Models\LessonModel();
 
-        if (!$id) {
-            return redirect()->back()->with('error', 'ID do curso não fornecido');
-        }
+        if (!$id) return redirect()->back()->with('error', 'ID do curso não fornecido');
 
         $course = $courseModel->find($id);
-        if (!$course) {
-            return redirect()->back()->with('error', 'Curso não encontrado');
+        if (!$course) return redirect()->back()->with('error', 'Curso não encontrado');
+        if ($course->id_instructor_course != auth()->id()) return redirect()->back()->with('error', 'Acesso negado');
+
+        // Carregar módulos e aulas do curso
+        $modules = $moduleModel->where('id_course_module', $id)->orderBy('position_module')->findAll();
+        foreach ($modules as &$m) {
+            $m->lessons = $lessonModel
+                ->where('id_module_lesson', $m->id_module)
+                ->orderBy('position_lesson')
+                ->findAll();
         }
 
-        if ($course->id_instructor_course != auth()->id()) {
-            return redirect()->back()->with('error', 'Acesso negado');
-        }
+        // POST → salvar
+        if ($this->request->getMethod() === 'post') {
+            $data = $this->request->getPost();
+            $modulesData = $data['modules'] ?? [];
 
-        $data = $this->request->getPost();
+            dd($data);
 
-        // Processar módulos
-        $data['modules'] = [];
-        if ($this->request->getPost('modules')) {
-            $modulesRaw = $this->request->getPost('modules');
-            $data['modules'] = is_string($modulesRaw) ? json_decode($modulesRaw, true) : $modulesRaw;
-        }
+            // Atualizar curso
+            $courseData = [
+                'title_course'       => $data['title_course'] ?? $course->title_course,
+                'subtitle_course'    => $data['subtitle_course'] ?? $course->subtitle_course,
+                'description_course' => $data['description_course'] ?? $course->description_course,
+                'price_course'       => ($data['courseType'] ?? 'free') === 'paid' ? ($data['price_course'] ?? 0) : 0,
+                'status_course'      => $data['status_course'] ?? $course->status_course,
+            ];
 
-        // Atualizar curso
-        $courseData = [
-            'title_course'       => $data['title_course'] ?? $course->title_course,
-            'subtitle_course'    => $data['subtitle_course'] ?? $course->subtitle_course,
-            'description_course' => $data['description_course'] ?? $course->description_course,
-            'price_course'       => ($data['courseType'] ?? 'free') === 'paid' ? ($data['price_course'] ?? 0) : 0,
-            'status_course'      => $data['status_course'] ?? $course->status_course,
-        ];
-
-        if ($file = $this->request->getFile('image_course')) {
-            if ($file->isValid() && !$file->hasMoved()) {
-                $newName = $file->getRandomName();
-                $file->move(FCPATH . 'assets/instructor/img/courses', $newName);
-                $courseData['image_course'] = $newName;
+            if ($file = $this->request->getFile('image_course')) {
+                if ($file->isValid() && !$file->hasMoved()) {
+                    $newName = $file->getRandomName();
+                    $file->move(FCPATH . 'assets/instructor/img/courses', $newName);
+                    $courseData['image_course'] = $newName;
+                }
             }
-        }
 
-        $courseModel->update($id, $courseData);
+            $courseModel->update($id, $courseData);
 
-        // Atualizar módulos e aulas
-        if (!empty($data['modules'])) {
-            // Remover antigos
-            $oldModules = $moduleModel->where('id_course_module', $id)->findAll();
-            foreach ($oldModules as $mod) {
-                $lessonModel->where('id_module_lesson', $mod->id_module)->delete();
-            }
-            $moduleModel->where('id_course_module', $id)->delete();
+            // Atualizar módulos e aulas
+            foreach ($modulesData as $mIndex => $module) {
+                if (!empty($module['id_module'])) {
+                    // Update módulo existente
+                    $moduleModel->update($module['id_module'], [
+                        'title_module'       => $module['title'] ?? 'Módulo ' . ($mIndex + 1),
+                        'description_module' => $module['description'] ?? '',
+                        'position_module'    => $mIndex + 1,
+                    ]);
+                    $moduleId = $module['id_module'];
+                } else {
+                    // Novo módulo
+                    $moduleModel->insert([
+                        'id_course_module'   => $id,
+                        'title_module'       => $module['title'] ?? 'Módulo ' . ($mIndex + 1),
+                        'description_module' => $module['description'] ?? '',
+                        'position_module'    => $mIndex + 1,
+                    ]);
+                    $moduleId = $moduleModel->insertID();
+                }
 
-            // Inserir novos
-            foreach ($data['modules'] as $mIndex => $module) {
-                $moduleInsert = [
-                    'id_course_module'   => $id,
-                    'title_module'       => $module['title'] ?? 'Módulo ' . ($mIndex + 1),
-                    'description_module' => $module['description'] ?? '',
-                    'position_module'    => $mIndex + 1,
-                ];
-                $moduleModel->insert($moduleInsert);
-                $moduleId = $moduleModel->insertID();
-
-                if (!empty($module['lessons'])) {
-                    foreach ($module['lessons'] as $lIndex => $lesson) {
-                        $lessonInsert = [
+                // Processar aulas
+                $lessons = $module['lessons'] ?? [];
+                foreach ($lessons as $lIndex => $lesson) {
+                    if (!empty($lesson['id_lesson'])) {
+                        $lessonModel->update($lesson['id_lesson'], [
+                            'title_lesson'     => $lesson['title'] ?? 'Aula sem título',
+                            'type_lesson'      => $lesson['type'] ?? 'text',
+                            'duration_lesson'  => $lesson['duration'] ?? 0,
+                            'position_lesson'  => $lIndex + 1,
+                            'video_url_lesson' => $lesson['video_url'] ?? null,
+                        ]);
+                    } else {
+                        $lessonModel->insert([
                             'id_module_lesson' => $moduleId,
                             'title_lesson'     => $lesson['title'] ?? 'Aula sem título',
                             'type_lesson'      => $lesson['type'] ?? 'text',
                             'duration_lesson'  => $lesson['duration'] ?? 0,
                             'position_lesson'  => $lIndex + 1,
                             'video_url_lesson' => $lesson['video_url'] ?? null,
-                        ];
-                        $lessonModel->insert($lessonInsert);
+                        ]);
                     }
                 }
             }
-        }
 
-        return redirect()->back()->with('success', 'Curso atualizado com sucesso!');
+            return redirect()->back()->with('success', 'Curso atualizado com sucesso!');
+
+            return view('instructor/editar_curso', [
+                'course'  => $course,
+                'modules' => $modules,
+            ]);
+        }
     }
 
     public function deletar($id = null)

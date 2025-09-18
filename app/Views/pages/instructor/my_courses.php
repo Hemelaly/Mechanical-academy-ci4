@@ -53,9 +53,9 @@
   </div>
 
   <!-- Grid de Cursos -->
-  <div class="row d-flex g-4" id="coursesContainer">
+  <div class="row g-4" id="coursesContainer">
     <?php foreach ($courses as $course): ?>
-      <div class="col-md-4 course-card" data-status="<?= $course->status_course ?>" data-title="<?= strtolower($course->title_course) ?>">
+      <div class="col-12 col-lg-4 col-md-6 course-card" data-status="<?= $course->status_course ?>" data-title="<?= strtolower($course->title_course) ?>">
         <div class="card bg-modern-dark border-0 shadow-sm">
           <div class="position-relative">
             <div class="imagem" style="width: 100%; height: 100%;">

@@ -377,3 +377,10 @@ document.addEventListener("input", () => {
     console.log("Auto-saving...");
   }, 5000);
 });
+
+
+
+
+// ======================
+// Para edição de curso
+// ======================
