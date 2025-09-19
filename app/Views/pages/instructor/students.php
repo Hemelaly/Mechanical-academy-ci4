@@ -196,8 +196,7 @@
       <tr>
         <th>Aluno</th>
         <th>Curso</th>
-        <th>Progresso</th>
-        <th>Último Acesso</th>
+        <th>Comprovativo</th>
         <th>Status</th>
         <th>Ações</th>
       </tr>
@@ -208,8 +207,15 @@
           <tr class="">
             <td><?= $enrollment->name_student ?><br><small style="color:#8a9ba8;"><?= $enrollment->email_student ?></small></td>
             <td><?= $enrollment->title_course ?></td>
-            <td>35%</td>
-            <td>2 horas</td>
+            <td>
+              <!-- Botão -->
+              <button type="button"
+                class="btn btn-primary btn-sm"
+                data-bs-toggle="modal"
+                data-bs-target="#comprovativoModal<?= $enrollment->id_enrollment ?>">
+                Ver Comprovativo
+              </button>
+            </td>
             <td><span class="status-badge status-pendente">Pendente</span></td>
             <td class="actions d-flex align-items-center gap-2">
               <form action="/instructor/dashboard/meus_estudantes/<?= $enrollment->id_enrollment ?>" method="post">
@@ -226,6 +232,19 @@
             </td>
           </tr>
         <?php endif; ?>
+        <div class="modal fade" id="comprovativoModal<?= $enrollment->id_enrollment ?>" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content bg-modern-dark">
+              <div class="modal-header">
+                <h5 class="modal-title">Comprovativo de Pagamento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+              </div>
+              <div class="modal-body text-center">
+                <img src="<?= base_url($enrollment->proof_file_payment) ?> " alt="Comprovativo" class="img-fluid rounded">
+              </div>
+            </div>
+          </div>
+        </div>
       <?php endforeach; ?>
     </tbody>
   </table>
@@ -263,5 +282,9 @@
     </tbody>
   </table>
 </div>
+
+<!-- Modal -->
+
+
 
 <?= $this->endSection() ?>

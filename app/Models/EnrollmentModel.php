@@ -103,14 +103,21 @@ class EnrollmentModel extends Model
                 enrollments.id_enrollment,
                 enrollments.enrolled_at_enrollment,
                 enrollments.status_enrollment,
+
                 students.id_student,
                 students.name_student,
                 students.email_student,
+
                 courses.id_course,
-                courses.title_course
+                courses.title_course,
+
+                payments.id_payment,
+                payments.status_payment,
+                payments.proof_file_payment
             ')
             ->join('courses', 'courses.id_course = enrollments.id_course_enrollment')
             ->join('students', 'students.id_user_student = enrollments.id_student_enrollment')
+            ->join('payments', 'payments.id_enrollment_payment = enrollments.id_enrollment', 'left')
             ->where('courses.id_instructor_course', $instructorId)
             ->findAll();
     }

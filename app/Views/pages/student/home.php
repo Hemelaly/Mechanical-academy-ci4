@@ -33,7 +33,7 @@
     }
 
     .tw-dark .tw-card {
-        background: radial-gradient(120% 120% at 0% 0%, #0c1427, var(--tw-card));
+        background: radial-gradient(120% 120% at 0% 0%, #0c1427, var(--tw-card)) !important;
         border: 1px solid var(--tw-border);
         border-radius: 1rem;
         /* ~ rounded-2xl */
@@ -106,6 +106,7 @@
         row-gap: 1rem;
     }
 </style>
+
 <!-- Banner -->
 <div class="gradient-banner">
     <div>
@@ -132,11 +133,11 @@
 </div>
 
 <!-- Coluna: Cursos em andamento -->
-<div class="col-lg-5 my-3">
+<div class="col-lg-5 tw-dark my-3">
     <div class="tw-card p-3 p-md-4 h-100">
         <div class="d-flex align-items-center justify-content-between mb-3">
             <h5 class="tw-title mb-0"><i class="bi bi-play-circle me-2"></i>Cursos em andamento</h5>
-            <span class="badge badge-soft px-3 py-2">2 ativos</span>
+            <span class="badge badge-soft px-3 py-2"><?= count($activeCourseIds) ?> ativos</span>
         </div>
 
         <div class="d-flex flex-column gap-3">
@@ -151,7 +152,7 @@
                                 </div>
                                 <div class="tw-sub small mb-2">Instrutor: <?= $course->name_instructor ?? 'N/A' ?></div>
                             </div>
-                            <a href="/student/dashboard/lessons/<?= $course->id_course ?>" class="btn btn-sm btn-accent">
+                            <a href="/student/dashboard/meus_cursos" class="btn btn-sm btn-accent">
                                 <i class="bi bi-arrow-right-circle me-1"></i>Continuar
                             </a>
                         </div>

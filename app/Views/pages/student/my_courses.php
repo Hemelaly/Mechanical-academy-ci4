@@ -67,9 +67,9 @@
     <!-- Courses Grid -->
     <div class="row g-4">
       <!-- Curso 1 -->
+      <?php if ($courses): ?>
       <?php foreach ($courses as $key => $course): ?>
         <?php if ($course->status_enrollment == 'Ativo'): ?>
-        <?php if ($course): ?>
           <div class="col-md-6 col-lg-4">
             <div class="card bg-modern-dark text-light h-100 shadow rounded-3">
               <img src="<?= base_url('assets/instructor/img/courses/' . $course->image_course) ?>" class="card-img-top" alt="<?= $course->title_course ?>">
@@ -105,6 +105,7 @@
             </div>
           </div>
         <?php endif ?>
+        <?php endforeach ?>
         <?php else: ?>
           <div class="col-12">
             <div class="alert alert-warning" role="alert">
@@ -112,8 +113,6 @@
             </div>
           </div>
         <?php endif ?>
-      <?php endforeach ?>
-
     </div>
   </div>
 

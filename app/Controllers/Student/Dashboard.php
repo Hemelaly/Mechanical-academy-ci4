@@ -69,9 +69,30 @@ class Dashboard extends BaseController
             }
         }
 
+        $enrollmentModel = new \App\Models\EnrollmentModel();
+        $lessonModel = new \App\Models\LessonModel();
+        $user = service('auth')->user();
+
+        // Pega os cursos nos quais o aluno está inscrito
+        $lessons = $enrollmentModel->getStudentEnrolledCourses($user->id);
+
+        // Para cada curso, pega a primeira aula (ordenada por posição do módulo e da aula)
+        foreach ($lessons as &$lesson) {
+            $firstLesson = $lessonModel
+                ->select('lessons.id_lesson')
+                ->join('modules', 'modules.id_module = lessons.id_module_lesson')
+                ->where('modules.id_course_module', $lesson->id_course)
+                ->orderBy('modules.position_module', 'ASC')
+                ->orderBy('lessons.position_lesson', 'ASC')
+                ->first();
+
+            $lesson->firstLessonId = $firstLesson->id_lesson ?? null;
+        }
+
         return view('pages/student/home', [
             'user' => $user,
             'courses' => $courses,
+            // 'lesson' => $lesson,
             'activeCourseIds' => $activeCourseIds,
             'pendingCourseIds' => $pendingCourseIds,
             'sidebarLinks' => $this->sidebarLinks(),
@@ -197,9 +218,30 @@ class Dashboard extends BaseController
             }
         }
 
+        $enrollmentModel = new \App\Models\EnrollmentModel();
+        $lessonModel = new \App\Models\LessonModel();
+        $user = service('auth')->user();
+
+        // Pega os cursos nos quais o aluno está inscrito
+        $lessons = $enrollmentModel->getStudentEnrolledCourses($user->id);
+
+        // Para cada curso, pega a primeira aula (ordenada por posição do módulo e da aula)
+        foreach ($lessons as &$lesson) {
+            $firstLesson = $lessonModel
+                ->select('lessons.id_lesson')
+                ->join('modules', 'modules.id_module = lessons.id_module_lesson')
+                ->where('modules.id_course_module', $lesson->id_course)
+                ->orderBy('modules.position_module', 'ASC')
+                ->orderBy('lessons.position_lesson', 'ASC')
+                ->first();
+
+            $lesson->firstLessonId = $firstLesson->id_lesson ?? null;
+        }
+
         return view('pages/student/courses', [
             'user' => $user,
             'courses' => $courses,
+            // 'lesson' => $lesson,
             'activeCourseIds' => $activeCourseIds,
             'pendingCourseIds' => $pendingCourseIds,
             'sidebarLinks' => $this->sidebarLinks(),

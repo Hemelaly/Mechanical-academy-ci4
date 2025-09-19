@@ -52,7 +52,7 @@ class PaymentController extends Controller
             'progress_enrollment'    => 0.00,
             'enrolled_at_enrollment' => date('Y-m-d H:i:s'),
         ];
-
+        
         $idEnrollment = $enrollmentModel->insert($dataEnrollment, true);
 
         if ($idEnrollment === false) {
