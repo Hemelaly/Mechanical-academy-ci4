@@ -220,6 +220,11 @@ class CourseController extends BaseController
         // Deletar curso
         $courseModel->delete($id);
 
-        return redirect()->back()->with('success', 'Curso deletado com sucesso');
+        return redirect()->to('/instructor/dashboard/meus_cursos')
+            ->with('swal', [
+                'icon' => 'success',
+                'title' => 'Curso eliminado!',
+                'text'  => 'O curso foi removido com sucesso.'
+            ]);
     }
 }

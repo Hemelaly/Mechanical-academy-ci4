@@ -52,7 +52,7 @@ class PaymentController extends Controller
             'progress_enrollment'    => 0.00,
             'enrolled_at_enrollment' => date('Y-m-d H:i:s'),
         ];
-        
+
         $idEnrollment = $enrollmentModel->insert($dataEnrollment, true);
 
         if ($idEnrollment === false) {
@@ -85,6 +85,10 @@ class PaymentController extends Controller
 
         // ----- Redireciona para a dashboard do aluno -----
         return redirect()->to('/student/dashboard/meus_cursos')
-            ->with('success', 'Pedido enviado com sucesso! Aguarde a validação.');
+            ->with('swal', [
+                'icon'  => 'success',
+                'title' => 'Pedido enviado!',
+                'text'  => 'O seu pedido está a ser analisado. Dentro de 12 horas o pedido será concluido.'
+            ]);
     }
 }

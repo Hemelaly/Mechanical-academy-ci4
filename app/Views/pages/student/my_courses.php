@@ -68,51 +68,51 @@
     <div class="row g-4">
       <!-- Curso 1 -->
       <?php if ($courses): ?>
-      <?php foreach ($courses as $key => $course): ?>
-        <?php if ($course->status_enrollment == 'Ativo'): ?>
-          <div class="col-md-6 col-lg-4">
-            <div class="card bg-modern-dark text-light h-100 shadow rounded-3">
-              <img src="<?= base_url('assets/instructor/img/courses/' . $course->image_course) ?>" class="card-img-top" alt="<?= $course->title_course ?>">
-              <div class="card-body d-flex flex-column">
-                <h5 class="card-title d-flex justify-content-between align-items-center">
-                  <?= $course->title_course ?>
-                  <span class="badge bg-warning text-dark">
-                    <i class="fas fa-star me-1"></i> 4.8
-                  </span>
-                </h5>
-                <p class="small text-muted mb-1">Por: Prof. <?= $course->name_instructor ?></p>
-                <p class="card-text flex-grow-1"><?= $course->description_course ?></p>
+        <?php foreach ($courses as $key => $course): ?>
+          <?php if ($course->status_enrollment == 'Ativo'): ?>
+            <div class="col-md-6 col-lg-4">
+              <div class="card bg-modern-dark text-light h-100 shadow rounded-3">
+                <img src="<?= base_url('assets/instructor/img/courses/' . $course->image_course) ?>" class="card-img-top" alt="<?= $course->title_course ?>">
+                <div class="card-body d-flex flex-column">
+                  <h5 class="card-title d-flex justify-content-between align-items-center">
+                    <?= $course->title_course ?>
+                    <span class="badge bg-warning text-dark">
+                      <i class="fas fa-star me-1"></i> 4.8
+                    </span>
+                  </h5>
+                  <p class="small text-muted mb-1">Por: Prof. <?= $course->name_instructor ?></p>
+                  <p class="card-text flex-grow-1"><?= $course->description_course ?></p>
 
-                <!-- Progresso -->
-                <div class="mb-3">
-                  <div class="d-flex justify-content-between">
-                    <small>Progresso</small>
-                    <small>85%</small>
+                  <!-- Progresso -->
+                  <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                      <small>Progresso</small>
+                      <small>85%</small>
+                    </div>
+                    <div class="progress bg-dark" style="height: 6px;">
+                      <div class="progress-bar bg-info" style="width: 85%;"></div>
+                    </div>
+                    <small class="text-muted">8 de 10 módulos concluídos</small>
                   </div>
-                  <div class="progress bg-dark" style="height: 6px;">
-                    <div class="progress-bar bg-info" style="width: 85%;"></div>
-                  </div>
-                  <small class="text-muted">8 de 10 módulos concluídos</small>
-                </div>
 
-                <!-- Ações -->
-                <div class="d-flex gap-2">
-                  <a href="/student/dashboard/ver_aulas/<?= $course->firstLessonId ?>" class="btn btn-info flex-fill">
-                    <i class="fas fa-play me-1"></i> Continuar
-                  </a>
+                  <!-- Ações -->
+                  <div class="d-flex gap-2">
+                    <a href="/student/dashboard/ver_aulas/<?= $course->firstLessonId ?>" class="btn btn-info flex-fill">
+                      <i class="fas fa-play me-1"></i> Continuar
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        <?php endif ?>
+          <?php endif ?>
         <?php endforeach ?>
-        <?php else: ?>
-          <div class="col-12">
-            <div class="alert alert-warning" role="alert">
-              <i class="fas fa-exclamation-triangle me-2"></i> Você não está matriculado em nenhum curso ativo. <a href="/student/dashboard/cursos/" class="alert-link">Explore nossos cursos</a>.
-            </div>
+      <?php else: ?>
+        <div class="col-12">
+          <div class="alert alert-warning" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i> Você não está matriculado em nenhum curso ativo. <a href="/student/dashboard/cursos/" class="alert-link">Explore nossos cursos</a>.
           </div>
-        <?php endif ?>
+        </div>
+      <?php endif ?>
     </div>
   </div>
 
@@ -129,6 +129,18 @@
         // Aqui você pode adicionar lógica JS para filtrar seus cursos
         console.log('Filtrar por:', filter);
       });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      <?php if (session()->has('swal')):
+        $s = session()->get('swal'); ?>
+        Swal.fire({
+          icon: '<?= esc($s['icon']) ?>',
+          title: '<?= esc($s['title']) ?>',
+          text: '<?= esc($s['text']) ?>',
+          confirmButtonText: 'OK'
+        });
+      <?php endif; ?>
     });
   </script>
 </section>

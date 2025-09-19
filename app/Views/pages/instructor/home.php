@@ -14,19 +14,19 @@
     </div>
     <div class="d-flex gap-2 mt-4">
         <a
-            href=""
+            href="/instructor/dashboard/novo_curso"
             style="text-decoration: none"
             class="btn-modern btn-modern-primary">
             + Criar Novo Curso
         </a>
         <a
-            href=""
+            href="/instructor/dashboard/meus_cursos"
             style="text-decoration: none"
             class="btn-modern bg-light text-dark">
             Gerenciar Cursos
         </a>
         <a
-            href=""
+            href="/instructor/dashboard/financas"
             style="text-decoration: none"
             class="btn-modern btn btn-dark">
             Ver Relatórios

@@ -34,7 +34,27 @@
             <i class="bi <?= $link['icon'] ?> me-2"></i> <?= $link['label'] ?>
         </a>
     <?php endforeach; ?>
-    <a href="/logout" class="nav-link mt-5">
+    <a href="/logout" id="logoutBtn" class="nav-link mt-5">
         <i class="bi bi-box-arrow-right me-2" onclick="return confirm('Tem certeza que deseja sair da conta?');"></i> Sair
     </a>
 </div>
+
+<script>
+document.getElementById('logoutBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+
+    Swal.fire({
+        title: 'Tem certeza?',
+        text: "Você será desconectado da sessão.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sim, sair',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Redireciona para a rota de logout do CI4
+            window.location.href = "<?= site_url('logout') ?>";
+        }
+    });
+});
+</script>

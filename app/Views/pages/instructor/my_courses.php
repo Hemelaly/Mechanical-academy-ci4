@@ -76,7 +76,7 @@
             </div>
             <div class="d-flex gap-2">
               <a href="/instructor/dashboard/meus_cursos/editar/<?= $course->id_course ?>" class="btn btn-outline-primary btn-sm rounded-pill">Editar</a>
-              <form action="/instructor/dashboard/meus_cursos/deletar/<?= $course->id_course ?>" method="POST" onsubmit="return confirm('Tem certeza que deseja deletar este curso?');">
+              <form class="deleteForm" action="/instructor/dashboard/meus_cursos/deletar/<?= $course->id_course ?>" method="POST">
                 <button type="submit" class="btn btn-danger btn-sm rounded-pill">Eliminar</button>
               </form>
             </div>
@@ -124,6 +124,49 @@
           }
         });
       });
+    });
+
+    document.querySelectorAll('.deleteForm').forEach(form => {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault(); // evita envio imediato
+
+        Swal.fire({
+          title: 'Confirmar ação',
+          text: "Deseja realmente eliminar este curso?",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Sim, eliminar',
+          cancelButtonText: 'Cancelar'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            Swal.fire({
+              title: 'Processando...',
+              text: 'Estamos eliminando o curso.',
+              allowOutsideClick: false,
+              didOpen: () => {
+                Swal.showLoading();
+              }
+            });
+
+            // envia o form depois de um pequeno delay (opcional)
+            setTimeout(() => {
+              form.submit();
+            }, 1000);
+          }
+        });
+      });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      <?php if (session()->has('swal')):
+        $s = session()->get('swal'); ?>
+        Swal.fire({
+          icon: '<?= esc($s['icon']) ?>',
+          title: '<?= esc($s['title']) ?>',
+          text: '<?= esc($s['text']) ?>',
+          confirmButtonText: 'OK'
+        });
+      <?php endif; ?>
     });
   </script>
 </div>

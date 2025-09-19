@@ -170,6 +170,7 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const dropzone = document.getElementById('dropzone');
@@ -179,7 +180,7 @@
         const removeImageBtn = document.getElementById('remove-image');
         const form = document.getElementById('checkout-form');
 
-        // Abrir seletor de arquivo ao clicar no dropzone ou botão
+        // Abrir seletor de arquivo
         dropzone.addEventListener('click', function(e) {
             if (e.target.tagName !== 'BUTTON') {
                 fileInput.click();
@@ -197,30 +198,32 @@
 
                 // Verificar se é uma imagem
                 if (!file.type.match('image.*')) {
-                    alert('Por favor, selecione apenas arquivos de imagem.');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Arquivo inválido',
+                        text: 'Por favor, selecione apenas arquivos de imagem.'
+                    });
                     return;
                 }
 
                 const reader = new FileReader();
-
                 reader.onload = function(e) {
                     previewImage.src = e.target.result;
                     previewContainer.style.display = 'block';
                     dropzone.style.display = 'none';
                 }
-
                 reader.readAsDataURL(file);
             }
         });
 
-        // Remover imagem selecionada
+        // Remover imagem
         removeImageBtn.addEventListener('click', function() {
             fileInput.value = '';
             previewContainer.style.display = 'none';
             dropzone.style.display = 'flex';
         });
 
-        // Drag and drop functionality
+        // Drag and drop
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             dropzone.addEventListener(eventName, preventDefaults, false);
         });
@@ -231,50 +234,48 @@
         }
 
         ['dragenter', 'dragover'].forEach(eventName => {
-            dropzone.addEventListener(eventName, highlight, false);
+            dropzone.addEventListener(eventName, () => dropzone.classList.add('dragover'), false);
         });
 
         ['dragleave', 'drop'].forEach(eventName => {
-            dropzone.addEventListener(eventName, unhighlight, false);
+            dropzone.addEventListener(eventName, () => dropzone.classList.remove('dragover'), false);
         });
 
-        function highlight() {
-            dropzone.classList.add('dragover');
-        }
-
-        function unhighlight() {
-            dropzone.classList.remove('dragover');
-        }
-
-        dropzone.addEventListener('drop', handleDrop, false);
-
-        function handleDrop(e) {
+        dropzone.addEventListener('drop', function(e) {
             const dt = e.dataTransfer;
             const files = dt.files;
 
             if (files.length) {
                 fileInput.files = files;
-
-                // Disparar evento change manualmente
-                const event = new Event('change');
-                fileInput.dispatchEvent(event);
+                fileInput.dispatchEvent(new Event('change'));
             }
-        }
+        });
 
         // Validação do formulário
         form.addEventListener('submit', function(e) {
             if (!fileInput.files.length) {
                 e.preventDefault();
-                alert('Por favor, envie o comprovante de pagamento.');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Comprovante obrigatório',
+                    text: 'Por favor, envie o comprovante de pagamento.'
+                });
                 return;
             }
 
-            // Simulação de envio
-            alert('O seu pedido foi enviado! Por favor, aguarde até terminarmos de verificar, e lhe notificaremos por email.');
-            previewContainer.style.display = 'none';
-            dropzone.style.display = 'flex';
+            // Se quiseres mostrar feedback antes de enviar:
+            Swal.fire({
+                icon: 'info',
+                title: 'Enviando pedido...',
+                text: 'Estamos processando o seu comprovante.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading()
+                }
+            });
         });
     });
 </script>
+
 
 <?= $this->endSection() ?>

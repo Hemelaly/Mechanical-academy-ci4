@@ -9,16 +9,16 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0 text-center">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="/students/dashboard">Início</a>
+                    <a class="nav-link active" aria-current="page" href="/student/dashboard">Início</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/students/dashboard/meus_cursos">Meus Cursos</a>
+                    <a class="nav-link" href="/student/dashboard/meus_cursos">Meus Cursos</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/students/dashboard/cursos">Todos Cursos</a>
+                    <a class="nav-link" href="/student/dashboard/cursos">Todos Cursos</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/students/dashboard/perfil">Perfil</a>
+                    <a class="nav-link" href="/student/dashboard/perfil">Perfil</a>
                 </li>
             </ul>
             <form class="d-flex d-none d-md-block" role="search">

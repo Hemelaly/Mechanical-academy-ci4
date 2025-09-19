@@ -218,10 +218,10 @@
             </td>
             <td><span class="status-badge status-pendente">Pendente</span></td>
             <td class="actions d-flex align-items-center gap-2">
-              <form action="/instructor/dashboard/meus_estudantes/<?= $enrollment->id_enrollment ?>" method="post">
+              <form id="acceptForm" action="/instructor/dashboard/meus_estudantes/<?= $enrollment->id_enrollment ?>" method="post">
                 <input type="hidden" name="status_enrollment" value="Ativo">
                 <input type="hidden" name="status_payment" value="Aprovado">
-                <button type="submit" class="btn btn-success btn-sm my-1">Aceitar</button>
+                <button id="acceptBtn" type="submit" class="btn btn-success btn-sm my-1">Aceitar</button>
               </form>
 
               <form action="/instructor/dashboard/meus_estudantes/<?= $enrollment->id_enrollment ?>" method="post">
@@ -283,8 +283,54 @@
   </table>
 </div>
 
-<!-- Modal -->
+<style>
+  #sidebar a {
+    color: #94a3b8;
+    /* slate-400 */
+    text-decoration: none;
+    display: block;
+    padding: 12px 20px;
+    border-radius: 0.75rem;
+    transition: 0.3s;
+    font-weight: 500;
+  }
 
+  #sidebar a:hover,
+  #sidebar a.active {
+    background: #1e293b;
+    /* slate-800 */
+    color: #fff;
+  }
+</style>
 
+<script>
+  document.getElementById('acceptForm').addEventListener('submit', function(e) {
+    e.preventDefault(); // evita o envio imediato
+
+    Swal.fire({
+      title: 'Confirmar ação',
+      text: "Deseja realmente aceitar este estudante?",
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sim, aceitar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // opcional: mostra loading antes de enviar
+        Swal.fire({
+          title: 'Processando...',
+          text: 'Estamos atualizando o status.',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        // envia o form de verdade
+        e.target.submit();
+      }
+    });
+  });
+</script>
 
 <?= $this->endSection() ?>
