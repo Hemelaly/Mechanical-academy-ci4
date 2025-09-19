@@ -44,8 +44,36 @@ class Dashboard extends BaseController
     {
         $user = service('auth')->user();
 
+        $enrollmentModel = new \App\Models\EnrollmentModel();
+        $coursesModel = new CourseModel();
+        $courses = $coursesModel->findAll();
+        $user = service('auth')->user();
+        $enrollmentModel = new \App\Models\EnrollmentModel();
+
+        // Pega todas as inscrições do usuário
+        $enrollments = $enrollmentModel->where('id_student_enrollment', $user->id)
+            ->findAll();
+
+        // Cria um array com os IDs de cursos ativos
+        $activeCourseIds = [];
+        foreach ($enrollments as $enr) {
+            if ($enr->status_enrollment === 'Ativo') {
+                $activeCourseIds[] = $enr->id_course_enrollment;
+            }
+        }
+
+        $pendingCourseIds = [];
+        foreach ($enrollments as $enr) {
+            if ($enr->status_enrollment === 'Pendente') {
+                $pendingCourseIds[] = $enr->id_course_enrollment;
+            }
+        }
+
         return view('pages/student/home', [
             'user' => $user,
+            'courses' => $courses,
+            'activeCourseIds' => $activeCourseIds,
+            'pendingCourseIds' => $pendingCourseIds,
             'sidebarLinks' => $this->sidebarLinks(),
             'currentUrl' => current_url()
         ]);

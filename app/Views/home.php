@@ -10,6 +10,16 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Outfit:wght@100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+    <!-- Owl Carousel CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css">
+
+    <!-- jQuery (necessário para Owl Carousel) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Owl Carousel JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+
     <link rel="stylesheet" href="./assets/css/style.css" />
     <title>Mechanical Academy | Aprenda a fazer do jeito certo</title>
 
@@ -176,6 +186,55 @@
                     #090f1e 70%,
                     #030712 100%);
         }
+
+        /* Sempre mostrar nav e dots */
+        .owl-nav,
+        .owl-dots {
+            display: block !important;
+        }
+
+        /* Estilo das setas */
+        .owl-nav button.owl-prev,
+        .owl-nav button.owl-next {
+            position: absolute;
+            top: 40%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5) !important;
+            color: #fff !important;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px !important;
+            line-height: 40px;
+        }
+
+        .owl-nav button.owl-prev {
+            left: -50px;
+        }
+
+        .owl-nav button.owl-next {
+            right: -50px;
+        }
+
+        /* Estilo dos dots */
+        .owl-dots {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .owl-dot span {
+            width: 12px;
+            height: 12px;
+            margin: 5px 7px;
+            background: #bbb;
+            display: block;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+
+        .owl-dot.active span {
+            background: #0d6efd;
+        }
     </style>
 </head>
 
@@ -212,7 +271,7 @@
                                 <a href="#cursos"
                                     class="btn btn-light py-3 rounded-5 text-decoration-none fw-medium text-center"
                                     style="width: 200px;">Ver todos cursos</a>
-                                <a href="#"
+                                <a href="/login"
                                     class=" btn btn-outline-primary px-5 py-3 rounded-5 text-decoration-none fw-medium">Entrar</a>
                             </div>
                         </div>
@@ -272,20 +331,44 @@
                     Aprenda na Prática com os Melhores Conteúdos em Tecnologia
                 </p>
 
-                <div class="row mt-5">
-                    <div class="col-lg-4 col-md-6 p-2">
+                <div class="owl-carousel owl-theme mt-5">
+
+                    <!-- Card 1 -->
+                    <div class="item">
+                        <div class="card bg-course-card course-card rounded-3 overflow-hidden">
+                            <img src="./assets/img/Excell.jpg" class="card-img-top img-bw" alt="..." />
+                            <div class="card-body p-4">
+                                <h5><span class="badge text-bg-secondary">Dados</span></h5>
+                                <h3 class="card-title text-white fw-semibold">Curso de Excel</h3>
+                                <p class="card-description">
+                                    Aprenda a utilizar o Excel para organizar dados, criar relatórios e aplicar fórmulas que facilitam o dia a dia. </p>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="stars">
+                                        <i class="bi bi-star-fill text-warning"></i>
+                                        <i class="bi bi-star-fill text-warning"></i>
+                                        <i class="bi bi-star-fill text-warning"></i>
+                                        <i class="bi bi-star-fill text-warning"></i>
+                                        <i class="bi bi-star-fill text-warning"></i>
+                                    </div>
+                                    <span class="course-rating p-1 rounded-1">5.0</span>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="fw-bold h3">999<sub style="font-size: 12px !important;">MZN</sub></div>
+                                    <a href="https://edson-09.github.io/curso-excel/" target="_blank" class="btn btn-primary">Saber mais</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="item">
                         <div class="card bg-course-card course-card rounded-3 overflow-hidden">
                             <img src="./assets/img/html-css-js.jpg" class="card-img-top img-bw" alt="..." />
                             <div class="card-body p-4">
-                                <h5>
-                                    <span class="badge text-bg-secondary">Programacao</span>
-                                </h5>
-                                <h3 class="card-title text-white fw-semibold">
-                                    Programação Web
-                                </h3>
+                                <h5><span class="badge text-bg-secondary">Programacao</span></h5>
+                                <h3 class="card-title text-white fw-semibold">Programação Web</h3>
                                 <p class="card-description">
-                                    Aprenda do zero a criar sites dinâmicos e responsivos. Domine
-                                    HTML, CSS, JavaScript e muito mais.
+                                    Aprenda do zero a criar sites dinâmicos e responsivos. Domine HTML, CSS, JavaScript e muito mais.
                                 </p>
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="stars">
@@ -298,24 +381,22 @@
                                     <span class="course-rating p-1 rounded-1">5.0</span>
                                 </div>
                                 <div class="d-flex align-items-center justify-content-between">
-                                    <div class="fw-bold h3">$700</div>
+                                    <div class="fw-bold h3">999<sub style="font-size: 12px !important;">MZN</sub></div>
                                     <button class="btn btn-primary">Saber mais</button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="col-lg-4 col-md-6 p-2">
+                    <!-- Card 3 -->
+                    <div class="item">
                         <div class="card bg-course-card course-card rounded-3 overflow-hidden">
                             <img src="./assets/img/p-bi.jpg" class="card-img-top img-bw" alt="..." />
                             <div class="card-body p-4">
-                                <h5>
-                                    <span class="badge text-bg-secondary">Analise de dados</span>
-                                </h5>
+                                <h5><span class="badge text-bg-secondary">Analise de dados</span></h5>
                                 <h3 class="card-title text-white fw-semibold">Power BI</h3>
                                 <p class="card-description">
-                                    Aprenda do zero a criar sites dinâmicos e responsivos. Domine
-                                    HTML, CSS, JavaScript e muito mais.
+                                    Aprenda a transformar dados em dashboards interativos, relatórios e insights de negócio com Power BI.
                                 </p>
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="stars">
@@ -328,22 +409,22 @@
                                     <span class="course-rating p-1 rounded-1">5.0</span>
                                 </div>
                                 <div class="d-flex align-items-center justify-content-between">
-                                    <div class="fw-bold h3">$700</div>
+                                    <div class="fw-bold h3">999<sub style="font-size: 12px !important;">MZN</sub></div>
                                     <button class="btn btn-primary">Saber mais</button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="col-lg-4 col-md-6 p-2">
+                    <!-- Card 4 -->
+                    <div class="item">
                         <div class="card bg-course-card course-card rounded-3 overflow-hidden">
                             <img src="./assets/img/Cisco-01.jpg" class="card-img-top img-bw" alt="..." />
                             <div class="card-body p-4">
                                 <h5><span class="badge text-bg-secondary">Redes</span></h5>
                                 <h3 class="card-title text-white fw-semibold">Cisco CCNA</h3>
                                 <p class="card-description">
-                                    Aprenda do zero a criar sites dinâmicos e responsivos. Domine
-                                    HTML, CSS, JavaScript e muito mais.
+                                    Torne-se especialista em redes, domine configuração de roteadores, switches e fundamentos de TCP/IP.
                                 </p>
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="stars">
@@ -356,12 +437,13 @@
                                     <span class="course-rating p-1 rounded-1">5.0</span>
                                 </div>
                                 <div class="d-flex align-items-center justify-content-between">
-                                    <div class="fw-bold h3">$700</div>
+                                    <div class="fw-bold h3">999<sub style="font-size: 12px !important;">MZN</sub></div>
                                     <button class="btn btn-primary">Saber mais</button>
                                 </div>
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
         </section>
@@ -438,7 +520,7 @@
                         <p class="description text-center text-dark">Na TechAcademy, não ensinamos apenas teoria -
                             capacitamos você a resolver problemas reais do mercado. Nossos alunos conseguem empregos com
                             salários 67% superiores à média em até 180 dias após a certificação.</p>
-                        <a href="#" class="btn btn-dark px-5 py-3 rounded-5 mb-5">Comecar Agora</a>
+                        <a href="<?= base_url('/student/dashboard/cursos') ?>" class="btn btn-dark px-5 py-3 rounded-5 mb-5">Comecar Agora</a>
                     </div>
                 </div>
             </div>
@@ -453,7 +535,7 @@
                             <p>Na Mechanical Tecnologia, acreditamos que a melhor forma de aprender é praticando. Por
                                 isso, desenvolvemos uma metodologia baseada em experiências reais, projetos práticos e
                                 um acompanhamento próximo do aluno.</p>
-                            <a href="#" class="btn btn-light text-dark fw-medium py-3 rounded-5 mt-4"
+                            <a href="<?= base_url('/student/dashboard/cursos') ?>" class="btn btn-light text-dark fw-medium py-3 rounded-5 mt-4"
                                 style="width: 250px;">Comecar a aprender</a>
                         </div>
                     </div>
@@ -585,6 +667,30 @@
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
         crossorigin="anonymous"></script>
     <script>
+        $(document).ready(function() {
+            $(".owl-carousel").owlCarousel({
+                loop: true, // loop infinito
+                margin: 20, // espaço entre cards
+                nav: true, // botões anterior/próximo
+                dots: true, // bolinhas de navegação
+                autoplay: true, // autoplay
+                autoplayTimeout: 4000, // tempo entre slides (4s)
+                autoplayHoverPause: true, // pausa no hover
+                responsive: {
+                    0: {
+                        items: 1
+                    }, // mobile: 1 card
+                    768: {
+                        items: 2
+                    }, // tablet: 2 cards
+                    1200: {
+                        items: 3
+                    } // desktop: 3 cards
+                }
+            });
+        });
+
+
         // Função que anima os contadores
         function animateCounter(counter) {
             const target = +counter.getAttribute("data-target"); // número final

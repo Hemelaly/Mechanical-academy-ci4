@@ -69,6 +69,7 @@
       <!-- Curso 1 -->
       <?php foreach ($courses as $key => $course): ?>
         <?php if ($course->status_enrollment == 'Ativo'): ?>
+        <?php if ($course): ?>
           <div class="col-md-6 col-lg-4">
             <div class="card bg-modern-dark text-light h-100 shadow rounded-3">
               <img src="<?= base_url('assets/instructor/img/courses/' . $course->image_course) ?>" class="card-img-top" alt="<?= $course->title_course ?>">
@@ -101,6 +102,13 @@
                   </a>
                 </div>
               </div>
+            </div>
+          </div>
+        <?php endif ?>
+        <?php else: ?>
+          <div class="col-12">
+            <div class="alert alert-warning" role="alert">
+              <i class="fas fa-exclamation-triangle me-2"></i> Você não está matriculado em nenhum curso ativo. <a href="/student/dashboard/cursos/" class="alert-link">Explore nossos cursos</a>.
             </div>
           </div>
         <?php endif ?>

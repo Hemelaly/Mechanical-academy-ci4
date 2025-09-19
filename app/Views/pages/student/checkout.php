@@ -134,7 +134,7 @@
                 <h3 class="text-white">+258 84 000 0000</h3>
                 <div class="form-text text-muted">Este é o número para onde você deve enviar o pagamento.</div>
 
-                <form action="/checkout/<?= $course->id_course ?>" method="post" id="checkout-form">
+                <form action="/checkout/<?= $course->id_course ?>" enctype="multipart/form-data" method="post" id="checkout-form">
                     <div class="divider text-muted">
                         <span>Envio do Comprovativo</span>
                     </div>
@@ -271,7 +271,6 @@
 
             // Simulação de envio
             alert('O seu pedido foi enviado! Por favor, aguarde até terminarmos de verificar, e lhe notificaremos por email.');
-            form.reset();
             previewContainer.style.display = 'none';
             dropzone.style.display = 'flex';
         });

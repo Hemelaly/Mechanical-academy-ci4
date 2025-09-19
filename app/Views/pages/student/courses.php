@@ -128,35 +128,35 @@
             <div class="tw-card p-3 p-md-4 h-100">
                 <div class="d-flex align-items-center justify-content-between mb-3">
                     <h5 class="tw-title mb-0"><i class="bi bi-play-circle me-2"></i>Cursos em andamento</h5>
-                    <span class="badge badge-soft px-3 py-2">2 ativos</span>
+                    <span class="badge badge-soft px-3 py-2"><?= count($activeCourseIds) ?> ativos</span>
                 </div>
 
                 <div class="d-flex flex-column gap-3">
                     <?php foreach ($courses as $course): ?>
-                        <?php if (in_array($course->id_course,  $activeCourseIds)): ?>
-                            <div class="p-3" style="background: var(--tw-soft); border:1px solid var(--tw-border); border-radius: .875rem;">
-                                <div class="d-flex align-items-start justify-content-between gap-3">
-                                    <div>
-                                        <div class="d-flex align-items-center gap-2 mb-1">
-                                            <span class="fw-semibold" style="color:#e5e7eb;"><?= $course->title_course ?></span>
-                                            <span class="badge badge-soft ms-1"><?= $course->category ?? 'Curso' ?></span>
+                            <?php if (in_array($course->id_course,  $activeCourseIds)): ?>
+                                <div class="p-3" style="background: var(--tw-soft); border:1px solid var(--tw-border); border-radius: .875rem;">
+                                    <div class="d-flex align-items-start justify-content-between gap-3">
+                                        <div>
+                                            <div class="d-flex align-items-center gap-2 mb-1">
+                                                <span class="fw-semibold" style="color:#e5e7eb;"><?= $course->title_course ?></span>
+                                                <span class="badge badge-soft ms-1"><?= $course->category ?? 'Curso' ?></span>
+                                            </div>
+                                            <div class="tw-sub small mb-2">Instrutor: <?= $course->name_instructor ?? 'N/A' ?></div>
                                         </div>
-                                        <div class="tw-sub small mb-2">Instrutor: <?= $course->name_instructor ?? 'N/A' ?></div>
+                                        <a href="/student/dashboard/lessons/<?= $course->id_course ?>" class="btn btn-sm btn-accent">
+                                            <i class="bi bi-arrow-right-circle me-1"></i>Continuar
+                                        </a>
                                     </div>
-                                    <a href="/student/dashboard/lessons/<?= $course->id_course ?>" class="btn btn-sm btn-accent">
-                                        <i class="bi bi-arrow-right-circle me-1"></i>Continuar
-                                    </a>
+                                    <div class="mt-3">
+                                        <div class="d-flex justify-content-between small tw-sub mb-1">
+                                            <span>Progresso</span>
+                                            <span>40%</span>
+                                        </div>
+                                        <div class="progress">
+                                            <div class="progress-bar" role="progressbar" style="width:40%;" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="mt-3">
-                                    <div class="d-flex justify-content-between small tw-sub mb-1">
-                                        <span>Progresso</span>
-                                        <span>40%</span>
-                                    </div>
-                                    <div class="progress">
-                                        <div class="progress-bar" role="progressbar" style="width:40%;" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                </div>
-                            </div>
                         <?php endif; ?>
                     <?php endforeach; ?>
                 </div>

@@ -75,6 +75,7 @@
         background-color: #312e81;
         border-radius: 12px;
         overflow: hidden;
+        align-self: start;
     }
 
     .video-player {
