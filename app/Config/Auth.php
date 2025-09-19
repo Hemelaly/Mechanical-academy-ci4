@@ -63,6 +63,23 @@ class Auth extends ShieldAuth
         };
     }
 
+        public function registerRedirect(): string
+    {
+        $user = service('auth')->user();
+
+        if (!$user) {
+            // fallback padrão
+            return $this->getUrl(setting('Auth.redirects')['login']);
+        }
+
+        return match ($user->role) {
+            'admin'      => $this->getUrl('/admin/dashboard'),
+            'instructor' => $this->getUrl('/instructor/dashboard'),
+            'student'    => $this->getUrl('/student/dashboard/cursos'),
+            default      => $this->getUrl('/login'),
+        };
+    }
+
     /**
      * --------------------------------------------------------------------
      * Logout redirect

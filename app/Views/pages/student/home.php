@@ -152,7 +152,7 @@
                                 </div>
                                 <div class="tw-sub small mb-2">Instrutor: <?= $course->name_instructor ?? 'N/A' ?></div>
                             </div>
-                            <a href="/student/dashboard/meus_cursos" class="btn btn-sm btn-accent">
+                            <a href="/student/dashboard/ver_aulas/<?= $lesson->firstLessonId ?>" class="btn btn-sm btn-accent">
                                 <i class="bi bi-arrow-right-circle me-1"></i>Continuar
                             </a>
                         </div>

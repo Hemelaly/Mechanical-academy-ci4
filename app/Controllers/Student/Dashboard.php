@@ -92,7 +92,7 @@ class Dashboard extends BaseController
         return view('pages/student/home', [
             'user' => $user,
             'courses' => $courses,
-            // 'lesson' => $lesson,
+            'lesson' => $lesson,
             'activeCourseIds' => $activeCourseIds,
             'pendingCourseIds' => $pendingCourseIds,
             'sidebarLinks' => $this->sidebarLinks(),
