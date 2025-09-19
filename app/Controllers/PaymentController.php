@@ -63,7 +63,6 @@ class PaymentController extends Controller
         // ----- Criar pagamento vinculado à matrícula -----
         $post = $this->request->getPost();
 
-
         $dataPayment = [
             'id_user_payment'       => $user->id,
             'id_course_payment'     => $idCourse,

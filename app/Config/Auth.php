@@ -52,7 +52,7 @@ class Auth extends ShieldAuth
 
         if (!$user) {
             // fallback padrão
-            return $this->getUrl('/login');
+            return $this->getUrl(setting('Auth.redirects')['login']);
         }
 
         return match ($user->role) {
