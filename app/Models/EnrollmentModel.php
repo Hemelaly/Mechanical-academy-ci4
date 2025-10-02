@@ -29,10 +29,10 @@ class EnrollmentModel extends Model
 
     // Validation
     protected $validationRules      = [
-        'id_student_enrollment'   => 'required|integer|is_not_unique[students.id_user_student]',
+        'id_student_enrollment'   => 'required|integer|is_not_unique[users.id]',
         'id_course_enrollment'    => 'required|integer|is_not_unique[courses.id_course]',
         'enrolled_at_enrollment'  => 'required|valid_date',
-        'status_enrollment'       => 'required|in_list[Ativo,Pendente,Cancelado]',
+        'status_enrollment'       => 'required|in_list[Ativo,Pendente,Cancelada]',
     ];
     protected $validationMessages   = [
         'id_student_enrollment' => [
@@ -51,7 +51,7 @@ class EnrollmentModel extends Model
         ],
         'status_enrollment' => [
             'required'   => 'O campo status da inscrição é obrigatório.',
-            'in_list'   => 'O status da inscrição deve ser um dos seguintes: active, completed, cancelled.',
+            'in_list'   => 'O status da inscrição deve ser um dos seguintes: Ativo, Pendente, Cancelada.',
         ],
     ];
     protected $skipValidation       = false;

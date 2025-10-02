@@ -115,6 +115,28 @@
             <?php endif; ?>
         });
     </script>
+
+    <?php if (session()->getFlashdata('success')): ?>
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Sucesso!',
+                text: '<?= session()->getFlashdata('success') ?>',
+                confirmButtonText: 'Ok'
+            });
+        </script>
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('error')): ?>
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro!',
+                text: '<?= session()->getFlashdata('error') ?>',
+                confirmButtonText: 'Ok'
+            });
+        </script>
+    <?php endif; ?>
 </body>
 
 </html>

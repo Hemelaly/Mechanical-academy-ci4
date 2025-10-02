@@ -354,7 +354,7 @@
                                 </div>
                                 <div class="d-flex align-items-center justify-content-between">
                                     <div class="fw-bold h3">999<sub style="font-size: 12px !important;">MZN</sub></div>
-                                    <a href="https://edson-09.github.io/curso-excel/" target="_blank" class="btn btn-primary">Saber mais</a>
+                                    <a href="https://hemelaly.github.io/MT-Academy---EXCEL/" target="_blank" class="btn btn-primary">Saber mais</a>
                                 </div>
                             </div>
                         </div>

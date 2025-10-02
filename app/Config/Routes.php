@@ -11,8 +11,8 @@ $routes->get('/', 'Home::index');
 // Rotas do Shield (login, logout, etc.)
 service('auth')->routes($routes);
 
-$routes->get('register', 'Register::showForm'); // se quiser mostrar o form
-$routes->post('register', 'Register::register');
+$routes->get('reset-password', 'ResetPassword::showResetForm');
+$routes->post('reset-password', 'ResetPassword::submitReset');
 
 // Admin
 $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'role:admin'], function ($routes) {
@@ -31,8 +31,7 @@ $routes->group('instructor', ['namespace' => 'App\Controllers\Instructor', 'filt
     $routes->get('dashboard/meus_estudantes', 'Dashboard::students');
     $routes->get('dashboard/financas', 'Dashboard::financial');
     $routes->get('dashboard/perfil', 'Dashboard::profile');
-    $routes->post('dashboard/meus_estudantes/(:num)', 'Dashboard::updateEnrollment/$1');
-
+    $routes->post('dashboard/meus_estudantes/(:num)/(:num)', 'Dashboard::approveEnrollment/$1/$2');
 });
 
 // Student
@@ -45,7 +44,11 @@ $routes->group('student', ['namespace' => 'App\Controllers\Student', 'filter' =>
     $routes->get('dashboard/perfil', 'Dashboard::profile');
 });
 
+$routes->get('checkout/(:num)', 'PageController::index/$1');
+$routes->post('checkout/pending/(:num)', 'Register::createPendingUser/$1');
+
 // Pagamentos
+$routes->get('payment/checkout/(:num)/(:num)', 'PaymentController::createPayment/$1/$2');
 $routes->post('checkout/(:num)', 'PaymentController::createPayment/$1');
 // $routes->post('student/payment/mpesa/(:num)', 'Student\PaymentController::mpesa/$1');
 // $routes->post('pay/(:num)', 'Student\PaymentController::pay/$1');

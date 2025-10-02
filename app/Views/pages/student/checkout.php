@@ -171,7 +171,19 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        <?php if (session()->has('swal')): ?>
+            const swalData = <?= json_encode(session('swal')) ?>;
+            Swal.fire({
+                icon: swalData.icon,
+                title: swalData.title,
+                text: swalData.text
+            });
+        <?php endif; ?>
+    });
+
     document.addEventListener('DOMContentLoaded', function() {
         const dropzone = document.getElementById('dropzone');
         const fileInput = document.getElementById('file-input');

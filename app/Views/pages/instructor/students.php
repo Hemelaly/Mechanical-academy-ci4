@@ -1,3 +1,9 @@
+<?php
+
+// dd($payments)
+
+?>
+
 <?= $this->extend('layouts/master') ?>
 
 <?= $this->section('title') ?>Alunos<?= $this->endSection() ?>
@@ -202,29 +208,33 @@
       </tr>
     </thead>
     <tbody>
-      <?php foreach ($enrollments as $key => $enrollment): ?>
-        <?php if ($enrollment->status_enrollment == 'Pendente'): ?>
+      <?php foreach ($payments as $key => $payment): ?>
+        <?php if ($payment->status_payment == 'Pendente'): ?>
           <tr class="">
-            <td><?= $enrollment->name_student ?><br><small style="color:#8a9ba8;"><?= $enrollment->email_student ?></small></td>
-            <td><?= $enrollment->title_course ?></td>
+            <td><?= $payment->username ?><br><small style="color:#8a9ba8;"><?= $payment->email ?></small></td>
+            <td><?= $payment->title_course ?></td>
             <td>
               <!-- Botão -->
               <button type="button"
                 class="btn btn-primary btn-sm"
                 data-bs-toggle="modal"
-                data-bs-target="#comprovativoModal<?= $enrollment->id_enrollment ?>">
+                data-bs-target="#comprovativoModal<?= $payment->id_payment ?>">
                 Ver Comprovativo
               </button>
             </td>
             <td><span class="status-badge status-pendente">Pendente</span></td>
             <td class="actions d-flex align-items-center gap-2">
-              <form id="acceptForm" action="/instructor/dashboard/meus_estudantes/<?= $enrollment->id_enrollment ?>" method="post">
+              <form class="acceptForm"
+                id="acceptForm<?= $payment->id_payment ?>"
+                action="/instructor/dashboard/meus_estudantes/<?= $payment->id_course ?>/<?= $payment->id_user_payment ?>"
+                method="post">
                 <input type="hidden" name="status_enrollment" value="Ativo">
                 <input type="hidden" name="status_payment" value="Aprovado">
-                <button id="acceptBtn" type="submit" class="btn btn-success btn-sm my-1">Aceitar</button>
+                <button type="submit" class="btn btn-success btn-sm my-1">Aceitar</button>
               </form>
 
-              <form action="/instructor/dashboard/meus_estudantes/<?= $enrollment->id_enrollment ?>" method="post">
+
+              <form action="/instructor/dashboard/meus_estudantes/<?= $payment->id_course ?>/<?= $payment->id_user_payment ?>" method="post">
                 <input type="hidden" name="status_payment" value="Rejeitado">
                 <button type="submit" class="btn btn-danger btn-sm my-1">Rejeitar</button>
               </form>
@@ -232,7 +242,7 @@
             </td>
           </tr>
         <?php endif; ?>
-        <div class="modal fade" id="comprovativoModal<?= $enrollment->id_enrollment ?>" tabindex="-1" aria-hidden="true">
+        <div class="modal fade" id="comprovativoModal<?= $payment->id_payment ?>" tabindex="-1" aria-hidden="true">
           <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content bg-modern-dark">
               <div class="modal-header">
@@ -240,7 +250,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
               </div>
               <div class="modal-body text-center">
-                <img src="<?= base_url($enrollment->proof_file_payment) ?> " alt="Comprovativo" class="img-fluid rounded">
+                <img src="<?= base_url($payment->proof_file_payment) ?> " alt="Comprovativo" class="img-fluid rounded">
               </div>
             </div>
           </div>
@@ -248,7 +258,7 @@
       <?php endforeach; ?>
     </tbody>
   </table>
-</div>
+</div> 
 
 <!-- Tabela Alunos Inscritos -->
 <h3>Alunos Inscritos</h3>
@@ -304,31 +314,29 @@
 </style>
 
 <script>
-  document.getElementById('acceptForm').addEventListener('submit', function(e) {
-    e.preventDefault(); // evita o envio imediato
-
-    Swal.fire({
-      title: 'Confirmar ação',
-      text: "Deseja realmente aceitar este estudante?",
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Sim, aceitar',
-      cancelButtonText: 'Cancelar'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // opcional: mostra loading antes de enviar
-        Swal.fire({
-          title: 'Processando...',
-          text: 'Estamos atualizando o status.',
-          allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading();
-          }
-        });
-
-        // envia o form de verdade
-        e.target.submit();
-      }
+  document.querySelectorAll('.acceptForm').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      Swal.fire({
+        title: 'Confirmar ação',
+        text: "Deseja realmente aceitar este estudante?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sim, aceitar',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.fire({
+            title: 'Processando...',
+            text: 'Estamos atualizando o status.',
+            allowOutsideClick: false,
+            didOpen: () => {
+              Swal.showLoading();
+            }
+          });
+          form.submit(); // envia o form correto
+        }
+      });
     });
   });
 </script>
