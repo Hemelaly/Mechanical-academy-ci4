@@ -275,10 +275,6 @@
                                     class=" btn btn-outline-primary px-5 py-3 rounded-5 text-decoration-none fw-medium">Entrar</a>
                             </div>
                         </div>
-
-                        <div class="img mt-5">
-                            <img src="./assets/img/dashboard.png" alt="Academia" class="w-100 rounded-3" />
-                        </div>
                     </div>
                 </div>
             </div>
