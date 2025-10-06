@@ -77,23 +77,23 @@
                   <h5 class="card-title d-flex justify-content-between align-items-center">
                     <?= $course->title_course ?>
                     <span class="badge bg-warning text-dark">
-                      <i class="fas fa-star me-1"></i> 4.8
+                      <i class="fas fa-star me-1"></i> 9.8
                     </span>
                   </h5>
                   <p class="small text-muted mb-1">Por: Prof. <?= $course->name_instructor ?></p>
                   <p class="card-text flex-grow-1"><?= $course->description_course ?></p>
 
                   <!-- Progresso -->
-                  <div class="mb-3">
+                  <!-- <div class="mb-3">
                     <div class="d-flex justify-content-between">
                       <small>Progresso</small>
                       <small>85%</small>
                     </div>
                     <div class="progress bg-dark" style="height: 6px;">
-                      <div class="progress-bar bg-info" style="width: 85%;"></div>
+                      <div class="progress-bar bg-info" style="width: 0%;"></div>
                     </div>
-                    <small class="text-muted">8 de 10 módulos concluídos</small>
-                  </div>
+                    <small class="text-muted">0 de 0 módulos concluídos</small>
+                  </div> -->
 
                   <!-- Ações -->
                   <div class="d-flex gap-2">

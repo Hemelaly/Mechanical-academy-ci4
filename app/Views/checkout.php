@@ -5,32 +5,128 @@ $session = session();
 ?>
 
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Checkout - <?= $course->title_course ?></title>
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dropzone@5/dist/min/dropzone.min.css" />
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
-    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
-
-    body {
-      font-family: "Poppins", sans-serif;
+    .container {
+      max-width: 980px !important;
     }
 
+    body {
+      font-family: "Inter", sans-serif;
+      background-color: #fff;
+      color: #000;
+    }
+
+    /* ==============================
+       HEADER / HERO
+    ============================== */
+    .hero {
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+      padding: 4rem 1rem;
+      text-align: center;
+      width: 100%;
+      height: 25vh;
+    }
+
+    .hero::before,
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      background-image: url(<?= base_url('assets/instructor/img/courses/' . $course->image_course) ?>);
+      background-size: cover;
+      background-position: center center;
+    }
+
+    .hero h1 {
+      font-weight: 800;
+      font-size: 2.8rem;
+    }
+
+    .hero h1 span {
+      color: #ffcc00;
+    }
+
+    .hero small {
+      display: block;
+      font-size: 1rem;
+      color: #ccc;
+      margin-top: 0.5rem;
+    }
+
+    /* ==============================
+       MAIN CONTENT
+    ============================== */
+    .course-section {
+      padding: 4rem 1rem;
+    }
+
+    .course-thumb {
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .features {
+      margin-top: 2rem;
+      list-style: none;
+      padding: 0;
+    }
+
+    .features li {
+      margin-bottom: 0.5rem;
+      padding-left: 1.2rem;
+      position: relative;
+    }
+
+    .features li::before {
+      content: "•";
+      color: #ffcc00;
+      position: absolute;
+      left: 0;
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+
+    .testimonial {
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+      font-size: 0.95rem;
+      border: 1px solid #eee;
+    }
+
+    .testimonial strong {
+      display: block;
+      margin-top: 0.5rem;
+    }
+
+    /* ==============================
+       PRICE BOX (RIGHT SIDE)
+    ============================== */
     .gradient-bg {
       background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
     }
 
     .course-card {
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      box-shadow: 0px 10px 0px 0px #dcdcdcff;
       transition: transform 0.3s ease;
     }
 
@@ -160,354 +256,219 @@ $session = session();
       border-radius: 8px;
       margin-bottom: 15px;
     }
+
+    .rounded {
+      border-radius: 10px !important;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: 0.9rem;
+      color: #777;
+    }
+
+    @media (max-width: 991px) {
+      .hero {
+        padding: 3rem 1rem;
+      }
+
+      .hero h1 {
+        font-size: 2.2rem;
+      }
+
+      .price-box {
+        position: static;
+        margin-top: 2rem;
+      }
+    }
   </style>
 </head>
 
-<body class="">
-  <!-- Header -->
-  <header class="header-bg text-white py-5 py-md-6">
-    <div class="container position-relative z-1">
-      <div class="row align-items-center">
-        <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-          <h1 class="h2 fw-bold mb-1 text-uppercase"><?= $course->title_course ?></h1>
-          <p class="h5 mb-0">Análise de Dados</p>
-        </div>
-        <div class="col-md-6 text-center text-lg-end">
-          <p class="h5 mb-1">70+ Projectos Reais</p>
-          <p class="h5 mb-0">Para solidificar o teu conhecimento</p>
-        </div>
-      </div>
+<body>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
     </div>
-  </header>
+  </section>
 
-  <!-- Main Content -->
-  <main class="container my-5">
-    <div class="row g-4">
-      <!-- Course Details -->
-      <div class="col-lg-8">
-        <div class="sticky-top">
-          <div class="course-card bg-white rounded-3 p-4 mb-4">
-            <h2 class="h3 fw-bold text-dark mb-3">Sobre o Curso</h2>
-            <p class="text-muted mb-4">
-              Aprenda estruturas de dados e algoritmos essenciais através de
-              mais de 70 desafios práticos em JavaScript. Este curso é ideal
-              para desenvolvedores que desejam melhorar suas habilidades de
-              resolução de problemas e preparar-se para entrevistas técnicas.
-            </p>
-
-            <div class="row mb-4">
-              <div class="col-md-6 mb-3">
-                <div class="d-flex align-items-center">
-                  <i class="fas fa-play-circle text-dark fs-5 me-3"></i>
-                  <span>12.5 horas de vídeo sob demanda</span>
-                </div>
-              </div>
-              <div class="col-md-6 mb-3">
-                <div class="d-flex align-items-center">
-                  <i class="fas fa-file-alt text-dark fs-5 me-3"></i>
-                  <span>Documentação completa e sandbox com testes</span>
-                </div>
-              </div>
-              <div class="col-md-6 mb-3">
-                <div class="d-flex align-items-center">
-                  <i class="fas fa-infinity text-dark fs-5 me-3"></i>
-                  <span>Acesso vitalício</span>
-                </div>
-              </div>
-              <div class="col-md-6 mb-3">
-                <div class="d-flex align-items-center">
-                  <i class="fas fa-mobile-alt text-dark fs-5 me-3"></i>
-                  <span>Acesso no celular e TV</span>
-                </div>
-              </div>
-              <div class="col-md-6 mb-3">
-                <div class="d-flex align-items-center">
-                  <i class="fas fa-certificate text-dark fs-5 me-3"></i>
-                  <span>Certificado de conclusão</span>
-                </div>
-              </div>
-              <div class="col-md-6 mb-3">
-                <div class="d-flex align-items-center">
-                  <i class="fab fa-discord text-dark fs-5 me-3"></i>
-                  <span>Acesso à comunidade do Discord</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="border-top pt-3">
-              <h3 class="h5 fw-semibold mb-2">O que você aprenderá</h3>
-              <ul class="list-unstyled text-muted">
-                <li class="mb-1">
-                  <i class="bi bi-check-circle-fill text-dark me-2"></i>
-                  Implementar estruturas de dados como arrays, listas ligadas,
-                  pilhas e filas
-                </li>
-                <li class="mb-1">
-                  <i class="bi bi-check-circle-fill text-dark me-2"></i>
-                  Dominar algoritmos de ordenação e busca
-                </li>
-                <li class="mb-1">
-                  <i class="bi bi-check-circle-fill text-dark me-2"></i>
-                  Resolver problemas complexos com técnicas de programação
-                  dinâmica
-                </li>
-                <li class="mb-1">
-                  <i class="bi bi-check-circle-fill text-dark me-2"></i>
-                  Analisar a complexidade de tempo e espaço dos algoritmos
-                </li>
-                <li class="mb-1">
-                  <i class="bi bi-check-circle-fill text-dark me-2"></i>
-                  Preparar-se para entrevistas técnicas em empresas de
-                  tecnologia
-                </li>
-              </ul>
-            </div>
+  <!-- CONTENT -->
+  <section class="course-section">
+    <div class="container">
+      <div class="row g-5 align-items-start">
+        <!-- LEFT -->
+        <div class="col-lg-7">
+          <div class="course-thumb mb-4">
+            <img src="<?= base_url('assets/instructor/img/courses/' . $course->image_course) ?>" alt="Modern JavaScript" class="img-fluid rounded w-100">
           </div>
 
-          <a href="https://hemelaly.github.io/MT-Academy---EXCEL/" class="btn btn-primary">
-            <i class="fas fa-chevron-left py-2 px-2"></i> Voltar à Página do Curso
-          </a>
+          <h3 class="fw-bold mb-3"><?= $course->title_course ?></h3>
+
+          <ul class="features">
+            <li>37 horas de vídeo sob demanda</li>
+            <li>20+ recursos para download</li>
+            <li>Documentação completa para cada vídeo e todos os códigos</li>
+            <li>Acesso vitalício</li>
+            <li>Acesso via dispositivos móveis e TV</li>
+            <li>Certificado de conclusão</li>
+            <li>Acesso à comunidade no Discord</li>
+          </ul>
+
+          <h5 class="fw-bold mt-5 mb-3">O que as pessoas estão dizendo:</h5>
+
+          <div class="testimonial">
+            “Conteúdo excelente, tanto para profissionais quanto para iniciantes. Este é mais um exemplo do porquê o Brad é tão bem-sucedido como instrutor.
+            OURO é difícil de encontrar se você não souber onde procurar nesta área.”
+            <strong>— Benny V.</strong>
+          </div>
+
+          <div class="testimonial">
+            “Brad é o melhor. Todos os cursos dele são incríveis. A minha parte favorita é o quanto ele é detalhista e nunca se esquece dos iniciantes.”
+            <strong>— Brandon W.</strong>
+          </div>
+
         </div>
 
-        <!-- Additional Course Option -->
-        <!-- <div class="course-card bg-white rounded-3 p-4">
-            <div class="form-check mb-3">
-              <input class="form-check-input" type="checkbox" id="add-course">
-              <label class="form-check-label fw-semibold" for="add-course">
-                Precisa aprender o básico primeiro?
-              </label>
+        <!-- RIGHT -->
+        <div class="col-lg-5">
+          <div class="course-card shadow bg-white rounded-3 p-4 sticky-top">
+            <div class="mb-4">
+
+              <p class="h2 fw-bold text-dark mb-1"><?= number_format($course->price_course, 2, ",", ".") ?> MZN</p>
             </div>
-            <p class="text-muted mb-3">
-              Adquira Modern JS From The Beginning por +$25
-            </p>
-            <div class="bg-green-50 p-3 rounded-3">
-              <p class="fw-semibold text-green-700 mb-1">
-                Modern JavaScript from The Beginning 2.0
-              </p>
-              <p class="small text-muted mb-0">
-                Aprenda JavaScript moderno do zero, incluindo ES6+, módulos,
-                promises, async/await e muito mais.
-              </p>
-            </div>
-          </div> -->
-      </div>
 
-      <!-- Purchase Section -->
-      <div class="col-lg-4">
-        <div class="course-card bg-white rounded-3 p-4 sticky-top">
-          <div class="text-center mb-4">
-            <?php
-
-            $price1 = ($course->price_course * 0.75) + $course->price_course;
-
-            $price2 = $course->price_course;
-
-            ?>
-            <p class="text-muted text-decoration-line-through mb-1"><?= number_format($price1, 2, ",", ".") ?> MZN</p>
-            <p class="h2 fw-bold text-dark mb-1"><?= number_format($price2, 2, ",", ".") ?> MZN</p>
-            <p class="text-primary fw-semibold">75% de desconto!</p>
-          </div>
-
-          <?php if ($isEnrolled): ?>
-            <div class="alert alert-success text-center">
-              <h4 class="alert-heading">Você já está inscrito neste curso!</h4>
-              <p>Parabéns! Já tens acesso completo ao curso <?= $course->title_course ?>.</p>
-              <hr>
-              <a href="<?= base_url('/student/dashboard/meus_cursos') ?>" class="btn btn-primary">Ir para meus cursos</a>
-            </div>
-          <?php elseif(($user) && ($user->role == "instructor")): ?>
-            <div class="alert alert-warning text-center">
-              <h4 class="alert-heading">Você é um instrutor!</h4>
-              <p>Não pode se inscrever neste curso.</p>
-              <hr>
-              <a href="<?= base_url('/instructor/dashboard/') ?>" class="btn btn-primary">Ir para meus cursos</a>
-            </div>
-          <?php else: ?>
-            <form id="checkout-form" action="/checkout/pending/<?= $course->id_course ?>" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
-              <?= csrf_field() ?>
-
-              <div class="mb-3">
-                <label for="coupon" class="form-label">Código do Cupom</label>
-                <div class="input-group">
-                  <input type="text" class="form-control text-sm" id="coupon">
-                  <button class="btn btn-outline-secondary" type="button">Aplicar</button>
-                </div>
+            <?php if ($isEnrolled): ?>
+              <div class="alert alert-success text-center">
+                <h4 class="alert-heading">Você já está inscrito neste curso!</h4>
+                <p>Já tem acesso completo ao curso <?= $course->title_course ?>.</p>
+                <hr>
+                <a href="<?= base_url('/student/dashboard/meus_cursos') ?>" class="btn btn-primary">Ir para meus cursos</a>
               </div>
-
-              <?php if (($user) && ($user->role !== "instructor")): ?>
-                <!-- Se já estiver logado, passa os dados como hidden -->
-                <input type="hidden" name="id_user" value="<?= $user->id ?>">
-                <input type="hidden" name="email" value="<?= $user->email ?>">
-                <input type="hidden" name="username" value="<?= $user->username ?>">
-
-              <?php else: ?>
-                <!-- Se NÃO estiver logado, mostra os campos -->
-                <a href="<?= base_url('/login') ?>" type="button" class="btn btn-outline-primary w-100 mb-3">
-                  <i class="fa-solid fa-right-to-bracket me-2"></i> Fazer login
-                </a>
-
-                <div class="position-relative text-center my-3">
-                  <hr>
-                  <span class="position-absolute top-50 start-50 translate-middle bg-white px-2 text-muted small">ou</span>
-                </div>
+            <?php elseif (($user) && ($user->role == "instructor")): ?>
+              <div class="alert alert-warning text-center">
+                <h4 class="alert-heading">Você é um instrutor!</h4>
+                <p>Não pode se inscrever neste curso.</p>
+                <hr>
+                <a href="<?= base_url('/instructor/dashboard/') ?>" class="btn btn-primary">Ir para meus cursos</a>
+              </div>
+            <?php else: ?>
+              <form id="checkout-form" action="/checkout/pending/<?= $course->id_course ?>" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                <?= csrf_field() ?>
 
                 <div class="mb-3">
-                  <label for="email" class="form-label">Endereço de Email</label>
-                  <input type="email" name="email" class="form-control" id="email" required>
-                  <div class="invalid-feedback">
-                    Por favor, insira um email válido.
+                  <div class="input-group">
+                    <input type="text" class="form-control text-sm" id="coupon" placeholder="Código do Cupom">
+                    <button class="btn btn-outline-secondary" type="button">Aplicar</button>
                   </div>
                 </div>
+
+                <?php if (($user) && ($user->role !== "instructor")): ?>
+                  <!-- Se já estiver logado, passa os dados como hidden -->
+                  <input type="hidden" name="id_user" value="<?= $user->id ?>">
+                  <input type="hidden" name="email" value="<?= $user->email ?>">
+                  <input type="hidden" name="username" value="<?= $user->username ?>">
+
+                <?php else: ?>
+                  <!-- Se NÃO estiver logado, mostra os campos -->
+                  <a href="<?= base_url('/login') ?>" type="button" class="w-100 mb-3 nav-link text-primary fw-bold text-end">
+                    Fazer login
+                  </a>
+
+                  <div class="mb-3">
+                    <input type="email" name="email" class="form-control" id="email" placeholder="Endereço de Email" required>
+                    <div class="invalid-feedback">
+                      Por favor, insira um email válido.
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <input type="text" name="username" class="form-control" id="name" placeholder="Nome e Sobrenome" required>
+                    <div class="invalid-feedback">
+                      Por favor, insira seu nome e sobrenome.
+                    </div>
+                  </div>
+                <?php endif; ?>
+
 
                 <div class="mb-3">
-                  <label for="name" class="form-label">Nome Completo</label>
-                  <input type="text" name="username" class="form-control" id="name" required>
-                  <div class="invalid-feedback">
-                    Por favor, insira seu nome completo.
-                  </div>
-                </div>
-              <?php endif; ?>
-
-
-              <div class="mb-3">
-                <p class="form-label">Método de Pagamento</p>
-                <div class="d-flex gap-4">
-                  <div class="form-check">
-                    <input class="form-check-input" type="radio" name="payment" id="mobile" checked>
-                    <label class="form-check-label" for="mobile">
-                      Mpesa/E-mola
-                    </label>
-                  </div>
-                  <!-- <div class="form-check">
+                  <div class="d-flex flex-column gap-4">
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="payment" id="mobile">
+                      <label class="form-check-label" for="mobile">
+                        Mpesa/E-mola
+                      </label>
+                    </div>
+                    <!-- <div class="form-check">
                   <input class="form-check-input" type="radio" name="payment" id="paypal">
                   <label class="form-check-label" for="paypal">
                     PayPal
                   </label>
                 </div> -->
-                </div>
-              </div>
-
-              <!-- Div oculta que será exibida quando o radio estiver selecionado -->
-              <div id="payment-info" class="mt-3 d-none">
-                <p><strong>Contacto para transferência:</strong></p>
-                <p style="margin-top: -10px;">+258 84 123 4567 - Mpesa</p>
-                <p style="margin-top: -10px;">+258 87 123 4567 - Emola</p>
-
-                <!-- Dropzone -->
-                <div class="divider text-muted">
-                  <span>Envio do Comprovativo</span>
-                </div>
-
-                <div class="mb-4">
-                  <label class="form-label fw-semibold">Envie a imagem do comprovativo</label>
-                  <div class="dropzone text-muted" id="dropzone">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <p class="mb-1">Arraste e solte a imagem aqui</p>
-                    <p class="text-muted">ou</p>
-                    <button type="button" class="btn btn-sm btn-outline-primary">Selecionar arquivo</button>
-                    <input type="file" name="proof_file_payment" id="file-input" class="d-none" accept="image/*" required>
-                    <div class="invalid-feedback">
-                      Por favor, carregue o comprovativo antes de submeter o seu pedido.
-                    </div>
-                  </div>
-
-                  <div class="preview-container" id="preview-container">
-                    <img src="" class="preview-image" id="preview-image" alt="Preview do comprovante">
-                    <div>
-                      <button type="button" class="btn btn-sm btn-danger" id="remove-image">
-                        <i class="fas fa-trash me-1"></i> Remover imagem
-                      </button>
-                    </div>
                   </div>
                 </div>
 
-                <input type="hidden" name="amount_payment" value="<?= $course->price_course ?>">
-              </div>
+                <!-- Div oculta que será exibida quando o radio estiver selecionado -->
+                <div id="payment-info" class="mt-3 d-none">
+                  <p><strong>Contacto para transferência:</strong></p>
+                  <p style="margin-top: -10px;">+258 84 123 4567 - Mpesa</p>
+                  <p style="margin-top: -10px;">+258 87 123 4567 - Emola</p>
+
+                  <!-- Dropzone -->
+                  <div class="divider text-muted">
+                    <span>Envio do Comprovativo</span>
+                  </div>
+
+                  <div class="mb-4">
+                    <label class="form-label fw-semibold">Envie a imagem do comprovativo</label>
+                    <div class="dropzone text-muted" id="dropzone">
+                      <i class="fas fa-cloud-upload-alt"></i>
+                      <p class="mb-1">Arraste e solte a imagem aqui</p>
+                      <p class="text-muted">ou</p>
+                      <button type="button" class="btn btn-sm btn-outline-primary">Selecionar arquivo</button>
+                      <input type="file" name="proof_file_payment" id="file-input" class="d-none" accept="image/*" required>
+                      <div class="invalid-feedback">
+                        Por favor, carregue o comprovativo antes de submeter o seu pedido.
+                      </div>
+                    </div>
+
+                    <div class="preview-container" id="preview-container">
+                      <img src="" class="preview-image" id="preview-image" alt="Preview do comprovante">
+                      <div>
+                        <button type="button" class="btn btn-sm btn-danger" id="remove-image">
+                          <i class="fas fa-trash me-1"></i> Remover imagem
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <input type="hidden" name="amount_payment" value="<?= $course->price_course ?>">
+                </div>
 
 
-              <!-- <div class="form-check mb-4">
+                <!-- <div class="form-check mb-4">
               <input class="form-check-input" type="checkbox" id="newsletter">
               <label class="form-check-label small" for="newsletter">
                 Inscrever-se na nossa lista de email
               </label>
             </div> -->
 
-              <button type="submit" class="btn bg-blue-500 text-white w-100 py-2 fw-semibold hover:bg-blue-600">
-                Finalizar minha compra
-                <i class="fas fa-arrow-right ms-2"></i>
-              </button>
+                <button type="submit" class="btn bg-blue-500 text-white w-100 py-2 fw-semibold hover:bg-blue-600">
+                  Finalizar minha compra
+                  <i class="fas fa-arrow-right ms-2"></i>
+                </button>
 
-              <p class="small text-muted text-center mt-3">
-                Ao finalizar a compra, você concorda com nossos
-                <a href="#" class="text-blue-500 text-decoration-none">Termos de Serviço</a>
-              </p>
-            </form>
-          <?php endif; ?>
+                <p class="small text-muted text-center mt-3">
+                  Ao finalizar a compra, você concorda com nossos
+                  <a href="#" class="text-blue-500 text-decoration-none">Termos de Serviço</a>
+                </p>
+              </form>
+            <?php endif; ?>
 
+          </div>
         </div>
       </div>
-    </div>
-  </main>
-
-  <!-- FAQ Section -->
-  <section class="bg-light py-5">
-    <div class="container">
-      <h2 class="h2 fw-bold text-center mb-4">Perguntas Frequentes</h2>
-      <div class="row justify-content-center">
-        <div class="col-lg-8">
-          <!-- Accordion Item -->
-          <details class="bg-white rounded-3 shadow-sm mb-3">
-            <summary class="d-flex justify-content-between align-items-center p-3 fw-semibold fs-5 cursor-pointer">
-              Por quanto tempo terei acesso ao curso?
-              <svg class="transition-transform" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
-            </summary>
-            <div class="p-3 text-muted border-top">
-              Você terá acesso vitalício ao curso, incluindo todas as
-              atualizações futuras.
-            </div>
-          </details>
-
-          <!-- Accordion Item -->
-          <details class="bg-white rounded-3 shadow-sm mb-3">
-            <summary class="d-flex justify-content-between align-items-center p-3 fw-semibold fs-5 cursor-pointer">
-              Há algum pré-requisito para este curso?
-              <svg class="transition-transform" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
-            </summary>
-            <div class="p-3 text-muted border-top">
-              É recomendado ter conhecimento básico de JavaScript. Se você é
-              iniciante, sugerimos adicionar o curso "Modern JavaScript from The
-              Beginning".
-            </div>
-          </details>
-
-          <!-- Accordion Item -->
-          <details class="bg-white rounded-3 shadow-sm mb-3">
-            <summary class="d-flex justify-content-between align-items-center p-3 fw-semibold fs-5 cursor-pointer">
-              Receberei um certificado?
-              <svg class="transition-transform" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
-            </summary>
-            <div class="p-3 text-muted border-top">
-              Sim, ao completar o curso você receberá um certificado de
-              conclusão que pode ser compartilhado no LinkedIn.
-            </div>
-          </details>
-        </div>
-      </div>
-    </div>
   </section>
-
-  <!-- Footer -->
-  <footer class="bg-dark text-white py-4">
-    <div class="container text-center">
-      <p class="mb-3">&copy; 2025 <?= $course->title_course ?>. Todos os direitos reservados.</p>
-    </div>
-  </footer>
 
   <!-- SCRIPTS (junta ao final da página, depois de carregar o DOM) -->
   <script src="https://cdn.jsdelivr.net/npm/dropzone@5/dist/min/dropzone.min.js"></script>
@@ -671,6 +632,7 @@ $session = session();
       });
     });
   </script>
+
 </body>
 
 </html>

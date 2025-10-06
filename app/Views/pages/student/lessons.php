@@ -8,6 +8,38 @@
 <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
 
 <style>
+    .navigation-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 40px;
+    }
+
+    .nav-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background-color: #8b5cf6;
+        border: none;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .nav-btn:hover {
+        background-color: #7c3aed;
+    }
+
+    .nav-btn.secondary {
+        background-color: #4c1d95;
+    }
+
+    .nav-btn.secondary:hover {
+        background-color: #6b21a8;
+    }
+
     .sidebar2 {
         padding: 20px 0;
     }
@@ -142,9 +174,9 @@
     <!-- Progress Section -->
     <div class="progress-section">
         <div class="progress-title">Progresso do Curso</div>
-        <div class="progress-percentage" id="progressPercentage">75%</div>
+        <div class="progress-percentage" id="progressPercentage">0%</div>
         <div class="progress-bar-container">
-            <div class="progress-bar-fill" id="progressBar" style="width: 75%;"></div>
+            <div class="progress-bar-fill" id="progressBar" style="width: 0%;"></div>
         </div>
     </div>
 
@@ -174,6 +206,7 @@
                             allow="autoplay; encrypted-media">
                         </iframe>
                     </div>
+                    
                 <?php else: ?>
                     <p class="text-danger">Link de vídeo inválido</p>
                 <?php endif; ?>
@@ -236,12 +269,14 @@
     <!-- Navigation Buttons -->
     <div class="navigation-buttons">
         <?php if ($prevLesson): ?>
-            <a href="<?= site_url('student/dashboard/ver_aulas/' . $prevLesson) ?>" class="nav-btn secondary">← Aula Anterior</a>
+            <a href="<?= site_url('student/dashboard/ver_aulas/' . $prevLesson) ?>" class="nav-btn secondary">
+                ← Aula Anterior
+            </a>
         <?php endif; ?>
         <?php if ($nextLesson): ?>
-            <a href="<?= site_url('student/dashboard/ver_aulas/' . $nextLesson) ?>" class="nav-btn">Próxima Aula →</a>
-        <?php endif; ?>
+            <a href="<?= site_url('student/dashboard/ver_aulas/' . $nextLesson) ?>" class="nav-btn">Próxima Aula →</a> <?php endif; ?>
     </div>
+</div>
 </div>
 
 <!-- Plyr JS -->
