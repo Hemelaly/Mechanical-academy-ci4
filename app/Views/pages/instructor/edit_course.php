@@ -1,5 +1,6 @@
 <?php
 $user = service('auth')->user();
+
 ?>
 
 <?= $this->extend('layouts/master') ?>
@@ -339,211 +340,211 @@ $user = service('auth')->user();
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-    // ======================
-    // Global Variables
-    // ======================
-    let currentStep = 1;
-    let tags = [];
+    document.addEventListener("DOMContentLoaded", () => {
+        // ======================
+        // Global Variables
+        // ======================
+        let currentStep = 1;
+        let tags = [];
 
-    // ======================
-    // Elements
-    // ======================
-    const fileInput = document.getElementById("courseImage");
-    const previewContainer = document.getElementById("image-preview");
-    const previewImg = document.getElementById("preview-img");
-    const removeBtn = document.getElementById("remove-image");
-    const uploadArea = document.getElementById("upload-area");
-    const modulesContainer = document.getElementById("modules-container");
-    const nextBtn = document.getElementById("next-step");
-    const prevBtn = document.getElementById("prev-step");
-    const tabs = document.querySelectorAll("#courseCreationTab button");
-    const priceSettings = document.getElementById("price-settings");
-    const tagsInput = document.getElementById("courseTags");
-    const tagsDisplay = document.getElementById("tags-display");
-    let moduleIndex = modulesContainer?.children.length || 0;
+        // ======================
+        // Elements
+        // ======================
+        const fileInput = document.getElementById("courseImage");
+        const previewContainer = document.getElementById("image-preview");
+        const previewImg = document.getElementById("preview-img");
+        const removeBtn = document.getElementById("remove-image");
+        const uploadArea = document.getElementById("upload-area");
+        const modulesContainer = document.getElementById("modules-container");
+        const nextBtn = document.getElementById("next-step");
+        const prevBtn = document.getElementById("prev-step");
+        const tabs = document.querySelectorAll("#courseCreationTab button");
+        const priceSettings = document.getElementById("price-settings");
+        const tagsInput = document.getElementById("courseTags");
+        const tagsDisplay = document.getElementById("tags-display");
+        let moduleIndex = modulesContainer?.children.length || 0;
 
-    // ======================
-    // Tooltips
-    // ======================
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map((tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl));
+        // ======================
+        // Tooltips
+        // ======================
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map((tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl));
 
-    // ======================
-    // Step Navigation
-    // ======================
-    function updateStepIndicators(step) {
-        const indicators = document.querySelectorAll(".step-indicator");
-        const progressBar = document.querySelector(".progress-bar");
-        const progressText = document.getElementById("progress-text");
+        // ======================
+        // Step Navigation
+        // ======================
+        function updateStepIndicators(step) {
+            const indicators = document.querySelectorAll(".step-indicator");
+            const progressBar = document.querySelector(".progress-bar");
+            const progressText = document.getElementById("progress-text");
 
-        indicators.forEach((indicator, index) => {
-            indicator.classList.remove("active", "completed");
-            if (index + 1 < step) {
-                indicator.classList.add("completed");
-                indicator.innerHTML = '<i class="fas fa-check"></i>';
-            } else if (index + 1 === step) {
-                indicator.classList.add("active");
-                indicator.innerHTML = index + 1;
-            } else {
-                indicator.innerHTML = index + 1;
-            }
-        });
-
-        progressBar.style.width = step * 25 + "%";
-        progressText.textContent = `Passo ${step} de 4`;
-    }
-
-    function updateNavigationButtons() {
-        prevBtn.disabled = currentStep === 1;
-        nextBtn.style.display = currentStep === 4 ? "none" : "inline-block";
-    }
-
-    nextBtn.addEventListener("click", () => {
-        if (currentStep < 4) {
-            currentStep++;
-            new bootstrap.Tab(tabs[currentStep - 1]).show();
-            updateStepIndicators(currentStep);
-            updateNavigationButtons();
-        }
-    });
-
-    prevBtn.addEventListener("click", () => {
-        if (currentStep > 1) {
-            currentStep--;
-            new bootstrap.Tab(tabs[currentStep - 1]).show();
-            updateStepIndicators(currentStep);
-            updateNavigationButtons();
-        }
-    });
-
-    tabs.forEach((tab, index) => {
-        tab.addEventListener("click", () => {
-            currentStep = index + 1;
-            updateStepIndicators(currentStep);
-            updateNavigationButtons();
-        });
-    });
-
-    updateNavigationButtons();
-    updateStepIndicators(currentStep);
-
-    // ======================
-    // Rich Text Editor Placeholder
-    // ======================
-    const editor = document.getElementById("courseDescription");
-    if (editor) {
-        function updatePlaceholder() {
-            editor.classList.toggle("empty", editor.textContent.trim() === "");
-        }
-        editor.addEventListener("input", updatePlaceholder);
-        editor.addEventListener("focus", () => {
-            if (editor.textContent.trim() === "") editor.innerHTML = "";
-        });
-        updatePlaceholder();
-    }
-
-    // ======================
-    // Tags
-    // ======================
-    if (tagsInput) {
-        tagsInput.addEventListener("keypress", (e) => {
-            if (e.key === "Enter") {
-                e.preventDefault();
-                const tag = tagsInput.value.trim();
-                if (tag && !tags.includes(tag)) {
-                    tags.push(tag);
-                    renderTags();
-                    tagsInput.value = "";
+            indicators.forEach((indicator, index) => {
+                indicator.classList.remove("active", "completed");
+                if (index + 1 < step) {
+                    indicator.classList.add("completed");
+                    indicator.innerHTML = '<i class="fas fa-check"></i>';
+                } else if (index + 1 === step) {
+                    indicator.classList.add("active");
+                    indicator.innerHTML = index + 1;
+                } else {
+                    indicator.innerHTML = index + 1;
                 }
+            });
+
+            progressBar.style.width = step * 25 + "%";
+            progressText.textContent = `Passo ${step} de 4`;
+        }
+
+        function updateNavigationButtons() {
+            prevBtn.disabled = currentStep === 1;
+            nextBtn.style.display = currentStep === 4 ? "none" : "inline-block";
+        }
+
+        nextBtn.addEventListener("click", () => {
+            if (currentStep < 4) {
+                currentStep++;
+                new bootstrap.Tab(tabs[currentStep - 1]).show();
+                updateStepIndicators(currentStep);
+                updateNavigationButtons();
             }
         });
-    }
 
-    function renderTags() {
-        if (!tagsDisplay) return;
-        tagsDisplay.innerHTML = tags.map(tag => `
+        prevBtn.addEventListener("click", () => {
+            if (currentStep > 1) {
+                currentStep--;
+                new bootstrap.Tab(tabs[currentStep - 1]).show();
+                updateStepIndicators(currentStep);
+                updateNavigationButtons();
+            }
+        });
+
+        tabs.forEach((tab, index) => {
+            tab.addEventListener("click", () => {
+                currentStep = index + 1;
+                updateStepIndicators(currentStep);
+                updateNavigationButtons();
+            });
+        });
+
+        updateNavigationButtons();
+        updateStepIndicators(currentStep);
+
+        // ======================
+        // Rich Text Editor Placeholder
+        // ======================
+        const editor = document.getElementById("courseDescription");
+        if (editor) {
+            function updatePlaceholder() {
+                editor.classList.toggle("empty", editor.textContent.trim() === "");
+            }
+            editor.addEventListener("input", updatePlaceholder);
+            editor.addEventListener("focus", () => {
+                if (editor.textContent.trim() === "") editor.innerHTML = "";
+            });
+            updatePlaceholder();
+        }
+
+        // ======================
+        // Tags
+        // ======================
+        if (tagsInput) {
+            tagsInput.addEventListener("keypress", (e) => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    const tag = tagsInput.value.trim();
+                    if (tag && !tags.includes(tag)) {
+                        tags.push(tag);
+                        renderTags();
+                        tagsInput.value = "";
+                    }
+                }
+            });
+        }
+
+        function renderTags() {
+            if (!tagsDisplay) return;
+            tagsDisplay.innerHTML = tags.map(tag => `
             <span class="badge bg-primary me-1">
                 ${tag} 
                 <button type="button" class="btn-close btn-close-white btn-sm" onclick="removeTag('${tag}')"></button>
             </span>
         `).join("");
-    }
-
-    window.removeTag = function (tagToRemove) {
-        tags = tags.filter(tag => tag !== tagToRemove);
-        renderTags();
-    };
-
-    // ======================
-    // Image Upload
-    // ======================
-    function handleImageUpload(file) {
-        if (!file.type.startsWith("image/")) {
-            alert("Por favor selecione apenas arquivos de imagem.");
-            return;
         }
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            if (previewImg) previewImg.src = e.target.result;
-            if (previewContainer) previewContainer.style.display = "block";
-            if (uploadArea) uploadArea.style.display = "none";
+
+        window.removeTag = function(tagToRemove) {
+            tags = tags.filter(tag => tag !== tagToRemove);
+            renderTags();
         };
-        reader.readAsDataURL(file);
-    }
 
-    if (uploadArea) {
-        uploadArea.addEventListener("dragover", (e) => {
-            e.preventDefault();
-            uploadArea.classList.add("dragover");
-        });
-        uploadArea.addEventListener("dragleave", (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove("dragover");
-        });
-        uploadArea.addEventListener("drop", (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove("dragover");
-            if (e.dataTransfer.files.length) {
-                fileInput.files = e.dataTransfer.files;
-                handleImageUpload(e.dataTransfer.files[0]);
+        // ======================
+        // Image Upload
+        // ======================
+        function handleImageUpload(file) {
+            if (!file.type.startsWith("image/")) {
+                alert("Por favor selecione apenas arquivos de imagem.");
+                return;
             }
-        });
-    }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                if (previewImg) previewImg.src = e.target.result;
+                if (previewContainer) previewContainer.style.display = "block";
+                if (uploadArea) uploadArea.style.display = "none";
+            };
+            reader.readAsDataURL(file);
+        }
 
-    if (fileInput) {
-        fileInput.addEventListener("change", (e) => {
-            if (e.target.files.length) handleImageUpload(e.target.files[0]);
-        });
-    }
-
-    if (removeBtn) {
-        removeBtn.addEventListener("click", () => {
-            fileInput.value = "";
-            if (previewContainer) previewContainer.style.display = "none";
-            if (uploadArea) uploadArea.style.display = "block";
-        });
-    }
-
-    // ======================
-    // Modules and Lessons
-    // ======================
-    document.getElementById("add-module")?.addEventListener("click", () => addModule());
-
-    function addModule(moduleData = null) {
-        const mIndex = moduleIndex++;
-        const moduleId = moduleData?.id_module || "";
-        const moduleTitle = moduleData?.title || "";
-        const moduleDescription = moduleData?.description || "";
-        let lessonsHtml = "";
-
-        if (moduleData?.lessons) {
-            moduleData.lessons.forEach((lesson, lIndex) => {
-                lessonsHtml += createLessonHTML(mIndex, lIndex, lesson);
+        if (uploadArea) {
+            uploadArea.addEventListener("dragover", (e) => {
+                e.preventDefault();
+                uploadArea.classList.add("dragover");
+            });
+            uploadArea.addEventListener("dragleave", (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove("dragover");
+            });
+            uploadArea.addEventListener("drop", (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove("dragover");
+                if (e.dataTransfer.files.length) {
+                    fileInput.files = e.dataTransfer.files;
+                    handleImageUpload(e.dataTransfer.files[0]);
+                }
             });
         }
 
-        const moduleHtml = `
+        if (fileInput) {
+            fileInput.addEventListener("change", (e) => {
+                if (e.target.files.length) handleImageUpload(e.target.files[0]);
+            });
+        }
+
+        if (removeBtn) {
+            removeBtn.addEventListener("click", () => {
+                fileInput.value = "";
+                if (previewContainer) previewContainer.style.display = "none";
+                if (uploadArea) uploadArea.style.display = "block";
+            });
+        }
+
+        // ======================
+        // Modules and Lessons
+        // ======================
+        document.getElementById("add-module")?.addEventListener("click", () => addModule());
+
+        function addModule(moduleData = null) {
+            const mIndex = moduleIndex++;
+            const moduleId = moduleData?.id_module || "";
+            const moduleTitle = moduleData?.title || "";
+            const moduleDescription = moduleData?.description || "";
+            let lessonsHtml = "";
+
+            if (moduleData?.lessons) {
+                moduleData.lessons.forEach((lesson, lIndex) => {
+                    lessonsHtml += createLessonHTML(mIndex, lIndex, lesson);
+                });
+            }
+
+            const moduleHtml = `
             <div class="module-card mb-3 border p-3">
                 <input type="hidden" name="modules[${mIndex}][id_module]" value="${moduleId}">
                 <div class="d-flex justify-content-between align-items-center mb-2">
@@ -555,17 +556,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 <button type="button" class="btn btn-sm btn-primary add-lesson" data-module="${mIndex}">+ Adicionar Aula</button>
             </div>
         `;
-        modulesContainer.insertAdjacentHTML("beforeend", moduleHtml);
-    }
+            modulesContainer.insertAdjacentHTML("beforeend", moduleHtml);
+        }
 
-    function createLessonHTML(mIndex, lIndex, lessonData = {}) {
-        const lessonId = lessonData.id_lesson || "";
-        const title = lessonData.title || "";
-        const type = lessonData.type || "text";
-        const duration = lessonData.duration || 0;
-        const video_url = lessonData.video_url || "";
+        function createLessonHTML(mIndex, lIndex, lessonData = {}) {
+            const lessonId = lessonData.id_lesson || "";
+            const title = lessonData.title || "";
+            const type = lessonData.type || "text";
+            const duration = lessonData.duration || 0;
+            const video_url = lessonData.video_url || "";
 
-        return `
+            return `
             <div class="lesson-item mb-2 border p-2">
                 <input type="hidden" name="modules[${mIndex}][lessons][${lIndex}][id_lesson]" value="${lessonId}">
                 <div class="d-flex justify-content-between align-items-center mb-1">
@@ -582,75 +583,79 @@ document.addEventListener("DOMContentLoaded", () => {
                 <input type="url" name="modules[${mIndex}][lessons][${lIndex}][video_url]" class="form-control" placeholder="Link do vídeo" value="${video_url}">
             </div>
         `;
-    }
-
-    modulesContainer?.addEventListener("click", (e) => {
-        // Remove module
-        if (e.target.classList.contains("remove-module")) e.target.closest(".module-card").remove();
-        // Remove lesson
-        if (e.target.classList.contains("remove-lesson")) e.target.closest(".lesson-item").remove();
-        // Add lesson
-        if (e.target.classList.contains("add-lesson")) {
-            const moduleId = e.target.dataset.module;
-            const lessonsContainer = e.target.previousElementSibling;
-            const lessonCount = lessonsContainer.querySelectorAll(".lesson-item").length;
-            lessonsContainer.insertAdjacentHTML("beforeend", createLessonHTML(moduleId, lessonCount));
         }
-    });
 
-    // ======================
-    // Course Type and Price Toggle
-    // ======================
-    document.querySelectorAll('input[name="courseType"]').forEach(radio => {
-        radio.addEventListener("change", () => {
-            if (radio.value === "paid") priceSettings.style.display = "block";
-            else priceSettings.style.display = "none";
+        modulesContainer?.addEventListener("click", (e) => {
+            // Remove module
+            if (e.target.classList.contains("remove-module")) e.target.closest(".module-card").remove();
+            // Remove lesson
+            if (e.target.classList.contains("remove-lesson")) e.target.closest(".lesson-item").remove();
+            // Add lesson
+            if (e.target.classList.contains("add-lesson")) {
+                const moduleId = e.target.dataset.module;
+                const lessonsContainer = e.target.previousElementSibling;
+                const lessonCount = lessonsContainer.querySelectorAll(".lesson-item").length;
+                lessonsContainer.insertAdjacentHTML("beforeend", createLessonHTML(moduleId, lessonCount));
+            }
         });
-    });
 
-    // ======================
-    // Preview Update
-    // ======================
-    function updatePreview() {
-        document.getElementById("preview-title")?.textContent = document.getElementById("title_course")?.value || "Título do Curso";
-        document.getElementById("preview-subtitle")?.textContent = document.getElementById("courseSubtitle")?.value || "Subtítulo do curso";
-        document.getElementById("preview-description")?.innerHTML = document.getElementById("courseDescription")?.value || "Descrição do curso aparecerá aqui...";
-    }
-    document.addEventListener("input", updatePreview);
-    document.addEventListener("change", updatePreview);
-    updatePreview();
+        // ======================
+        // Course Type and Price Toggle
+        // ======================
+        document.querySelectorAll('input[name="courseType"]').forEach(radio => {
+            radio.addEventListener("change", () => {
+                if (radio.value === "paid") priceSettings.style.display = "block";
+                else priceSettings.style.display = "none";
+            });
+        });
 
-    // ======================
-    // Collect Data for Backend
-    // ======================
-    window.collectCourseData = function() {
-        const form = document.getElementById("courseForm");
-        const formData = new FormData(form);
-        formData.append("tags", JSON.stringify(tags));
+        // ======================
+        // Preview Update
+        // ======================
+        function updatePreview() {
+            document.getElementById("preview-title")?.textContent = document.getElementById("title_course")?.value || "Título do Curso";
+            document.getElementById("preview-subtitle")?.textContent = document.getElementById("courseSubtitle")?.value || "Subtítulo do curso";
+            document.getElementById("preview-description")?.innerHTML = document.getElementById("courseDescription")?.value || "Descrição do curso aparecerá aqui...";
+        }
+        document.addEventListener("input", updatePreview);
+        document.addEventListener("change", updatePreview);
+        updatePreview();
 
-        const modules = [];
-        document.querySelectorAll(".module-card").forEach((modCard) => {
-            const moduleId = modCard.querySelector(`input[name$="[id_module]"]`)?.value || null;
-            const moduleTitle = modCard.querySelector(`input[name$="[title]"]`)?.value || "";
-            const moduleDescription = modCard.querySelector(`textarea[name$="[description]"]`)?.value || "";
-            const lessons = [];
-            modCard.querySelectorAll(".lesson-item").forEach((lessonEl) => {
-                lessons.push({
-                    id_lesson: lessonEl.querySelector(`input[name$="[id_lesson]"]`)?.value || null,
-                    title: lessonEl.querySelector(`input[name$="[title]"]`)?.value || "",
-                    type: lessonEl.querySelector(`select[name$="[type]"]`)?.value || "text",
-                    duration: lessonEl.querySelector(`input[name$="[duration]"]`)?.value || 0,
-                    video_url: lessonEl.querySelector(`input[name$="[video_url]"]`)?.value || null,
+        // ======================
+        // Collect Data for Backend
+        // ======================
+        window.collectCourseData = function() {
+            const form = document.getElementById("courseForm");
+            const formData = new FormData(form);
+            formData.append("tags", JSON.stringify(tags));
+
+            const modules = [];
+            document.querySelectorAll(".module-card").forEach((modCard) => {
+                const moduleId = modCard.querySelector(`input[name$="[id_module]"]`)?.value || null;
+                const moduleTitle = modCard.querySelector(`input[name$="[title]"]`)?.value || "";
+                const moduleDescription = modCard.querySelector(`textarea[name$="[description]"]`)?.value || "";
+                const lessons = [];
+                modCard.querySelectorAll(".lesson-item").forEach((lessonEl) => {
+                    lessons.push({
+                        id_lesson: lessonEl.querySelector(`input[name$="[id_lesson]"]`)?.value || null,
+                        title: lessonEl.querySelector(`input[name$="[title]"]`)?.value || "",
+                        type: lessonEl.querySelector(`select[name$="[type]"]`)?.value || "text",
+                        duration: lessonEl.querySelector(`input[name$="[duration]"]`)?.value || 0,
+                        video_url: lessonEl.querySelector(`input[name$="[video_url]"]`)?.value || null,
+                    });
+                });
+
+                modules.push({
+                    id_module: moduleId,
+                    title: moduleTitle,
+                    description: moduleDescription,
+                    lessons
                 });
             });
 
-            modules.push({ id_module: moduleId, title: moduleTitle, description: moduleDescription, lessons });
-        });
-
-        formData.append("modules", JSON.stringify(modules));
-        return formData;
-    };
-});
-
+            formData.append("modules", JSON.stringify(modules));
+            return formData;
+        };
+    });
 </script>
 <?= $this->endSection() ?>

@@ -119,8 +119,10 @@ class CourseController extends BaseController
                 ->findAll();
         }
 
+        $post = $this->request->getMethod();
+
         // POST → salvar
-        if ($this->request->getMethod() === 'post') {
+        if ($post == 'POST') {
             $data = $this->request->getPost();
             $modulesData = $data['modules'] ?? [];
 
@@ -188,12 +190,8 @@ class CourseController extends BaseController
                 }
             }
 
-            return redirect()->back()->with('success', 'Curso atualizado com sucesso!');
+            return redirect()->to('/instructor/dashboard/meus_cursos')->with('success', 'Curso atualizado com sucesso!');
 
-            return view('instructor/editar_curso', [
-                'course' => $course,
-                'modules' => $modules,
-            ]);
         }
     }
 
