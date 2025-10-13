@@ -1,6 +1,7 @@
 <?php
 
-// dd($payments)
+// dd($payments);
+// dd($enrollments);
 
 ?>
 
@@ -276,7 +277,7 @@
     </thead>
     <tbody>
       <?php foreach ($enrollments as $key => $enrollment): ?>
-        <?php if ($enrollment->status_enrollment == 'Ativo'): ?>
+        <?php if ($enrollment->status_enrollment == 'Ativa'): ?>
           <tr>
             <td><?= $enrollment->name_student ?><br><small style="color:#8a9ba8;"><?= $enrollment->email_student ?></small></td>
             <td><?= $enrollment->title_course ?></td>

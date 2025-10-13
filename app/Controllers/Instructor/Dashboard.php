@@ -215,7 +215,6 @@ class Dashboard extends BaseController
         $actualUser = service('auth')->user();
 
         $db = db_connect();
-        $db->transStart(); // inicia transação
         helper('text');
 
         $studentModel     = new \App\Models\StudentModel();
@@ -264,7 +263,7 @@ class Dashboard extends BaseController
             $enrollmentModel->insert([
                 'id_course_enrollment'   => $courseId,
                 'id_student_enrollment'  => $existingUser->id,
-                'status_enrollment'      => 'Ativo',
+                'status_enrollment'      => 'Ativa',
                 'progress_enrollment'    => 0.00,
                 'enrolled_at_enrollment' => date('Y-m-d H:i:s'),
             ]);
@@ -282,7 +281,6 @@ class Dashboard extends BaseController
             // Remover pending_user
             $pendingUserModel->delete($pendingId);
 
-            $db->transComplete();
 
             return redirect()->back()->with('success', 'Inscrição aprovada para usuário já existente!');
         }
@@ -335,7 +333,7 @@ class Dashboard extends BaseController
         $result = $enrollmentModel->insert([
             'id_course_enrollment'   => $courseId,
             'id_student_enrollment'  => $userId,
-            'status_enrollment'      => 'Ativo',
+            'status_enrollment'      => 'Ativa',
             'progress_enrollment'    => 0.00,
             'enrolled_at_enrollment' => date('Y-m-d H:i:s'),
         ]);
@@ -352,12 +350,6 @@ class Dashboard extends BaseController
 
         // 7. Remover pending_user
         $pendingUserModel->delete($pendingId);
-
-        $db->transComplete();
-
-        if ($db->transStatus() === false) {
-            return redirect()->back()->with('error', 'Erro ao aprovar a inscrição.');
-        }
 
         return redirect()->back()->with('success', 'Inscrição aprovada e usuário criado com sucesso!');
     }

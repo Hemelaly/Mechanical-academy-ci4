@@ -23,7 +23,7 @@ class PageController extends BaseController
             $isEnrolled = $enrollmentModel
                 ->where('id_student_enrollment', $userId)
                 ->where('id_course_enrollment', $course->id_course)
-                ->where('status_enrollment', 'Ativo')
+                ->where('status_enrollment', 'Ativa')
                 ->first();
         }
 

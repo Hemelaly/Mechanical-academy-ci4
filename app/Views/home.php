@@ -4,6 +4,7 @@ $isLoggedIn   = auth()->loggedIn();
 
 $user = service('auth')->user();
 
+
 ?>
 
 <!DOCTYPE html>
@@ -101,40 +102,41 @@ $user = service('auth')->user();
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg sticky-top bg-black navbar-dark py-3 d-flex align-items-center">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <img src="<?= base_url('./assets/img/logo.png') ?>" alt="Logo" style="width: 150px;">
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-                aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                    <?php if ($isLoggedIn): ?>
-                        <li class="nav-item">
-                            <a class="nav-link active me-3" aria-current="page" href="<?= base_url($user->role . '/dashboard/meus_cursos') ?>">Meus Cursos</a>
-                        </li>
-                        <li class="nav-item">
-                            <div class="image d-flex" style="width: 35px; height: 35px;">
-                                <img class="img-fluid rounded-pill w-100 me-1" src="<?= base_url('assets/img/user-default.png') ?>" alt="">
-                                <a class="nav-link active text-nowrap" aria-current="page" href="<?= base_url($user->role . '/dashboard/perfil') ?>"><?= $user->username ?></a>
-                            </div>
-                        </li>
-                    <?php else: ?>
-                        <li class="nav-item">
-                            <a class="nav-link active me-3" aria-current="page" href="#cursos">Cursos</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="<?= base_url('login') ?>">Entrar</a>
-                        </li>
-                    <?php endif ?>
-                </ul>
-            </div>
+<nav class="navbar navbar-expand-lg sticky-top bg-black navbar-dark py-3">
+    <div class="container">
+        <a class="navbar-brand" href="#">
+            <img src="<?= base_url('./assets/img/logo.png') ?>" alt="Logo" style="width: 150px;">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+            data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+            aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
+                <?php if ($isLoggedIn): ?>
+                    <li class="nav-item me-3">
+                        <a class="nav-link active" href="<?= base_url($user->role . '/dashboard/meus_cursos') ?>">Meus Cursos</a>
+                    </li>
+                    <li class="nav-item d-flex align-items-center">
+                        <a href="<?= base_url($user->role . '/dashboard/perfil') ?>" class="d-flex align-items-center text-decoration-none">
+                            <img src="<?= base_url('assets/img/user-default.png') ?>" alt="User" class="rounded-circle me-2" width="35" height="35">
+                            <span class="text-white fw-semibold text-nowrap"><?= $user->username ?></span>
+                        </a>
+                    </li>
+                <?php else: ?>
+                    <li class="nav-item me-3">
+                        <a class="nav-link active" href="#cursos">Cursos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="<?= base_url('login') ?>">Entrar</a>
+                    </li>
+                <?php endif; ?>
+            </ul>
         </div>
-    </nav>
+    </div>
+</nav>
+
 
     <section id="banner">
         <div class="overlay w-100 h-100 py-5 py-sm-0">

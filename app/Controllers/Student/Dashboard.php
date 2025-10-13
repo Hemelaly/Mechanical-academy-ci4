@@ -57,7 +57,7 @@ class Dashboard extends BaseController
         // Cria um array com os IDs de cursos ativos
         $activeCourseIds = [];
         foreach ($enrollments as $enr) {
-            if ($enr->status_enrollment === 'Ativo') {
+            if ($enr->status_enrollment === 'Ativa') {
                 $activeCourseIds[] = $enr->id_course_enrollment;
             }
         }
@@ -206,7 +206,7 @@ class Dashboard extends BaseController
         // Cria um array com os IDs de cursos ativos
         $activeCourseIds = [];
         foreach ($enrollments as $enr) {
-            if ($enr->status_enrollment === 'Ativo') {
+            if ($enr->status_enrollment === 'Ativa') {
                 $activeCourseIds[] = $enr->id_course_enrollment;
             }
         }

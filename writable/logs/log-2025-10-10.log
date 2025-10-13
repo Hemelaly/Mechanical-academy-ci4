@@ -1,0 +1,14 @@
+CRITICAL - 2025-10-10 15:32:58 --> ErrorException: Attempt to read property "image_course" on null
+[Method: GET, Route: checkout/4]
+in APPPATH\Views\checkout.php on line 52.
+ 1 APPPATH\Views\checkout.php(52): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Attempt to read property "image_course" on null', 'C:\\laragon\\www\\academy-ci4\\app\\Views\\checkout.php', 52)
+ 2 SYSTEMPATH\View\View.php(226): include('C:\\laragon\\www\\academy-ci4\\app\\Views\\checkout.php')
+ 3 SYSTEMPATH\View\View.php(229): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('checkout', [], true)
+ 5 APPPATH\Controllers\PageController.php(30): view('checkout', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\PageController->index('4')
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\PageController))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))

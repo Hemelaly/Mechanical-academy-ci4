@@ -184,36 +184,42 @@
     <div class="content-grid">
         <!-- Vídeo -->
         <div class="video-section sticky-top">
-            <div class="video-player">
+            <div class="video-player"
+                style="position: relative; padding-top: 56.25%; overflow: hidden;"
+                oncontextmenu="return false;"
+                ondragstart="return false;"
+                onmousedown="return false;"
+                onselectstart="return false;">
                 <?php
-                function getYouTubeId($url)
+                function getVimeoId($url)
                 {
-                    preg_match(
-                        '/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/',
-                        $url,
-                        $matches
-                    );
+                    preg_match('/vimeo\.com\/(?:video\/)?([0-9]+)/', $url, $matches);
                     return $matches[1] ?? null;
                 }
-                $videoId = getYouTubeId($lesson->video_url_lesson);
+
+                $videoId = getVimeoId($lesson->video_url_lesson);
                 ?>
+
                 <?php if ($videoId): ?>
-                    <!-- Plyr Embed -->
-                    <div class="plyr__video-embed" id="player">
-                        <iframe
-                            src="https://www.youtube.com/embed/<?= esc($videoId) ?>?origin=<?= base_url() ?>&iv_load_policy=3&modestbranding=1&rel=0&showinfo=0"
-                            allowfullscreen
-                            allow="autoplay; encrypted-media">
-                        </iframe>
-                    </div>
-                    
+                    <iframe
+                        id="vimeoPlayer"
+                        src="https://player.vimeo.com/video/<?= esc($videoId) ?>?badge=0&autopause=0&player_id=<?= esc($lesson->id_lesson) ?>&app_id=58479&title=0&byline=0&portrait=0"
+                        allow="autoplay; fullscreen; picture-in-picture"
+                        allowfullscreen
+                        referrerpolicy="no-referrer"
+                        loading="lazy"
+                        sandbox="allow-same-origin allow-scripts allow-presentation"
+                        oncontextmenu="return false;"
+                        style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;">
+                    </iframe>
+
                 <?php else: ?>
                     <p class="text-danger">Link de vídeo inválido</p>
                 <?php endif; ?>
             </div>
 
             <!-- Info -->
-            <div class="lesson-info">
+            <div class="lesson-info mt-3">
                 <h2 class="lesson-title"><?= esc($lesson->title_lesson) ?></h2>
                 <div class="lesson-meta">
                     <div class="lesson-meta-item">⏱ <?= esc($lesson->duration_lesson) ?> minutos</div>
@@ -222,6 +228,7 @@
                 <p class="lesson-description"><?= esc($lesson->content_lesson) ?></p>
             </div>
         </div>
+
 
         <!-- Sidebar -->
         <div class="sidebar2" style="background: transparent;">
@@ -277,20 +284,59 @@
             <a href="<?= site_url('student/dashboard/ver_aulas/' . $nextLesson) ?>" class="nav-btn">Próxima Aula →</a> <?php endif; ?>
     </div>
 </div>
-</div>
 
-<!-- Plyr JS -->
-<script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
-<script>
-    const player = new Plyr('#player', {
-        controls: [
-            'play-large', 'play', 'progress', 'current-time', 'duration',
-            'mute', 'volume', 'settings', 'pip', 'fullscreen'
-        ],
-        settings: ['quality', 'speed', 'loop'],
-        ratio: '16:9',
-        autoplay: false,
-    });
-</script>
+<?php if (ENVIRONMENT === 'production'): ?>
+    <script>
+        // --- BLOQUEAR CLIQUE DIREITO ---
+        document.addEventListener("contextmenu", e => e.preventDefault());
+
+        // --- BLOQUEAR TECLAS DE INSPEÇÃO ---
+        document.addEventListener("keydown", e => {
+            const blocked = [
+                e.key === "F12",
+                (e.ctrlKey && e.shiftKey && ["I", "J", "C"].includes(e.key.toUpperCase())),
+                (e.ctrlKey && e.key.toUpperCase() === "U")
+            ];
+
+            if (blocked.some(Boolean)) {
+                e.preventDefault();
+                e.stopPropagation();
+                alert("Ação bloqueada por motivos de segurança.");
+                return false;
+            }
+        });
+
+        // --- BLOQUEAR COPIAR / COLAR / SELECIONAR ---
+        document.addEventListener("copy", e => e.preventDefault());
+        document.addEventListener("cut", e => e.preventDefault());
+        document.addEventListener("paste", e => e.preventDefault());
+        document.addEventListener("selectstart", e => e.preventDefault());
+
+        // --- DETECTAR DEVTOOLS ABERTO ---
+        (function() {
+            let aberto = false;
+            const detectarDevTools = () => {
+                const antes = performance.now();
+                debugger;
+                const depois = performance.now();
+                if (depois - antes > 100) {
+                    if (!aberto) {
+                        aberto = true;
+                        alert("Modo de desenvolvedor detectado! Feche as ferramentas para continuar.");
+                        window.location.href = "<?= base_url('/') ?>";
+                    }
+                } else {
+                    aberto = false;
+                }
+            };
+            setInterval(detectarDevTools, 1000);
+        })();
+
+        // --- BLOQUEAR ARRASTAR / SOLTAR ---
+        document.addEventListener("dragstart", e => e.preventDefault());
+        document.addEventListener("drop", e => e.preventDefault());
+    </script>
+<?php endif; ?>
+
 
 <?= $this->endSection() ?>

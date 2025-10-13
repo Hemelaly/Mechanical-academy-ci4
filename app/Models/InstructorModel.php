@@ -12,7 +12,7 @@ class InstructorModel extends Model
     protected $returnType       = 'object';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['name_instructor', 'email_instructor', 'password_instructor', 'created_at', 'updated_at'];
+    protected $allowedFields    = ['name_instructor', 'email_instructor', 'id_user_instructor', 'created_at', 'updated_at'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -31,7 +31,7 @@ class InstructorModel extends Model
     protected $validationRules      = [
         'name_instructor'     => 'required|string|max_length[100]',
         'email_instructor'    => 'required|valid_email|is_unique[instructors.email_instructor,id_instructor,{id_instructor}]',
-        'password_instructor' => 'required|string|min_length[8]',
+        'id_user_instructor' => 'required|integer',
     ];
     protected $validationMessages   = [
         'name_instructor' => [
@@ -44,10 +44,9 @@ class InstructorModel extends Model
             'valid_email'=> 'Por favor, escreva um email válido.',
             'is_unique'  => 'Este email já foi registrado! Tente outro.',
         ],
-        'password_instructor' => [
+        'id_user_instructor' => [
             'required'   => 'O campo senha é obrigatório.',
-            'string'     => 'O campo senha não deve conter caracteres especiais.',
-            'min_length' => 'O password deve conter no mínimo 8 carateres.',
+            'string'     => 'O campo id_user_instructor deve ser do tipo INT.',
         ],
     ];
     protected $skipValidation       = false;

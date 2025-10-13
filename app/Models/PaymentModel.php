@@ -32,7 +32,7 @@ class PaymentModel extends Model
         'id_user_payment'    => 'required|integer',
         'id_course_payment'  => 'required|integer',
         'amount_payment'     => 'required|decimal',
-        'status_payment'     => 'required|in_list[Pendente,Aprovado,Rejeitado,Esperando aprovação]',
+        'status_payment'     => 'required|in_list[Pendente,Aprovado,Rejeitado]',
         'reference_payment'  => 'permit_empty|string|max_length[50]',
         'proof_file_payment' => 'permit_empty|string|max_length[255]',
         'approved_by_payment' => 'permit_empty|integer',
@@ -52,7 +52,7 @@ class PaymentModel extends Model
         ],
         'status_payment'     => [
             'required' => 'O status do pagamento é obrigatório.',
-            'in_list'  => 'O status do pagamento deve ser "pending", "completed" ou "failed".',
+            'in_list'  => 'O status do pagamento deve ser "Pendente", "Aprovado" ou "Rejeitado".',
         ],
         'reference_payment'  => [
             'string'     => 'A referência do pagamento deve ser uma string.',
@@ -89,8 +89,8 @@ class PaymentModel extends Model
             payments.proof_file_payment,
             payments.created_at,
 
-            pending_users.id as id_user_payment,
-            pending_users.username,
+            Pending_users.id as id_user_payment,
+            Pending_users.username,
             pending_users.email,
 
             courses.id_course,

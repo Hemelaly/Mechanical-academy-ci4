@@ -32,7 +32,7 @@ class EnrollmentModel extends Model
         'id_student_enrollment'   => 'required|integer|is_not_unique[users.id]',
         'id_course_enrollment'    => 'required|integer|is_not_unique[courses.id_course]',
         'enrolled_at_enrollment'  => 'required|valid_date',
-        'status_enrollment'       => 'required|in_list[Ativo,Pendente,Cancelada]',
+        'status_enrollment'       => 'required|in_list[Ativa,Pendente,Cancelada]',
     ];
     protected $validationMessages   = [
         'id_student_enrollment' => [
@@ -51,7 +51,7 @@ class EnrollmentModel extends Model
         ],
         'status_enrollment' => [
             'required'   => 'O campo status da inscrição é obrigatório.',
-            'in_list'   => 'O status da inscrição deve ser um dos seguintes: Ativo, Pendente, Cancelada.',
+            'in_list'   => 'O status da inscrição deve ser um dos seguintes: Ativa, Pendente, Cancelada.',
         ],
     ];
     protected $skipValidation       = false;
@@ -86,13 +86,12 @@ class EnrollmentModel extends Model
                     courses.description_course,
                     courses.price_course,
                     
-                    instructors.id_instructor,
-                    instructors.name_instructor,
-                    instructors.email_instructor
+                    users.id,
+                    users.username,
                 ')
             ->join('students', 'students.id_user_student = enrollments.id_student_enrollment')
             ->join('courses', 'courses.id_course = enrollments.id_course_enrollment')
-            ->join('instructors', 'instructors.id_instructor = courses.id_instructor_course') // join com instrutor
+            ->join('users', 'users.id = courses.id_instructor_course') // join com instrutor
             ->where('enrollments.id_student_enrollment', $studentId)
             ->findAll();
     }

@@ -30,7 +30,7 @@ class CourseModel extends Model
     // Validation
     protected $validationRules      = [
         'title_course'       => 'required|string|max_length[150]',
-        'id_instructor_course' => 'required|integer|is_not_unique[instructors.id_instructor]',
+        'id_instructor_course' => 'required|integer|is_not_unique[users.id]',
         'description_course' => 'required|string',
         'price_course'       => 'required|decimal',
         'status_course'      => 'required|in_list[Ativo,Rascunho,Arquivado]',

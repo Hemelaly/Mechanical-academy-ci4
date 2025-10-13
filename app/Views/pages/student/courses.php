@@ -182,7 +182,7 @@
                                 <div class="d-flex align-items-start justify-content-between gap-3">
                                     <div>
                                         <div class="fw-semibold mb-1" style="color:#e5e7eb;"><?= $course->title_course ?></div>
-                                        <div class="tw-sub small mb-2">Instrutor: <?= $course->name_instructor ?? '' ?></div>
+                                        <div class="tw-sub small mb-2">Instrutor: <?= $course->username ?? '' ?></div>
                                     </div>
                                     <span class="badge badge-soft">Avançado</span>
                                 </div>
@@ -194,9 +194,9 @@
                                     <?php if (in_array($course->id_course,  $activeCourseIds)): ?>
                                         <a href="/student/dashboard/meus_cursos" class="btn btn-sm btn-success"><i class="bi bi-check-circle me-1"></i>Começar a assistir</a>
                                     <?php elseif (in_array($course->id_course,  $pendingCourseIds)): ?>
-                                        <a href="/student/dashboard/checkout/<?= $course->id_course ?>" class="btn btn-sm btn-warning"><i class="bi bi-activity"></i>Pendente</a>
+                                        <a href="/checkout/<?= $course->id_course ?>" class="btn btn-sm btn-warning"><i class="bi bi-activity"></i>Pendente</a>
                                     <?php else: ?>
-                                        <a href="/student/dashboard/checkout/<?= $course->id_course ?>" class="btn btn-sm btn-tw"><i class="bi bi-book me-1"></i>Inscreva-se</a>
+                                        <a href="/checkout/<?= $course->id_course ?>" class="btn btn-sm btn-tw"><i class="bi bi-book me-1"></i>Inscreva-se</a>
                                     <?php endif; ?>
                                 </div>
                             </div>
