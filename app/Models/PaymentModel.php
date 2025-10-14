@@ -89,8 +89,8 @@ class PaymentModel extends Model
             payments.proof_file_payment,
             payments.created_at,
 
-            Pending_users.id as id_user_payment,
-            Pending_users.username,
+            pending_users.id as id_user_payment,
+            pending_users.username,
             pending_users.email,
 
             courses.id_course,

@@ -34,7 +34,7 @@
             <i class="bi <?= $link['icon'] ?> me-2"></i> <?= $link['label'] ?>
         </a>
     <?php endforeach; ?>
-    <a href="/logout" id="logoutBtn" class="nav-link mt-5">
+    <a href="/logout" id="logoutBtn" class="nav-link text-danger mt-5">
         <i class="bi bi-box-arrow-right me-2" onclick="return confirm('Tem certeza que deseja sair da conta?');"></i> Sair
     </a>
 </div>
