@@ -4,162 +4,343 @@
 
 <?= $this->section('lessons') ?>
 
-<!-- Plyr CSS -->
+<!-- CSS base (Plyr opcional) -->
 <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
 
+<!-- CSRF para AJAX -->
+<meta name="csrf-name" content="<?= csrf_token() ?>">
+<meta name="csrf-hash" content="<?= csrf_hash() ?>">
+
 <style>
+    :root {
+        --bg: #0f1021;
+        --panel: #181a2e;
+        --panel-2: #1d2040;
+        --accent: #8b5cf6;
+        --accent-2: #a855f7;
+        --text: #e5e7eb;
+        --muted: #a5b4fc;
+        --line: #2a2e5b;
+        --ok: #22c55e;
+        --warn: #f59e0b;
+    }
+
+    * {
+        box-sizing: border-box
+    }
+
+    body {
+        background: var(--bg)
+    }
+
+    .main-container {
+        padding: 24px;
+        max-width: 100%;
+        margin: 0 auto;
+        color: var(--text)
+    }
+
+    a {
+        color: var(--muted);
+        text-decoration: none
+    }
+
+    a:hover {
+        opacity: .9
+    }
+
+    /* Breadcrumb */
+    .breadcrumb-nav {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 16px;
+        font-size: .95rem
+    }
+
+    .breadcrumb-nav .separator {
+        opacity: .6
+    }
+
+    /* Progress */
+    .progress-section {
+        background: linear-gradient(135deg, #16174a 0%, #1d1b4b 100%);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 18px
+    }
+
+    .progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px
+    }
+
+    .progress-title {
+        font-size: .9rem;
+        color: #cbd5e1;
+        opacity: .9
+    }
+
+    .progress-percentage {
+        font-weight: 800
+    }
+
+    .progress-bar-container {
+        width: 100%;
+        height: 10px;
+        background: rgba(255, 255, 255, .06);
+        border-radius: 999px;
+        overflow: hidden
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent), var(--accent-2));
+        transition: width .3s ease
+    }
+
+    /* Grid */
+    .content-grid {
+        display: grid;
+        grid-template-columns: 1.6fr .8fr;
+        gap: 22px;
+        align-items: start;
+        grid-auto-rows: auto;
+    }
+
+    @media (max-width:1024px) {
+        .content-grid {
+            grid-template-columns: 1fr
+        }
+    }
+
+    /* Video card */
+    .video-section {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        overflow: hidden
+    }
+
+    @media (min-width:992px) {
+        .video-section.sticky-top {
+            position: sticky;
+            top: 28px;
+            z-index: 2
+        }
+    }
+
+    @media (max-width:991px) {
+        .video-section.sticky-top {
+            position: static
+        }
+    }
+
+    .video-player {
+        position: relative;
+        padding-top: 56.25%;
+        overflow: hidden
+    }
+
+    .video-player iframe {
+        position: absolute;
+        inset: 0;
+        border: 0;
+        width: 100%;
+        height: 100%
+    }
+
+    .lesson-info {
+        padding: 30px
+    }
+
+    .lesson-title {
+        font-size: 1.4rem;
+        font-weight: 800;
+        margin: 0 0 10px
+    }
+
+    .lesson-meta {
+        display: flex;
+        gap: 18px;
+        color: var(--muted);
+        font-size: .9rem;
+        margin-bottom: 10px
+    }
+
+    .lesson-description {
+        opacity: .9;
+        line-height: 1.6
+    }
+
+    /* Sidebar */
+    .sidebar2 {
+        background: transparent
+    }
+
+    .sidebar-title {
+        font-weight: 800;
+        margin-bottom: 10px
+    }
+
+    .module {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--panel);
+        overflow: hidden
+    }
+
+    .module+.module {
+        margin-top: 10px
+    }
+
+    .module-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        padding: 14px 16px;
+        background: var(--panel-2);
+        border: none;
+        cursor: pointer
+    }
+
+    .module-header .left {
+        display: flex;
+        gap: 10px;
+        align-items: center
+    }
+
+    .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: var(--accent)
+    }
+
+    .module-title {
+        font-weight: 700;
+        color: #dbeafe
+    }
+
+    .module-count {
+        font-size: .8rem;
+        opacity: .7
+    }
+
+    .module-body {
+        padding: 0
+    }
+
+    .lesson-row {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border-top: 1px solid var(--line);
+        background: transparent;
+        transition: background .2s
+    }
+
+    .lesson-row:hover {
+        background: rgba(255, 255, 255, .03)
+    }
+
+    /* ativo (aula atual) */
+    .lesson-row.current {
+        background: rgba(0, 0, 0, .25);
+        /* mais escuro */
+        border-left: 3px solid #8b5cf6;
+        /* faixa de destaque */
+    }
+
+    /* opcional: diferenciar hover do ativo */
+    .lesson-row.current:hover {
+        background: rgba(0, 0, 0, .32);
+    }
+
+    .lesson-link {
+        color: var(--text);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 10px
+    }
+
+    .badge-current {
+        font-size: .7rem;
+        padding: 2px 6px;
+        border-radius: 999px;
+        background: rgba(139, 92, 246, .15);
+        border: 1px solid var(--accent)
+    }
+
+    .duration {
+        font-size: .85rem;
+        opacity: .75
+    }
+
+    .check-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px
+    }
+
+    .checkbox {
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        border: 2px solid var(--line);
+        border-radius: 6px;
+        display: inline-grid;
+        place-content: center;
+        background: transparent;
+        cursor: pointer;
+        transition: .15s;
+    }
+
+    .checkbox:checked {
+        border-color: var(--ok);
+        background: rgba(34, 197, 94, .2)
+    }
+
+    .checkbox:checked::after {
+        content: "✓";
+        font-weight: 900;
+        font-size: .9rem;
+        transform: translateY(-1px)
+    }
+
+    /* Nav buttons */
     .navigation-buttons {
         display: flex;
         justify-content: space-between;
-        margin-top: 40px;
+        margin-top: 24px
     }
 
     .nav-btn {
         display: flex;
         align-items: center;
         gap: 8px;
-        background-color: #8b5cf6;
+        background: var(--accent);
         border: none;
-        color: white;
-        padding: 12px 24px;
-        border-radius: 8px;
-        font-weight: 500;
+        color: #fff;
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-weight: 600;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: .2s
     }
 
     .nav-btn:hover {
-        background-color: #7c3aed;
+        filter: brightness(1.05)
     }
 
     .nav-btn.secondary {
-        background-color: #4c1d95;
-    }
-
-    .nav-btn.secondary:hover {
-        background-color: #6b21a8;
-    }
-
-    .sidebar2 {
-        padding: 20px 0;
-    }
-
-    .main-container {
-        padding: 20px;
-        max-width: 1400px;
-        margin: 0 auto;
-    }
-
-    .breadcrumb-nav {
-        display: flex;
-        align-items: center;
-        margin-bottom: 20px;
-        color: #8159fbff;
-        font-size: 14px;
-    }
-
-    .breadcrumb-nav a {
-        color: #a78bfa;
-        text-decoration: none;
-    }
-
-    .breadcrumb-nav .separator {
-        margin: 0 10px;
-    }
-
-    .progress-section {
-        background: linear-gradient(135deg, #1a1473ff 0%, #1e1b4b 100%);
-        border-radius: 12px;
-        padding: 24px;
-        margin-bottom: 20px;
-    }
-
-    .progress-title {
-        color: #cbd5e1;
-        font-size: 14px;
-        margin-bottom: 8px;
-    }
-
-    .progress-percentage {
-        font-size: 24px;
-        font-weight: 700;
-        margin-bottom: 12px;
-    }
-
-    .progress-bar-container {
-        width: 100%;
-        height: 8px;
-        background-color: #312e81;
-        border-radius: 4px;
-        overflow: hidden;
-    }
-
-    .progress-bar-fill {
-        height: 100%;
-        background: linear-gradient(90deg, #8b5cf6, #a855f7);
-        border-radius: 4px;
-        transition: width 0.3s ease;
-    }
-
-    .content-grid {
-        display: grid;
-        grid-template-columns: 1fr 350px;
-        gap: 20px;
-    }
-
-    .video-section {
-        background-color: #312e81;
-        border-radius: 12px;
-        overflow: hidden;
-        align-self: start;
-    }
-
-    .lesson-info {
-        padding: 24px;
-    }
-
-    .lesson-title {
-        font-size: 24px;
-        font-weight: 700;
-        margin-bottom: 16px;
-    }
-
-    .lesson-meta {
-        display: flex;
-        gap: 20px;
-        margin-bottom: 16px;
-        font-size: 14px;
-        color: #a78bfa;
-    }
-
-    .lesson-description {
-        color: #cbd5e1;
-        line-height: 1.6;
-        margin-bottom: 24px;
-    }
-
-    @media (max-width: 1024px) {
-        .content-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    /* Só ativa sticky no desktop */
-    @media (min-width: 992px) {
-        .video-section.sticky-top {
-            position: sticky;
-            top: 40px;
-            /* 👈 aqui você controla o espaço do topo */
-            z-index: 1020;
-            /* garante que fica acima do conteúdo */
-        }
-    }
-
-    /* No mobile e tablet (até 991px) ele se comporta normal */
-    @media (max-width: 991px) {
-        .video-section.sticky-top {
-            position: static;
-        }
+        background: #4c1d95
     }
 </style>
 
@@ -168,175 +349,191 @@
     <div class="breadcrumb-nav">
         <a href="/student/dashboard/meus_cursos">← Voltar aos Cursos</a>
         <span class="separator">/</span>
-        <span><?= $course->title_course ?></span>
+        <span><?= esc($course->title_course) ?></span>
     </div>
 
-    <!-- Progress Section -->
-    <div class="progress-section">
-        <div class="progress-title">Progresso do Curso</div>
-        <div class="progress-percentage" id="progressPercentage">0%</div>
+    <!-- Progress -->
+    <?php $completedLessonIds = $completedLessonIds ?? []; ?>
+    <div class="progress-section mb-5">
+        <div class="progress-header">
+            <div class="progress-title">Progresso do Curso</div>
+            <div class="progress-percentage" id="progressPercentage">0%</div>
+        </div>
         <div class="progress-bar-container">
-            <div class="progress-bar-fill" id="progressBar" style="width: 0%;"></div>
+            <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
         </div>
     </div>
 
-    <!-- Main Content Grid -->
+    <!-- Main -->
     <div class="content-grid">
         <!-- Vídeo -->
         <div class="video-section sticky-top">
-            <div class="video-player"
-                style="position: relative; padding-top: 56.25%; overflow: hidden;"
-                oncontextmenu="return false;"
-                ondragstart="return false;"
-                onmousedown="return false;"
-                onselectstart="return false;">
+            <div class="video-player" oncontextmenu="return false;" ondragstart="return false;" onmousedown="return false;" onselectstart="return false;">
                 <?php
                 function getVimeoId($url)
                 {
-                    preg_match('/vimeo\.com\/(?:video\/)?([0-9]+)/', $url, $matches);
-                    return $matches[1] ?? null;
+                    preg_match('/vimeo\.com\/(?:video\/)?([0-9]+)/', $url, $m);
+                    return $m[1] ?? null;
                 }
-
                 $videoId = getVimeoId($lesson->video_url_lesson);
                 ?>
-
                 <?php if ($videoId): ?>
-                    <iframe
-                        id="vimeoPlayer"
+                    <iframe id="vimeoPlayer"
                         src="https://player.vimeo.com/video/<?= esc($videoId) ?>?badge=0&autopause=0&player_id=<?= esc($lesson->id_lesson) ?>&app_id=58479&title=0&byline=0&portrait=0"
                         allow="autoplay; fullscreen; picture-in-picture"
-                        allowfullscreen
-                        referrerpolicy="no-referrer"
-                        loading="lazy"
+                        allowfullscreen referrerpolicy="no-referrer" loading="lazy"
                         sandbox="allow-same-origin allow-scripts allow-presentation"
-                        oncontextmenu="return false;"
-                        style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;">
-                    </iframe>
-
+                        oncontextmenu="return false;"></iframe>
                 <?php else: ?>
                     <p class="text-danger">Link de vídeo inválido</p>
                 <?php endif; ?>
             </div>
 
-            <!-- Info -->
-            <div class="lesson-info mt-3">
+            <div class="lesson-info">
                 <h2 class="lesson-title"><?= esc($lesson->title_lesson) ?></h2>
                 <div class="lesson-meta">
-                    <div class="lesson-meta-item">⏱ <?= esc($lesson->duration_lesson) ?> minutos</div>
-                    <div class="lesson-meta-item">📅 <?= date('d/m/Y', strtotime($lesson->created_at)) ?></div>
+                    <div>⏱ <?= esc($lesson->duration_lesson) ?> minutos</div>
+                    <div>📅 <?= date('d/m/Y', strtotime($lesson->created_at)) ?></div>
                 </div>
                 <p class="lesson-description"><?= esc($lesson->content_lesson) ?></p>
             </div>
         </div>
 
+        <!-- Sidebar / Conteúdo -->
+        <div class="sidebar2">
+            <h3 class="sidebar-title">Conteúdo do Curso</h3>
 
-        <!-- Sidebar -->
-        <div class="sidebar2" style="background: transparent;">
-            <div class="sidebar-header">
-                <h3 class="sidebar-title">Conteúdo do Curso</h3>
-            </div>
-            <div class="accordion" id="courseAccordion">
-                <?php foreach ($modules as $index => $m): ?>
-                    <div class="accordion-item mb-2" style="background-color: #1e1b4b; border-radius: 8px; border: none;">
-                        <h2 class="accordion-header" id="heading<?= $index ?>">
-                            <button class="accordion-button collapsed" type="button"
-                                data-bs-toggle="collapse" data-bs-target="#collapse<?= $index ?>"
-                                aria-expanded="false" aria-controls="collapse<?= $index ?>"
-                                style="background-color: #1e1b4b; color: #a78bfa; font-weight: 600; border-radius: 8px;">
-                                <div class="module-info d-flex align-items-center gap-2">
-                                    <div class="module-icon" style="width: 8px; height: 8px; border-radius: 50%; background-color: #8b5cf6;"></div>
-                                    <span class="module-title"><?= esc($m->title_module) ?></span>
-                                </div>
-                            </button>
-                        </h2>
-                        <div id="collapse<?= $index ?>" class="accordion-collapse collapse <?php if ($index === 0) echo 'show'; ?>" aria-labelledby="heading<?= $index ?>">
-                            <div class="accordion-body p-0">
-                                <?php foreach ($m->lessons as $l): ?>
-                                    <a href="<?= site_url('student/dashboard/ver_aulas/' . $l->id_lesson) ?>"
-                                        class="lesson-item <?= $l->id_lesson == $lesson->id_lesson ? 'current' : '' ?>"
-                                        style="display: flex; justify-content: space-between; padding: 12px 20px; border-bottom: 1px solid #4c1d95; color: #cbd5e1; text-decoration: none; transition: background 0.3s;">
-                                        <div class="lesson-info-item d-flex align-items-center gap-2">
-                                            <div class="lesson-status <?= $l->id_lesson == $lesson->id_lesson ? 'current' : 'pending' ?>"
-                                                style="width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; background-color: <?= $l->id_lesson == $lesson->id_lesson ? '#8b5cf6' : '#4c1d95' ?>;">
-                                                <?= $l->id_lesson == $lesson->id_lesson ? '▶' : '○' ?>
-                                            </div>
-                                            <span><?= esc($l->title_lesson) ?></span>
-                                        </div>
-                                        <div class="lesson-duration"><?= esc($l->duration_lesson) ?> min</div>
+            <?php foreach ($modules as $index => $m): ?>
+                <div class="module" x-module="<?= $index ?>">
+                    <button class="module-header" type="button" data-bs-toggle="collapse" data-bs-target="#mod<?= $index ?>" aria-expanded="<?= $index === 0 ? 'true' : 'false' ?>" aria-controls="mod<?= $index ?>">
+                        <div class="left">
+                            <span class="dot"></span>
+                            <span class="module-title"><?= esc($m->title_module) ?></span>
+                        </div>
+                        <span class="module-count text-white"><?= count($m->lessons) ?> aulas</span>
+                    </button>
+
+                    <div id="mod<?= $index ?>" class="collapse <?= $index === 0 ? 'show' : '' ?>">
+                        <div class="module-body">
+                            <?php foreach ($m->lessons as $l): ?>
+                                <?php $isCurrent = ($l->id_lesson == $lesson->id_lesson); ?>
+                                <?php $isDone    = in_array($l->id_lesson, $completedLessonIds ?? [], true); ?>
+                                <div class="lesson-row <?= $isCurrent ? 'current' : '' ?>" data-lesson-id="<?= (int)$l->id_lesson ?>">
+                                    <div class="check-wrap">
+                                        <input type="checkbox"
+                                            class="checkbox lesson-check"
+                                            <?= $isDone ? 'checked' : '' ?>
+                                            aria-label="Marcar aula como concluída">
+                                    </div>
+
+                                    <a class="lesson-link" href="<?= site_url('student/dashboard/ver_aulas/' . $l->id_lesson) ?>">
+                                        <span><?= esc($l->title_lesson) ?></span>
+                                        <?php if ($isCurrent): ?><span class="badge-current">A assistir</span><?php endif; ?>
                                     </a>
-                                <?php endforeach; ?>
-                            </div>
+
+                                    <span class="duration"><?= esc($l->duration_lesson) ?> min</span>
+                                </div>
+                            <?php endforeach; ?>
                         </div>
                     </div>
-                <?php endforeach; ?>
-            </div>
+                </div>
+            <?php endforeach; ?>
         </div>
     </div>
 
-    <!-- Navigation Buttons -->
+    <!-- Navegação -->
     <div class="navigation-buttons">
         <?php if ($prevLesson): ?>
-            <a href="<?= site_url('student/dashboard/ver_aulas/' . $prevLesson) ?>" class="nav-btn secondary">
-                ← Aula Anterior
-            </a>
-        <?php endif; ?>
+            <a href="<?= site_url('student/dashboard/ver_aulas/' . $prevLesson) ?>" class="nav-btn secondary">← Aula Anterior</a>
+        <?php else: ?><span></span><?php endif; ?>
+
         <?php if ($nextLesson): ?>
-            <a href="<?= site_url('student/dashboard/ver_aulas/' . $nextLesson) ?>" class="nav-btn">Próxima Aula →</a> <?php endif; ?>
+            <a href="<?= site_url('student/dashboard/ver_aulas/' . $nextLesson) ?>" class="nav-btn">Próxima Aula →</a>
+        <?php endif; ?>
     </div>
 </div>
 
 <?php if (ENVIRONMENT === 'production'): ?>
     <script>
-        // --- BLOQUEAR CLIQUE DIREITO ---
-        document.addEventListener("contextmenu", e => e.preventDefault());
-
-        // --- BLOQUEAR TECLAS DE INSPEÇÃO ---
-        document.addEventListener("keydown", e => {
-            const blocked = [
-                e.key === "F12",
-                (e.ctrlKey && e.shiftKey && ["I", "J", "C"].includes(e.key.toUpperCase())),
-                (e.ctrlKey && e.key.toUpperCase() === "U")
-            ];
-
-            if (blocked.some(Boolean)) {
-                e.preventDefault();
-                e.stopPropagation();
-                alert("Ação bloqueada por motivos de segurança.");
-                return false;
-            }
-        });
-
-        // --- BLOQUEAR COPIAR / COLAR / SELECIONAR ---
-        document.addEventListener("copy", e => e.preventDefault());
-        document.addEventListener("cut", e => e.preventDefault());
-        document.addEventListener("paste", e => e.preventDefault());
-        document.addEventListener("selectstart", e => e.preventDefault());
-
-        // --- DETECTAR DEVTOOLS ABERTO ---
-        (function() {
-            let aberto = false;
-            const detectarDevTools = () => {
-                const antes = performance.now();
-                debugger;
-                const depois = performance.now();
-                if (depois - antes > 100) {
-                    if (!aberto) {
-                        aberto = true;
-                        alert("Modo de desenvolvedor detectado! Feche as ferramentas para continuar.");
-                        window.location.href = "<?= base_url('/') ?>";
-                    }
-                } else {
-                    aberto = false;
-                }
-            };
-            setInterval(detectarDevTools, 1000);
-        })();
-
-        // --- BLOQUEAR ARRASTAR / SOLTAR ---
-        document.addEventListener("dragstart", e => e.preventDefault());
-        document.addEventListener("drop", e => e.preventDefault());
+        // bloqueios (opcional): mantém seus handlers originais aqui se quiser
     </script>
 <?php endif; ?>
 
+<script>
+    // ------- Helpers CSRF -------
+    const csrfName = document.querySelector('meta[name="csrf-name"]')?.content;
+    let csrfHash = document.querySelector('meta[name="csrf-hash"]')?.content;
+
+    async function fetchJSON(url, opts = {}) {
+        const cfg = {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            ...opts
+        };
+        if (!cfg.headers) cfg.headers = {};
+        if (csrfName && csrfHash && cfg.method !== 'GET') {
+            cfg.headers['Content-Type'] = 'application/json';
+            cfg.headers[csrfName] = csrfHash;
+        }
+        const res = await fetch(url, cfg);
+        // atualiza CSRF se vier no header
+        const newHash = res.headers.get('X-CSRF-Hash');
+        if (newHash) csrfHash = newHash;
+        return res.json();
+    }
+
+    // ------- Progresso -------
+    function computeProgress() {
+        const total = document.querySelectorAll('.lesson-row').length;
+        const done = document.querySelectorAll('.lesson-check:checked').length;
+        const pct = total ? Math.round((done / total) * 100) : 0;
+        document.getElementById('progressPercentage').textContent = pct + '%';
+        document.getElementById('progressBar').style.width = pct + '%';
+    }
+
+    // ------- Toggle conclusão -------
+    async function toggleLessonComplete(lessonId, isChecked) {
+        try {
+            const url = isChecked ?
+                '<?= site_url('student/lessons/complete') ?>' :
+                '<?= site_url('student/lessons/uncomplete') ?>';
+
+            const data = await fetchJSON(url, {
+                method: 'POST',
+                body: JSON.stringify({
+                    lesson_id: lessonId
+                })
+            });
+
+            if (!data?.ok) {
+                // revert UI se falhar
+                const cb = document.querySelector(`.lesson-row[data-lesson-id="${lessonId}"] .lesson-check`);
+                if (cb) cb.checked = !isChecked;
+                alert(data?.message || 'Não foi possível atualizar a conclusão.');
+            }
+        } catch (e) {
+            const cb = document.querySelector(`.lesson-row[data-lesson-id="${lessonId}"] .lesson-check`);
+            if (cb) cb.checked = !isChecked;
+            alert('Erro de rede ao salvar. Tente novamente.');
+        } finally {
+            computeProgress();
+        }
+    }
+
+    // Bind checkboxes
+    document.querySelectorAll('.lesson-check').forEach(cb => {
+        cb.addEventListener('change', (e) => {
+            const row = e.target.closest('.lesson-row');
+            const id = row?.dataset?.lessonId;
+            if (id) toggleLessonComplete(id, e.target.checked);
+        });
+    });
+
+    // Inicializa progresso
+    computeProgress();
+</script>
 
 <?= $this->endSection() ?>

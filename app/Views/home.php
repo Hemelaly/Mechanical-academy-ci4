@@ -102,40 +102,40 @@ $user = service('auth')->user();
 </head>
 
 <body>
-<nav class="navbar navbar-expand-lg sticky-top bg-black navbar-dark py-3">
-    <div class="container">
-        <a class="navbar-brand" href="#">
-            <img src="<?= base_url('./assets/img/logo.png') ?>" alt="Logo" style="width: 150px;">
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-            data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-            aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
-                <?php if ($isLoggedIn): ?>
-                    <li class="nav-item me-3">
-                        <a class="nav-link active" href="<?= base_url($user->role . '/dashboard/meus_cursos') ?>">Meus Cursos</a>
-                    </li>
-                    <li class="nav-item d-flex align-items-center">
-                        <a href="<?= base_url($user->role . '/dashboard/perfil') ?>" class="d-flex align-items-center text-decoration-none">
-                            <img src="<?= base_url('assets/img/user-default.png') ?>" alt="User" class="rounded-circle me-2" width="35" height="35">
-                            <span class="text-white fw-semibold text-nowrap"><?= $user->username ?></span>
-                        </a>
-                    </li>
-                <?php else: ?>
-                    <li class="nav-item me-3">
-                        <a class="nav-link active" href="#cursos">Cursos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="<?= base_url('login') ?>">Entrar</a>
-                    </li>
-                <?php endif; ?>
-            </ul>
+    <nav class="navbar navbar-expand-lg sticky-top bg-black navbar-dark py-3">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="<?= base_url('./assets/img/logo.png') ?>" alt="Logo" style="width: 150px;">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
+                    <?php if ($isLoggedIn): ?>
+                        <li class="nav-item me-3">
+                            <a class="nav-link active" href="<?= base_url($user->role . '/dashboard/meus_cursos') ?>">Meus Cursos</a>
+                        </li>
+                        <li class="nav-item d-flex align-items-center">
+                            <a href="<?= base_url($user->role . '/dashboard/perfil') ?>" class="d-flex align-items-center text-decoration-none">
+                                <img src="<?= base_url('assets/img/user-default.png') ?>" alt="User" class="rounded-circle me-2" width="35" height="35">
+                                <span class="text-white fw-semibold text-nowrap"><?= $user->username ?></span>
+                            </a>
+                        </li>
+                    <?php else: ?>
+                        <li class="nav-item me-3">
+                            <a class="nav-link active" href="#cursos">Cursos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="<?= base_url('login') ?>">Entrar</a>
+                        </li>
+                    <?php endif; ?>
+                </ul>
+            </div>
         </div>
-    </div>
-</nav>
+    </nav>
 
 
     <section id="banner">
@@ -201,16 +201,16 @@ $user = service('auth')->user();
             <div class="row mt-4">
                 <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
                     <div class="card card-bg text-light W-100 h-100 p-1 card-border">
-                        <div class="card-body d-flex justify-content-between">
+                        <div class="card-body d-flex justify-content-between ">
                             <div>
                                 <h5 class="fs-6"><i class="fa fa-clock"></i> 25 Horas</h5>
                                 <div class="mt-4 p-3" w-100>
                                     <h6 class="card-subtitle mb-2 text-primary fw-light text-uppercase fs-6">Todos os
                                         níveis</h6>
-                                    <p class="card-text fs-5 fw-semibold mb-0">Excel: Da Produtividade à Análise de
+                                    <p class="card-text fs-5 text-white fw-semibold mb-3">Excel: Da Produtividade à Análise de
                                         Dados</p>
                                     <a href="https://hemelaly.github.io/MT-Academy---EXCEL/"
-                                        class="card-link text-decoration-none text-primary fw-light fs-6 py-4">Ver
+                                        class="card-link text-decoration-none text-primary fw-light fs-6 py-4 stretched-link">Ver
                                         Curso</a>
                                 </div>
                             </div>

@@ -159,10 +159,10 @@
                         <div class="mt-3">
                             <div class="d-flex justify-content-between small tw-sub mb-1">
                                 <span>Progresso</span>
-                                <span>40%</span>
+                                <span>0%</span>
                             </div>
                             <div class="progress">
-                                <div class="progress-bar" role="progressbar" style="width:40%;" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
+                                <div class="progress-bar" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                             </div>
                         </div>
                     </div>
