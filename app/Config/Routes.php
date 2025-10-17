@@ -42,6 +42,12 @@ $routes->group('student', ['namespace' => 'App\Controllers\Student', 'filter' =>
     $routes->get('dashboard/ver_aulas/(:num)', 'Dashboard::lessons/$1');
     $routes->get('dashboard/checkout/(:num)', 'Dashboard::checkout/$1');
     $routes->get('dashboard/perfil', 'Dashboard::profile');
+
+    // Rotas para Marcar as aulas como completas
+    $routes->group('lessons', function ($r) {
+        $r->post('complete',   'LessonsController::complete');   // POST /student/lessons/complete
+        $r->post('uncomplete', 'LessonsController::uncomplete'); // POST /student/lessons/uncomplete
+    });
 });
 
 $routes->get('checkout/(:num)', 'PageController::index/$1');
@@ -53,4 +59,3 @@ $routes->post('checkout/(:num)', 'PaymentController::createPayment/$1');
 // $routes->post('student/payment/mpesa/(:num)', 'Student\PaymentController::mpesa/$1');
 // $routes->post('pay/(:num)', 'Student\PaymentController::pay/$1');
 // $routes->post('mpesa/webhook', 'MpesaWebhookController::receive');
-

@@ -133,63 +133,161 @@ class Dashboard extends BaseController
 
     public function lessons($id)
     {
-        $lessonModel = new LessonModel();
-        $moduleModel = new ModuleModel();
-        $courseModel = new CourseModel();
+        $lessonModel     = new LessonModel();
+        $moduleModel     = new ModuleModel();
+        $courseModel     = new CourseModel();
+        $enrollmentModel = new EnrollmentModel();
+        $db              = db_connect();
+
+        $authUser = service('auth')->user();
+        $userId   = function_exists('user_id') ? user_id() : ($authUser->id ?? $authUser->getId());
 
         $id = (int) $id;
 
-        // Tenta encontrar a aula pelo ID
+        // Tenta achar como AULA
         $lesson = $lessonModel->find($id);
 
-        // Se não existir, assume que é o ID do curso e pega a primeira aula
+        // Se NÃO for aula, tratamos como CURSO e redirecionamos para "retomar"
         if (!$lesson) {
-            $firstLesson = $lessonModel
-                ->join('modules', 'modules.id_module = lessons.id_module_lesson')
-                ->where('modules.id_course_module', $id)
-                ->orderBy('position_lesson', 'ASC')
-                ->first();
-
-            if (!$firstLesson) {
-                return redirect()->back()->with('error', 'Nenhuma aula encontrada para este curso.');
+            $course = $courseModel->find($id);
+            if (!$course) {
+                return redirect()->back()->with('error', 'Curso não encontrado.');
             }
 
-            return redirect()->to('/student/dashboard/ver_aulas/' . $firstLesson->id_lesson);
+            // matrícula do usuário nesse curso
+            $enrollment = $enrollmentModel
+                ->where('id_course_enrollment', $course->id_course)
+                ->first();
+
+            if (!$enrollment) {
+                return redirect()->to('/student/dashboard/checkout/' . $course->id_course)
+                    ->with('warning', 'Você precisa estar inscrito neste curso.');
+            }
+
+            // aulas do curso (ordenadas por módulo e posição)
+            $ordered = $db->table('lessons l')
+                ->select('l.id_lesson')
+                ->join('modules m', 'm.id_module = l.id_module_lesson')
+                ->where('m.id_course_module', $course->id_course)
+                ->orderBy('m.position_module', 'ASC')
+                ->orderBy('l.position_lesson', 'ASC')
+                ->get()->getResultArray();
+            $orderedIds = array_map(fn($r) => (int)$r['id_lesson'], $ordered);
+
+            // aulas concluídas pela matrícula
+            $completedLessonIds = array_column(
+                $db->table('progress')
+                    ->select('id_lesson_progress')
+                    ->where('id_enrollment_progress', $enrollment['id_enrollment'])
+                    ->where('completed_at_progress IS NOT NULL', null, false)
+                    ->get()->getResultArray(),
+                'id_lesson_progress'
+            );
+            $completedSet = array_flip($completedLessonIds);
+
+            // primeira NÃO concluída (resume). Se todas concluídas, vai para a última aula.
+            $resumeId = null;
+            foreach ($orderedIds as $lid) {
+                if (!isset($completedSet[$lid])) {
+                    $resumeId = $lid;
+                    break;
+                }
+            }
+            if ($resumeId === null && !empty($orderedIds)) {
+                $resumeId = end($orderedIds); // última do curso
+            }
+
+            if ($resumeId) {
+                return redirect()->to('/student/dashboard/ver_aulas/' . $resumeId)
+                    ->with('info', 'Retomando de onde parou.');
+            }
+
+            return redirect()->back()->with('error', 'Nenhuma aula encontrada para este curso.');
         }
 
+        // Daqui pra baixo: $lesson É uma aula válida
         // Pega módulo e curso da aula
         $module = $moduleModel->find($lesson->id_module_lesson);
         $course = $courseModel->find($module->id_course_module);
 
-        // Pega todos os módulos do curso e suas aulas
-        $modules = $moduleModel->where('id_course_module', $course->id_course)->orderBy('position_module')->findAll();
-        foreach ($modules as &$m) {
-            $m->lessons = $lessonModel->where('id_module_lesson', $m->id_module)->orderBy('position_lesson')->findAll();
+        // matrícula do usuário no curso
+        $enrollment = $enrollmentModel
+            ->where('id_course_enrollment', $course->id_course)
+            ->first();
+
+        if (!$enrollment) {
+            return redirect()->to('/student/dashboard/checkout/' . $course->id_course)
+                ->with('warning', 'Você precisa estar inscrito neste curso.');
         }
 
-        // Navegação entre aulas do módulo atual
-        $allLessons = $lessonModel->where('id_module_lesson', $lesson->id_module_lesson)
-            ->orderBy('position_lesson')
-            ->findAll();
-        $lessonKeys = array_column($allLessons, 'id_lesson');
+        // carregar módulos + aulas
+        $modules = $moduleModel->where('id_course_module', $course->id_course)
+            ->orderBy('position_module')->findAll();
+        foreach ($modules as &$m) {
+            $m->lessons = $lessonModel->where('id_module_lesson', $m->id_module)
+                ->orderBy('position_lesson')->findAll();
+        }
+
+        // ordenação "global" de aulas do curso (para navegação e bloqueio server-side)
+        $ordered = $db->table('lessons l')
+            ->select('l.id_lesson')
+            ->join('modules m', 'm.id_module = l.id_module_lesson')
+            ->where('m.id_course_module', $course->id_course)
+            ->orderBy('m.position_module', 'ASC')
+            ->orderBy('l.position_lesson', 'ASC')
+            ->get()->getResultArray();
+        $orderedIds   = array_map(fn($r) => (int)$r['id_lesson'], $ordered);
+
+        // aulas concluídas da matrícula (para checkboxes e bloqueio)
+        $completedLessonIds = array_column(
+            $db->table('progress')
+                ->select('id_lesson_progress')
+                ->where('id_enrollment_progress', $enrollment->id_enrollment)
+                ->where('completed_at_progress IS NOT NULL', null, false)
+                ->get()->getResultArray(),
+            'id_lesson_progress'
+        );
+
+        // navegação anterior/próxima dentro do MÓDULO atual (como você já fazia)
+        $allLessons   = $lessonModel->where('id_module_lesson', $lesson->id_module_lesson)
+            ->orderBy('position_lesson')->findAll();
+        $lessonKeys   = array_column($allLessons, 'id_lesson');
         $currentIndex = array_search($lesson->id_lesson, $lessonKeys);
+        $prevLesson   = $lessonKeys[$currentIndex - 1] ?? null;
+        $nextLesson   = $lessonKeys[$currentIndex + 1] ?? null;
 
-        $prevLesson = $lessonKeys[$currentIndex - 1] ?? null;
-        $nextLesson = $lessonKeys[$currentIndex + 1] ?? null;
-
-        $user = service('auth')->user();
+        // (Opcional/segurança) Impedir pular: se tentou abrir uma aula "depois" da primeira não concluída, redireciona para ela
+        $completedSet = array_flip($completedLessonIds);
+        $firstLocked  = null;
+        foreach ($orderedIds as $lid) {
+            if (!isset($completedSet[$lid])) {
+                $firstLocked = $lid;
+                break;
+            }
+        }
+        if ($firstLocked !== null) {
+            $reqIndex  = array_search((int)$lesson->id_lesson, $orderedIds, true);
+            $lockIndex = array_search($firstLocked, $orderedIds, true);
+            if ($reqIndex > $lockIndex) {
+                return redirect()->to('/student/dashboard/ver_aulas/' . $firstLocked)
+                    ->with('warning', 'Conclua a aula anterior para continuar.');
+            }
+        }
 
         return view('pages/student/lessons', [
-            'course' => $course,
-            'modules' => $modules,
-            'lesson' => $lesson,
-            'prevLesson' => $prevLesson,
-            'nextLesson' => $nextLesson,
-            'user' => $user,
-            'sidebarLinks' => $this->sidebarLinks(),
-            'currentUrl' => current_url()
+            'course'             => $course,
+            'enrollment'         => (object)$enrollment,   // sua view usa ->id_enrollment
+            'modules'            => $modules,
+            'lesson'             => $lesson,
+            'prevLesson'         => $prevLesson,
+            'nextLesson'         => $nextLesson,
+            'completedLessonIds' => $completedLessonIds,
+            'user'               => $authUser,
+            'sidebarLinks'       => $this->sidebarLinks(),
+            'currentUrl'         => current_url(),
         ]);
     }
+
 
     public function courses()
     {

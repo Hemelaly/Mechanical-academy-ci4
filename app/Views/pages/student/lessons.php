@@ -1,3 +1,9 @@
+<?php
+
+// dd($enrollment)
+
+?>
+
 <?= $this->extend('layouts/master') ?>
 
 <?= $this->section('title') ?>Assistir<?= $this->endSection() ?>
@@ -257,6 +263,21 @@
         /* faixa de destaque */
     }
 
+    .lesson-row.locked {
+        opacity: .55;
+        pointer-events: auto;
+    }
+
+    .lesson-row.locked .checkbox {
+        opacity: .4;
+        pointer-events: none;
+    }
+
+    .nav-btn.disabled-next {
+        opacity: .55;
+        cursor: not-allowed;
+    }
+
     /* opcional: diferenciar hover do ativo */
     .lesson-row.current:hover {
         background: rgba(0, 0, 0, .32);
@@ -344,7 +365,7 @@
     }
 </style>
 
-<div class="main-container">
+<div class="main-container" data-enrollment-id="<?= (int)($enrollment->id_enrollment) ?>">
     <!-- Breadcrumb -->
     <div class="breadcrumb-nav">
         <a href="/student/dashboard/meus_cursos">← Voltar aos Cursos</a>
@@ -459,6 +480,8 @@
     </script>
 <?php endif; ?>
 
+<script src="https://player.vimeo.com/api/player.js"></script>
+
 <script>
     // ------- Helpers CSRF -------
     const csrfName = document.querySelector('meta[name="csrf-name"]')?.content;
@@ -485,54 +508,98 @@
         return res.json();
     }
 
-    // ------- Progresso -------
+    // ------- Enrollment Id via data-attribute -------
+    const enrollmentId = document.querySelector('.main-container')?.dataset?.enrollmentId;
+    if (!enrollmentId) {
+        console.warn('Enrollment ID não encontrado no data-enrollment-id da .main-container');
+    }
+
+    // ------- Progresso (UI local; servidor pode sobrescrever depois) -------
     function computeProgress() {
         const total = document.querySelectorAll('.lesson-row').length;
         const done = document.querySelectorAll('.lesson-check:checked').length;
         const pct = total ? Math.round((done / total) * 100) : 0;
-        document.getElementById('progressPercentage').textContent = pct + '%';
-        document.getElementById('progressBar').style.width = pct + '%';
+        const ppEl = document.getElementById('progressPercentage');
+        const barEl = document.getElementById('progressBar');
+        if (ppEl) ppEl.textContent = pct + '%';
+        if (barEl) barEl.style.width = pct + '%';
     }
 
     // ------- Toggle conclusão -------
-    async function toggleLessonComplete(lessonId, isChecked) {
+    async function toggleLessonComplete(lessonId, isChecked, checkboxEl) {
+        if (!enrollmentId) {
+            alert('Matrícula não identificada. Recarregue a página.');
+            // reverte
+            if (checkboxEl) checkboxEl.checked = !isChecked;
+            return;
+        }
+
+        // desabilita o checkbox durante a requisição
+        if (checkboxEl) checkboxEl.disabled = true;
+
         try {
             const url = isChecked ?
                 '<?= site_url('student/lessons/complete') ?>' :
                 '<?= site_url('student/lessons/uncomplete') ?>';
 
+            // otimista: atualiza linha concluída para feedback visual imediato
+            const row = document.querySelector(`.lesson-row[data-lesson-id="${lessonId}"]`);
+            row?.classList.toggle('done', isChecked);
+
+            // atualiza progresso localmente enquanto envia
+            computeProgress();
+
             const data = await fetchJSON(url, {
                 method: 'POST',
                 body: JSON.stringify({
-                    lesson_id: lessonId
+                    lesson_id: Number(lessonId),
+                    enrollment_id: Number(enrollmentId)
                 })
             });
 
             if (!data?.ok) {
-                // revert UI se falhar
-                const cb = document.querySelector(`.lesson-row[data-lesson-id="${lessonId}"] .lesson-check`);
-                if (cb) cb.checked = !isChecked;
+                // reverte UI se falhar
+                if (checkboxEl) checkboxEl.checked = !isChecked;
+                row?.classList.toggle('done', !isChecked);
                 alert(data?.message || 'Não foi possível atualizar a conclusão.');
+                return;
+            }
+
+            // se o backend devolver o % oficial, use-o
+            if (typeof data.progress === 'number') {
+                const ppEl = document.getElementById('progressPercentage');
+                const barEl = document.getElementById('progressBar');
+                if (ppEl) ppEl.textContent = data.progress + '%';
+                if (barEl) barEl.style.width = data.progress + '%';
+            } else {
+                // fallback: recalc local
+                computeProgress();
             }
         } catch (e) {
-            const cb = document.querySelector(`.lesson-row[data-lesson-id="${lessonId}"] .lesson-check`);
-            if (cb) cb.checked = !isChecked;
+            // reverte UI e alerta
+            if (checkboxEl) checkboxEl.checked = !isChecked;
+            const row = document.querySelector(`.lesson-row[data-lesson-id="${lessonId}"]`);
+            row?.classList.toggle('done', !isChecked);
             alert('Erro de rede ao salvar. Tente novamente.');
         } finally {
-            computeProgress();
+            if (checkboxEl) checkboxEl.disabled = false;
         }
     }
 
-    // Bind checkboxes
+    // ------- Bind checkboxes -------
     document.querySelectorAll('.lesson-check').forEach(cb => {
+        // estado visual inicial "done"
+        const initRow = cb.closest('.lesson-row');
+        if (initRow) initRow.classList.toggle('done', cb.checked);
+
         cb.addEventListener('change', (e) => {
             const row = e.target.closest('.lesson-row');
             const id = row?.dataset?.lessonId;
-            if (id) toggleLessonComplete(id, e.target.checked);
+            if (id) toggleLessonComplete(id, e.target.checked, e.target);
         });
     });
 
-    // Inicializa progresso
+    // ------- Inicializa progresso -------
     computeProgress();
 </script>
 
