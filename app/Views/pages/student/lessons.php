@@ -1,7 +1,7 @@
 <?php
-
 // dd($enrollment)
-
+$autoplayFlag = (int) ($_GET['autoplay'] ?? 0); // CI4
+$auto  = $autoplayFlag ? 1 : 0;
 ?>
 
 <?= $this->extend('layouts/master') ?>
@@ -255,12 +255,9 @@
         background: rgba(255, 255, 255, .03)
     }
 
-    /* ativo (aula atual) */
     .lesson-row.current {
         background: rgba(0, 0, 0, .25);
-        /* mais escuro */
         border-left: 3px solid #8b5cf6;
-        /* faixa de destaque */
     }
 
     .lesson-row.locked {
@@ -278,9 +275,8 @@
         cursor: not-allowed;
     }
 
-    /* opcional: diferenciar hover do ativo */
     .lesson-row.current:hover {
-        background: rgba(0, 0, 0, .32);
+        background: rgba(0, 0, 0, .32)
     }
 
     .lesson-link {
@@ -363,6 +359,69 @@
     .nav-btn.secondary {
         background: #4c1d95
     }
+
+    /* Overlay mostrado quando o vídeo termina */
+    .end-overlay {
+        position: absolute;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(2px);
+        background: rgba(0, 0, 0, .45);
+        z-index: 5;
+    }
+
+    .end-overlay.show {
+        display: flex;
+    }
+
+    .end-card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 20px;
+        text-align: center;
+        max-width: 360px;
+        width: 92%;
+        color: var(--text);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, .35);
+    }
+
+    .end-card h4 {
+        margin: 0 0 10px;
+    }
+
+    .end-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 14px;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--accent);
+        border: none;
+        color: #fff;
+        padding: 10px 16px;
+        border-radius: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .btn.secondary {
+        background: #4c1d95;
+    }
+
+    .small-note {
+        font-size: .85rem;
+        opacity: .8;
+        margin-top: 8px;
+    }
 </style>
 
 <div class="main-container" data-enrollment-id="<?= (int)($enrollment->id_enrollment) ?>">
@@ -400,13 +459,31 @@
                 ?>
                 <?php if ($videoId): ?>
                     <iframe id="vimeoPlayer"
-                        src="https://player.vimeo.com/video/<?= esc($videoId) ?>?badge=0&autopause=0&player_id=<?= esc($lesson->id_lesson) ?>&app_id=58479&title=0&byline=0&portrait=0"
+                        src="https://player.vimeo.com/video/<?= esc($videoId) ?>?badge=0&autopause=0&player_id=<?= esc($lesson->id_lesson) ?>&app_id=58479&title=0&byline=0&portrait=0&autoplay=<?= $auto ?>"
                         allow="autoplay; fullscreen; picture-in-picture"
                         allowfullscreen referrerpolicy="no-referrer" loading="lazy"
                         sandbox="allow-same-origin allow-scripts allow-presentation"
-                        oncontextmenu="return false;"></iframe>
+                        oncontextmenu="return false">
+                    </iframe>
                 <?php else: ?>
                     <p class="text-danger">Link de vídeo inválido</p>
+                <?php endif; ?>
+
+                <?php if ($nextLesson): ?>
+                    <!-- Overlay DENTRO do .video-player -->
+                    <div id="endOverlay" class="end-overlay" oncontextmenu="return false;">
+                        <div class="end-card">
+                            <h4>Aula concluída 🎉</h4>
+                            <p>Avance para a próxima aula quando quiser.</p>
+                            <div class="end-actions">
+                                <a id="goNextBtn"
+                                    href="<?= site_url('student/dashboard/ver_aulas/' . $nextLesson) ?>?autoplay=1"
+                                    class="btn">Próxima Aula →</a>
+                                <button id="stayBtn" type="button" class="btn secondary">Ficar aqui</button>
+                            </div>
+                            <div class="small-note" id="autoNote">Indo automaticamente em <span id="countdown">5</span>s…</div>
+                        </div>
+                    </div>
                 <?php endif; ?>
             </div>
 
@@ -469,7 +546,8 @@
         <?php else: ?><span></span><?php endif; ?>
 
         <?php if ($nextLesson): ?>
-            <a href="<?= site_url('student/dashboard/ver_aulas/' . $nextLesson) ?>" class="nav-btn">Próxima Aula →</a>
+            <!-- Botão inferior também com autoplay -->
+            <a href="<?= site_url('student/dashboard/ver_aulas/' . $nextLesson) ?>?autoplay=1" class="nav-btn">Próxima Aula →</a>
         <?php endif; ?>
     </div>
 </div>
@@ -480,10 +558,13 @@
     </script>
 <?php endif; ?>
 
+<!-- SDK do Vimeo -->
 <script src="https://player.vimeo.com/api/player.js"></script>
 
 <script>
-    // ------- Helpers CSRF -------
+    /* =========================
+   Helpers CSRF / Progress
+   ========================= */
     const csrfName = document.querySelector('meta[name="csrf-name"]')?.content;
     let csrfHash = document.querySelector('meta[name="csrf-hash"]')?.content;
 
@@ -502,19 +583,14 @@
             cfg.headers[csrfName] = csrfHash;
         }
         const res = await fetch(url, cfg);
-        // atualiza CSRF se vier no header
         const newHash = res.headers.get('X-CSRF-Hash');
         if (newHash) csrfHash = newHash;
         return res.json();
     }
 
-    // ------- Enrollment Id via data-attribute -------
     const enrollmentId = document.querySelector('.main-container')?.dataset?.enrollmentId;
-    if (!enrollmentId) {
-        console.warn('Enrollment ID não encontrado no data-enrollment-id da .main-container');
-    }
+    if (!enrollmentId) console.warn('Enrollment ID não encontrado no data-enrollment-id da .main-container');
 
-    // ------- Progresso (UI local; servidor pode sobrescrever depois) -------
     function computeProgress() {
         const total = document.querySelectorAll('.lesson-row').length;
         const done = document.querySelectorAll('.lesson-check:checked').length;
@@ -525,16 +601,12 @@
         if (barEl) barEl.style.width = pct + '%';
     }
 
-    // ------- Toggle conclusão -------
     async function toggleLessonComplete(lessonId, isChecked, checkboxEl) {
         if (!enrollmentId) {
             alert('Matrícula não identificada. Recarregue a página.');
-            // reverte
             if (checkboxEl) checkboxEl.checked = !isChecked;
             return;
         }
-
-        // desabilita o checkbox durante a requisição
         if (checkboxEl) checkboxEl.disabled = true;
 
         try {
@@ -542,11 +614,8 @@
                 '<?= site_url('student/lessons/complete') ?>' :
                 '<?= site_url('student/lessons/uncomplete') ?>';
 
-            // otimista: atualiza linha concluída para feedback visual imediato
             const row = document.querySelector(`.lesson-row[data-lesson-id="${lessonId}"]`);
             row?.classList.toggle('done', isChecked);
-
-            // atualiza progresso localmente enquanto envia
             computeProgress();
 
             const data = await fetchJSON(url, {
@@ -558,25 +627,20 @@
             });
 
             if (!data?.ok) {
-                // reverte UI se falhar
                 if (checkboxEl) checkboxEl.checked = !isChecked;
                 row?.classList.toggle('done', !isChecked);
                 alert(data?.message || 'Não foi possível atualizar a conclusão.');
                 return;
             }
-
-            // se o backend devolver o % oficial, use-o
             if (typeof data.progress === 'number') {
                 const ppEl = document.getElementById('progressPercentage');
                 const barEl = document.getElementById('progressBar');
                 if (ppEl) ppEl.textContent = data.progress + '%';
                 if (barEl) barEl.style.width = data.progress + '%';
             } else {
-                // fallback: recalc local
                 computeProgress();
             }
         } catch (e) {
-            // reverte UI e alerta
             if (checkboxEl) checkboxEl.checked = !isChecked;
             const row = document.querySelector(`.lesson-row[data-lesson-id="${lessonId}"]`);
             row?.classList.toggle('done', !isChecked);
@@ -586,21 +650,118 @@
         }
     }
 
-    // ------- Bind checkboxes -------
     document.querySelectorAll('.lesson-check').forEach(cb => {
-        // estado visual inicial "done"
         const initRow = cb.closest('.lesson-row');
         if (initRow) initRow.classList.toggle('done', cb.checked);
-
         cb.addEventListener('change', (e) => {
             const row = e.target.closest('.lesson-row');
             const id = row?.dataset?.lessonId;
             if (id) toggleLessonComplete(id, e.target.checked, e.target);
         });
     });
-
-    // ------- Inicializa progresso -------
     computeProgress();
+
+    /* =========================
+       Vimeo Player + Navegação
+       ========================= */
+    const vimeoIframe = document.getElementById('vimeoPlayer');
+    const player = vimeoIframe ? new Vimeo.Player(vimeoIframe) : null;
+
+    const currentLessonId = <?= (int)$lesson->id_lesson ?>;
+    const hasNext = <?= $nextLesson ? 'true' : 'false' ?>;
+    const nextUrl = "<?= $nextLesson ? site_url('student/dashboard/ver_aulas/' . $nextLesson) : '' ?>";
+
+    const endOverlay = document.getElementById('endOverlay');
+    const goNextBtn = document.getElementById('goNextBtn');
+    const stayBtn = document.getElementById('stayBtn');
+    const countdownEl = document.getElementById('countdown');
+    const autoNote = document.getElementById('autoNote');
+
+    function withAutoplay(url) {
+        return url + (url.includes('?') ? '&' : '?') + 'autoplay=1';
+    }
+
+    let autoTimer = null;
+    let seconds = 5;
+
+    function showEndOverlay() {
+        if (!endOverlay) return;
+        endOverlay.classList.add('show');
+
+        if (goNextBtn && nextUrl) {
+            goNextBtn.href = withAutoplay(nextUrl);
+        }
+        if (autoNote && countdownEl) {
+            seconds = 5;
+            countdownEl.textContent = seconds;
+            autoTimer = setInterval(() => {
+                seconds--;
+                countdownEl.textContent = seconds;
+                if (seconds <= 0) {
+                    clearInterval(autoTimer);
+                    if (nextUrl) window.location.href = withAutoplay(nextUrl);
+                }
+            }, 1000);
+        }
+    }
+
+    function hideEndOverlay() {
+        if (!endOverlay) return;
+        endOverlay.classList.remove('show');
+        if (autoTimer) {
+            clearInterval(autoTimer);
+            autoTimer = null;
+        }
+    }
+
+    if (stayBtn) {
+        stayBtn.addEventListener('click', hideEndOverlay);
+    }
+
+    // Marca concluído ao terminar
+    async function markCompletedOnEnd() {
+        const checkbox = document.querySelector(`.lesson-row[data-lesson-id="${currentLessonId}"] .lesson-check`);
+        if (checkbox && !checkbox.checked) {
+            checkbox.checked = true;
+            await toggleLessonComplete(currentLessonId, true, checkbox);
+        }
+    }
+
+    // Autoplay “failsafe” ao carregar esta página, se veio com ?autoplay=1
+    const urlParams = new URLSearchParams(window.location.search);
+    const shouldAutoplay = urlParams.get('autoplay') === '1';
+    if (player && shouldAutoplay) {
+        player.ready().then(() => {
+            player.play().catch(() => {
+                /* navegador pode bloquear */ });
+        });
+    }
+
+    if (player) {
+        player.on('ended', async function() {
+            try {
+                await markCompletedOnEnd();
+            } catch (e) {
+                console.warn('Falha ao marcar concluída no término:', e);
+            }
+            if (hasNext && nextUrl) showEndOverlay();
+        });
+
+        // (Opcional) marcar com 90% assistido
+        player.on('timeupdate', async function(data) {
+            try {
+                const duration = (await player.getDuration()) || 0;
+                const watched = data.seconds || 0;
+                if (duration > 0 && watched / duration >= 0.95) {
+                    const checkbox = document.querySelector(`.lesson-row[data-lesson-id="${currentLessonId}"] .lesson-check`);
+                    if (checkbox && !checkbox.checked) {
+                        checkbox.checked = true;
+                        await toggleLessonComplete(currentLessonId, true, checkbox);
+                    }
+                }
+            } catch {}
+        });
+    }
 </script>
 
 <?= $this->endSection() ?>
