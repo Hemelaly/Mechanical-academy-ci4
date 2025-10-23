@@ -1,3 +1,9 @@
+<?php
+
+// dd($courses)
+
+?>
+
 <?= $this->extend('layouts/master') ?>
 
 <?= $this->section('title') ?>Painel do Estudante<?= $this->endSection() ?>
@@ -152,17 +158,17 @@
                                 </div>
                                 <div class="tw-sub small mb-2">Instrutor: <?= $course->name_instructor ?? 'N/A' ?></div>
                             </div>
-                            <a href="/student/dashboard/ver_aulas/<?= $lesson->firstLessonId ?>" class="btn btn-sm btn-accent">
+                            <a href="/student/dashboard/ver_aulas/<?= $lesson[0]->resumeLessonId ?>" class="btn btn-sm btn-accent">
                                 <i class="bi bi-arrow-right-circle me-1"></i>Continuar
                             </a>
                         </div>
                         <div class="mt-3">
                             <div class="d-flex justify-content-between small tw-sub mb-1">
                                 <span>Progresso</span>
-                                <span>0%</span>
+                                <span><?= esc((int) round($progress->{$course->id_course}->progress)) ?>%</span>
                             </div>
                             <div class="progress">
-                                <div class="progress-bar" role="progressbar" style="width:0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                <div class="progress-bar" role="progressbar" style="width:<?= esc((int) round($progress->{$course->id_course}->progress)) ?>%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                             </div>
                         </div>
                     </div>

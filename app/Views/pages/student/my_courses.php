@@ -90,22 +90,28 @@
                   <p class="card-text flex-grow-1"><?= $course->description_course ?></p>
 
                   <!-- Progresso -->
-                  <!-- <div class="mb-3">
+                  <div class="mb-3">
                     <div class="d-flex justify-content-between">
                       <small>Progresso</small>
-                      <small>85%</small>
+                      <small><?= (int) $progress->{$course->id_course}->progress ?>%</small>
                     </div>
                     <div class="progress bg-dark" style="height: 6px;">
-                      <div class="progress-bar bg-info" style="width: 0%;"></div>
+                      <div class="progress-bar bg-info" style="width: <?= (int) $progress->{$course->id_course}->progress ?>%;"></div>
                     </div>
-                    <small class="text-muted">0 de 0 módulos concluídos</small>
-                  </div> -->
+                    <!-- <small class="text-muted">0 de 0 módulos concluídos</small> -->
+                  </div>
 
                   <!-- Ações -->
                   <div class="d-flex gap-2">
-                    <a href="/student/dashboard/ver_aulas/<?= $course->firstLessonId ?>" class="btn btn-info flex-fill">
-                      <i class="fas fa-play me-1"></i> Continuar
-                    </a>
+                    <?php if (!empty($course->resumeLessonId)): ?>
+                      <a class="btn btn-info flex-fill" href="<?= site_url('student/dashboard/ver_aulas/' . $course->resumeLessonId) ?>?autoplay=1">
+                        Continuar a ver
+                      </a>
+                    <?php else: ?>
+                      <a class="btn btn-info flex-fill" href="<?= site_url('student/dashboard/ver_aulas/' . $course->resumeLessonId) ?>?autoplay=1">
+                        Começar a assistir
+                      </a>
+                    <?php endif; ?>
                   </div>
                 </div>
               </div>

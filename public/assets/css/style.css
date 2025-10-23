@@ -106,7 +106,6 @@ body {
 .sidebar {
   background: #0f172a;
   border-right: 1px solid #1e293b; /* slate-800 */
-  height: 100vh;
 }
 
 #sidebar a {
