@@ -244,7 +244,6 @@ class Dashboard extends BaseController
         ]);
     }
 
-
     public function lessons($id)
     {
         $lessonModel     = new LessonModel();
@@ -258,9 +257,8 @@ class Dashboard extends BaseController
 
         $id = (int) $id;
 
-        // Helper local para calcular a aula de retomada (resume) de um curso
+        // Helper para calcular retomada e ordem global
         $calcResume = function (int $courseId, int $enrollmentId) use ($db) {
-            // ordem global das aulas do curso
             $ordered = $db->table('lessons l')
                 ->select('l.id_lesson')
                 ->join('modules m', 'm.id_module = l.id_module_lesson')
@@ -274,7 +272,6 @@ class Dashboard extends BaseController
                 return [null, $orderedIds];
             }
 
-            // aulas concluídas
             $completedLessonIds = array_column(
                 $db->table('progress')
                     ->select('id_lesson_progress')
@@ -285,7 +282,6 @@ class Dashboard extends BaseController
             );
             $completedSet = array_flip($completedLessonIds);
 
-            // primeira NÃO concluída -> resume; se todas concluídas -> última
             $resumeId = null;
             foreach ($orderedIds as $lid) {
                 if (!isset($completedSet[$lid])) {
@@ -293,9 +289,7 @@ class Dashboard extends BaseController
                     break;
                 }
             }
-            if ($resumeId === null) {
-                $resumeId = end($orderedIds);
-            }
+            if ($resumeId === null) $resumeId = end($orderedIds);
 
             return [$resumeId, $orderedIds];
         };
@@ -303,35 +297,29 @@ class Dashboard extends BaseController
         // Tenta achar como AULA
         $lesson = $lessonModel->find($id);
 
-        // Se NÃO for aula, tratamos como CURSO e redirecionamos para "retomar"
+        // Se NÃO for aula, trata como CURSO e redireciona para retomar
         if (!$lesson) {
             $course = $courseModel->find($id);
             if (!$course) {
                 return redirect()->back()->with('error', 'Curso não encontrado.');
             }
-
-            // matrícula do usuário nesse curso
             $enrollment = $enrollmentModel
                 ->where('id_course_enrollment', $course->id_course)
                 ->first();
-
             if (!$enrollment) {
                 return redirect()->to('/student/dashboard/checkout/' . $course->id_course)
                     ->with('warning', 'Você precisa estar inscrito neste curso.');
             }
 
-            // calcula a aula de retomada e redireciona SEMPRE
             [$resumeId] = $calcResume((int)$course->id_course, (int)$enrollment->id_enrollment);
             if ($resumeId) {
                 return redirect()->to('/student/dashboard/ver_aulas/' . $resumeId)
                     ->with('info', 'Retomando de onde parou.');
             }
-
             return redirect()->back()->with('error', 'Nenhuma aula encontrada para este curso.');
         }
 
-        // Daqui pra baixo: $lesson É uma aula válida
-        // Pega módulo e curso da aula
+        // Aula válida → obter módulo/curso
         $module = $moduleModel->find($lesson->id_module_lesson);
         $course = $courseModel->find($module->id_course_module);
 
@@ -339,38 +327,34 @@ class Dashboard extends BaseController
         $enrollment = $enrollmentModel
             ->where('id_course_enrollment', $course->id_course)
             ->first();
-
         if (!$enrollment) {
             return redirect()->to('/student/dashboard/checkout/' . $course->id_course)
                 ->with('warning', 'Você precisa estar inscrito neste curso.');
         }
 
-        // === SEMPRE FORÇAR RESUME, MESMO QUANDO VEIO COM ID DE AULA ===
-        // Use ?override=1 na URL para abrir a aula explicitamente sem forçar.
+        // Força retomar apenas se tentar ir à frente
         $override = (int) (service('request')->getGet('override') ?? 0);
         [$resumeId, $orderedIds] = $calcResume((int)$course->id_course, (int)$enrollment->id_enrollment);
 
         if (!$override && $resumeId) {
             $reqIndex    = array_search((int)$lesson->id_lesson, $orderedIds, true);
             $resumeIndex = array_search((int)$resumeId,        $orderedIds, true);
-
-            // Só bloqueia se estiver tentando abrir uma aula À FRENTE da retomada
             if ($reqIndex !== false && $resumeIndex !== false && $reqIndex > $resumeIndex) {
                 return redirect()->to('/student/dashboard/ver_aulas/' . $resumeId)
                     ->with('warning', 'Conclua a aula anterior para continuar.');
             }
         }
-        // === FIM DO FORCE RESUME ===
 
-        // carregar módulos + aulas (para sidebar)
+        // Sidebar: módulos + aulas (sem interferir em prev/next)
         $modules = $moduleModel->where('id_course_module', $course->id_course)
             ->orderBy('position_module')->findAll();
         foreach ($modules as &$m) {
             $m->lessons = $lessonModel->where('id_module_lesson', $m->id_module)
                 ->orderBy('position_lesson')->findAll();
         }
+        unset($m);
 
-        // aulas concluídas da matrícula (para checkboxes e bloqueio)
+        // Concluídas (para checkboxes)
         $completedLessonIds = array_column(
             $db->table('progress')
                 ->select('id_lesson_progress')
@@ -380,39 +364,22 @@ class Dashboard extends BaseController
             'id_lesson_progress'
         );
 
-        // navegação anterior/próxima dentro do MÓDULO atual (como você já fazia)
-        $allLessons   = $lessonModel->where('id_module_lesson', $lesson->id_module_lesson)
-            ->orderBy('position_lesson')->findAll();
-        $lessonKeys   = array_column($allLessons, 'id_lesson');
-        $currentIndex = array_search($lesson->id_lesson, $lessonKeys);
-        $prevLesson   = $lessonKeys[$currentIndex - 1] ?? null;
-        $nextLesson   = $lessonKeys[$currentIndex + 1] ?? null;
-
-        // (Opcional) Bloqueio de pulo (mantido)
-        $completedSet = array_flip($completedLessonIds);
-        $firstLocked  = null;
-        foreach ($orderedIds as $lid) {
-            if (!isset($completedSet[$lid])) {
-                $firstLocked = $lid;
-                break;
-            }
-        }
-        if ($firstLocked !== null) {
-            $reqIndex  = array_search((int)$lesson->id_lesson, $orderedIds, true);
-            $lockIndex = array_search($firstLocked, $orderedIds, true);
-            if ($reqIndex > $lockIndex) {
-                return redirect()->to('/student/dashboard/ver_aulas/' . $firstLocked)
-                    ->with('warning', 'Conclua a aula anterior para continuar.');
-            }
-        }
+        // >>> PREV/NEXT **GLOBAIS** com base em $orderedIds <<<
+        $currIndex = array_search((int)$lesson->id_lesson, $orderedIds, true);
+        $prevLesson = ($currIndex !== false && $currIndex > 0)
+            ? $orderedIds[$currIndex - 1]
+            : null;
+        $nextLesson = ($currIndex !== false && $currIndex < count($orderedIds) - 1)
+            ? $orderedIds[$currIndex + 1]
+            : null;
 
         return view('pages/student/lessons', [
             'course'             => $course,
-            'enrollment'         => (object)$enrollment,   // sua view usa ->id_enrollment
+            'enrollment'         => (object)$enrollment,
             'modules'            => $modules,
             'lesson'             => $lesson,
-            'prevLesson'         => $prevLesson,
-            'nextLesson'         => $nextLesson,
+            'prevLesson'         => $prevLesson,  // agora global
+            'nextLesson'         => $nextLesson,  // agora global
             'completedLessonIds' => $completedLessonIds,
             'user'               => $authUser,
             'sidebarLinks'       => $this->sidebarLinks(),

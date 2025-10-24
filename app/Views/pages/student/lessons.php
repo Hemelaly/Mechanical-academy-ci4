@@ -661,6 +661,55 @@ $auto  = $autoplayFlag ? 1 : 0;
     });
     computeProgress();
 
+    // === Abrir o acordeão do módulo da AULA ATUAL ===
+    function getCollapseFromModule(moduleEl) {
+        if (!moduleEl) return null;
+        const idx = moduleEl.getAttribute('x-module');
+        return document.getElementById('mod' + idx);
+    }
+
+    function getHeaderBtnFromModule(moduleEl) {
+        return moduleEl?.querySelector('.module-header') || null;
+    }
+
+    function collapseModuleEl(moduleEl) {
+        const collapse = getCollapseFromModule(moduleEl);
+        const headerBtn = getHeaderBtnFromModule(moduleEl);
+        if (collapse && collapse.classList.contains('show')) {
+            collapse.classList.remove('show');
+        }
+        if (headerBtn) headerBtn.setAttribute('aria-expanded', 'false');
+    }
+
+    function expandModuleEl(moduleEl, {
+        exclusive = false
+    } = {}) {
+        if (!moduleEl) return;
+
+        if (exclusive) {
+            // fecha todos os módulos antes
+            document.querySelectorAll('.module').forEach(m => collapseModuleEl(m));
+        }
+
+        const collapse = getCollapseFromModule(moduleEl);
+        const headerBtn = getHeaderBtnFromModule(moduleEl);
+
+        if (collapse && !collapse.classList.contains('show')) {
+            collapse.classList.add('show');
+        }
+        if (headerBtn) headerBtn.setAttribute('aria-expanded', 'true');
+    }
+
+    // Ao carregar: fecha os anteriores e abre SOMENTE o do item atual
+    (function expandCurrentModuleOnLoad() {
+        const currentRow = document.querySelector('.lesson-row.current');
+        if (!currentRow) return;
+        const moduleEl = currentRow.closest('.module');
+        expandModuleEl(moduleEl, {
+            exclusive: true
+        });
+    })();
+
     /* =========================
        Vimeo Player + Navegação
        ========================= */
@@ -733,7 +782,8 @@ $auto  = $autoplayFlag ? 1 : 0;
     if (player && shouldAutoplay) {
         player.ready().then(() => {
             player.play().catch(() => {
-                /* navegador pode bloquear */ });
+                /* navegador pode bloquear */
+            });
         });
     }
 
