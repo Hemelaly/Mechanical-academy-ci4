@@ -490,8 +490,8 @@ $auto  = $autoplayFlag ? 1 : 0;
             <div class="lesson-info">
                 <h2 class="lesson-title"><?= esc($lesson->title_lesson) ?></h2>
                 <div class="lesson-meta">
-                    <div>⏱ <?= esc($lesson->duration_lesson) ?> minutos</div>
-                    <div>📅 <?= date('d/m/Y', strtotime($lesson->created_at)) ?></div>
+                    <div><i class="bi bi-stopwatch"></i> <?= esc($lesson->duration_lesson) ?> minutos</div>
+                    <div><i class="bi bi-calendar3"></i> <?= date('d/m/Y', strtotime($lesson->created_at)) ?></div>
                 </div>
                 <p class="lesson-description"><?= esc($lesson->content_lesson) ?></p>
             </div>
@@ -504,11 +504,11 @@ $auto  = $autoplayFlag ? 1 : 0;
             <?php foreach ($modules as $index => $m): ?>
                 <div class="module" x-module="<?= $index ?>">
                     <button class="module-header" type="button" data-bs-toggle="collapse" data-bs-target="#mod<?= $index ?>" aria-expanded="<?= $index === 0 ? 'true' : 'false' ?>" aria-controls="mod<?= $index ?>">
-                        <div class="left">
+                        <div class="left col-10 text-start">
                             <span class="dot"></span>
                             <span class="module-title"><?= esc($m->title_module) ?></span>
                         </div>
-                        <span class="module-count text-white"><?= count($m->lessons) ?> aulas</span>
+                        <span class="module-count col-2 text-white"><?= count($m->lessons) ?> aulas</span>
                     </button>
 
                     <div id="mod<?= $index ?>" class="collapse <?= $index === 0 ? 'show' : '' ?>">
@@ -542,7 +542,7 @@ $auto  = $autoplayFlag ? 1 : 0;
     <!-- Navegação -->
     <div class="navigation-buttons">
         <?php if ($prevLesson): ?>
-            <a href="<?= site_url('student/dashboard/ver_aulas/' . $prevLesson) ?>" class="nav-btn secondary">← Aula Anterior</a>
+            <a href="<?= site_url('student/dashboard/ver_aulas/' . $prevLesson) ?>?autoplay=1" class="nav-btn secondary">← Aula Anterior</a>
         <?php else: ?><span></span><?php endif; ?>
 
         <?php if ($nextLesson): ?>
