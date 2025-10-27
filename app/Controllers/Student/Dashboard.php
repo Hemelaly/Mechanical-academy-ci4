@@ -5,8 +5,10 @@ namespace App\Controllers\Student;
 use App\Controllers\BaseController;
 use App\Models\CourseModel;
 use App\Models\EnrollmentModel;
+use App\Models\ExtendedUserModel;
 use App\Models\ModuleModel;
 use App\Models\LessonModel;
+use CodeIgniter\Shield\Models\UserModel;
 
 class Dashboard extends BaseController
 {
@@ -506,12 +508,86 @@ class Dashboard extends BaseController
 
     public function profile()
     {
-        $user = service('auth')->user();
+        // Se estiver a usar um model estendido, troque para ExtendedUserModel::class
+        $users = new ExtendedUserModel();
 
-        return view('pages/student/profile', [
-            'user' => $user,
-            'sidebarLinks' => $this->sidebarLinks(),
-            'currentUrl' => current_url()
-        ]);
+        $user = auth()->user();
+        if (! $user) {
+            return redirect()->to(site_url('login'))->with('error', 'Sessão expirada. Faça login novamente.');
+        }
+
+        if ($this->request->getMethod() !== 'POST') {
+            return view('pages/student/profile', [
+                'user'         => $user,
+                'sidebarLinks' => $this->sidebarLinks(),
+                'currentUrl'   => current_url(),
+            ]);
+        }
+
+        // Validação
+        $rules = [
+            'nome'      => 'required|min_length[2]',
+            'pais'      => 'permit_empty|max_length[100]',
+            'provincia' => 'permit_empty|max_length[100]',
+            'cidade'    => 'permit_empty|max_length[100]',
+            'telefone'    => 'permit_empty|max_length[20]',
+            'imagem'    => 'if_exist|is_image[imagem]|mime_in[imagem,image/jpg,image/jpeg,image/png,image/webp]|max_size[imagem,4096]',
+        ];
+        if (! $this->validate($rules)) {
+            return redirect()->back()->withInput()->with('error', implode(', ', $this->validator->getErrors()));
+        }
+
+        $post     = $this->request->getPost();
+        
+        $userName = trim(($post['nome'] ?? ''));
+
+        // Upload opcional
+        $file     = $this->request->getFile('imagem');
+        $filePath = $user->img ?? null; // mantém a imagem atual por padrão
+
+        if ($file && $file->isValid() && $file->getError() === UPLOAD_ERR_OK) {
+            $targetDir = FCPATH . 'assets/img/';
+            if (! is_dir($targetDir)) {
+                @mkdir($targetDir, 0755, true);
+            }
+
+            $newName = $file->getRandomName();
+            if (! $file->move($targetDir, $newName)) {
+                return redirect()->back()->withInput()->with('error', 'Falha ao mover a imagem.');
+            }
+
+            // opcional: apagar imagem antiga
+            if (! empty($user->img)) {
+                $old = FCPATH . $user->img;
+                if (is_file($old)) {
+                    @unlink($old);
+                }
+            }
+
+            $filePath = 'assets/img/' . $newName; // salvar relativo na DB
+        }
+
+        // IMPORTANTE (Shield):
+        // O UserModel do Shield protege os campos. Para gravar 'img', 'country', etc.,
+        // eles devem estar em $allowedFields do Model (ver seção "Model estendido" abaixo).
+        $dataProfile = [
+            'username' => $userName,
+            'img'      => $filePath,
+            'country'  => $post['pais']      ?? null,
+            'province' => $post['provincia'] ?? null,
+            'city'     => $post['cidade']    ?? null,
+            'phone'     => $post['telefone']    ?? null,
+        ];
+
+        // Atualiza via update(id, data) ou preenchendo a entidade e chamando save()
+        if (! $users->update($user->id, $dataProfile)) {
+            return redirect()->back()->withInput()->with('error', implode(', ', $users->errors()));
+        }
+
+        // Recarrega o user para refletir alterações
+        $updated = $users->find($user->id);
+        auth()->setUser($updated);
+
+        return redirect()->back()->with('success', 'Perfil atualizado com sucesso.');
     }
 }

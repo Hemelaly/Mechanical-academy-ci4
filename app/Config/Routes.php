@@ -17,6 +17,7 @@ $routes->post('reset-password', 'ResetPassword::submitReset');
 // Admin
 $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'role:admin'], function ($routes) {
     $routes->get('dashboard', 'Dashboard::index');
+    $routes->get('dashboard/perfil', 'Dashboard::profile');
 });
 
 // Instructor
@@ -42,6 +43,7 @@ $routes->group('student', ['namespace' => 'App\Controllers\Student', 'filter' =>
     $routes->get('dashboard/ver_aulas/(:num)', 'Dashboard::lessons/$1');
     $routes->get('dashboard/checkout/(:num)', 'Dashboard::checkout/$1');
     $routes->get('dashboard/perfil', 'Dashboard::profile');
+    $routes->post('dashboard/perfil', 'Dashboard::profile');
 
     // Rotas para Marcar as aulas como completas
     $routes->group('lessons', function ($r) {

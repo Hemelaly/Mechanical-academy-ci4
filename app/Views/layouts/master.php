@@ -35,6 +35,8 @@
                         <?= $this->include('pages/admin/partials/navbar') ?>
 
                         <?= $this->renderSection('home_admin') ?>
+
+                        <?= $this->renderSection('profile') ?>
                     </div>
                 </div>
 
