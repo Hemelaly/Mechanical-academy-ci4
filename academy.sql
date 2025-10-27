@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Oct 17, 2025 at 03:14 PM
+-- Generation Time: Oct 27, 2025 at 05:22 PM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.26
 
@@ -39,7 +39,8 @@ CREATE TABLE `auth_groups_users` (
 --
 
 INSERT INTO `auth_groups_users` (`id`, `user_id`, `group`, `created_at`) VALUES
-(1, 1, 'user', '2025-10-09 05:18:14');
+(1, 1, 'user', '2025-10-09 05:18:14'),
+(2, 17, 'user', '2025-10-23 09:33:15');
 
 -- --------------------------------------------------------
 
@@ -67,9 +68,9 @@ CREATE TABLE `auth_identities` (
 --
 
 INSERT INTO `auth_identities` (`id`, `user_id`, `type`, `name`, `secret`, `secret2`, `expires`, `extra`, `force_reset`, `last_used_at`, `created_at`, `updated_at`) VALUES
-(1, 1, 'email_password', NULL, 'keylacelestino@gmail.com', '$2y$12$etwJ5HqvY30lgh404H2YLuxjxWIEY5o7sb9dajkDrgUEffY97Qpai', NULL, NULL, 0, '2025-10-13 10:40:56', '2025-10-09 05:18:13', '2025-10-13 10:40:56'),
-(15, 15, 'email_password', NULL, 'hemelaly02@gmail.com', '$2y$12$SctU77Nw567mZJZt6i/0NuXrTLGtcUA3nzeozXdvpUxE.VBQ5sVcG', NULL, NULL, 0, '2025-10-15 09:03:31', '2025-10-10 16:42:11', '2025-10-15 09:03:31'),
-(16, 16, 'email_password', NULL, 'hemelwork02@gmail.com', '$2y$12$dLHO1ZIXerIyb6usUZqH4eKTo05BSLJt517weViG9Uw/OAP78o9Ou', NULL, NULL, 0, '2025-10-13 10:41:51', '2025-10-13 10:41:13', '2025-10-13 10:41:51');
+(1, 1, 'email_password', NULL, 'keylacelestino@gmail.com', '$2y$12$etwJ5HqvY30lgh404H2YLuxjxWIEY5o7sb9dajkDrgUEffY97Qpai', NULL, NULL, 0, '2025-10-24 08:14:30', '2025-10-09 05:18:13', '2025-10-24 08:14:30'),
+(15, 15, 'email_password', NULL, 'hemelaly02@gmail.com', '$2y$12$SctU77Nw567mZJZt6i/0NuXrTLGtcUA3nzeozXdvpUxE.VBQ5sVcG', NULL, NULL, 0, '2025-10-24 12:15:24', '2025-10-10 16:42:11', '2025-10-24 12:15:24'),
+(17, 17, 'email_password', NULL, 'admin@gmail.com', '$2y$12$L0rfyKOmgx689TOSng/M.Oug7ya0/rjLhi77RpR1APMBn4C6DXGFy', NULL, NULL, 0, '2025-10-24 11:30:20', '2025-10-23 09:33:15', '2025-10-24 11:30:20');
 
 -- --------------------------------------------------------
 
@@ -116,7 +117,15 @@ INSERT INTO `auth_logins` (`id`, `ip_address`, `user_agent`, `id_type`, `identif
 (21, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0', 'email_password', 'keylacelestino@gmail.com', NULL, '2025-10-13 10:40:44', 0),
 (22, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0', 'email_password', 'keylacelestino@gmail.com', 1, '2025-10-13 10:40:56', 1),
 (23, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0', 'email_password', 'hemelwork02@gmail.com', 16, '2025-10-13 10:41:51', 1),
-(24, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0', 'email_password', 'hemelaly02@gmail.com', 15, '2025-10-15 09:03:31', 1);
+(24, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0', 'email_password', 'hemelaly02@gmail.com', 15, '2025-10-15 09:03:31', 1),
+(25, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0', 'email_password', 'admin@gmail.com', NULL, '2025-10-23 09:11:18', 0),
+(26, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0', 'email_password', 'hemelaly02@gmail.com', 15, '2025-10-23 09:39:12', 1),
+(27, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0', 'email_password', 'keylacelestino@gmail.com', 1, '2025-10-24 08:14:30', 1),
+(28, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0', 'email_password', 'hemelaly02@gmail.com', 15, '2025-10-24 08:14:40', 1),
+(29, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0', 'email_password', 'admin@gmail.com', NULL, '2025-10-24 11:30:06', 0),
+(30, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0', 'email_password', 'admin@gmail.com', 17, '2025-10-24 11:30:20', 1),
+(31, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0', 'email_password', 'hemelaly02@gmail.com', NULL, '2025-10-24 12:15:10', 0),
+(32, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0', 'email_password', 'hemelaly02@gmail.com', 15, '2025-10-24 12:15:24', 1);
 
 -- --------------------------------------------------------
 
@@ -153,7 +162,7 @@ CREATE TABLE `auth_remember_tokens` (
 
 INSERT INTO `auth_remember_tokens` (`id`, `selector`, `hashedValidator`, `user_id`, `expires`, `created_at`, `updated_at`) VALUES
 (14, 'c366a5a22174b088a720afa4', '72d6e33edae525596f95b4c67c0fdcd39c5fe0831673324c9e0f9e77d2df0f74', 1, '2025-11-12 16:15:59', '2025-10-13 10:40:56', '2025-10-13 16:15:59'),
-(16, '02249f51c37dc21aea601fe9', 'e62266240d54939372ceed24a7bd1aad9456a05398d2d99b65f498332f5d9a52', 15, '2025-11-16 07:01:54', '2025-10-15 09:03:31', '2025-10-17 07:01:54');
+(17, '0db0a70a418ab8f4e2f366f7', '757efc925e832e88651d1d67b9f1bd7009691b0cd7d3c5b17702eda5c315f535', 1, '2025-11-23 08:14:30', '2025-10-24 08:14:30', '2025-10-24 08:14:30');
 
 -- --------------------------------------------------------
 
@@ -222,8 +231,7 @@ CREATE TABLE `enrollments` (
 --
 
 INSERT INTO `enrollments` (`id_enrollment`, `id_student_enrollment`, `id_course_enrollment`, `status_enrollment`, `progress_enrollment`, `completed_enrollment`, `enrolled_at_enrollment`, `created_at`, `updated_at`) VALUES
-(12, 15, 18, 'Ativa', 11, NULL, '2025-10-10', '2025-10-10 16:42:16', '2025-10-17 11:17:40'),
-(13, 16, 18, 'Ativa', 0, NULL, '2025-10-13', '2025-10-13 10:41:18', '2025-10-13 10:41:18');
+(12, 15, 18, 'Ativa', 8, NULL, '2025-10-10', '2025-10-10 16:42:16', '2025-10-27 12:25:28');
 
 -- --------------------------------------------------------
 
@@ -444,13 +452,9 @@ CREATE TABLE `progress` (
 --
 
 INSERT INTO `progress` (`id_progress`, `id_enrollment_progress`, `id_lesson_progress`, `completed_at_progress`, `created_at`, `updated_at`) VALUES
-(1, 12, 150, '2025-10-15 18:19:23', '2025-10-15 16:15:23', '2025-10-15 18:19:23'),
-(2, 12, 151, '2025-10-15 17:25:20', '2025-10-15 16:21:57', '2025-10-15 17:25:20'),
-(3, 12, 152, '2025-10-17 11:17:39', '2025-10-15 16:22:10', '2025-10-17 11:17:39'),
-(6, 12, 153, '2025-10-17 11:17:40', '2025-10-15 16:23:18', '2025-10-17 11:17:40'),
-(7, 12, 154, NULL, '2025-10-15 16:23:20', '2025-10-15 16:29:43'),
-(8, 12, 155, NULL, '2025-10-15 16:23:21', '2025-10-15 16:29:42'),
-(13, 12, 156, NULL, '2025-10-15 16:27:48', '2025-10-15 16:29:42');
+(1, 12, 150, '2025-10-23 16:55:44', '2025-10-15 16:15:23', '2025-10-23 16:55:44'),
+(2, 12, 151, '2025-10-24 10:15:30', '2025-10-15 16:21:57', '2025-10-24 10:15:30'),
+(3, 12, 152, '2025-10-27 12:21:02', '2025-10-15 16:22:10', '2025-10-27 12:21:02');
 
 -- --------------------------------------------------------
 
@@ -493,8 +497,7 @@ CREATE TABLE `students` (
 --
 
 INSERT INTO `students` (`id_student`, `id_user_student`, `name_student`, `email_student`, `enrollment_number_student`, `bio_student`, `avatar_student`, `status_student`, `created_at`, `updated_at`) VALUES
-(16, 15, 'Hemel Aly', 'hemelaly02@gmail.com', NULL, NULL, NULL, 'active', '2025-10-10 16:42:16', '2025-10-10 16:42:16'),
-(17, 16, 'Hemel Work', 'hemelwork02@gmail.com', NULL, NULL, NULL, 'active', '2025-10-13 10:41:18', '2025-10-13 10:41:18');
+(16, 15, 'Hemel Aly', 'hemelaly02@gmail.com', NULL, NULL, NULL, 'active', '2025-10-10 16:42:16', '2025-10-10 16:42:16');
 
 -- --------------------------------------------------------
 
@@ -506,6 +509,11 @@ CREATE TABLE `users` (
   `id` int UNSIGNED NOT NULL,
   `role` enum('admin','student','instructor','') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'student',
   `username` varchar(30) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `img` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `country` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `province` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `city` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `status` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `status_message` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `active` tinyint(1) NOT NULL DEFAULT '0',
@@ -519,10 +527,10 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `role`, `username`, `status`, `status_message`, `active`, `last_active`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(1, 'instructor', 'keyla', NULL, NULL, 1, NULL, '2025-10-09 05:18:13', '2025-10-09 05:18:14', NULL),
-(15, 'student', 'Hemel Aly', NULL, NULL, 0, NULL, '2025-10-10 16:42:11', '2025-10-10 16:42:11', NULL),
-(16, 'student', 'Hemel Work', NULL, NULL, 0, NULL, '2025-10-13 10:41:13', '2025-10-13 10:41:13', NULL);
+INSERT INTO `users` (`id`, `role`, `username`, `phone`, `img`, `country`, `province`, `city`, `status`, `status_message`, `active`, `last_active`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 'instructor', 'keyla', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL, '2025-10-09 05:18:13', '2025-10-09 05:18:14', NULL),
+(15, 'student', 'Hemel Aly', '+258870000000', 'assets/img/1761585588_b1f41b6ac6bca88f9cd1.jpg', 'Mocambique', 'Maputo', 'Maputo', NULL, NULL, 0, NULL, '2025-10-10 16:42:11', '2025-10-27 17:19:48', NULL),
+(17, 'admin', 'Administrador', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL, '2025-10-23 09:33:15', '2025-10-23 09:33:15', NULL);
 
 --
 -- Indexes for dumped tables
@@ -675,19 +683,19 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `auth_groups_users`
 --
 ALTER TABLE `auth_groups_users`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `auth_identities`
 --
 ALTER TABLE `auth_identities`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `auth_logins`
 --
 ALTER TABLE `auth_logins`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT for table `auth_permissions_users`
@@ -699,7 +707,7 @@ ALTER TABLE `auth_permissions_users`
 -- AUTO_INCREMENT for table `auth_remember_tokens`
 --
 ALTER TABLE `auth_remember_tokens`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `auth_token_logins`
@@ -765,7 +773,7 @@ ALTER TABLE `pending_users`
 -- AUTO_INCREMENT for table `progress`
 --
 ALTER TABLE `progress`
-  MODIFY `id_progress` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `id_progress` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=127;
 
 --
 -- AUTO_INCREMENT for table `settings`
@@ -777,13 +785,13 @@ ALTER TABLE `settings`
 -- AUTO_INCREMENT for table `students`
 --
 ALTER TABLE `students`
-  MODIFY `id_student` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id_student` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- Constraints for dumped tables
