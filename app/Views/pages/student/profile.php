@@ -1,6 +1,6 @@
 <?php
 
-// dd($user->img);
+// dd($user);
 
 ?>
 
@@ -18,9 +18,12 @@ Perfil
         <div class="d-flex flex-column flex-md-row justify-content-center justify-content-md-between align-items-center gap-3">
             <!-- User Info -->
             <div class="d-flex flex-column flex-md-row justify-content-center align-items-center gap-md-1 gap-3 text-md-start text-center">
-                <a href="#" class="position-relative me-3">
-                    <img src="<?= base_url($user->img) ?? base_url('assets/img/user-default.png') ?>"
-                        class="rounded-circle object-fit-cover" width="80" height="80" alt="Foto de perfil de <?= $user->username ?>" />
+                <img
+                    src="<?= base_url($user->img ?? 'assets/img/user-default.png') ?>"
+                    class="rounded-circle object-fit-cover"
+                    width="80" height="80"
+                    alt="Foto de perfil de <?= esc($user->username) ?>" />
+
                 </a>
                 <div>
                     <h3 class="h5 fw-semibold mb-1 text-capitalize"><?= $user->username ?></h3>
@@ -146,12 +149,11 @@ Perfil
                         <h6 class="text-white mb-3 pb-2 border-bottom border-secondary">Foto de Perfil</h6>
                         <div class="d-flex align-items-center gap-3">
                             <div class="position-relative">
-                                <img id="profilePreview"
-                                    src="<?= base_url($user->img) ?? base_url('assets/img/user-default.png') ?>"
+                                <img
+                                    src="<?= base_url($user->img ?? 'assets/img/user-default.png') ?>"
                                     class="rounded-circle object-fit-cover"
                                     width="80" height="80"
-                                    alt="Foto de perfil de <?= $user->username ?>" />
-
+                                    alt="Foto de perfil de <?= esc($user->username) ?>" />
                             </div>
                             <div class="flex-grow-1">
                                 <label for="profileImage" class="form-label text-white small">Alterar foto</label>
@@ -174,8 +176,11 @@ Perfil
     <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content bg-transparent border-0">
             <button type="button" class="btn-close btn-close-white ms-auto me-2 mt-2" data-bs-dismiss="modal" aria-label="Fechar"></button>
-            <img src="<?= base_url($user->img) ?? base_url('assets/img/user-default.png') ?>"
-                class="rounded-circle object-fit-cover" width="80" height="80" alt="Foto de perfil de <?= $user->username ?>" />
+            <img
+                src="<?= base_url($user->img ?? 'assets/img/user-default.png') ?>"
+                class="rounded-circle object-fit-cover"
+                width="80" height="80"
+                alt="Foto de perfil de <?= esc($user->username) ?>" />
         </div>
     </div>
 </div>

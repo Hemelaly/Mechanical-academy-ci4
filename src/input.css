@@ -1,0 +1,3 @@
+/* src/input.css */
+@import "tailwindcss" source("../app/Views");  /* COM aspas */
+@source "public/**/*.html";                    /* COM aspas e ; */

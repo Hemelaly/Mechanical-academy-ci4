@@ -254,12 +254,17 @@ class Dashboard extends BaseController
         $enrollmentModel = new EnrollmentModel();
         $db              = db_connect();
 
+        // Usuário atual
         $authUser = service('auth')->user();
-        $userId   = function_exists('user_id') ? user_id() : ($authUser->id ?? $authUser->getId());
+        if (! $authUser) {
+            return redirect()->to(site_url('login'))
+                ->with('error', 'Sessão expirada. Faça login novamente.');
+        }
+        $userId = function_exists('user_id') ? user_id() : ($authUser->id ?? $authUser->getId());
 
         $id = (int) $id;
 
-        // Helper para calcular retomada e ordem global
+        // Helper para calcular retomada e ordem global (por curso)
         $calcResume = function (int $courseId, int $enrollmentId) use ($db) {
             $ordered = $db->table('lessons l')
                 ->select('l.id_lesson')
@@ -268,12 +273,13 @@ class Dashboard extends BaseController
                 ->orderBy('m.position_module', 'ASC')
                 ->orderBy('l.position_lesson', 'ASC')
                 ->get()->getResultArray();
-            $orderedIds = array_map(fn($r) => (int)$r['id_lesson'], $ordered);
 
+            $orderedIds = array_map(fn($r) => (int) $r['id_lesson'], $ordered);
             if (empty($orderedIds)) {
                 return [null, $orderedIds];
             }
 
+            // Concluídas POR ESTA MATRÍCULA
             $completedLessonIds = array_column(
                 $db->table('progress')
                     ->select('id_lesson_progress')
@@ -286,12 +292,15 @@ class Dashboard extends BaseController
 
             $resumeId = null;
             foreach ($orderedIds as $lid) {
-                if (!isset($completedSet[$lid])) {
+                if (! isset($completedSet[$lid])) {
                     $resumeId = $lid;
                     break;
                 }
             }
-            if ($resumeId === null) $resumeId = end($orderedIds);
+            if ($resumeId === null) {
+                // tudo concluído → volta à última
+                $resumeId = end($orderedIds);
+            }
 
             return [$resumeId, $orderedIds];
         };
@@ -299,48 +308,71 @@ class Dashboard extends BaseController
         // Tenta achar como AULA
         $lesson = $lessonModel->find($id);
 
-        // Se NÃO for aula, trata como CURSO e redireciona para retomar
-        if (!$lesson) {
+        // ===========================
+        // NÃO É AULA → tratar como CURSO
+        // ===========================
+        if (! $lesson) {
             $course = $courseModel->find($id);
-            if (!$course) {
-                return redirect()->back()->with('error', 'Curso não encontrado.');
+            if (! $course) {
+                return redirect()->to('/student/dashboard/meus_cursos')
+                    ->with('error', 'Curso não encontrado.');
             }
+
+            // MATRÍCULA do usuário logado nesse curso
             $enrollment = $enrollmentModel
-                ->where('id_course_enrollment', $course->id_course)
+                ->where('id_course_enrollment',  (int) $course->id_course)
+                ->where('id_student_enrollment', (int) $userId)   // <<< FILTRO PELO ESTUDANTE
                 ->first();
-            if (!$enrollment) {
-                return redirect()->to('/student/dashboard/checkout/' . $course->id_course)
+
+            if (! $enrollment) {
+                return redirect()->to('/student/dashboard/checkout/' . (int) $course->id_course)
                     ->with('warning', 'Você precisa estar inscrito neste curso.');
             }
 
-            [$resumeId] = $calcResume((int)$course->id_course, (int)$enrollment->id_enrollment);
+            [$resumeId] = $calcResume((int) $course->id_course, (int) $enrollment->id_enrollment);
             if ($resumeId) {
                 return redirect()->to('/student/dashboard/ver_aulas/' . $resumeId)
                     ->with('info', 'Retomando de onde parou.');
             }
-            return redirect()->back()->with('error', 'Nenhuma aula encontrada para este curso.');
+
+            return redirect()->to('/student/dashboard/meus_cursos')
+                ->with('error', 'Nenhuma aula encontrada para este curso.');
         }
 
-        // Aula válida → obter módulo/curso
+        // ===========================
+        // É AULA → obter módulo/curso
+        // ===========================
         $module = $moduleModel->find($lesson->id_module_lesson);
-        $course = $courseModel->find($module->id_course_module);
+        if (! $module) {
+            return redirect()->to('/student/dashboard/meus_cursos')
+                ->with('error', 'Módulo da aula não encontrado.');
+        }
 
-        // matrícula do usuário no curso
+        $course = $courseModel->find($module->id_course_module);
+        if (! $course) {
+            return redirect()->to('/student/dashboard/meus_cursos')
+                ->with('error', 'Curso da aula não encontrado.');
+        }
+
+        // MATRÍCULA do usuário logado nesse curso
         $enrollment = $enrollmentModel
-            ->where('id_course_enrollment', $course->id_course)
+            ->where('id_course_enrollment',  (int) $course->id_course)
+            ->where('id_student_enrollment', (int) $userId)      // <<< FILTRO PELO ESTUDANTE
             ->first();
-        if (!$enrollment) {
-            return redirect()->to('/student/dashboard/checkout/' . $course->id_course)
+
+        if (! $enrollment) {
+            return redirect()->to('/student/dashboard/checkout/' . (int) $course->id_course)
                 ->with('warning', 'Você precisa estar inscrito neste curso.');
         }
 
         // Força retomar apenas se tentar ir à frente
         $override = (int) (service('request')->getGet('override') ?? 0);
-        [$resumeId, $orderedIds] = $calcResume((int)$course->id_course, (int)$enrollment->id_enrollment);
+        [$resumeId, $orderedIds] = $calcResume((int) $course->id_course, (int) $enrollment->id_enrollment);
 
-        if (!$override && $resumeId) {
-            $reqIndex    = array_search((int)$lesson->id_lesson, $orderedIds, true);
-            $resumeIndex = array_search((int)$resumeId,        $orderedIds, true);
+        if (! $override && $resumeId) {
+            $reqIndex    = array_search((int) $lesson->id_lesson, $orderedIds, true);
+            $resumeIndex = array_search((int) $resumeId,          $orderedIds, true);
+
             if ($reqIndex !== false && $resumeIndex !== false && $reqIndex > $resumeIndex) {
                 return redirect()->to('/student/dashboard/ver_aulas/' . $resumeId)
                     ->with('warning', 'Conclua a aula anterior para continuar.');
@@ -349,25 +381,28 @@ class Dashboard extends BaseController
 
         // Sidebar: módulos + aulas (sem interferir em prev/next)
         $modules = $moduleModel->where('id_course_module', $course->id_course)
-            ->orderBy('position_module')->findAll();
+            ->orderBy('position_module')
+            ->findAll();
+
         foreach ($modules as &$m) {
             $m->lessons = $lessonModel->where('id_module_lesson', $m->id_module)
-                ->orderBy('position_lesson')->findAll();
+                ->orderBy('position_lesson')
+                ->findAll();
         }
         unset($m);
 
-        // Concluídas (para checkboxes)
+        // IDs concluídos POR ESTA MATRÍCULA
         $completedLessonIds = array_column(
             $db->table('progress')
                 ->select('id_lesson_progress')
-                ->where('id_enrollment_progress', $enrollment->id_enrollment)
+                ->where('id_enrollment_progress', (int) $enrollment->id_enrollment)
                 ->where('completed_at_progress IS NOT NULL', null, false)
                 ->get()->getResultArray(),
             'id_lesson_progress'
         );
 
-        // >>> PREV/NEXT **GLOBAIS** com base em $orderedIds <<<
-        $currIndex = array_search((int)$lesson->id_lesson, $orderedIds, true);
+        // Prev/Next globais com base em $orderedIds
+        $currIndex = array_search((int) $lesson->id_lesson, $orderedIds, true);
         $prevLesson = ($currIndex !== false && $currIndex > 0)
             ? $orderedIds[$currIndex - 1]
             : null;
@@ -377,15 +412,15 @@ class Dashboard extends BaseController
 
         return view('pages/student/lessons', [
             'course'             => $course,
-            'enrollment'         => (object)$enrollment,
+            'enrollment'         => (object) $enrollment,
             'modules'            => $modules,
             'lesson'             => $lesson,
-            'prevLesson'         => $prevLesson,  // agora global
-            'nextLesson'         => $nextLesson,  // agora global
+            'prevLesson'         => $prevLesson,
+            'nextLesson'         => $nextLesson,
             'completedLessonIds' => $completedLessonIds,
             'user'               => $authUser,
             'sidebarLinks'       => $this->sidebarLinks(),
-            'currentUrl'         => current_url(),
+            'currentUrl'         => current_url(false),
         ]);
     }
 
@@ -508,19 +543,23 @@ class Dashboard extends BaseController
 
     public function profile()
     {
-        // Se estiver a usar um model estendido, troque para ExtendedUserModel::class
         $users = new ExtendedUserModel();
 
         $user = auth()->user();
         if (! $user) {
-            return redirect()->to(site_url('login'))->with('error', 'Sessão expirada. Faça login novamente.');
+            return redirect()->to(site_url('login'))
+                ->with('error', 'Sessão expirada. Faça login novamente.');
         }
+
+        // URLs seguras para redirecionar
+        $profileUrl = current_url(false);                    // a própria página de perfil (GET)
+        $backUrl    = previous_url() ?? $profileUrl;         // fallback se não houver referer
 
         if ($this->request->getMethod() !== 'POST') {
             return view('pages/student/profile', [
                 'user'         => $user,
                 'sidebarLinks' => $this->sidebarLinks(),
-                'currentUrl'   => current_url(),
+                'currentUrl'   => $profileUrl,
             ]);
         }
 
@@ -530,20 +569,21 @@ class Dashboard extends BaseController
             'pais'      => 'permit_empty|max_length[100]',
             'provincia' => 'permit_empty|max_length[100]',
             'cidade'    => 'permit_empty|max_length[100]',
-            'telefone'    => 'permit_empty|max_length[20]',
+            'telefone'  => 'permit_empty|max_length[20]',
             'imagem'    => 'if_exist|is_image[imagem]|mime_in[imagem,image/jpg,image/jpeg,image/png,image/webp]|max_size[imagem,4096]',
         ];
         if (! $this->validate($rules)) {
-            return redirect()->back()->withInput()->with('error', implode(', ', $this->validator->getErrors()));
+            return redirect()->to($backUrl)
+                ->withInput()
+                ->with('error', implode(', ', $this->validator->getErrors()));
         }
 
         $post     = $this->request->getPost();
-        
         $userName = trim(($post['nome'] ?? ''));
 
         // Upload opcional
         $file     = $this->request->getFile('imagem');
-        $filePath = $user->img ?? null; // mantém a imagem atual por padrão
+        $filePath = $user->img ?? null;
 
         if ($file && $file->isValid() && $file->getError() === UPLOAD_ERR_OK) {
             $targetDir = FCPATH . 'assets/img/';
@@ -553,10 +593,12 @@ class Dashboard extends BaseController
 
             $newName = $file->getRandomName();
             if (! $file->move($targetDir, $newName)) {
-                return redirect()->back()->withInput()->with('error', 'Falha ao mover a imagem.');
+                return redirect()->to($backUrl)
+                    ->withInput()
+                    ->with('error', 'Falha ao mover a imagem.');
             }
 
-            // opcional: apagar imagem antiga
+            // apagar imagem antiga (se existir)
             if (! empty($user->img)) {
                 $old = FCPATH . $user->img;
                 if (is_file($old)) {
@@ -564,30 +606,30 @@ class Dashboard extends BaseController
                 }
             }
 
-            $filePath = 'assets/img/' . $newName; // salvar relativo na DB
+            $filePath = 'assets/img/' . $newName; // relativo na DB
         }
 
-        // IMPORTANTE (Shield):
-        // O UserModel do Shield protege os campos. Para gravar 'img', 'country', etc.,
-        // eles devem estar em $allowedFields do Model (ver seção "Model estendido" abaixo).
+        // Campos extras – garanta que estão em $allowedFields do Model
         $dataProfile = [
             'username' => $userName,
             'img'      => $filePath,
             'country'  => $post['pais']      ?? null,
             'province' => $post['provincia'] ?? null,
             'city'     => $post['cidade']    ?? null,
-            'phone'     => $post['telefone']    ?? null,
+            'phone'    => $post['telefone']  ?? null,
         ];
 
-        // Atualiza via update(id, data) ou preenchendo a entidade e chamando save()
         if (! $users->update($user->id, $dataProfile)) {
-            return redirect()->back()->withInput()->with('error', implode(', ', $users->errors()));
+            return redirect()->to($backUrl)
+                ->withInput()
+                ->with('error', implode(', ', $users->errors()));
         }
 
-        // Recarrega o user para refletir alterações
+        // Recarrega o usuário na sessão
         $updated = $users->find($user->id);
         auth()->setUser($updated);
 
-        return redirect()->back()->with('success', 'Perfil atualizado com sucesso.');
+        // PRG: volta para a página de perfil (GET) – evita back() nulo
+        return redirect()->to($profileUrl)->with('success', 'Perfil atualizado com sucesso.');
     }
 }

@@ -2,7 +2,7 @@
 
 $isLoggedIn   = auth()->loggedIn();
 
-$user = service('auth')->user();
+// dd($courses)
 
 
 ?>
@@ -199,6 +199,7 @@ $user = service('auth')->user();
             </h2>
 
             <div class="row mt-4">
+                <?php foreach($courses as $key => $course): ?>
                 <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
                     <div class="card card-bg text-light W-100 h-100 p-1 card-border">
                         <div class="card-body d-flex justify-content-between ">
@@ -207,165 +208,17 @@ $user = service('auth')->user();
                                 <div class="mt-4 p-3" w-100>
                                     <h6 class="card-subtitle mb-2 text-primary fw-light text-uppercase fs-6">Todos os
                                         níveis</h6>
-                                    <p class="card-text fs-5 text-white fw-semibold mb-3">Excel: Da Produtividade à Análise de
-                                        Dados</p>
-                                    <a href="https://hemelaly.github.io/MT-Academy---EXCEL/"
+                                    <p class="card-text fs-5 text-white fw-semibold mb-3"><?= esc($course->title_course) ?></p>
+                                    <a href="<?= base_url('./courses/'. $course->id_course) ?>"
                                         class="card-link text-decoration-none text-primary fw-light fs-6 py-4 stretched-link">Ver
                                         Curso</a>
                                 </div>
                             </div>
-                            <div><img src="<?= base_url('./assets/img/excel.png') ?>" style="width: 50px;" alt=""></div>
+                            <div><img src="<?= base_url('./assets/img/'. $course->icon_course) ?>" style="width: 50px;" alt=""></div>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
-                    <div class="card card-bg text-light W-100 h-100 p-1 card-border">
-                        <div class="card-body d-flex justify-content-between">
-                            <div>
-                                <h5 class="fs-6"><i class="fa fa-clock"></i> 25 Horas</h5>
-                                <div class="mt-4 p-3" w-100>
-                                    <h6 class="card-subtitle mb-2 text-primary fw-light text-uppercase fs-6">Todos os
-                                        níveis</h6>
-                                    <p class="card-text fs-5 fw-semibold mb-0">HTML e CSS modernos desde início</p>
-                                    <a href="#"
-                                        class="card-link text-decoration-none text-primary fw-light fs-6 py-4">Ver
-                                        Curso</a>
-                                </div>
-                            </div>
-                            <div><img src="<?= base_url('./assets/img/html-css.png') ?>" style="width: 70px;" alt=""></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
-                    <div class="card card-bg text-light W-100 h-100 p-1 card-border">
-                        <div class="card-body d-flex justify-content-between">
-                            <div>
-                                <h5 class="fs-6"><i class="fa fa-clock"></i> 25 Horas</h5>
-                                <div class="mt-4 p-3" w-100>
-                                    <h6 class="card-subtitle mb-2 text-primary fw-light text-uppercase fs-6">Todos os
-                                        níveis</h6>
-                                    <p class="card-text fs-5 fw-semibold mb-0">Administração de Redes e Servidores</p>
-                                    <a href="#"
-                                        class="card-link text-decoration-none text-primary fw-light fs-6 py-4">Ver
-                                        Curso</a>
-                                </div>
-                            </div>
-                            <div><img src="<?= base_url('./assets/img/ws.png') ?>" style="width: 50px;" alt=""></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
-                    <div class="card card-bg text-light W-100 h-100 p-1 card-border">
-                        <div class="card-body d-flex justify-content-between">
-                            <div>
-                                <h5 class="fs-6"><i class="fa fa-clock"></i> 25 Horas</h5>
-                                <div class="mt-4 p-3" w-100>
-                                    <h6 class="card-subtitle mb-2 text-primary fw-light text-uppercase fs-6">Todos os
-                                        níveis</h6>
-                                    <p class="card-text fs-5 fw-semibold mb-0">Javascript moderno desde o início</p>
-                                    <a href="#"
-                                        class="card-link text-decoration-none text-primary fw-light fs-6 py-4">Ver
-                                        Curso</a>
-                                </div>
-                            </div>
-                            <div><img src="<?= base_url('./assets/img/js.png') ?>" style="width: 40px;" alt=""></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
-                    <div class="card card-bg text-light W-100 h-100 p-1 card-border">
-                        <div class="card-body d-flex justify-content-between">
-                            <div>
-                                <h5 class="fs-6"><i class="fa fa-clock"></i> 25 Horas</h5>
-                                <div class="mt-4 p-3" w-100>
-                                    <h6 class="card-subtitle mb-2 text-primary fw-light text-uppercase fs-6">Todos os
-                                        níveis</h6>
-                                    <p class="card-text fs-5 fw-semibold mb-0">Transforme Dados em Decisões com Power BI
-                                    </p>
-                                    <a href="#"
-                                        class="card-link text-decoration-none text-primary fw-light fs-6 py-4">Ver
-                                        Curso</a>
-                                </div>
-                            </div>
-                            <div><img src="<?= base_url('./assets/img/p-bi.png') ?>" style="width: 40px;" alt=""></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
-                    <div class="card card-bg text-light W-100 h-100 p-1 card-border">
-                        <div class="card-body d-flex justify-content-between">
-                            <div>
-                                <h5 class="fs-6"><i class="fa fa-clock"></i> 25 Horas</h5>
-                                <div class="mt-4 p-3" w-100>
-                                    <h6 class="card-subtitle mb-2 text-primary fw-light text-uppercase fs-6">Todos os
-                                        níveis</h6>
-                                    <p class="card-text fs-5 fw-semibold mb-0">Desenvolvimento Web Profissional com PHP
-                                    </p>
-                                    <a href="#"
-                                        class="card-link text-decoration-none text-primary fw-light fs-6 py-4">Ver
-                                        Curso</a>
-                                </div>
-                            </div>
-                            <div><img src="<?= base_url('./assets/img/php.png') ?>" style="width: 70px;" alt=""></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
-                    <div class="card card-bg text-light W-100 h-100 p-1 card-border">
-                        <div class="card-body d-flex justify-content-between">
-                            <div>
-                                <h5 class="fs-6"><i class="fa fa-clock"></i> 25 Horas</h5>
-                                <div class="mt-4 p-3" w-100>
-                                    <h6 class="card-subtitle mb-2 text-primary fw-light text-uppercase fs-6">Todos os
-                                        níveis</h6>
-                                    <p class="card-text fs-5 fw-semibold mb-0">Torne-se um Profissional Certificado CCNA
-                                    </p>
-                                    <a href="#"
-                                        class="card-link text-decoration-none text-primary fw-light fs-6 py-4">Ver
-                                        Curso</a>
-                                </div>
-                            </div>
-                            <div><img src="<?= base_url('./assets/img/ccna.png') ?>" style="width: 50px;" alt=""></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
-                    <div class="card card-bg text-light W-100 h-100 p-1 card-border">
-                        <div class="card-body d-flex justify-content-between">
-                            <div>
-                                <h5 class="fs-6"><i class="fa fa-clock"></i> 25 Horas</h5>
-                                <div class="mt-4 p-3" w-100>
-                                    <h6 class="card-subtitle mb-2 text-primary fw-light text-uppercase fs-6">Todos os
-                                        níveis</h6>
-                                    <p class="card-text fs-5 fw-semibold mb-0">Domine o Planejamento e Gestão de
-                                        Projetos</p>
-                                    <a href="#"
-                                        class="card-link text-decoration-none text-primary fw-light fs-6 py-4">Ver
-                                        Curso</a>
-                                </div>
-                            </div>
-                            <div><img src="<?= base_url('./assets/img/ms-p.png') ?>" style="width: 50px;" alt=""></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
-                    <div class="card card-bg text-light W-100 h-100 p-1 card-border">
-                        <div class="card-body d-flex justify-content-between">
-                            <div>
-                                <h5 class="fs-6"><i class="fa fa-clock"></i> 25 Horas</h5>
-                                <div class="mt-4 p-3" w-100>
-                                    <h6 class="card-subtitle mb-2 text-primary fw-light text-uppercase fs-6">Todos os
-                                        níveis</h6>
-                                    <p class="card-text fs-5 fw-semibold mb-0">Criando sites institucionais e blog</p>
-                                    <a href="#"
-                                        class="card-link text-decoration-none text-primary fw-light fs-6 py-4">Ver
-                                        Curso</a>
-                                </div>
-                            </div>
-                            <div><img src="<?= base_url('./assets/img/wp.png') ?>" style="width: 50px;" class="rounded-5" alt=""></div>
-                        </div>
-                    </div>
-                </div>
+                <?php endforeach ?>
             </div>
         </div>
     </section>

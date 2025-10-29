@@ -32,6 +32,30 @@ class PageController extends BaseController
             'user' => $user,
             'isEnrolled' => $isEnrolled
         ]);
+    }
 
+    public function excel($id_course)
+    {
+
+        $courseModel = new CourseModel();
+        $user = service('auth')->user();
+
+        $course = $courseModel->find($id_course);
+
+        $enrollmentModel = new \App\Models\EnrollmentModel();
+        $userId = $user ? $user->id : null;
+
+        $isEnrolled = false;
+        if ($userId) {
+            $isEnrolled = $enrollmentModel
+                ->where('id_student_enrollment', $userId)
+                ->where('id_course_enrollment', $course->id_course)
+                ->where('status_enrollment', 'Ativa')
+                ->first();
+        }
+
+        return view('courses/excel', [
+            'course' => $course
+        ]);
     }
 }

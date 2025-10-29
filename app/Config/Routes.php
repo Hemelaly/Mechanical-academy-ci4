@@ -47,10 +47,13 @@ $routes->group('student', ['namespace' => 'App\Controllers\Student', 'filter' =>
 
     // Rotas para Marcar as aulas como completas
     $routes->group('lessons', function ($r) {
-        $r->post('complete',   'LessonsController::complete');   // POST /student/lessons/complete
-        $r->post('uncomplete', 'LessonsController::uncomplete'); // POST /student/lessons/uncomplete
+        $r->post('complete',   'LessonsController::complete');
+        $r->post('uncomplete', 'LessonsController::uncomplete');
     });
 });
+
+// Rotas de Cursos
+$routes->get('/courses/(:num)', 'PageController::excel/$1');
 
 $routes->get('checkout/(:num)', 'PageController::index/$1');
 $routes->post('checkout/pending/(:num)', 'Register::createPendingUser/$1');
