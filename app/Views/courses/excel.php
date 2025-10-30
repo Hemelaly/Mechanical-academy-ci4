@@ -9,135 +9,89 @@ $user = service('auth')->user();
 
 ?>
 
-<!DOCTYPE html>
-<html lang="pt-br">
+<!doctype html>
+<html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Excel Profissional</title>
-
-  <!-- Bootstrap Icons -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><?= esc($course->title_course) ?></title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
-    integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
-    rel="stylesheet" />
-  <link rel="stylesheet" href="<?= base_url('./assets/css/output.css') ?>">
-
+    href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+    rel="stylesheet">
+  <!-- Bootstrap Icons CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
-    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
+    .bg-primary {
+      background: <?= esc($course->color_course) ?> !important;
+    }
 
-    body {
-      font-family: "Poppins", sans-serif;
+    .text-primary {
+      color: <?= esc($course->color_course) ?> !important;
+    }
+
+    .btn-primary {
+      background: <?= esc($course->color_course) ?> !important;
+      border: 0;
+    }
+
+    .bg-yellow {
+      background: rgba(226, 226, 128, 1);
+    }
+
+    .bg-darkblue {
+      background: #161e2a;
+    }
+
+    .bg-blue {
+      background: #1b232f;
+    }
+
+    .check-icon {
+      color: <?= esc($course->color_course) ?>;
+    }
+
+    .feature-bold {
+      font-weight: 700;
     }
   </style>
 </head>
 
-<body class="bg-[#070707]">
-  
-  <nav class="sticky top-0 z-50 bg-black text-white py-4">
-    <div class="container mx-auto px-4">
-      <div class="flex h-16 items-center justify-between py-3">
-        <!-- Brand -->
-        <a class="inline-flex items-center" href="/">
-          <img src="<?= base_url('./assets/img/logo.png') ?>" alt="Logo" class="w-[150px] h-auto">
-        </a>
+<body style="font-family: 'Poppins';">
 
-        <!-- Toggler (mobile only) -->
-        <button
-          id="navToggle"
-          type="button"
-          class="lg:hidden inline-flex items-center justify-center rounded-md p-2 ring-1 ring-white/20 hover:bg-white/10 focus:outline-none focus-visible:ring"
-          aria-controls="mobileMenu"
-          aria-expanded="false"
-          aria-label="Abrir menu">
-          <svg id="iconOpen" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-          <svg id="iconClose" class="hidden h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-
-        <!-- Menu (desktop only) -->
-        <div class="hidden lg:flex lg:items-center">
-          <ul class="flex items-center gap-8">
-            <?php if ($isLoggedIn): ?>
-              <li>
-                <a class="text-white/80 hover:text-white font-medium transition"
-                  href="<?= base_url($user->role . '/dashboard/meus_cursos') ?>">
-                  Meus Cursos
-                </a>
-              </li>
-              <li>
-                <a href="<?= base_url($user->role . '/dashboard/perfil') ?>"
-                  class="inline-flex items-center gap-3 text-white/90 hover:text-white no-underline">
-                  <img src="<?= base_url('assets/img/user-default.png') ?>"
-                    alt="User" class="h-auto rounded-full object-cover" style="width: 50px;">
-                  <span class="font-semibold truncate max-w-[10rem]"><?= $user->username ?></span>
-                </a>
-              </li>
-            <?php else: ?>
-              <li>
-                <a class="text-white/80 hover:text-white font-medium transition"
-                  href="<?= base_url('/#cursos') ?>">
-                  Cursos
-                </a>
-              </li>
-              <li>
-                <a class="text-white/80 hover:text-white font-medium transition"
-                  href="<?= base_url('login') ?>">
-                  Entrar
-                </a>
-              </li>
-            <?php endif; ?>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Menu (mobile) -->
-      <div id="mobileMenu" class="hidden lg:hidden border-t border-white/10">
-        <ul class="flex flex-col gap-2 py-3">
+  <nav class="navbar navbar-expand-lg sticky-top bg-black navbar-dark py-3">
+    <div class="container">
+      <a class="navbar-brand" href="<?= base_url('/') ?>">
+        <img src="<?= base_url('./assets/img/logo.png') ?>" alt="Logo" style="width: 150px;">
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+        data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+        aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
           <?php if ($isLoggedIn): ?>
-            <li>
-              <a class="block px-2 py-2 text-white/90 hover:bg-white/10 rounded-md"
-                href="<?= base_url($user->role . '/dashboard/meus_cursos') ?>">
-                Meus Cursos
-              </a>
+            <li class="nav-item me-3">
+              <a class="nav-link active" href="<?= base_url($user->role . '/dashboard/meus_cursos') ?>">Meus Cursos</a>
             </li>
-            <li>
-              <a href="<?= base_url($user->role . '/dashboard/perfil') ?>"
-                class="flex items-center gap-3 px-2 py-2 hover:bg-white/10 rounded-md no-underline">
-                <img src="<?= base_url('assets/img/user-default.png') ?>"
-                  alt="User" class="h-9 w-9 rounded-full object-cover">
-                <span class="font-semibold"><?= $user->username ?></span>
+            <li class="nav-item d-flex align-items-center">
+              <a href="<?= base_url($user->role . '/dashboard/perfil') ?>" class="d-flex align-items-center text-decoration-none">
+                <img src="<?= base_url('assets/img/user-default.png') ?>" alt="User" class="rounded-circle me-2" width="35" height="35">
+                <span class="text-white fw-semibold text-nowrap"><?= $user->username ?></span>
               </a>
             </li>
           <?php else: ?>
-            <li>
-              <a class="block px-2 py-2 text-white/90 hover:bg-white/10 rounded-md"
-                href="<?= base_url('/#cursos') ?>">
-                Cursos
-              </a>
+            <li class="nav-item me-3">
+              <a class="nav-link active" href="#cursos">Cursos</a>
             </li>
-            <li>
-              <a class="block px-2 py-2 text-white/90 hover:bg-white/10 rounded-md"
-                href="<?= base_url('login') ?>">
-                Entrar
-              </a>
+            <li class="nav-item">
+              <a class="nav-link active" href="<?= base_url('login') ?>">Entrar</a>
             </li>
           <?php endif; ?>
         </ul>
@@ -145,45 +99,69 @@ $user = service('auth')->user();
     </div>
   </nav>
 
-  <section
-    id="hero"
-    class="bg-cover bg-center"
-    style="background-image: url(<?= base_url('./assets/img/background.jpg') ?>);">
-    <div class="bg-[#000000ee] h-full py-16">
-      <div class="row py-10 px-5">
-        <div class="max-w-[1140px] mx-auto px-4">
-          <div
-            class="mx-auto w-full flex flex-col justify-center items-center">
-            <span
-              class="inline-flex items-center rounded-md bg-green-400/10 px-2 py-1 text-xs font-medium text-green-400 inset-ring inset-ring-green-500/20">
-              Excel Para Todos
-            </span>
-            <h2
-              class="text-4xl md:text-5xl md:mb-3 text-center text-white font-bold mt-5">
-              Domine o Excel Profissional
-            </h2>
+  <section id="banner"
+    style="background-image: url('<?= base_url('assets/img/' . ($course->bg_course ?? 'bg.webp')) ?>'); height:100%; width:100%; background-size:cover; background-position:center center; background-repeat:no-repeat;">
+    <div class="overlay" style="background: rgba(0, 0, 0, 0.9); height: 100%; width: 100%;">
+      <div class="container py-5">
+        <div class="content text-center py-3">
+          <div class="badged d-flex justify-content-center">
+            <p class="text-dark bg-yellow px-3 rounded">Curso mais vendido e recém-renovado</p>
+          </div>
+          <div class="title d-flex justify-content-center">
+            <p class="title fs-1 fw-bold text-white">Curso de Excel Para Todos</p>
+          </div>
+          <div class="course-image d-flex justify-content-center">
+            <img src="<?= base_url('assets/img/' . $course->image_course) ?>" class="img-fluid rounded h-auto" width="500px" alt="">
+          </div>
+          <div class="description text-center mt-3">
+            <p class="title fs-2 fw-bold text-white">Aprenda Excel moderno desde o início</p>
+            <p class="text-white" style="margin-top: -0.8rem;">Um curso de mestrado de 40 horas para levá-lo
+              do iniciante ao avançado</p>
+            <a href="<?= base_url('/checkout/' . $course->id_course) ?>" class="btn btn-primary py-3 px-5 fw-bold">Compre Agora</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-            <div class="m-5 w-full">
-              <img
-                class="w-full lg:w-1/2 lg:mx-auto rounded-sm"
-                src="<?= base_url('./assets/img/Excell.jpg') ?>"
-                alt="" />
+  <section id="numbers" class="bg-darkblue">
+    <div class="container py-4">
+      <div class="content">
+        <div class="row">
+          <div class="col-md-3">
+            <div class="info-box text-center">
+              <div class="icon">
+                <i class="fa-solid fa-user-graduate text-primary" style="font-size: 3rem;"></i>
+              </div>
+              <p class="title fs-3 my-2 fw-bold text-white">100,000+</p>
+              <p class="text-white">Alunos matriculados</p>
             </div>
-
-            <h2 class="text-3xl md:mt-3 text-center text-white font-bold">
-              Destaque-se no Mercado de Trabalho
-            </h2>
-            <p class="text-lime-50 text-center mt-4 md:w-1/2">
-              Curso completo com foco em aplicações práticas, dashboards
-              interativos e técnicas usadas por empresas.
-            </p>
-
-            <div class="mt-10 w-full md:w-1/3 lg:w-1/6 border">
-              <a
-                href="<?= base_url('/checkout/' . $course->id_course) ?>"
-                class="btn bg-green-400 text-white font-bold block rounded-sm w-full py-3 text-center">
-                Comprar Agora
-              </a>
+          </div>
+          <div class="col-md-3">
+            <div class="info-box text-center">
+              <div class="icon">
+                <i class="fa-solid fa-star-half-stroke text-primary" style="font-size: 3rem;"></i>
+              </div>
+              <p class="title fs-3 my-2 fw-bold text-white">4.7+</p>
+              <p class="text-white">Avaliado</p>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="info-box text-center">
+              <div class="icon">
+                <i class="fa-solid fa-language text-primary" style="font-size: 3rem;"></i>
+              </div>
+              <p class="title fs-3 my-2 fw-bold text-white">Português</p>
+              <p class="text-white">Idioma do Curso</p>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="info-box text-center">
+              <div class="icon">
+                <i class="fa-solid fa-arrows-rotate text-primary" style="font-size: 3rem;"></i>
+              </div>
+              <p class="title fs-3 my-2 fw-bold text-white">Ultima atualização</p>
+              <p class="text-white">10/2025</p>
             </div>
           </div>
         </div>
@@ -191,822 +169,305 @@ $user = service('auth')->user();
     </div>
   </section>
 
-  <section class="py-10">
-    <div class="container mx-auto px-4">
-      <div class="row">
-        <div class="grid grid-cols-1 md:grid-cols-4">
-          <div class="col-span-1 py-5">
-            <div
-              class="flex flex-col items-center justify-center gap-2 md:gap-4">
-              <i class="fa fa-graduation-cap text-green-400 text-5xl"></i>
-              <h2 class="text-2xl text-white font-bold">1000+</h2>
-              <p class="text-center text-white" style="margin-top: -0.8rem">
-                Alunos matriculados
-              </p>
+  <section id="video" class="bg-blue">
+    <div class="container py-lg-5 py-0">
+      <div class="content py-lg-4 py-0">
+        <p class="fs-2 fw-bold text-center text-white">Vídeo de visão geral do curso</p>
+
+        <div class="video-area mx-auto mt-lg-3 mt-0" style="width: 65%; height: 500px;">
+          <iframe title="vimeo-player" class="rounded mt-lg-3 mt-0" src="<?= esc($course->url_video_course) ?>" width="100%" height="100%" frameborder="0" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" allowfullscreen></iframe>
+        </div>
+      </div>
+  </section>
+
+  <section id="features" class="bg-darkblue py-5">
+    <div class="container">
+      <div class="content">
+        <div class="row row-cols-1 row-cols-md-4 g-4 align-items-stretch">
+          <div class="col">
+            <div class="card h-100 bg-transparent border p-4 text-center">
+              <div class="icon">
+                <i class="fa-solid fa-photo-film text-primary" style="font-size: 3rem;"></i>
+              </div>
+              <p class="text-white mt-4">40+ horas de vídeo sob demanda</p>
             </div>
           </div>
-          <div class="col-span-1 py-5">
-            <div
-              class="flex flex-col items-center justify-center gap-2 md:gap-4">
-              <i class="fa fa-thumbs-up text-green-400 text-5xl"></i>
-              <h2 class="text-2xl text-white font-bold">5.0</h2>
-              <p class="text-center text-white" style="margin-top: -0.8rem">
-                Avaliado
-              </p>
+          <div class="col">
+            <div class="card h-100 bg-transparent border p-4 text-center">
+              <div class="icon">
+                <i class="fa-solid fa-download text-primary" style="font-size: 3rem;"></i>
+              </div>
+              <p class="text-white mt-4">20+ recursos e documentos para download</p>
             </div>
           </div>
-          <div class="col-span-1 py-5">
-            <div
-              class="flex flex-col items-center justify-center gap-2 md:gap-4">
-              <i class="fa fa-language text-green-400 text-5xl"></i>
-              <h2 class="text-2xl text-white font-bold">Português</h2>
-              <p class="text-center text-white" style="margin-top: -0.8rem">
-                Idioma do Curso
-              </p>
+          <div class="col">
+            <div class="card h-100 bg-transparent border p-4 text-center">
+              <div class="icon">
+                <i class="fa-solid fa-calendar-days text-primary" style="font-size: 3rem;"></i>
+              </div>
+              <p class="text-white mt-4">Acesso vitalício completo</p>
             </div>
           </div>
-          <div class="col-span-1 py-5">
-            <div
-              class="flex flex-col items-center justify-center gap-2 md:gap-4">
-              <i class="fa fa-arrows-rotate text-green-400 text-5xl"></i>
-              <h2 class="text-2xl text-white font-bold text-center">
-                Última Actualização
-              </h2>
-              <p class="text-center text-white" style="margin-top: -0.8rem">
-                10/2025
-              </p>
+          <div class="col">
+            <div class="card h-100 bg-transparent border p-4 text-center">
+              <div class="icon">
+                <i class="fa-solid fa-graduation-cap text-primary" style="font-size: 3rem;"></i>
+              </div>
+              <p class="text-white mt-4">Certificado de conclusão</p>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </section>
 
-  <section class="bg-[#0D301A] py-20 px-5">
-    <div class="container mx-auto px-4">
-      <div class="row px-5">
-        <h2 class="text-center text-3xl font-bold text-white">
-          Visão Geral do Curso
-        </h2>
-
-        <div class="mt-5 md:h-100 lg:w-1/2 md:mx-auto">
-          <iframe
-            width="100%"
-            height="100%"
-            class="rounded-sm"
-            src="https://www.youtube.com/embed/aSWVS-win1A?list=PLIGlfkzBSfnCHmuA0khugp0YZRCfYdimc"
-            title="01-Introdução ao Excel Básico"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            referrerpolicy="strict-origin-when-cross-origin"
-            allowfullscreen></iframe>
-        </div>
-      </div>
-
-      <div class="row mt-10">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div class="col-span-1 p-2">
-            <div
-              class="flex flex-col justify-between gap-3 border rounded-sm bg-white p-5 h-full">
-              <i class="fa-solid fa-certificate text-2xl text-green-500"></i>
-              <h2 class="text-xl font-semibold text-gray-950">
-                Certificação Profissional
-              </h2>
-              <p class="text-gray-600">
-                Receba um certificado reconhecido para valorizar seu
-                currículo.
-              </p>
-            </div>
-          </div>
-
-          <div class="col-span-1 p-2">
-            <div
-              class="flex flex-col justify-between gap-3 border rounded-sm bg-white p-5 h-full">
-              <i class="fa-solid fa-briefcase text-2xl text-green-500"></i>
-              <h2 class="text-xl font-semibold text-gray-950">
-                Oportunidades de Carreira
-              </h2>
-              <p class="text-gray-600">
-                Abra portas para novas posições que exigem conhecimento em
-                Excel.
-              </p>
-            </div>
-          </div>
-
-          <div class="col-span-1 p-2">
-            <div
-              class="flex flex-col justify-between gap-3 border rounded-sm bg-white p-5 h-full">
-              <i class="fa-solid fa-database text-2xl text-green-500"></i>
-              <h2 class="text-xl font-semibold text-gray-950">
-                Gestão de Dados
-              </h2>
-              <p class="text-gray-600">
-                Aprenda a gerenciar grandes volumes de dados com eficiência.
-              </p>
-            </div>
-          </div>
-
-          <div class="col-span-1 p-2">
-            <div
-              class="flex flex-col justify-between gap-3 border rounded-sm bg-white p-5 h-full">
-              <i class="fa-solid fa-chart-bar text-2xl text-green-500"></i>
-              <h2 class="text-xl font-semibold text-gray-950">
-                Análise de Dados
-              </h2>
-              <p class="text-gray-600">
-                Transforme dados brutos em insights valiosos para tomada de
-                decisões.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <div class="container mx-auto px-4 py-20">
-      <div class="row">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          <div class="col-span-1 lg:col-span-2">
-            <div class="bg-white rounded-sm shadow p-10">
-              <h2 class="text-xl mb-5 text-center font-bold text-green-600">
-                O que Você Aprenderá
-              </h2>
-
-              <div class="flex items-start gap-3 sm:gap-4 mb-2">
-                <i
-                  class="fas fa-check-circle text-green-600 text-lg sm:text-xl mt-1"></i>
-                <p class="text-sm sm:text-base">
-                  Dominar fórmulas e funções avançadas do Excel
-                </p>
-              </div>
-
-              <div class="flex items-start gap-3 sm:gap-4 mb-2">
-                <i
-                  class="fas fa-check-circle text-green-600 text-lg sm:text-xl mt-1"></i>
-                <p class="text-sm sm:text-base">
-                  Criar dashboards interativos e profissionais
-                </p>
-              </div>
-
-              <div class="flex items-start gap-3 sm:gap-4 mb-2">
-                <i
-                  class="fas fa-check-circle text-green-600 text-lg sm:text-xl mt-1"></i>
-                <p class="text-sm sm:text-base">
-                  Automatizar tarefas repetitivas com macros
-                </p>
-              </div>
-
-              <div class="flex items-start gap-3 sm:gap-4 mb-2">
-                <i
-                  class="fas fa-check-circle text-green-600 text-lg sm:text-xl mt-1"></i>
-                <p class="text-sm sm:text-base">
-                  Analisar grandes volumes de dados com tabelas dinâmicas
-                </p>
-              </div>
-
-              <div class="flex items-start gap-3 sm:gap-4 mb-2">
-                <i
-                  class="fas fa-check-circle text-green-600 text-lg sm:text-xl mt-1"></i>
-                <p class="text-sm sm:text-base">
-                  Criar visualizações de dados impactantes
-                </p>
-              </div>
-
-              <div class="flex items-start gap-3 sm:gap-4 mb-2">
-                <i
-                  class="fas fa-check-circle text-green-600 text-lg sm:text-xl mt-1"></i>
-                <p class="text-sm sm:text-base">
-                  Dominar ferramentas de análise estatística
-                </p>
-              </div>
-
-              <div class="flex items-start gap-3 sm:gap-4 mb-2">
-                <i
-                  class="fas fa-check-circle text-green-600 text-lg sm:text-xl mt-1"></i>
-                <p class="text-sm sm:text-base">
-                  Integrar Excel com outras ferramentas e sistemas
-                </p>
-              </div>
-
-              <div class="flex items-start gap-3 sm:gap-4 mb-2">
-                <i
-                  class="fas fa-check-circle text-green-600 text-lg sm:text-xl mt-1"></i>
-                <p class="text-sm sm:text-base">
-                  Aplicar técnicas de modelagem financeira
-                </p>
-              </div>
-
-              <div class="flex items-start gap-3 sm:gap-4 mb-2">
-                <i
-                  class="fas fa-check-circle text-green-600 text-lg sm:text-xl mt-1"></i>
-                <p class="text-sm sm:text-base">
-                  Implementar validações e proteção de dados
-                </p>
-              </div>
-
-              <div class="flex items-start gap-3 sm:gap-4 mb-2">
-                <i
-                  class="fas fa-check-circle text-green-600 text-lg sm:text-xl mt-1"></i>
-                <p class="text-sm sm:text-base">
-                  Otimizar planilhas para melhor desempenho
-                </p>
-              </div>
-
-              <div class="flex items-start gap-3 sm:gap-4 mb-2">
-                <i
-                  class="fas fa-check-circle text-green-600 text-lg sm:text-xl mt-1"></i>
-                <p class="text-sm sm:text-base">
-                  Criar soluções personalizadas com VBA
-                </p>
-              </div>
-
-              <div class="flex items-start gap-3 sm:gap-4 mb-2">
-                <i
-                  class="fas fa-check-circle text-green-600 text-lg sm:text-xl mt-1"></i>
-                <p class="text-sm sm:text-base">
-                  Extrair insights através de análise de dados
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-span-1">
-            <div
-              class="bg-white rounded-sm shadow flex flex-col justify-center items-center p-7">
-              <h2 class="text-xl font-semibold text-center text-green-600">
-                Curso de Excel Profissional
-              </h2>
-              <p class="text-green-800 font-bold text-center text-4xl">
-                999 MZN
-              </p>
-              <p class="text-center">Compra única</p>
-
-              <a
-                href="<?= base_url('/checkout/' . $course->id_course) ?>"
-                class="block btn mt-5 bg-green-500 hover:bg-green-700 text-white p-3 rounded-sm font-semibold">Comprar Agora</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="bg-[#0D301A] py-20 px-5">
-    <div class="container mx-auto px-4">
-      <div class="row">
-        <h2 class="text-3xl font-bold text-white mb-3 text-center">
-          Módulos do Curso
-        </h2>
-        <p class="text-gray-300 text-center">
-          Conteúdo completo e estruturado para garantir seu domínio do Excel
-        </p>
-      </div>
-
-      <div class="row mt-5">
-        <div class="max-w-4xl mx-auto space-y-4">
-          <!-- ================= MÓDULO 1 ================= -->
-          <div class="accordion-item bg-white rounded-lg shadow">
-            <button
-              class="accordion-header w-full flex justify-between items-center p-4 text-left">
-              <span class="font-semibold text-gray-800">Módulo 1: Introdução ao Excel</span>
-              <i class="fas fa-chevron-down text-gray-600"></i>
-            </button>
-            <div
-              class="accordion-content hidden border-t border-gray-200 p-6 text-gray-700 space-y-4">
-              <p>O que é o Excel?</p>
-              <ul class="list-disc ml-5 space-y-1">
-                <li>Definição e principais usos.</li>
-                <li>
-                  Apresentação da interface: barra de ferramentas, guias,
-                  células, colunas e linhas.
-                </li>
-                <li>O conceito de pastas de trabalho e planilhas.</li>
-              </ul>
-              <p>Navegação Básica</p>
-              <ul class="list-disc ml-5 space-y-1">
-                <li>Como navegar pelas células.</li>
-                <li>Selecionar, copiar e colar células.</li>
-                <li>
-                  Atalhos básicos do Excel para navegação e produtividade.
-                </li>
-              </ul>
-              <p>Inserção e Manipulação de Dados</p>
-              <ul class="list-disc ml-5 space-y-1">
-                <li>Inserção de texto, números e datas.</li>
-                <li>Ajuste de largura de colunas e altura de linhas.</li>
-                <li>Mesclar células e centralizar texto.</li>
-              </ul>
-            </div>
-          </div>
-
-          <!-- ================= MÓDULO 2 ================= -->
-          <div class="accordion-item bg-white rounded-lg shadow">
-            <button
-              class="accordion-header w-full flex justify-between items-center p-4 text-left">
-              <span class="font-semibold text-gray-800">Módulo 2: Formatação de Células</span>
-              <i class="fas fa-chevron-down text-gray-600"></i>
-            </button>
-            <div
-              class="accordion-content hidden border-t border-gray-200 p-6 text-gray-700 space-y-4">
-              <p>Formatação Básica</p>
-              <ul class="list-disc ml-5 space-y-1">
-                <li>
-                  Alterar fontes, tamanhos, cores e alinhamento de texto.
-                </li>
-                <li>Aplicar bordas e preenchimentos de células.</li>
-                <li>
-                  Formatação de números: moeda, porcentagem, datas, frações.
-                </li>
-              </ul>
-              <p>Formatação Condicional</p>
-              <ul class="list-disc ml-5 space-y-1">
-                <li>Introdução à formatação condicional.</li>
-                <li>Aplicar regras básicas (maior, menor, igual, etc.).</li>
-                <li>
-                  Utilizando formatação condicional com base em fórmulas.
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <!-- ================= MÓDULO 3 ================= -->
-          <div class="accordion-item bg-white rounded-lg shadow">
-            <button
-              class="accordion-header w-full flex justify-between items-center p-4 text-left">
-              <span class="font-semibold text-gray-800">Módulo 3: Fórmulas e Funções Básicas</span>
-              <i class="fas fa-chevron-down text-gray-600"></i>
-            </button>
-            <div
-              class="accordion-content hidden border-t border-gray-200 p-6 text-gray-700 space-y-4">
-              <p>O que são Fórmulas?</p>
-              <ul class="list-disc ml-5 space-y-1">
-                <li>Como inserir fórmulas.</li>
-                <li>
-                  Operadores básicos: soma, subtração, multiplicação, divisão.
-                </li>
-                <li>Referências relativas e absolutas ($A$1).</li>
-              </ul>
-              <p>Funções Básicas</p>
-              <ul class="list-disc ml-5 space-y-1">
-                <li>Função SOMA.</li>
-                <li>Função MÉDIA.</li>
-                <li>Função MÁXIMO e MÍNIMO.</li>
-                <li>Função CONT.SE e CONT.VALORES.</li>
-              </ul>
-              <p>Uso de Referências Absolutas e Relativas</p>
-              <ul class="list-disc ml-5 space-y-1">
-                <li>
-                  Diferença entre referência absoluta (com $) e relativa.
-                </li>
-                <li>
-                  Como usar referências relativas e absolutas em fórmulas.
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <!-- ================= MÓDULO 4 ================= -->
-          <div class="accordion-item bg-white rounded-lg shadow">
-            <button
-              class="accordion-header w-full flex justify-between items-center p-4 text-left">
-              <span class="font-semibold text-gray-800">Módulo 4: Funções Lógicas e Funções de Texto</span>
-              <i class="fas fa-chevron-down text-gray-600"></i>
-            </button>
-            <div
-              class="accordion-content hidden border-t border-gray-200 p-6 text-gray-700 space-y-4">
-              <p>Funções Lógicas</p>
-              <ul class="list-disc ml-5 space-y-1">
-                <li>Função SE: lógica condicional básica.</li>
-                <li>Funções E e OU: combinar condições lógicas.</li>
-                <li>Exemplos práticos de uso de SE com várias condições.</li>
-              </ul>
-              <p>Funções de Texto</p>
-              <ul class="list-disc ml-5 space-y-1">
-                <li>Funções CONCATENAR, ESQUERDA, DIREITA, TEXTO.</li>
-                <li>Manipulação de texto em planilhas.</li>
-                <li>
-                  Uso prático para manipulação de strings em relatórios.
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <!-- ================= MÓDULO 5 ================= -->
-          <div class="accordion-item bg-white rounded-lg shadow">
-            <button
-              class="accordion-header w-full flex justify-between items-center p-4 text-left">
-              <span class="font-semibold text-gray-800">Módulo 5: Funções de Procura e Referência</span>
-              <i class="fas fa-chevron-down text-gray-600"></i>
-            </button>
-            <div
-              class="accordion-content hidden border-t border-gray-200 p-6 text-gray-700 space-y-4">
-              <p>Função PROCV</p>
-              <ul class="list-disc ml-5 space-y-1">
-                <li>Como funciona a função PROCV.</li>
-                <li>Aplicação para procurar dados em tabelas.</li>
-                <li>Vlookup para pesquisa exata e aproximada.</li>
-              </ul>
-              <p>Função PROCH</p>
-              <ul class="list-disc ml-5 space-y-1">
-                <li>Diferença entre PROCH e PROCV.</li>
-                <li>Quando utilizar PROCH para buscar em linhas.</li>
-              </ul>
-              <p>ÍNDICE e CORRESP</p>
-              <ul class="list-disc ml-5 space-y-1">
-                <li>
-                  Como usar ÍNDICE e CORRESP para buscas mais avançadas.
-                </li>
-                <li>
-                  Combinação das funções para procurar dados de forma
-                  eficiente.
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <!-- ================= MÓDULO 6 ================= -->
-          <div class="accordion-item bg-white rounded-lg shadow">
-            <button
-              class="accordion-header w-full flex justify-between items-center p-4 text-left">
-              <span class="font-semibold text-gray-800">Módulo 6: Gráficos e Visualização de Dados</span>
-              <i class="fas fa-chevron-down text-gray-600"></i>
-            </button>
-            <div
-              class="accordion-content hidden border-t border-gray-200 p-6 text-gray-700 space-y-4">
-              <p>Criando Gráficos</p>
-              <ul class="list-disc ml-5 space-y-1">
-                <li>Tipos de gráficos: colunas, barras, linhas, pizza.</li>
-                <li>Como inserir e personalizar gráficos.</li>
-                <li>Gráficos dinâmicos e atualizáveis.</li>
-              </ul>
-              <p>Gráficos de Dispersão e Tendência</p>
-              <ul class="list-disc ml-5 space-y-1">
-                <li>Gráficos de dispersão e sua utilidade.</li>
-                <li>
-                  Inserção de linhas de tendência para análise preditiva.
-                </li>
-              </ul>
-              <p>Minigráficos</p>
-              <ul class="list-disc ml-5 space-y-1">
-                <li>O que são minigráficos.</li>
-                <li>
-                  Como usar minigráficos em células para visualização rápida
-                  de tendências.
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <!-- ================= MÓDULO 7 ================= -->
-          <div class="accordion-item bg-white rounded-lg shadow">
-            <button
-              class="accordion-header w-full flex justify-between items-center p-4 text-left">
-              <span class="font-semibold text-gray-800">Módulo 7: Tabelas Dinâmicas</span>
-              <i class="fas fa-chevron-down text-gray-600"></i>
-            </button>
-            <div
-              class="accordion-content hidden border-t border-gray-200 p-6 text-gray-700 space-y-4">
-              <p>Introdução às Tabelas Dinâmicas</p>
-              <ul class="list-disc ml-5 space-y-1">
-                <li>O que é uma Tabela Dinâmica.</li>
-                <li>
-                  Como criar e configurar tabelas dinâmicas a partir de um
-                  conjunto de dados.
-                </li>
-                <li>Agrupamento de dados por categorias.</li>
-              </ul>
-              <p>Campos Calculados e Filtros</p>
-              <ul class="list-disc ml-5 space-y-1">
-                <li>Criar campos calculados em Tabelas Dinâmicas.</li>
-                <li>
-                  Usar filtros e segmentação de dados em tabelas dinâmicas.
-                </li>
-                <li>
-                  Análise de grandes volumes de dados de forma eficiente.
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <!-- ================= MÓDULO 8 ================= -->
-          <div class="accordion-item bg-white rounded-lg shadow">
-            <button
-              class="accordion-header w-full flex justify-between items-center p-4 text-left">
-              <span class="font-semibold text-gray-800">Módulo 8: Ferramentas de Análise de Dados</span>
-              <i class="fas fa-chevron-down text-gray-600"></i>
-            </button>
-            <div
-              class="accordion-content hidden border-t border-gray-200 p-6 text-gray-700 space-y-4">
-              <p>Validação de Dados</p>
-              <ul class="list-disc ml-5 space-y-1">
-                <li>
-                  Como usar a validação de dados para criar listas suspensas.
-                </li>
-                <li>Configurar regras de entrada de dados e alertas.</li>
-              </ul>
-              <p>Análise de Cenários</p>
-              <ul class="list-disc ml-5 space-y-1">
-                <li>O que é a Análise de Cenários.</li>
-                <li>
-                  Usar a ferramenta Gerenciador de Cenários para comparar
-                  diferentes cenários.
-                </li>
-                <li>
-                  Função Tabelas de Dados para simulação de vários valores.
-                </li>
-              </ul>
-              <p>Atingir Meta</p>
-              <ul class="list-disc ml-5 space-y-1">
-                <li>
-                  Como usar a ferramenta Atingir Meta para fazer previsões com
-                  base em condições específicas.
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <!-- ================= MÓDULO 9 ================= -->
-          <div class="accordion-item bg-white rounded-lg shadow">
-            <button
-              class="accordion-header w-full flex justify-between items-center p-4 text-left">
-              <span class="font-semibold text-gray-800">Módulo 9: Macros e Automatização</span>
-              <i class="fas fa-chevron-down text-gray-600"></i>
-            </button>
-            <div
-              class="accordion-content hidden border-t border-gray-200 p-6 text-gray-700 space-y-4">
-              <p>O que são Macros?</p>
-              <ul class="list-disc ml-5 space-y-1">
-                <li>Introdução à gravação de macros.</li>
-                <li>Criar e executar uma macro.</li>
-                <li>Automatizando tarefas repetitivas com macros.</li>
-              </ul>
-              <p>Noções de VBA (Opcional)</p>
-              <ul class="list-disc ml-5 space-y-1">
-                <li>
-                  Introdução à linguagem de programação VBA (Visual Basic for
-                  Applications).
-                </li>
-                <li>
-                  Exemplos simples de códigos VBA para automação de planilhas.
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <!-- ================= MÓDULO 10 ================= -->
-          <div class="accordion-item bg-white rounded-lg shadow">
-            <button
-              class="accordion-header w-full flex justify-between items-center p-4 text-left">
-              <span class="font-semibold text-gray-800">Módulo 10: Proteção e Colaboração</span>
-              <i class="fas fa-chevron-down text-gray-600"></i>
-            </button>
-            <div
-              class="accordion-content hidden border-t border-gray-200 p-6 text-gray-700 space-y-4">
-              <p>Proteção de Planilhas e Células</p>
-              <ul class="list-disc ml-5 space-y-1">
-                <li>
-                  Como proteger uma planilha ou uma célula específica contra
-                  edição.
-                </li>
-                <li>Uso de senhas para controle de acesso.</li>
-              </ul>
-              <p>Compartilhamento e Colaboração</p>
-              <ul class="list-disc ml-5 space-y-1">
-                <li>
-                  Como compartilhar uma planilha para colaboração em tempo
-                  real.
-                </li>
-                <li>
-                  Uso do Excel no OneDrive e Google Sheets para colaboração em
-                  nuvem.
-                </li>
-              </ul>
-              <p>Versões e Controle de Alterações</p>
-              <ul class="list-disc ml-5 space-y-1">
-                <li>Controle de versões de planilhas.</li>
-                <li>
-                  Como rastrear alterações feitas em uma planilha por
-                  diferentes usuários.
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="py-20 px-5">
-    <div class="container mx-auto px-4 mx-auto px-4">
-      <div class="row">
-        <div
-          class="bg-white rounded-sm py-2 px-3.5 grid grid-cols-1 md:grid-cols-5 gap-5">
-          <div class="col-span-1 md:col-span-2 md:flex md:items-center">
-            <img src="<?= base_url('./assets/img/Excell.jpg') ?>" class="rounded-sm md:h-auto" alt="" />
-          </div>
-          <div class="col-span-1 md:col-span-3 py-5">
-            <h2 class="text-2xl font-semibold text-green-600 mb-3">
-              Projeto Final: Criação de um Dashboard Interativo
-            </h2>
-            <ul>
-              <p>
-                Com base nos conhecimentos adquiridos, criar um dashboard que
-                inclua:
-              </p>
-              <div class="flex items-start gap-3 sm:gap-4 mb-2">
-                <i
-                  class="fas fa-check-circle text-green-600 text-lg sm:text-xl mt-1"></i>
-                <p class="text-sm sm:text-base">
-                  O projeto final deve ser interativo e permitir uma análise
-                  visual clara dos dados.
-                </p>
-              </div>
-
-              <div class="flex items-start gap-3 sm:gap-4 mb-2">
-                <i
-                  class="fas fa-check-circle text-green-600 text-lg sm:text-xl mt-1"></i>
-                <p class="text-sm sm:text-base">
-                  Análise de cenários e segmentações.
-                </p>
-              </div>
-
-              <div class="flex items-start gap-3 sm:gap-4 mb-2">
-                <i
-                  class="fas fa-check-circle text-green-600 text-lg sm:text-xl mt-1"></i>
-                <p class="text-sm sm:text-base">Validação de dados.</p>
-              </div>
-
-              <div class="flex items-start gap-3 sm:gap-4 mb-2">
-                <i
-                  class="fas fa-check-circle text-green-600 text-lg sm:text-xl mt-1"></i>
-                <p class="text-sm sm:text-base">Gráficos dinâmicos.</p>
-              </div>
-
-              <div class="flex items-start gap-3 sm:gap-4 mb-2">
-                <i
-                  class="fas fa-check-circle text-green-600 text-lg sm:text-xl mt-1"></i>
-                <p class="text-sm sm:text-base">Tabelas dinâmicas.</p>
-              </div>
+  <section id="details" class="py-5">
+    <div class="container">
+      <div class="row justify-content-center align-items-center">
+        <!-- Lista de aprendizado -->
+        <div class="col-lg-8 mb-4">
+          <div class="bg-white shadow rounded-3 p-4 p-md-5 h-100">
+            <h2 class="fw-bold text-primary mb-4 text-center">O que você aprenderá</h2>
+            <ul class="list-unstyled feature-text">
+              <li class="d-flex mb-3"><i class="bi bi-check-lg check-icon me-3"></i>Introdução ao Excel:
+                interface, células, planilhas e menus</li>
+              <li class="d-flex mb-3"><i class="bi bi-check-lg check-icon me-3"></i>Formatação de dados:
+                estilos, formatação condicional e tabelas</li>
+              <li class="d-flex mb-3"><i class="bi bi-check-lg check-icon me-3"></i>Fórmulas básicas:
+                SOMA, MÉDIA, MÍNIMO, MÁXIMO, CONT.SE</li>
+              <li class="d-flex mb-3"><i class="bi bi-check-lg check-icon me-3"></i>Funções avançadas:
+                PROCV, ÍNDICE, CORRESP, SE, SOMASE</li>
+              <li class="d-flex mb-3"><i class="bi bi-check-lg check-icon me-3"></i>Gráficos: criação e
+                personalização de gráficos profissionais</li>
+              <li class="d-flex mb-3"><i class="bi bi-check-lg check-icon me-3"></i>Tabelas dinâmicas:
+                criação, segmentação e análise de dados</li>
+              <li class="d-flex mb-3"><i class="bi bi-check-lg check-icon me-3"></i>Validação de dados e
+                proteção de planilhas</li>
+              <li class="d-flex"><i class="bi bi-check-lg check-icon me-3"></i><span><span
+                    class="feature-bold">Bônus:</span> Automatização com Macros e introdução ao
+                  VBA</span></li>
             </ul>
           </div>
         </div>
+
+        <!-- Card de compra -->
+        <div class="col-lg-4">
+          <div class="bg-white shadow rounded-3 p-4 text-center">
+            <h4 class="fw-bold text-primary mb-3">Excel Básico</h4>
+            <span class="fw-bold display-6 mb-2"><?= number_format(esc($course->price_course), 2, ",", ".") ?></span><sub class="fw-bold">MZN</sub>
+            <p class="text-muted mb-4">Compra única</p>
+            <a href="<?= base_url('/checkout/' . $course->id_course) ?>" class="btn btn-primary btn-lg fw-bold px-4">Compre Agora</a>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
-  <footer
-    class="patterns text-white"
-    style="background-image: url(<?= base_url('./assets/img/pattern.png') ?>)">
-    <div class="bg-[#0D301A10]">
-      <div class="max-w-[1140px] mx-auto px-4 py-12">
-        <div class="grid gric-cols-1 lg:grid-cols-6 px-5">
-          <div class="col-span-1 lg:flex lg:items-center h-1/1">
-            <img src="<?= base_url('./assets/img/logo.png') ?>" alt="Mechanical Academy" class="w-40" />
-          </div>
-          <div class="col-span-1 lg:col-span-5 flex flex-col">
-            <div
-              class="w-full flex flex-col md:flex-row justify-between border-b pb-5 mb-5 border-b-gray-800">
-              <div class="flex flex-col md:flex-row gap-5 mt-5">
-                <a href="#">Inicio</a>
-                <a href="#">Cursos</a>
-                <a href="#">Termos & Condicoes</a>
-                <a href="#">Politicas de Privacidade</a>
-              </div>
-              <div class="flex items-center gap-5 mt-5">
-                <i class="fab fa-facebook-f"></i>
-                <i class="fab fa-x-twitter"></i>
-                <i class="fab fa-linkedin-in"></i>
-                <i class="fab fa-youtube"></i>
+  <section id="description" class="py-5 text-white bg-darkblue">
+    <div class="container text-center">
+      <h2 class="fw-bold mb-4">Descrição do Curso</h2>
+      <p class="fs-5 mb-4">
+        Este é um curso aprofundado de 40+ horas que o levará desde o início absoluto do Excel, aprendendo desde
+        fórmulas básicas até recursos avançados como tabelas dinâmicas, gráficos e automação com macros.
+        Você aprenderá a criar planilhas profissionais, organizar e analisar grandes volumes de dados e aplicar
+        técnicas de produtividade para o uso no ambiente corporativo.
+      </p>
+      <p class="fs-5 mb-4">
+        Também exploraremos o uso de funções complexas como PROCX, SOMASES, ÍNDICE e CORRESP, além de recursos
+        de validação de dados, proteção de planilhas e dashboards interativos.
+        No final, você dominará as ferramentas para transformar dados brutos em insights claros e visuais
+        profissionais.
+      </p>
+      <p class="fw-bold fs-5">Confira o currículo abaixo!</p>
+
+      <div class="bg-blue text-white rounded p-4 mt-5 mx-auto" style="max-width: 1000px;">
+        <p class="fs-5 mb-0">
+          <strong>BÔNUS:</strong> Os alunos que adquirirem este curso receberão documentação detalhada com
+          exemplos práticos, planilhas-modelo e exercícios organizados por módulo.
+          Você poderá baixar e consultar todos os materiais para revisar cada tema facilmente durante o curso.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section id="modules" class="bg-blue py-5">
+    <div class="container">
+      <div class="accordion mx-auto w-75" id="excelAccordion">
+
+        <?php foreach ($modules as $key => $module): ?>
+          <div class="accordion-item mb-3 border-0 shadow-sm p-2">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse"
+                data-bs-target="#mod<?= $module->id_module ?>">
+                <?= esc($module->title_module) ?>
+              </button>
+            </h2>
+            <div id="mod<?= $module->id_module ?>" class="accordion-collapse collapse" data-bs-parent="#excelAccordion">
+              <div class="accordion-body">
+                <?= esc($module->description_module) ?>
               </div>
             </div>
-            <p class="text-center lg:text-left">
-              Mechanical Academy © 2025 Todos os direitos reservados.
-              Desenvolvido do Jeito <span class="text-2xl">✓</span> pela
-              <a href="https://mechanical.co.mz" class="text-custom-orange-1">Mechanical Tecnologia.</a>
-            </p>
+          </div>
+        <?php endforeach ?>
+
+      </div>
+    </div>
+  </section>
+
+  <section id="projects" class="text-center text-white">
+    <div class="bg-darkblue pt-5 pb-2">
+      <h2 class="fw-bold mb-2">Projetos de Curso</h2>
+      <p class="fs-5 mb-5">Vamos dar uma olhada em alguns dos projetos práticos desenvolvidos durante o curso
+      </p>
+    </div>
+
+    <div class="py-5" style="background: #eee;">
+      <div class="container pb-3">
+        <div class="row g-4">
+          <div class="col-md-4">
+            <div class="bg-white text-dark px-5 py-4 rounded h-100">
+              <img src="<?= base_url('assets/img/Excell.jpg') ?>" alt="Dashboard Financeiro" class="img-fluid rounded mb-3">
+              <h5 class="fw-bold">Dashboard Financeiro</h5>
+              <p class="mb-0">
+                Projeto de análise financeira com tabelas dinâmicas, gráficos e métricas automáticas.
+                Permite visualizar lucros, despesas e tendências de forma interativa.
+              </p>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="bg-white text-dark px-5 py-4 rounded h-100">
+              <img src="<?= base_url('assets/img/Excell.jpg') ?>" alt="Planilha de controle" class="img-fluid rounded mb-3">
+              <h5 class="fw-bold">Controle de Estoque</h5>
+              <p class="mb-0">
+                Planilha automatizada com fórmulas e validações para controle de produtos e níveis de
+                estoque.
+                Inclui alertas e relatórios de movimentação.
+              </p>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="bg-white text-dark px-5 py-4 rounded h-100">
+              <img src="<?= base_url('assets/img/Excell.jpg') ?>" alt="Tela de macros" class="img-fluid rounded mb-3">
+              <h5 class="fw-bold">Automação com VBA</h5>
+              <p class="mb-0">
+                Projeto completo de automação usando VBA para geração de relatórios automáticos e
+                consolidação de dados de múltiplas planilhas.
+              </p>
+            </div>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- <section id="rating" class="text-white">
+    <div class="title bg-darkblue py-5">
+      <div class="container text-center">
+        <h2 class="fw-bold mb-2">Classificações do Curso</h2>
+        <p class="text-secondary mb-5">Algumas das últimas avaliações dos nossos alunos</p>
+      </div>
+    </div>
+
+    <div class="bg-blue">
+      <div class="container text-center">
+        <div class="row g-5 pb-3">
+          <div class="col-md-4">
+            <div class="d-flex flex-column align-items-center">
+              <div class="rounded-circle border border-primary d-flex align-items-center justify-content-center mb-3"
+                style="width:60px; height:60px;">
+                <span class="fw-bold text-primary">MS</span>
+              </div>
+              <div class="text-warning mb-2">
+                ★★★★★
+              </div>
+              <h5 class="fw-bold text-white">Mariana S.</h5>
+              <p class="text-light">
+                O curso de Excel é excelente! As explicações são diretas e os exemplos práticos ajudam
+                muito.
+                Aprendi a criar dashboards e automatizar planilhas em poucas semanas. Recomendo para
+                todos!
+              </p>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="d-flex flex-column align-items-center">
+              <div class="rounded-circle border border-primary d-flex align-items-center justify-content-center mb-3"
+                style="width:60px; height:60px;">
+                <span class="fw-bold text-primary">RC</span>
+              </div>
+              <div class="text-warning mb-2">
+                ★★★★★
+              </div>
+              <h5 class="fw-bold text-white">Ricardo C.</h5>
+              <p class="text-light">
+                Gostei muito da didática e da clareza dos exemplos.
+                As aulas de tabelas dinâmicas e fórmulas avançadas foram incríveis.
+                Agora uso o Excel de forma muito mais profissional no trabalho.
+              </p>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="d-flex flex-column align-items-center">
+              <div class="rounded-circle border border-primary d-flex align-items-center justify-content-center mb-3"
+                style="width:60px; height:60px;">
+                <span class="fw-bold text-primary">TP</span>
+              </div>
+              <div class="text-warning mb-2">
+                ★★★★★
+              </div>
+              <h5 class="fw-bold text-white">Tatiane P.</h5>
+              <p class="text-light">
+                O curso superou minhas expectativas. As explicações sobre VBA e automação foram
+                fantásticas.
+                Já consegui criar relatórios automáticos e economizar horas de trabalho!
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section> -->
+
+  <footer class="py-3 text-white" style="background-color:#111827;">
+    <div
+      class="container d-flex flex-column flex-md-row justify-content-between align-items-center text-center text-md-start">
+
+      <!-- Logotipo circular -->
+      <div class="mb-3 mb-md-0">
+        <div class="" style="width:150px; height:auto;">
+          <a href="">
+            <img src="<?= base_url('assets/img/logo.png') ?>" class="img-fluid h-auto" width="100%" alt="">
+          </a>
+        </div>
+      </div>
+
+      <!-- Texto central -->
+      <div class="mb-3 mb-md-0">
+        <small>© 2025 Mechanical Academy. Todos os direitos reservados</small>
+      </div>
+
+      <!-- Ícones sociais -->
+      <div>
+        <a href="#" class="text-white me-3"><i class="bi bi-twitter-x"></i></a>
+        <a href="#" class="text-white me-3"><i class="bi bi-instagram"></i></a>
+        <a href="#" class="text-white me-3"><i class="bi bi-youtube"></i></a>
+        <a href="#" class="text-white me-3"><i class="bi bi-github"></i></a>
+        <a href="#" class="text-white"><i class="bi bi-linkedin"></i></a>
       </div>
     </div>
   </footer>
 
-  <script>
-    (function() {
-      const btn = document.getElementById('navToggle');
-      const menu = document.getElementById('mobileMenu');
-      const openI = document.getElementById('iconOpen');
-      const closeI = document.getElementById('iconClose');
 
-      if (!btn || !menu) return;
 
-      btn.addEventListener('click', () => {
-        const expanded = btn.getAttribute('aria-expanded') === 'true';
-        btn.setAttribute('aria-expanded', String(!expanded));
-        menu.classList.toggle('hidden');
-        openI?.classList.toggle('hidden');
-        closeI?.classList.toggle('hidden');
-      });
-    })();
 
-    // Seleciona todos os elementos com a classe 'counter'
-    const counters = document.querySelectorAll('.counter');
-
-    counters.forEach(counter => {
-      const updateCount = () => {
-        const target = +counter.getAttribute('data-target'); // valor final
-        let count = parseInt(counter.innerText); // pega só o número (ignora o +)
-        const increment = target / 100; // menor incremento = mais lento
-
-        if (count < target) {
-          count = Math.ceil(count + increment);
-          counter.innerText = count + '+';
-          setTimeout(updateCount, 50); // mais lento (50ms)
-        } else {
-          counter.innerText = target + '+';
-        }
-      }
-
-      updateCount();
-    });
-
-    // Script para funcionamento dos acordiones
-
-    document.querySelectorAll(".accordion-header").forEach(header => {
-      header.addEventListener("click", () => {
-        const item = header.parentElement;
-        const content = header.nextElementSibling;
-        const icon = header.querySelector("i");
-
-        // alterna ativo
-        const isActive = item.classList.contains("active");
-        if (isActive) {
-          // fechar
-          item.classList.remove("active");
-          content.classList.add("hidden");
-          // ícone pra baixo
-          icon.classList.remove("fa-chevron-up");
-          icon.classList.add("fa-chevron-down");
-        } else {
-          // abrir
-          item.classList.add("active");
-          content.classList.remove("hidden");
-          // ícone pra cima
-          icon.classList.remove("fa-chevron-down");
-          icon.classList.add("fa-chevron-up");
-        }
-      });
-    });
-
-    document.querySelectorAll(".faq-header").forEach(button => {
-      button.addEventListener("click", () => {
-        const faqItem = button.parentElement;
-        const faqContent = faqItem.querySelector(".faq-content");
-
-        // Fecha os outros FAQs
-        document.querySelectorAll(".faq-item").forEach(item => {
-          if (item !== faqItem) {
-            item.querySelector(".faq-content").classList.add("hidden");
-            item.querySelector("i").classList.replace("fa-chevron-up", "fa-chevron-down");
-          }
-        });
-
-        // Toggle do FAQ clicado
-        faqContent.classList.toggle("hidden");
-        const icon = button.querySelector("i");
-        if (faqContent.classList.contains("hidden")) {
-          icon.classList.replace("fa-chevron-up", "fa-chevron-down");
-        } else {
-          icon.classList.replace("fa-chevron-down", "fa-chevron-up");
-        }
-      });
-    });
-
-    // Simple accordion functionality
-    document.addEventListener('DOMContentLoaded', function() {
-      const accordionButtons = document.querySelectorAll('[data-accordion]');
-
-      accordionButtons.forEach(button => {
-        button.addEventListener('click', function() {
-          const content = this.nextElementSibling;
-          const icon = this.querySelector('i');
-
-          if (content.classList.contains('hidden')) {
-            content.classList.remove('hidden');
-            icon.classList.remove('fa-chevron-down');
-            icon.classList.add('fa-chevron-up');
-            this.parentElement.classList.add('active');
-          } else {
-            content.classList.add('hidden');
-            icon.classList.remove('fa-chevron-up');
-            icon.classList.add('fa-chevron-down');
-            this.parentElement.classList.remove('active');
-          }
-        });
-      });
-    });
-  </script>
-
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
+    crossorigin="anonymous"></script>
 </body>
+
 </html>

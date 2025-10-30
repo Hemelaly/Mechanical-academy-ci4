@@ -4,7 +4,7 @@
         position: fixed;
         top: 0;
         left: 0;
-        width: 320px;
+        width: 220px;
         /* ajuste como preferir */
         height: 100vh !important;
         /* cor de fundo do sidebar */
@@ -55,9 +55,22 @@
             <i class="bi <?= $link['icon'] ?> me-2"></i> <?= $link['label'] ?>
         </a>
     <?php endforeach; ?>
-    <a href="/logout" id="logoutBtn" class="nav-link text-danger mt-5">
-        <i class="bi bi-box-arrow-right me-2" onclick="return confirm('Tem certeza que deseja sair da conta?');"></i> Sair
-    </a>
+
+    <div class="position-absolute w-100" style="left:0; bottom:16px; padding:0 16px;">
+        <a href="<?= site_url('logout') ?>"
+            class="nav-link text-danger d-flex align-items-center gap-2"
+            id="logoutBtn"
+            data-logout-url="<?= site_url('logout') ?>">
+            <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+            <span>Sair</span>
+        </a>
+        <a href="<?= site_url('/') ?>"
+            class="nav-link d-flex align-items-center gap-2">
+            <i class="bi bi-box-arrow-left"></i>
+            <span>Página Inicial</span>
+        </a>
+    </div>
+
 </div>
 
 <script>
@@ -73,8 +86,15 @@
             cancelButtonText: 'Cancelar'
         }).then((result) => {
             if (result.isConfirmed) {
-                // Redireciona para a rota de logout do CI4
-                window.location.href = "<?= site_url('logout') ?>";
+                Swal.fire({
+                    title: 'Sucesso',
+                    text: "Você foi desconectado da sessão.",
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                }).then((result) => {
+                    // Redireciona para a rota de logout do CI4
+                    window.location.href = "<?= site_url('logout') ?>";
+                })
             }
         });
     });

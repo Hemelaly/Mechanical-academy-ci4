@@ -5,6 +5,8 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\CourseModel;
+use App\Models\LessonModel;
+use App\Models\ModuleModel;
 
 class PageController extends BaseController
 {
@@ -37,6 +39,8 @@ class PageController extends BaseController
     public function excel($id_course)
     {
 
+        $lessonModel     = new LessonModel();
+        $moduleModel     = new ModuleModel();
         $courseModel = new CourseModel();
         $user = service('auth')->user();
 
@@ -44,6 +48,12 @@ class PageController extends BaseController
 
         $enrollmentModel = new \App\Models\EnrollmentModel();
         $userId = $user ? $user->id : null;
+
+        $module = $moduleModel
+            ->select('id_module, title_module, position_module, description_module') // opcional: só as colunas que precisa
+            ->where('id_course_module', $id_course)
+            ->orderBy('position_module', 'ASC')
+            ->findAll();
 
         $isEnrolled = false;
         if ($userId) {
@@ -55,7 +65,8 @@ class PageController extends BaseController
         }
 
         return view('courses/excel', [
-            'course' => $course
+            'course' => $course,
+            'modules' => $module,
         ]);
     }
 }
