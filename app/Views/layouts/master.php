@@ -16,6 +16,7 @@
     <script src="https://www.youtube.com/iframe_api"></script>
     <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
     <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+    <link rel="shortcut icon" href="<?= base_url('assets/img/favicon.png') ?>" width="100%" type="image/x-icon">
 </head>
 
 <body>

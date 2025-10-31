@@ -7,6 +7,7 @@ use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\CourseModel;
 use App\Models\LessonModel;
 use App\Models\ModuleModel;
+use App\Models\ProjectModel;
 
 class PageController extends BaseController
 {
@@ -42,6 +43,8 @@ class PageController extends BaseController
         $lessonModel     = new LessonModel();
         $moduleModel     = new ModuleModel();
         $courseModel = new CourseModel();
+        $projectModel = new ProjectModel();
+
         $user = service('auth')->user();
 
         $course = $courseModel->find($id_course);
@@ -64,9 +67,12 @@ class PageController extends BaseController
                 ->first();
         }
 
+        $projects = $projectModel->where('id_course_project', $id_course)->findAll();
+
         return view('courses/excel', [
             'course' => $course,
             'modules' => $module,
+            'projects' => $projects,
         ]);
     }
 }

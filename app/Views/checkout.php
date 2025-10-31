@@ -17,6 +17,7 @@ $session = session();
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dropzone@5/dist/min/dropzone.min.css" />
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="shortcut icon" href="<?= base_url('assets/img/favicon.png') ?>" width="100%" type="image/x-icon">
   <style>
     .container {
       max-width: 980px !important;
@@ -282,10 +283,135 @@ $session = session();
         margin-top: 2rem;
       }
     }
+
+    :root {
+      --pre-bg: #0b0f19;
+      --pre-fg: #fff;
+      --pre-accent: #7c5cff;
+      --pre-z: 9999;
+      --fade-ms: 360ms;
+    }
+
+    #preloader {
+      position: fixed;
+      inset: 0;
+      z-index: var(--pre-z);
+      display: grid;
+      place-items: center;
+      color: var(--pre-fg);
+      background:
+        radial-gradient(1000px 700px at 10% 10%, #11162a 0%, transparent 60%),
+        radial-gradient(1000px 700px at 90% 90%, #0e1330 0%, transparent 60%),
+        var(--pre-bg);
+      transition: opacity var(--fade-ms) ease, visibility var(--fade-ms) ease;
+    }
+
+    #preloader.is-hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .preloader__inner {
+      display: grid;
+      gap: 14px;
+      place-items: center;
+      text-align: center;
+    }
+
+    .preloader__logo {
+      width: 84px;
+      height: auto;
+      filter: drop-shadow(0 2px 10px rgba(0, 0, 0, .35));
+    }
+
+    .preloader__spinner {
+      width: 56px;
+      height: 56px;
+    }
+
+    .preloader__track {
+      fill: none;
+      stroke: rgba(255, 255, 255, .18);
+      stroke-width: 6;
+    }
+
+    .preloader__arc {
+      fill: none;
+      stroke: var(--pre-accent);
+      stroke-linecap: round;
+      stroke-width: 6;
+      stroke-dasharray: 110 126;
+      transform-origin: 50% 50%;
+      animation: spin 1.05s linear infinite, dash 1.5s ease-in-out infinite;
+    }
+
+    .preloader__bar {
+      width: min(320px, 70vw);
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .15);
+      overflow: hidden;
+    }
+
+    .preloader__bar__fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--pre-accent), #9a7bff 60%, var(--pre-accent));
+      border-radius: 999px;
+      transform: translateZ(0);
+    }
+
+    .preloader__text {
+      font: 600 .95rem/1.2 system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial;
+      opacity: .9;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes dash {
+      0% {
+        stroke-dasharray: 1 235;
+        stroke-dashoffset: 0;
+      }
+
+      50% {
+        stroke-dasharray: 120 115;
+        stroke-dashoffset: -25;
+      }
+
+      100% {
+        stroke-dasharray: 1 235;
+        stroke-dashoffset: -235;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .preloader__arc {
+        animation: none;
+      }
+    }
   </style>
 </head>
 
 <body>
+  <!-- PRELOADER -->
+  <div id="preloader" role="status" aria-live="polite" aria-label="Carregando conteúdo">
+    <div class="preloader__inner">
+      <!-- opcional: seu logotipo -->
+      <img src="<?= base_url('assets/img/logo.png') ?>" alt="Minha Marca" class="preloader__logo h-auto w-50" />
+
+
+      <div class="preloader__bar">
+        <div class="preloader__bar__fill" id="preloaderFill" style="width:0%"></div>
+      </div>
+      <p class="preloader__text"><span id="preloaderPct">0</span>%</p>
+    </div>
+  </div>
 
   <!-- HERO -->
   <section class="hero">
@@ -631,6 +757,167 @@ $session = session();
         });
       });
     });
+  </script>
+
+  <script>
+    /**
+     * PRELOADER com percentagem em:
+     *  - #preloaderFill   (largura da barra)
+     *  - #preloaderPct    (texto 0–100)
+     *
+     * Mantém:
+     *  - MIN_PRELOAD_TIME (mínimo visível)
+     *  - Esconde após window.load respeitando o mínimo
+     *  - Fallback de segurança (MIN + 1000)
+     */
+    function initPreloader() {
+      const MIN_PRELOAD_TIME = 2000; // 2s mínimo
+      const startTime = Date.now();
+
+      const preloader = document.getElementById('preloader');
+      const fillEl = document.getElementById('preloaderFill');
+      const pctEl = document.getElementById('preloaderPct');
+      if (!preloader || !fillEl || !pctEl) return;
+
+      // (opcional) bloquear rolagem enquanto o preloader está visível
+      const lockScroll = () => {
+        document.documentElement.style.overflow = 'hidden';
+      };
+      const unlockScroll = () => {
+        document.documentElement.style.overflow = '';
+      };
+      lockScroll();
+
+      // ---- Medição de progresso (realista) ----
+      const WEIGHTS = {
+        dom: 20,
+        fonts: 10,
+        images: 60,
+        load: 10
+      };
+      let target = 0; // alvo calculado pelos eventos
+      let current = 0; // valor exibido (animação)
+      let rafId = 0;
+      let doneFlag = false;
+
+      const clamp = () => {
+        if (target < 0) target = 0;
+        if (target > 100) target = 100;
+      };
+      const render = () => {
+        const pct = Math.round(current);
+        fillEl.style.width = pct + '%';
+        pctEl.textContent = pct;
+      };
+      const tick = () => {
+        // easing suave em direção ao alvo
+        current += (target - current) * 0.12;
+        render();
+        if (!doneFlag) rafId = requestAnimationFrame(tick);
+      };
+
+      // 1) DOM pronto
+      const bumpDom = () => {
+        target += WEIGHTS.dom;
+        clamp();
+      };
+      if (document.readyState === 'interactive' || document.readyState === 'complete') bumpDom();
+      else document.addEventListener('DOMContentLoaded', bumpDom, {
+        once: true
+      });
+
+      // 2) Fontes
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(() => {
+          target += WEIGHTS.fonts;
+          clamp();
+        }).catch(() => {
+          target += Math.floor(WEIGHTS.fonts * 0.6);
+          clamp();
+        });
+      } else {
+        target += Math.floor(WEIGHTS.fonts * 0.6);
+        clamp();
+      }
+
+      // 3) Imagens (<img> do DOM)
+      const imgs = Array.from(document.images || []);
+      const total = imgs.length;
+      let loaded = 0;
+      const onImgDone = () => {
+        loaded++;
+        const frac = total ? loaded / total : 1;
+        const imgProgress = WEIGHTS.images * frac;
+        const base = Math.min(target, WEIGHTS.dom + WEIGHTS.fonts);
+        target = base + imgProgress;
+        clamp();
+      };
+      if (total === 0) {
+        target += WEIGHTS.images;
+        clamp();
+      } else {
+        imgs.forEach(img => {
+          if (img.complete) onImgDone();
+          else {
+            img.addEventListener('load', onImgDone, {
+              once: true
+            });
+            img.addEventListener('error', onImgDone, {
+              once: true
+            });
+          }
+        });
+      }
+
+      // 4) load = fecha a conta (vamos a 100, mas respeitando o mínimo)
+      function hidePreloader() {
+        if (doneFlag) return;
+        doneFlag = true;
+
+        target = 100;
+        current = 100;
+        render(); // garante 100% visual
+
+        preloader.style.opacity = '0';
+        preloader.addEventListener('transitionend', () => {
+          preloader.style.display = 'none';
+          unlockScroll();
+        }, {
+          once: true
+        });
+
+        if (rafId) cancelAnimationFrame(rafId);
+      }
+
+      // fallback: força esconder após MIN + 1000 (se algo travar)
+      const forceHideTimeout = setTimeout(hidePreloader, MIN_PRELOAD_TIME + 1000);
+
+      window.addEventListener('load', () => {
+        // soma o peso do load para o indicador
+        target += WEIGHTS.load;
+        clamp();
+
+        const elapsed = Date.now() - startTime;
+        const remainingTime = Math.max(0, MIN_PRELOAD_TIME - elapsed);
+
+        clearTimeout(forceHideTimeout);
+        setTimeout(hidePreloader, remainingTime);
+      }, {
+        once: true
+      });
+
+      // inicia a animação do indicador
+      rafId = requestAnimationFrame(tick);
+    }
+
+    // iniciar quando o DOM estiver pronto
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPreloader, {
+        once: true
+      });
+    } else {
+      initPreloader();
+    }
   </script>
 
 </body>

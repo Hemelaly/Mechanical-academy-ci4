@@ -25,6 +25,7 @@ $isLoggedIn   = auth()->loggedIn();
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
         integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="shortcut icon" href="<?= base_url('assets/img/favicon.png') ?>" width="100%" type="image/x-icon">
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
@@ -212,8 +213,6 @@ $isLoggedIn   = auth()->loggedIn();
         }
     </style>
 
-
-
 </head>
 
 <body>
@@ -230,10 +229,6 @@ $isLoggedIn   = auth()->loggedIn();
             <p class="preloader__text"><span id="preloaderPct">0</span>%</p>
         </div>
     </div>
-
-
-
-
 
     <nav class="navbar navbar-expand-lg sticky-top bg-black navbar-dark py-3">
         <div class="container">
@@ -503,24 +498,26 @@ $isLoggedIn   = auth()->loggedIn();
         crossorigin="anonymous"></script>
 
     <script>
-        (function() {
-            const pre = document.getElementById('preloader');
-            if (!pre) return;
+        /**
+         * PRELOADER com percentagem em:
+         *  - #preloaderFill   (largura da barra)
+         *  - #preloaderPct    (texto 0–100)
+         *
+         * Mantém:
+         *  - MIN_PRELOAD_TIME (mínimo visível)
+         *  - Esconde após window.load respeitando o mínimo
+         *  - Fallback de segurança (MIN + 1000)
+         */
+        function initPreloader() {
+            const MIN_PRELOAD_TIME = 2000; // 2s mínimo
+            const startTime = Date.now();
 
-            const fill = document.getElementById('preloaderFill');
+            const preloader = document.getElementById('preloader');
+            const fillEl = document.getElementById('preloaderFill');
             const pctEl = document.getElementById('preloaderPct');
+            if (!preloader || !fillEl || !pctEl) return;
 
-            // ---- CONFIG ----
-            const MAX_WAIT_MS = 12000; // força saída em 12s
-            const MIN_SHOW_MS = 400; // evita "piscar" rápido demais
-            const WEIGHTS = {
-                dom: 20, // DOM pronto
-                fonts: 10, // fontes carregadas
-                images: 60, // imagens visíveis carregadas
-                load: 10 // evento window.load
-            };
-
-            // bloqueia rolagem (opcional; se não quiser, comente)
+            // (opcional) bloquear rolagem enquanto o preloader está visível
             const lockScroll = () => {
                 document.documentElement.style.overflow = 'hidden';
             };
@@ -529,67 +526,77 @@ $isLoggedIn   = auth()->loggedIn();
             };
             lockScroll();
 
-            let startTs = performance.now();
-            let current = 0; // valor animado
-            let target = 0; // alvo a perseguir
+            // ---- Medição de progresso (realista) ----
+            const WEIGHTS = {
+                dom: 20,
+                fonts: 10,
+                images: 60,
+                load: 10
+            };
+            let target = 0; // alvo calculado pelos eventos
+            let current = 0; // valor exibido (animação)
             let rafId = 0;
-            let finished = false;
-            let loadFired = false;
+            let doneFlag = false;
 
-            // ---- MEDIDORES DE PROGRESSO ----
+            const clamp = () => {
+                if (target < 0) target = 0;
+                if (target > 100) target = 100;
+            };
+            const render = () => {
+                const pct = Math.round(current);
+                fillEl.style.width = pct + '%';
+                pctEl.textContent = pct;
+            };
+            const tick = () => {
+                // easing suave em direção ao alvo
+                current += (target - current) * 0.12;
+                render();
+                if (!doneFlag) rafId = requestAnimationFrame(tick);
+            };
+
             // 1) DOM pronto
-            function bumpDomReady() {
+            const bumpDom = () => {
                 target += WEIGHTS.dom;
-                clampTarget();
-            }
-            if (document.readyState === 'interactive' || document.readyState === 'complete') {
-                bumpDomReady();
-            } else {
-                document.addEventListener('DOMContentLoaded', bumpDomReady, {
-                    once: true
-                });
-            }
+                clamp();
+            };
+            if (document.readyState === 'interactive' || document.readyState === 'complete') bumpDom();
+            else document.addEventListener('DOMContentLoaded', bumpDom, {
+                once: true
+            });
 
-            // 2) Fonts (se suportado)
+            // 2) Fontes
             if (document.fonts && document.fonts.ready) {
                 document.fonts.ready.then(() => {
                     target += WEIGHTS.fonts;
-                    clampTarget();
+                    clamp();
                 }).catch(() => {
-                    // em caso de erro de fontes, ainda avançamos um pouco
                     target += Math.floor(WEIGHTS.fonts * 0.6);
-                    clampTarget();
+                    clamp();
                 });
             } else {
                 target += Math.floor(WEIGHTS.fonts * 0.6);
-                clampTarget();
+                clamp();
             }
 
-            // 3) Imagens (só as do DOM atual; background-images são ignoradas por simplicidade)
+            // 3) Imagens (<img> do DOM)
             const imgs = Array.from(document.images || []);
-            const totalImgs = imgs.length;
-            let loadedImgs = 0;
-
-            function onImgDone() {
-                loadedImgs++;
-                const frac = totalImgs ? (loadedImgs / totalImgs) : 1;
-                // as imagens controlam até WEIGHTS.images do total
+            const total = imgs.length;
+            let loaded = 0;
+            const onImgDone = () => {
+                loaded++;
+                const frac = total ? loaded / total : 1;
                 const imgProgress = WEIGHTS.images * frac;
-                // base atual (dom + fonts) já pode ter somado; então fixamos a parte de imagens
                 const base = Math.min(target, WEIGHTS.dom + WEIGHTS.fonts);
                 target = base + imgProgress;
-                clampTarget();
-            }
-
-            if (totalImgs === 0) {
-                target += WEIGHTS.images; // não há imagens -> consideramos completo esse trecho
-                clampTarget();
+                clamp();
+            };
+            if (total === 0) {
+                target += WEIGHTS.images;
+                clamp();
             } else {
                 imgs.forEach(img => {
-                    if (img.complete) {
-                        // já carregada (ou falhou); conta mesmo assim
-                        onImgDone();
-                    } else {
+                    if (img.complete) onImgDone();
+                    else {
                         img.addEventListener('load', onImgDone, {
                             once: true
                         });
@@ -598,90 +605,57 @@ $isLoggedIn   = auth()->loggedIn();
                         });
                     }
                 });
-                // ainda assim, segurança: se muitas imagens travarem, damos um empurrão após 5s
-                setTimeout(() => {
-                    const minImgProgress = Math.max(target, WEIGHTS.dom + WEIGHTS.fonts + WEIGHTS.images * 0.5);
-                    target = minImgProgress;
-                    clampTarget();
-                }, 5000);
             }
 
-            // 4) window.load (fecha os 100%)
-            window.addEventListener('load', () => {
-                loadFired = true;
+            // 4) load = fecha a conta (vamos a 100, mas respeitando o mínimo)
+            function hidePreloader() {
+                if (doneFlag) return;
+                doneFlag = true;
+
                 target = 100;
-                clampTarget();
+                current = 100;
+                render(); // garante 100% visual
+
+                preloader.style.opacity = '0';
+                preloader.addEventListener('transitionend', () => {
+                    preloader.style.display = 'none';
+                    unlockScroll();
+                }, {
+                    once: true
+                });
+
+                if (rafId) cancelAnimationFrame(rafId);
+            }
+
+            // fallback: força esconder após MIN + 1000 (se algo travar)
+            const forceHideTimeout = setTimeout(hidePreloader, MIN_PRELOAD_TIME + 1000);
+
+            window.addEventListener('load', () => {
+                // soma o peso do load para o indicador
+                target += WEIGHTS.load;
+                clamp();
+
+                const elapsed = Date.now() - startTime;
+                const remainingTime = Math.max(0, MIN_PRELOAD_TIME - elapsed);
+
+                clearTimeout(forceHideTimeout);
+                setTimeout(hidePreloader, remainingTime);
             }, {
                 once: true
             });
 
-            // bailouts globais
-            setTimeout(() => {
-                target = Math.max(target, 95);
-                clampTarget();
-            }, 8000);
-            setTimeout(forceFinish, MAX_WAIT_MS);
-
-            // ---- ANIMAÇÃO SUAVE DO % ----
-            function clampTarget() {
-                if (target > 100) target = 100;
-                if (target < 0) target = 0;
-            }
-
-            function tick() {
-                // easing: aproxima current de target
-                current += (target - current) * 0.12; // mais baixo = mais suave
-                if ((target === 100 && current > 99.6) || (performance.now() - startTs > MAX_WAIT_MS)) {
-                    current = 100;
-                    render();
-                    done();
-                    return;
-                }
-                render();
-                rafId = requestAnimationFrame(tick);
-            }
-
-            function render() {
-                const pct = Math.round(current);
-                if (fill) fill.style.width = pct + '%';
-                if (pctEl) pctEl.textContent = pct;
-            }
-
-            function done() {
-                if (finished) return;
-                finished = true;
-
-                const now = performance.now();
-                const elapsed = now - startTs;
-                const delay = Math.max(0, MIN_SHOW_MS - elapsed);
-
-                setTimeout(() => {
-                    pre.classList.add('is-hidden');
-                    unlockScroll();
-
-                    // cancela RAF para evitar “loop”
-                    if (rafId) cancelAnimationFrame(rafId);
-
-                    // remove do DOM após o fade
-                    setTimeout(() => {
-                        pre.remove();
-                    }, 420);
-                }, delay);
-            }
-
-            function forceFinish() {
-                target = 100;
-                clampTarget();
-                // se nem DOM nem load aconteceram, ainda assim encerramos
-                if (!finished) {
-                    // dá 200ms para a barra chegar nos 100
-                    setTimeout(done, 200);
-                }
-            }
-
-            // inicia animação
+            // inicia a animação do indicador
             rafId = requestAnimationFrame(tick);
-        })();
+        }
+
+        // iniciar quando o DOM estiver pronto
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPreloader, {
+                once: true
+            });
+        } else {
+            initPreloader();
+        }
     </script>
 
 </body>

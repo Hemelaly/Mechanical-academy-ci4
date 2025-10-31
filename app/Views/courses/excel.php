@@ -4,7 +4,7 @@ $isLoggedIn   = auth()->loggedIn();
 
 $user = service('auth')->user();
 
-// dd($course)
+// dd($projects)
 
 
 ?>
@@ -20,12 +20,14 @@ $user = service('auth')->user();
     integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
-    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
   <!-- Bootstrap Icons CDN -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="shortcut icon" href="<?= base_url('assets/img/favicon.png') ?>" width="100%" type="image/x-icon">
   <style>
     .bg-primary {
       background: <?= esc($course->color_course) ?> !important;
@@ -59,10 +61,139 @@ $user = service('auth')->user();
     .feature-bold {
       font-weight: 700;
     }
+
+    .title{
+      font-family: 'Fira Sans' !important;
+    }
+
+    :root {
+      --pre-bg: #0b0f19;
+      --pre-fg: #fff;
+      --pre-accent: #7c5cff;
+      --pre-z: 9999;
+      --fade-ms: 360ms;
+    }
+
+    #preloader {
+      position: fixed;
+      inset: 0;
+      z-index: var(--pre-z);
+      display: grid;
+      place-items: center;
+      color: var(--pre-fg);
+      background:
+        radial-gradient(1000px 700px at 10% 10%, #11162a 0%, transparent 60%),
+        radial-gradient(1000px 700px at 90% 90%, #0e1330 0%, transparent 60%),
+        var(--pre-bg);
+      transition: opacity var(--fade-ms) ease, visibility var(--fade-ms) ease;
+    }
+
+    #preloader.is-hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .preloader__inner {
+      display: grid;
+      gap: 14px;
+      place-items: center;
+      text-align: center;
+    }
+
+    .preloader__logo {
+      width: 84px;
+      height: auto;
+      filter: drop-shadow(0 2px 10px rgba(0, 0, 0, .35));
+    }
+
+    .preloader__spinner {
+      width: 56px;
+      height: 56px;
+    }
+
+    .preloader__track {
+      fill: none;
+      stroke: rgba(255, 255, 255, .18);
+      stroke-width: 6;
+    }
+
+    .preloader__arc {
+      fill: none;
+      stroke: var(--pre-accent);
+      stroke-linecap: round;
+      stroke-width: 6;
+      stroke-dasharray: 110 126;
+      transform-origin: 50% 50%;
+      animation: spin 1.05s linear infinite, dash 1.5s ease-in-out infinite;
+    }
+
+    .preloader__bar {
+      width: min(320px, 70vw);
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .15);
+      overflow: hidden;
+    }
+
+    .preloader__bar__fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--pre-accent), #9a7bff 60%, var(--pre-accent));
+      border-radius: 999px;
+      transform: translateZ(0);
+    }
+
+    .preloader__text {
+      font: 600 .95rem/1.2 system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial;
+      opacity: .9;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes dash {
+      0% {
+        stroke-dasharray: 1 235;
+        stroke-dashoffset: 0;
+      }
+
+      50% {
+        stroke-dasharray: 120 115;
+        stroke-dashoffset: -25;
+      }
+
+      100% {
+        stroke-dasharray: 1 235;
+        stroke-dashoffset: -235;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .preloader__arc {
+        animation: none;
+      }
+    }
   </style>
 </head>
 
-<body style="font-family: 'Poppins';">
+<body style="font-family: 'Open Sans';">
+  <!-- PRELOADER -->
+  <div id="preloader" role="status" aria-live="polite" aria-label="Carregando conteúdo">
+    <div class="preloader__inner">
+      <!-- opcional: seu logotipo -->
+      <img src="<?= base_url('assets/img/logo.png') ?>" alt="Minha Marca" class="preloader__logo h-auto w-50" />
+
+
+      <div class="preloader__bar">
+        <div class="preloader__bar__fill" id="preloaderFill" style="width:0%"></div>
+      </div>
+      <p class="preloader__text"><span id="preloaderPct">0</span>%</p>
+    </div>
+  </div>
 
   <nav class="navbar navbar-expand-lg sticky-top bg-black navbar-dark py-3">
     <div class="container">
@@ -108,16 +239,15 @@ $user = service('auth')->user();
             <p class="text-dark bg-yellow px-3 rounded">Curso mais vendido e recém-renovado</p>
           </div>
           <div class="title d-flex justify-content-center">
-            <p class="title fs-1 fw-bold text-white">Curso de Excel Para Todos</p>
+            <p class="title fs-1 fw-bold text-white">Curso de <?= esc($course->title_course) ?></p>
           </div>
           <div class="course-image d-flex justify-content-center">
             <img src="<?= base_url('assets/img/' . $course->image_course) ?>" class="img-fluid rounded h-auto" width="500px" alt="">
           </div>
           <div class="description text-center mt-3">
-            <p class="title fs-2 fw-bold text-white">Aprenda Excel moderno desde o início</p>
-            <p class="text-white" style="margin-top: -0.8rem;">Um curso de mestrado de 40 horas para levá-lo
-              do iniciante ao avançado</p>
-            <a href="<?= base_url('/checkout/' . $course->id_course) ?>" class="btn btn-primary py-3 px-5 fw-bold">Compre Agora</a>
+            <p class="title fs-2 fw-bold text-white">Aprenda <?= esc($course->title_course) ?> moderno desde o início</p>
+            <p class="text-white" style="margin-top: -0.8rem;"><?= esc($course->description_course) ?></p>
+            <a href="<?= base_url('/checkout/' . $course->id_course) ?>" class="title btn btn-primary py-3 px-5 fw-bold">Compre Agora</a>
           </div>
         </div>
       </div>
@@ -172,7 +302,7 @@ $user = service('auth')->user();
   <section id="video" class="bg-blue">
     <div class="container py-lg-5 py-0">
       <div class="content py-lg-4 py-0">
-        <p class="fs-2 fw-bold text-center text-white">Vídeo de visão geral do curso</p>
+        <p class="title fs-2 fw-bold text-center text-white">Vídeo de visão geral do curso</p>
 
         <div class="video-area mx-auto mt-lg-3 mt-0" style="width: 65%; height: 500px;">
           <iframe title="vimeo-player" class="rounded mt-lg-3 mt-0" src="<?= esc($course->url_video_course) ?>" width="100%" height="100%" frameborder="0" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" allowfullscreen></iframe>
@@ -228,7 +358,7 @@ $user = service('auth')->user();
         <!-- Lista de aprendizado -->
         <div class="col-lg-8 mb-4">
           <div class="bg-white shadow rounded-3 p-4 p-md-5 h-100">
-            <h2 class="fw-bold text-primary mb-4 text-center">O que você aprenderá</h2>
+            <h2 class="title fw-bold text-primary mb-4 text-center">O que você aprenderá</h2>
             <ul class="list-unstyled feature-text">
               <li class="d-flex mb-3"><i class="bi bi-check-lg check-icon me-3"></i>Introdução ao Excel:
                 interface, células, planilhas e menus</li>
@@ -254,10 +384,10 @@ $user = service('auth')->user();
         <!-- Card de compra -->
         <div class="col-lg-4">
           <div class="bg-white shadow rounded-3 p-4 text-center">
-            <h4 class="fw-bold text-primary mb-3">Excel Básico</h4>
-            <span class="fw-bold display-6 mb-2"><?= number_format(esc($course->price_course), 2, ",", ".") ?></span><sub class="fw-bold">MZN</sub>
+            <h4 class="title fw-bold text-primary mb-3">Excel Básico</h4>
+            <span class="title fw-bold display-6 mb-2"><?= number_format(esc($course->price_course), 2, ",", ".") ?></span><sub class="fw-bold">MZN</sub>
             <p class="text-muted mb-4">Compra única</p>
-            <a href="<?= base_url('/checkout/' . $course->id_course) ?>" class="btn btn-primary btn-lg fw-bold px-4">Compre Agora</a>
+            <a href="<?= base_url('/checkout/' . $course->id_course) ?>" class="title btn btn-primary btn-lg fw-bold px-4">Compre Agora</a>
           </div>
         </div>
       </div>
@@ -266,7 +396,7 @@ $user = service('auth')->user();
 
   <section id="description" class="py-5 text-white bg-darkblue">
     <div class="container text-center">
-      <h2 class="fw-bold mb-4">Descrição do Curso</h2>
+      <h2 class="title fw-bold mb-4">Descrição do Curso</h2>
       <p class="fs-5 mb-4">
         Este é um curso aprofundado de 40+ horas que o levará desde o início absoluto do Excel, aprendendo desde
         fórmulas básicas até recursos avançados como tabelas dinâmicas, gráficos e automação com macros.
@@ -298,7 +428,7 @@ $user = service('auth')->user();
         <?php foreach ($modules as $key => $module): ?>
           <div class="accordion-item mb-3 border-0 shadow-sm p-2">
             <h2 class="accordion-header">
-              <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse"
+              <button class="title accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse"
                 data-bs-target="#mod<?= $module->id_module ?>">
                 <?= esc($module->title_module) ?>
               </button>
@@ -317,7 +447,7 @@ $user = service('auth')->user();
 
   <section id="projects" class="text-center text-white">
     <div class="bg-darkblue pt-5 pb-2">
-      <h2 class="fw-bold mb-2">Projetos de Curso</h2>
+      <h2 class="title fw-bold mb-2">Projetos de Curso</h2>
       <p class="fs-5 mb-5">Vamos dar uma olhada em alguns dos projetos práticos desenvolvidos durante o curso
       </p>
     </div>
@@ -325,39 +455,19 @@ $user = service('auth')->user();
     <div class="py-5" style="background: #eee;">
       <div class="container pb-3">
         <div class="row g-4">
-          <div class="col-md-4">
-            <div class="bg-white text-dark px-5 py-4 rounded h-100">
-              <img src="<?= base_url('assets/img/Excell.jpg') ?>" alt="Dashboard Financeiro" class="img-fluid rounded mb-3">
-              <h5 class="fw-bold">Dashboard Financeiro</h5>
-              <p class="mb-0">
-                Projeto de análise financeira com tabelas dinâmicas, gráficos e métricas automáticas.
-                Permite visualizar lucros, despesas e tendências de forma interativa.
-              </p>
-            </div>
-          </div>
 
-          <div class="col-md-4">
-            <div class="bg-white text-dark px-5 py-4 rounded h-100">
-              <img src="<?= base_url('assets/img/Excell.jpg') ?>" alt="Planilha de controle" class="img-fluid rounded mb-3">
-              <h5 class="fw-bold">Controle de Estoque</h5>
-              <p class="mb-0">
-                Planilha automatizada com fórmulas e validações para controle de produtos e níveis de
-                estoque.
-                Inclui alertas e relatórios de movimentação.
-              </p>
+          <?php foreach ($projects as $key => $project): ?>
+            <div class="col-md-4">
+              <div class="bg-white text-dark px-4 py-4 rounded h-100">
+                <img src="<?= base_url('assets/img/' . $project->img_project) ?>" alt="<?= esc($project->title_project) ?>" class="img-fluid rounded mb-3">
+                <h5 class="fw-bold fs-4"><?= esc($project->title_project) ?></h5>
+                <p class="mb-0 text-muted">
+                  <?= esc($project->description_project) ?>
+                </p>
+              </div>
             </div>
-          </div>
+          <?php endforeach ?>
 
-          <div class="col-md-4">
-            <div class="bg-white text-dark px-5 py-4 rounded h-100">
-              <img src="<?= base_url('assets/img/Excell.jpg') ?>" alt="Tela de macros" class="img-fluid rounded mb-3">
-              <h5 class="fw-bold">Automação com VBA</h5>
-              <p class="mb-0">
-                Projeto completo de automação usando VBA para geração de relatórios automáticos e
-                consolidação de dados de múltiplas planilhas.
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -468,6 +578,167 @@ $user = service('auth')->user();
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
     crossorigin="anonymous"></script>
+
+  <script>
+    /**
+     * PRELOADER com percentagem em:
+     *  - #preloaderFill   (largura da barra)
+     *  - #preloaderPct    (texto 0–100)
+     *
+     * Mantém:
+     *  - MIN_PRELOAD_TIME (mínimo visível)
+     *  - Esconde após window.load respeitando o mínimo
+     *  - Fallback de segurança (MIN + 1000)
+     */
+    function initPreloader() {
+      const MIN_PRELOAD_TIME = 2000; // 2s mínimo
+      const startTime = Date.now();
+
+      const preloader = document.getElementById('preloader');
+      const fillEl = document.getElementById('preloaderFill');
+      const pctEl = document.getElementById('preloaderPct');
+      if (!preloader || !fillEl || !pctEl) return;
+
+      // (opcional) bloquear rolagem enquanto o preloader está visível
+      const lockScroll = () => {
+        document.documentElement.style.overflow = 'hidden';
+      };
+      const unlockScroll = () => {
+        document.documentElement.style.overflow = '';
+      };
+      lockScroll();
+
+      // ---- Medição de progresso (realista) ----
+      const WEIGHTS = {
+        dom: 20,
+        fonts: 10,
+        images: 60,
+        load: 10
+      };
+      let target = 0; // alvo calculado pelos eventos
+      let current = 0; // valor exibido (animação)
+      let rafId = 0;
+      let doneFlag = false;
+
+      const clamp = () => {
+        if (target < 0) target = 0;
+        if (target > 100) target = 100;
+      };
+      const render = () => {
+        const pct = Math.round(current);
+        fillEl.style.width = pct + '%';
+        pctEl.textContent = pct;
+      };
+      const tick = () => {
+        // easing suave em direção ao alvo
+        current += (target - current) * 0.12;
+        render();
+        if (!doneFlag) rafId = requestAnimationFrame(tick);
+      };
+
+      // 1) DOM pronto
+      const bumpDom = () => {
+        target += WEIGHTS.dom;
+        clamp();
+      };
+      if (document.readyState === 'interactive' || document.readyState === 'complete') bumpDom();
+      else document.addEventListener('DOMContentLoaded', bumpDom, {
+        once: true
+      });
+
+      // 2) Fontes
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(() => {
+          target += WEIGHTS.fonts;
+          clamp();
+        }).catch(() => {
+          target += Math.floor(WEIGHTS.fonts * 0.6);
+          clamp();
+        });
+      } else {
+        target += Math.floor(WEIGHTS.fonts * 0.6);
+        clamp();
+      }
+
+      // 3) Imagens (<img> do DOM)
+      const imgs = Array.from(document.images || []);
+      const total = imgs.length;
+      let loaded = 0;
+      const onImgDone = () => {
+        loaded++;
+        const frac = total ? loaded / total : 1;
+        const imgProgress = WEIGHTS.images * frac;
+        const base = Math.min(target, WEIGHTS.dom + WEIGHTS.fonts);
+        target = base + imgProgress;
+        clamp();
+      };
+      if (total === 0) {
+        target += WEIGHTS.images;
+        clamp();
+      } else {
+        imgs.forEach(img => {
+          if (img.complete) onImgDone();
+          else {
+            img.addEventListener('load', onImgDone, {
+              once: true
+            });
+            img.addEventListener('error', onImgDone, {
+              once: true
+            });
+          }
+        });
+      }
+
+      // 4) load = fecha a conta (vamos a 100, mas respeitando o mínimo)
+      function hidePreloader() {
+        if (doneFlag) return;
+        doneFlag = true;
+
+        target = 100;
+        current = 100;
+        render(); // garante 100% visual
+
+        preloader.style.opacity = '0';
+        preloader.addEventListener('transitionend', () => {
+          preloader.style.display = 'none';
+          unlockScroll();
+        }, {
+          once: true
+        });
+
+        if (rafId) cancelAnimationFrame(rafId);
+      }
+
+      // fallback: força esconder após MIN + 1000 (se algo travar)
+      const forceHideTimeout = setTimeout(hidePreloader, MIN_PRELOAD_TIME + 1000);
+
+      window.addEventListener('load', () => {
+        // soma o peso do load para o indicador
+        target += WEIGHTS.load;
+        clamp();
+
+        const elapsed = Date.now() - startTime;
+        const remainingTime = Math.max(0, MIN_PRELOAD_TIME - elapsed);
+
+        clearTimeout(forceHideTimeout);
+        setTimeout(hidePreloader, remainingTime);
+      }, {
+        once: true
+      });
+
+      // inicia a animação do indicador
+      rafId = requestAnimationFrame(tick);
+    }
+
+    // iniciar quando o DOM estiver pronto
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPreloader, {
+        once: true
+      });
+    } else {
+      initPreloader();
+    }
+  </script>
 </body>
 
 </html>

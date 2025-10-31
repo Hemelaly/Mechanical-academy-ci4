@@ -544,6 +544,9 @@ class Dashboard extends BaseController
     public function profile()
     {
         $users = new ExtendedUserModel();
+        $userModel = new UserModel();
+
+        $usersResult = $userModel->findAll();
 
         $user = auth()->user();
         if (! $user) {
@@ -580,6 +583,14 @@ class Dashboard extends BaseController
 
         $post     = $this->request->getPost();
         $userName = trim(($post['nome'] ?? ''));
+
+        $existingUser = $userModel->where('username', $userName)->find();
+
+        if ($existingUser) {
+
+            return redirect()->to($backUrl)->with('error', 'Já existe um usuário cadastrado com esse nome!');
+
+        }
 
         // Upload opcional
         $file     = $this->request->getFile('imagem');

@@ -49,7 +49,7 @@ $routes->group('student', ['namespace' => 'App\Controllers\Student', 'filter' =>
     $routes->group('lessons', function ($r) {
         $r->post('complete',   'LessonsController::complete');
         $r->post('uncomplete', 'LessonsController::uncomplete');
-    });
+    }); 
 });
 
 // Rotas de Cursos
