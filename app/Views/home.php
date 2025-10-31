@@ -2,7 +2,7 @@
 
 $isLoggedIn   = auth()->loggedIn();
 
-// dd($courses)
+// dd(base_url('./assets/img/logo.png'))
 
 
 ?>
@@ -98,10 +98,143 @@ $isLoggedIn   = auth()->loggedIn();
         .patterns {
             background: url(<?= base_url('./assets/img/pattern.png') ?>);
         }
+
+        :root {
+            --pre-bg: #0b0f19;
+            --pre-fg: #fff;
+            --pre-accent: #7c5cff;
+            --pre-z: 9999;
+            --fade-ms: 360ms;
+        }
+
+        #preloader {
+            position: fixed;
+            inset: 0;
+            z-index: var(--pre-z);
+            display: grid;
+            place-items: center;
+            color: var(--pre-fg);
+            background:
+                radial-gradient(1000px 700px at 10% 10%, #11162a 0%, transparent 60%),
+                radial-gradient(1000px 700px at 90% 90%, #0e1330 0%, transparent 60%),
+                var(--pre-bg);
+            transition: opacity var(--fade-ms) ease, visibility var(--fade-ms) ease;
+        }
+
+        #preloader.is-hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .preloader__inner {
+            display: grid;
+            gap: 14px;
+            place-items: center;
+            text-align: center;
+        }
+
+        .preloader__logo {
+            width: 84px;
+            height: auto;
+            filter: drop-shadow(0 2px 10px rgba(0, 0, 0, .35));
+        }
+
+        .preloader__spinner {
+            width: 56px;
+            height: 56px;
+        }
+
+        .preloader__track {
+            fill: none;
+            stroke: rgba(255, 255, 255, .18);
+            stroke-width: 6;
+        }
+
+        .preloader__arc {
+            fill: none;
+            stroke: var(--pre-accent);
+            stroke-linecap: round;
+            stroke-width: 6;
+            stroke-dasharray: 110 126;
+            transform-origin: 50% 50%;
+            animation: spin 1.05s linear infinite, dash 1.5s ease-in-out infinite;
+        }
+
+        .preloader__bar {
+            width: min(320px, 70vw);
+            height: 8px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, .15);
+            overflow: hidden;
+        }
+
+        .preloader__bar__fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--pre-accent), #9a7bff 60%, var(--pre-accent));
+            border-radius: 999px;
+            transform: translateZ(0);
+        }
+
+        .preloader__text {
+            font: 600 .95rem/1.2 system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial;
+            opacity: .9;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes dash {
+            0% {
+                stroke-dasharray: 1 235;
+                stroke-dashoffset: 0;
+            }
+
+            50% {
+                stroke-dasharray: 120 115;
+                stroke-dashoffset: -25;
+            }
+
+            100% {
+                stroke-dasharray: 1 235;
+                stroke-dashoffset: -235;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .preloader__arc {
+                animation: none;
+            }
+        }
     </style>
+
+
+
 </head>
 
 <body>
+    <!-- PRELOADER -->
+    <div id="preloader" role="status" aria-live="polite" aria-label="Carregando conteúdo">
+        <div class="preloader__inner">
+            <!-- opcional: seu logotipo -->
+            <img src="<?= base_url('assets/img/logo.png') ?>" alt="Minha Marca" class="preloader__logo h-auto w-50" />
+
+
+            <div class="preloader__bar">
+                <div class="preloader__bar__fill" id="preloaderFill" style="width:0%"></div>
+            </div>
+            <p class="preloader__text"><span id="preloaderPct">0</span>%</p>
+        </div>
+    </div>
+
+
+
+
+
     <nav class="navbar navbar-expand-lg sticky-top bg-black navbar-dark py-3">
         <div class="container">
             <a class="navbar-brand" href="#">
@@ -199,25 +332,25 @@ $isLoggedIn   = auth()->loggedIn();
             </h2>
 
             <div class="row mt-4">
-                <?php foreach($courses as $key => $course): ?>
-                <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
-                    <div class="card card-bg text-light W-100 h-100 p-1 card-border">
-                        <div class="card-body d-flex justify-content-between ">
-                            <div>
-                                <h5 class="fs-6"><i class="fa fa-clock"></i> 25 Horas</h5>
-                                <div class="mt-4 p-3" w-100>
-                                    <h6 class="card-subtitle mb-2 text-primary fw-light text-uppercase fs-6">Todos os
-                                        níveis</h6>
-                                    <p class="card-text fs-5 text-white fw-semibold mb-3"><?= esc($course->title_course) ?></p>
-                                    <a href="<?= base_url('./courses/'. $course->id_course) ?>"
-                                        class="card-link text-decoration-none text-primary fw-light fs-6 py-4 stretched-link">Ver
-                                        Curso</a>
+                <?php foreach ($courses as $key => $course): ?>
+                    <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
+                        <div class="card card-bg text-light W-100 h-100 p-1 card-border">
+                            <div class="card-body d-flex justify-content-between ">
+                                <div>
+                                    <h5 class="fs-6"><i class="fa fa-clock"></i> 25 Horas</h5>
+                                    <div class="mt-4 p-3" w-100>
+                                        <h6 class="card-subtitle mb-2 text-primary fw-light text-uppercase fs-6">Todos os
+                                            níveis</h6>
+                                        <p class="card-text fs-5 text-white fw-semibold mb-3"><?= esc($course->title_course) ?></p>
+                                        <a href="<?= base_url('./courses/' . $course->id_course) ?>"
+                                            class="card-link text-decoration-none text-primary fw-light fs-6 py-4 stretched-link">Ver
+                                            Curso</a>
+                                    </div>
                                 </div>
+                                <div><img src="<?= base_url('./assets/img/' . $course->icon_course) ?>" style="width: 50px;" alt=""></div>
                             </div>
-                            <div><img src="<?= base_url('./assets/img/'. $course->icon_course) ?>" style="width: 50px;" alt=""></div>
                         </div>
                     </div>
-                </div>
                 <?php endforeach ?>
             </div>
         </div>
@@ -368,6 +501,189 @@ $isLoggedIn   = auth()->loggedIn();
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
         crossorigin="anonymous"></script>
+
+    <script>
+        (function() {
+            const pre = document.getElementById('preloader');
+            if (!pre) return;
+
+            const fill = document.getElementById('preloaderFill');
+            const pctEl = document.getElementById('preloaderPct');
+
+            // ---- CONFIG ----
+            const MAX_WAIT_MS = 12000; // força saída em 12s
+            const MIN_SHOW_MS = 400; // evita "piscar" rápido demais
+            const WEIGHTS = {
+                dom: 20, // DOM pronto
+                fonts: 10, // fontes carregadas
+                images: 60, // imagens visíveis carregadas
+                load: 10 // evento window.load
+            };
+
+            // bloqueia rolagem (opcional; se não quiser, comente)
+            const lockScroll = () => {
+                document.documentElement.style.overflow = 'hidden';
+            };
+            const unlockScroll = () => {
+                document.documentElement.style.overflow = '';
+            };
+            lockScroll();
+
+            let startTs = performance.now();
+            let current = 0; // valor animado
+            let target = 0; // alvo a perseguir
+            let rafId = 0;
+            let finished = false;
+            let loadFired = false;
+
+            // ---- MEDIDORES DE PROGRESSO ----
+            // 1) DOM pronto
+            function bumpDomReady() {
+                target += WEIGHTS.dom;
+                clampTarget();
+            }
+            if (document.readyState === 'interactive' || document.readyState === 'complete') {
+                bumpDomReady();
+            } else {
+                document.addEventListener('DOMContentLoaded', bumpDomReady, {
+                    once: true
+                });
+            }
+
+            // 2) Fonts (se suportado)
+            if (document.fonts && document.fonts.ready) {
+                document.fonts.ready.then(() => {
+                    target += WEIGHTS.fonts;
+                    clampTarget();
+                }).catch(() => {
+                    // em caso de erro de fontes, ainda avançamos um pouco
+                    target += Math.floor(WEIGHTS.fonts * 0.6);
+                    clampTarget();
+                });
+            } else {
+                target += Math.floor(WEIGHTS.fonts * 0.6);
+                clampTarget();
+            }
+
+            // 3) Imagens (só as do DOM atual; background-images são ignoradas por simplicidade)
+            const imgs = Array.from(document.images || []);
+            const totalImgs = imgs.length;
+            let loadedImgs = 0;
+
+            function onImgDone() {
+                loadedImgs++;
+                const frac = totalImgs ? (loadedImgs / totalImgs) : 1;
+                // as imagens controlam até WEIGHTS.images do total
+                const imgProgress = WEIGHTS.images * frac;
+                // base atual (dom + fonts) já pode ter somado; então fixamos a parte de imagens
+                const base = Math.min(target, WEIGHTS.dom + WEIGHTS.fonts);
+                target = base + imgProgress;
+                clampTarget();
+            }
+
+            if (totalImgs === 0) {
+                target += WEIGHTS.images; // não há imagens -> consideramos completo esse trecho
+                clampTarget();
+            } else {
+                imgs.forEach(img => {
+                    if (img.complete) {
+                        // já carregada (ou falhou); conta mesmo assim
+                        onImgDone();
+                    } else {
+                        img.addEventListener('load', onImgDone, {
+                            once: true
+                        });
+                        img.addEventListener('error', onImgDone, {
+                            once: true
+                        });
+                    }
+                });
+                // ainda assim, segurança: se muitas imagens travarem, damos um empurrão após 5s
+                setTimeout(() => {
+                    const minImgProgress = Math.max(target, WEIGHTS.dom + WEIGHTS.fonts + WEIGHTS.images * 0.5);
+                    target = minImgProgress;
+                    clampTarget();
+                }, 5000);
+            }
+
+            // 4) window.load (fecha os 100%)
+            window.addEventListener('load', () => {
+                loadFired = true;
+                target = 100;
+                clampTarget();
+            }, {
+                once: true
+            });
+
+            // bailouts globais
+            setTimeout(() => {
+                target = Math.max(target, 95);
+                clampTarget();
+            }, 8000);
+            setTimeout(forceFinish, MAX_WAIT_MS);
+
+            // ---- ANIMAÇÃO SUAVE DO % ----
+            function clampTarget() {
+                if (target > 100) target = 100;
+                if (target < 0) target = 0;
+            }
+
+            function tick() {
+                // easing: aproxima current de target
+                current += (target - current) * 0.12; // mais baixo = mais suave
+                if ((target === 100 && current > 99.6) || (performance.now() - startTs > MAX_WAIT_MS)) {
+                    current = 100;
+                    render();
+                    done();
+                    return;
+                }
+                render();
+                rafId = requestAnimationFrame(tick);
+            }
+
+            function render() {
+                const pct = Math.round(current);
+                if (fill) fill.style.width = pct + '%';
+                if (pctEl) pctEl.textContent = pct;
+            }
+
+            function done() {
+                if (finished) return;
+                finished = true;
+
+                const now = performance.now();
+                const elapsed = now - startTs;
+                const delay = Math.max(0, MIN_SHOW_MS - elapsed);
+
+                setTimeout(() => {
+                    pre.classList.add('is-hidden');
+                    unlockScroll();
+
+                    // cancela RAF para evitar “loop”
+                    if (rafId) cancelAnimationFrame(rafId);
+
+                    // remove do DOM após o fade
+                    setTimeout(() => {
+                        pre.remove();
+                    }, 420);
+                }, delay);
+            }
+
+            function forceFinish() {
+                target = 100;
+                clampTarget();
+                // se nem DOM nem load aconteceram, ainda assim encerramos
+                if (!finished) {
+                    // dá 200ms para a barra chegar nos 100
+                    setTimeout(done, 200);
+                }
+            }
+
+            // inicia animação
+            rafId = requestAnimationFrame(tick);
+        })();
+    </script>
+
 </body>
 
 </html>
