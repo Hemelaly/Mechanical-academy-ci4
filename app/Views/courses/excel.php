@@ -219,7 +219,7 @@ $user = service('auth')->user();
             </li>
           <?php else: ?>
             <li class="nav-item me-3">
-              <a class="nav-link active" href="#cursos">Cursos</a>
+              <a class="nav-link active" href="<?= base_url('/') ?>#cursos">Cursos</a>
             </li>
             <li class="nav-item">
               <a class="nav-link active" href="<?= base_url('login') ?>">Entrar</a>

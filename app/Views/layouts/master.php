@@ -37,6 +37,12 @@
 
                         <?= $this->renderSection('home_admin') ?>
 
+                        <?= $this->renderSection('courses') ?>
+
+                        <?= $this->renderSection('students') ?>
+
+                        <?= $this->renderSection('instructors') ?>
+
                         <?= $this->renderSection('profile') ?>
                     </div>
                 </div>

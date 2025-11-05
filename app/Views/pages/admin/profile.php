@@ -1,3 +1,9 @@
+<?php
+
+// dd($user);
+
+?>
+
 <?= $this->extend('layouts/master') ?>
 
 <?= $this->section('title') ?>
@@ -12,10 +18,13 @@ Perfil
         <div class="d-flex flex-column flex-md-row justify-content-center justify-content-md-between align-items-center gap-3">
             <!-- User Info -->
             <div class="d-flex flex-column flex-md-row justify-content-center align-items-center gap-md-1 gap-3 text-md-start text-center">
-                <div class="position-relative me-3">
-                    <img src="<?= base_url('assets/img/user-default.png') ?>"
-                        class="rounded-circle object-fit-cover" width="80" height="80" alt="Foto de perfil de <?= $user->username ?>" />
-                </div>
+                <img
+                    src="<?= base_url($user->img ?? 'assets/img/user-default.png') ?>"
+                    class="rounded-circle object-fit-cover"
+                    width="80" height="80"
+                    alt="Foto de perfil de <?= esc($user->username) ?>" />
+
+                </a>
                 <div>
                     <h3 class="h5 fw-semibold mb-1 text-capitalize"><?= $user->username ?></h3>
                     <small class="text-secondary text-capitalize"><?= $user->role ?></small>
@@ -38,7 +47,7 @@ Perfil
         <div class="row">
             <div class="col-md-6 col-lg-4 mb-3">
                 <label class="form-label text-secondary small mb-1">Nome</label>
-                <div class="fw-medium text-capitalize"><?= $user->username ?></div>
+                <div class="fw-medium text-capitalize"><?= esc($user->username ?? 'Teu nome...') ?></div>
             </div>
             <div class="col-md-6 col-lg-4 mb-3">
                 <label class="form-label text-secondary small mb-1">Apelido</label>
@@ -46,11 +55,11 @@ Perfil
             </div>
             <div class="col-md-6 col-lg-4 mb-3">
                 <label class="form-label text-secondary small mb-1">Email</label>
-                <div class="fw-medium text-break"><?= $user->email ?></div>
+                <div class="fw-medium text-break"><?= esc($user->email ?? 'Teu email...') ?></div>
             </div>
             <div class="col-md-6 col-lg-4 mb-3">
                 <label class="form-label text-secondary small mb-1">Telefone</label>
-                <div class="fw-medium">+(258) --- ----</div>
+                <div class="fw-medium"><?= esc($user->phone ?? 'Teu celular...') ?></div>
             </div>
         </div>
     </div>
@@ -63,15 +72,15 @@ Perfil
         <div class="row">
             <div class="col-md-6 col-lg-4 mb-3">
                 <label class="form-label text-secondary small mb-1">País</label>
-                <div class="fw-medium">Moçambique</div>
+                <div class="fw-medium"><?= esc($user->country ?? 'Teu país...') ?></div>
             </div>
             <div class="col-md-6 col-lg-4 mb-3">
                 <label class="form-label text-secondary small mb-1">Provincia</label>
-                <div class="fw-medium">Maputo</div>
+                <div class="fw-medium"><?= esc($user->province ?? 'Tua província...') ?></div>
             </div>
             <div class="col-md-6 col-lg-4 mb-3">
                 <label class="form-label text-secondary small mb-1">Cidade</label>
-                <div class="fw-medium">Maputo</div>
+                <div class="fw-medium"><?= esc($user->city ?? 'Tua cidade...') ?></div>
             </div>
         </div>
     </div>
@@ -80,32 +89,28 @@ Perfil
 <!-- Modal de Edição de Perfil -->
 <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content" style="background: #1f293a; border: 1px solid #2d3748;">
-            <div class="modal-header border-secondary">
-                <h5 class="modal-title text-white" id="editProfileModalLabel">Editar Perfil</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
-            </div>
-            <div class="modal-body">
-                <form id="profileForm">
+        <form action="/student/dashboard/perfil" enctype="multipart/form-data" method="POST">
+            <div class="modal-content" style="background: #1f293a; border: 1px solid #2d3748;">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title text-white" id="editProfileModalLabel">Editar Perfil</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
                     <!-- Informações Pessoais -->
                     <div class="mb-4">
                         <h6 class="text-white mb-3 pb-2 border-bottom border-secondary">Informações Pessoais</h6>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="firstName" class="form-label text-white small">Nome</label>
-                                <input type="text" class="form-control bg-dark text-white border-secondary" id="firstName" value="<?= $user->username ?>">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="lastName" class="form-label text-white small">Apelido</label>
-                                <input type="text" class="form-control bg-dark text-white border-secondary" id="lastName" placeholder="Digite seu apelido">
+                                <input type="text" name="nome" class="form-control bg-dark text-white border-secondary" id="firstName" value="<?= esc($user->username ?? '') ?>">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="email" class="form-label text-white small">Email</label>
-                                <input type="email" class="form-control bg-dark text-white border-secondary" id="email" value="<?= $user->email ?>">
+                                <input type="email" name="email" class="form-control bg-dark text-white border-secondary" id="email" value="<?= esc($user->email ?? '') ?>">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="phone" class="form-label text-white small">Telefone</label>
-                                <input type="tel" class="form-control bg-dark text-white border-secondary" id="phone" placeholder="+(258) 84 123 4567">
+                                <input type="tel" name="telefone" class="form-control bg-dark text-white border-secondary" id="phone" placeholder="+(258) 84 123 4567" value="<?= esc($user->phone ?? '') ?>">
                             </div>
                         </div>
                     </div>
@@ -116,7 +121,7 @@ Perfil
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="country" class="form-label text-white small">País</label>
-                                <select class="form-select bg-dark text-white border-secondary" id="country">
+                                <select class="form-select bg-dark text-white border-secondary" name="pais" id="country">
                                     <option value="Mocambique" selected>Moçambique</option>
                                     <option value="Angola">Angola</option>
                                     <option value="Brasil">Brasil</option>
@@ -125,7 +130,7 @@ Perfil
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="province" class="form-label text-white small">Província</label>
-                                <select class="form-select bg-dark text-white border-secondary" id="province">
+                                <select name="provincia" class="form-select bg-dark text-white border-secondary" id="province">
                                     <option value="Maputo" selected>Maputo</option>
                                     <option value="Gaza">Gaza</option>
                                     <option value="Inhambane">Inhambane</option>
@@ -134,7 +139,7 @@ Perfil
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="city" class="form-label text-white small">Cidade</label>
-                                <input type="text" class="form-control bg-dark text-white border-secondary" id="city" value="Maputo">
+                                <input type="text" name="cidade" class="form-control bg-dark text-white border-secondary" id="city" value="<?= esc($user->city ?? 'Maputo') ?>">
                             </div>
                         </div>
                     </div>
@@ -144,22 +149,38 @@ Perfil
                         <h6 class="text-white mb-3 pb-2 border-bottom border-secondary">Foto de Perfil</h6>
                         <div class="d-flex align-items-center gap-3">
                             <div class="position-relative">
-                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face"
-                                    class="rounded-circle object-fit-cover" width="80" height="80" alt="Foto atual de perfil" id="currentProfileImage">
+                                <img
+                                    src="<?= base_url($user->img ?? 'assets/img/user-default.png') ?>"
+                                    class="rounded-circle object-fit-cover"
+                                    width="80" height="80"
+                                    alt="Foto de perfil de <?= esc($user->username) ?>" />
                             </div>
                             <div class="flex-grow-1">
                                 <label for="profileImage" class="form-label text-white small">Alterar foto</label>
-                                <input class="form-control bg-dark text-white border-secondary" type="file" id="profileImage" accept="image/*">
+                                <input class="form-control bg-dark text-white border-secondary" name="imagem" type="file" id="profileImage" accept="image/*">
                                 <div class="form-text text-secondary">Formatos suportados: JPG, PNG, GIF. Tamanho máximo: 2MB</div>
                             </div>
                         </div>
                     </div>
-                </form>
-            </div>
-            <div class="modal-footer border-secondary">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" id="saveProfileChanges">Salvar Alterações</button>
-            </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="lightbox1" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-transparent border-0">
+            <button type="button" class="btn-close btn-close-white ms-auto me-2 mt-2" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            <img
+                src="<?= base_url($user->img ?? 'assets/img/user-default.png') ?>"
+                class="rounded-circle object-fit-cover"
+                width="80" height="80"
+                alt="Foto de perfil de <?= esc($user->username) ?>" />
         </div>
     </div>
 </div>
@@ -259,4 +280,61 @@ Perfil
         }
     });
 </script>
+
+<script>
+    (function() {
+        const input = document.getElementById('profileImage');
+        const img = document.getElementById('profilePreview');
+        const modalEl = document.getElementById('editProfileModal');
+
+        if (!input || !img) return;
+
+        const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+        const ALLOWED = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
+        let objectUrl = null;
+        const originalSrc = img.currentSrc || img.src;
+
+        function resetPreview() {
+            if (objectUrl) {
+                URL.revokeObjectURL(objectUrl);
+                objectUrl = null;
+            }
+            img.src = originalSrc;
+            // opcional: limpar input
+            // input.value = '';
+        }
+
+        input.addEventListener('change', () => {
+            const file = input.files && input.files[0];
+            if (!file) {
+                resetPreview();
+                return;
+            }
+
+            if (!ALLOWED.includes(file.type)) {
+                alert('Formato inválido. Use JPG, PNG, GIF ou WEBP.');
+                input.value = '';
+                resetPreview();
+                return;
+            }
+            if (file.size > MAX_SIZE) {
+                alert('O ficheiro excede 2MB.');
+                input.value = '';
+                resetPreview();
+                return;
+            }
+
+            if (objectUrl) URL.revokeObjectURL(objectUrl);
+            objectUrl = URL.createObjectURL(file);
+            img.src = objectUrl;
+        });
+
+        // Quando o modal fecha sem submissão, voltar à imagem original
+        if (modalEl) {
+            modalEl.addEventListener('hidden.bs.modal', resetPreview);
+        }
+    })();
+</script>
+
 <?= $this->endSection() ?>

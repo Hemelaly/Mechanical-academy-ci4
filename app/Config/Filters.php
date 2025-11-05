@@ -34,7 +34,8 @@ class Filters extends BaseFilters
         'forcehttps'    => ForceHTTPS::class,
         'pagecache'     => PageCache::class,
         'performance'   => PerformanceMetrics::class,
-        'role'  => \App\Filters\RoleFilter::class, // <-- nosso filtro
+        'role'  => \App\Filters\RoleFilter::class, // filtro para tipos de users
+        'magic-redirect' => \App\Filters\MagicLoginRedirect::class, // filtro para reset-password
     ];
 
     /**
@@ -81,6 +82,7 @@ class Filters extends BaseFilters
             // 'honeypot',
             // 'secureheaders',
         ],
+       
     ];
 
     /**

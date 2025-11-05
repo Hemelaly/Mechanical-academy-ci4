@@ -11,12 +11,15 @@ $routes->get('/', 'Home::index');
 // Rotas do Shield (login, logout, etc.)
 service('auth')->routes($routes);
 
-$routes->get('reset-password', 'ResetPassword::showResetForm');
+$routes->get('reset-password',  'ResetPassword::showResetForm');
 $routes->post('reset-password', 'ResetPassword::submitReset');
 
 // Admin
 $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'role:admin'], function ($routes) {
     $routes->get('dashboard', 'Dashboard::index');
+    $routes->get('dashboard/cursos', 'Dashboard::courses');
+    $routes->get('dashboard/estudantes', 'Dashboard::students');
+    $routes->get('dashboard/instrutores', 'Dashboard::instructors');
     $routes->get('dashboard/perfil', 'Dashboard::profile');
 });
 

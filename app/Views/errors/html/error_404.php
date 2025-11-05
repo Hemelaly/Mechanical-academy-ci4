@@ -5,6 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>404 • Página não encontrada</title>
+    <link rel="shortcut icon" href="<?= base_url('assets/img/favicon.png') ?>" width="100%" type="image/x-icon">
 
     <style>
         :root {
@@ -171,8 +172,9 @@
 
     <!-- conteúdo -->
     <main class="card" role="main">
-        <img class="logo" src="<?= base_url('assets/img/logo.png') ?>" alt="Mechanical Academy" />
-        <h1>404 — Página não encontrada</h1>
+        <!-- <img class="logo" src="<?= base_url('assets/img/logo.png') ?>" alt="Mechanical Academy" /> -->
+        <p style="font-size: 5rem; line-height: 1; font-weight: bold;">404</p>
+        <h1>Página não encontrada</h1>
         <p>A rota que você tentou acessar não existe ou foi movida.</p>
         <a class="cta" href="<?= base_url('/') ?>">Voltar para a página inicial</a>
         <div class="meta">Código do erro: 404 • <?= esc(current_url()) ?></div>
