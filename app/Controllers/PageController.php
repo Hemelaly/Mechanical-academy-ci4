@@ -42,8 +42,8 @@ class PageController extends BaseController
 
         $lessonModel     = new LessonModel();
         $moduleModel     = new ModuleModel();
-        $courseModel = new CourseModel();
-        $projectModel = new ProjectModel();
+        $courseModel     = new CourseModel();
+        $projectModel    = new ProjectModel();
 
         $user = service('auth')->user();
 

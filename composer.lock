@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e35353da932a71e47de3a789f869efb2",
+    "content-hash": "069753f6ea4a3aedbedea53fbf92ca1c",
     "packages": [
         {
             "name": "codeigniter4/framework",
@@ -205,6 +205,43 @@
                 "source": "https://github.com/codeigniter4/shield"
             },
             "time": "2025-07-14T10:26:03+00:00"
+        },
+        {
+            "name": "emagombe/mpesa-api",
+            "version": "v4.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/emagombe/mpesa-api.git",
+                "reference": "85173c500efa6872436fed24238fe6dd7dd65610"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/emagombe/mpesa-api/zipball/85173c500efa6872436fed24238fe6dd7dd65610",
+                "reference": "85173c500efa6872436fed24238fe6dd7dd65610",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "emagombe\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "Edson Magombe",
+                    "email": "edson.patricio.39@gmail.com"
+                }
+            ],
+            "description": "API em PHP para M-PESA (Mo\u0000ambique)",
+            "support": {
+                "issues": "https://github.com/emagombe/mpesa-api/issues",
+                "source": "https://github.com/emagombe/mpesa-api/tree/v4.0.0"
+            },
+            "time": "2024-07-13T19:52:54+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",

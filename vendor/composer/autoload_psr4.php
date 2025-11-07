@@ -6,13 +6,19 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'emagombe\\' => array($vendorDir . '/emagombe/mpesa-api/src'),
+    'Tests\\Support\\' => array($baseDir . '/tests/_support'),
     'Psr\\Log\\' => array($vendorDir . '/psr/log/src'),
     'Psr\\Http\\Message\\' => array($vendorDir . '/psr/http-factory/src', $vendorDir . '/psr/http-message/src'),
     'Psr\\Http\\Client\\' => array($vendorDir . '/psr/http-client/src'),
+    'Psr\\Container\\' => array($vendorDir . '/psr/container/src'),
+    'PhpParser\\' => array($vendorDir . '/nikic/php-parser/lib/PhpParser'),
     'Laminas\\Escaper\\' => array($vendorDir . '/laminas/laminas-escaper/src'),
     'GuzzleHttp\\Psr7\\' => array($vendorDir . '/guzzlehttp/psr7/src'),
     'GuzzleHttp\\Promise\\' => array($vendorDir . '/guzzlehttp/promises/src'),
     'GuzzleHttp\\' => array($vendorDir . '/guzzlehttp/guzzle/src'),
+    'Faker\\' => array($vendorDir . '/fakerphp/faker/src/Faker'),
+    'DeepCopy\\' => array($vendorDir . '/myclabs/deep-copy/src/DeepCopy'),
     'Config\\' => array($baseDir . '/app/Config'),
     'CodeIgniter\\Shield\\' => array($vendorDir . '/codeigniter4/shield/src'),
     'CodeIgniter\\Settings\\' => array($vendorDir . '/codeigniter4/settings/src'),

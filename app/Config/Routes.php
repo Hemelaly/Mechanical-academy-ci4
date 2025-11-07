@@ -62,6 +62,8 @@ $routes->get('checkout/(:num)', 'PageController::index/$1');
 $routes->post('checkout/pending/(:num)', 'Register::createPendingUser/$1');
 
 // Pagamentos
+$routes->post('mpesa/callback', 'MpesaCallback::stk');
+$routes->post('mpesa/send', 'MpesaController::send');
 $routes->get('payment/checkout/(:num)/(:num)', 'PaymentController::createPayment/$1/$2');
 $routes->post('checkout/(:num)', 'PaymentController::createPayment/$1');
 // $routes->post('student/payment/mpesa/(:num)', 'Student\PaymentController::mpesa/$1');

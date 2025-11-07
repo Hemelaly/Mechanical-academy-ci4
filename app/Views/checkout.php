@@ -517,12 +517,12 @@ $session = session();
                 <?php endif; ?>
 
 
-                <div class="mb-3">
+                <div class="mb-3 border rounded p-3" for="mobile">
                   <div class="d-flex flex-column gap-4">
                     <div class="form-check">
-                      <input class="form-check-input" type="radio" name="payment" id="mobile">
+                      <input class="form-check-input" type="radio" name="payment" id="mobile" checked>
                       <label class="form-check-label" for="mobile">
-                        Mpesa/E-mola
+                        Pagar com Mpesa
                       </label>
                     </div>
                     <!-- <div class="form-check">
@@ -536,12 +536,12 @@ $session = session();
 
                 <!-- Div oculta que será exibida quando o radio estiver selecionado -->
                 <div id="payment-info" class="mt-3 d-none">
-                  <p><strong>Contacto para transferência:</strong></p>
+                  <!-- <p><strong>Contacto para transferência:</strong></p>
                   <p style="margin-top: -10px;">+258 84 123 4567 - Mpesa</p>
-                  <p style="margin-top: -10px;">+258 87 123 4567 - Emola</p>
+                  <p style="margin-top: -10px;">+258 87 123 4567 - Emola</p> -->
 
                   <!-- Dropzone -->
-                  <div class="divider text-muted">
+                  <!-- <div class="divider text-muted">
                     <span>Envio do Comprovativo</span>
                   </div>
 
@@ -566,7 +566,12 @@ $session = session();
                         </button>
                       </div>
                     </div>
-                  </div>
+                  </div> -->
+
+                  <input type="tel" class="form-control mb-3" name="client_number" placeholder="Nr de Telefone com Mpesa" required>
+                  <div class="invalid-feedback">
+                      Por favor, insira seu número de Telefone com Mpesa.
+                    </div>
 
                   <input type="hidden" name="amount_payment" value="<?= $course->price_course ?>">
                 </div>
