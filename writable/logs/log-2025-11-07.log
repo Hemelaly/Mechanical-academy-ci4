@@ -43,3 +43,111 @@ DEBUG - 2025-11-07 13:21:50 --> Session: Class initialized using 'CodeIgniter\Se
 DEBUG - 2025-11-07 13:22:05 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
 DEBUG - 2025-11-07 13:23:15 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
 DEBUG - 2025-11-07 13:23:32 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 13:39:15 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 13:40:15 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 13:40:37 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 14:26:52 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 14:27:08 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2025-11-07 14:34:59 --> ArgumentCountError: Too few arguments to function App\Controllers\PaymentController::createPayment(), 1 passed in C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php on line 933 and exactly 2 expected
+[Method: POST, Route: checkout/19]
+in APPPATH\Controllers\PaymentController.php on line 11.
+ 1 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\PaymentController->createPayment('19')
+ 2 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\PaymentController))
+ 3 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 5 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 6 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2025-11-07 14:36:48 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2025-11-07 14:36:48 --> ErrorException: Attempt to read property "image_course" on null
+[Method: GET, Route: checkout/1]
+in APPPATH\Views\checkout.php on line 53.
+ 1 APPPATH\Views\checkout.php(53): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Attempt to read property "image_course" on null', 'C:\\laragon\\www\\academy-ci4\\app\\Views\\checkout.php', 53)
+ 2 SYSTEMPATH\View\View.php(226): include('C:\\laragon\\www\\academy-ci4\\app\\Views\\checkout.php')
+ 3 SYSTEMPATH\View\View.php(229): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('checkout', [], true)
+ 5 APPPATH\Controllers\PageController.php(33): view('checkout', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\PageController->index('1')
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\PageController))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2025-11-07 14:37:36 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2025-11-07 14:37:36 --> ErrorException: Attempt to read property "image_course" on null
+[Method: GET, Route: checkout/1]
+in APPPATH\Views\checkout.php on line 53.
+ 1 APPPATH\Views\checkout.php(53): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Attempt to read property "image_course" on null', 'C:\\laragon\\www\\academy-ci4\\app\\Views\\checkout.php', 53)
+ 2 SYSTEMPATH\View\View.php(226): include('C:\\laragon\\www\\academy-ci4\\app\\Views\\checkout.php')
+ 3 SYSTEMPATH\View\View.php(229): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('checkout', [], true)
+ 5 APPPATH\Controllers\PageController.php(33): view('checkout', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\PageController->index('1')
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\PageController))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2025-11-07 14:38:05 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2025-11-07 14:38:05 --> ErrorException: Attempt to read property "image_course" on null
+[Method: GET, Route: checkout/1]
+in APPPATH\Views\checkout.php on line 53.
+ 1 APPPATH\Views\checkout.php(53): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Attempt to read property "image_course" on null', 'C:\\laragon\\www\\academy-ci4\\app\\Views\\checkout.php', 53)
+ 2 SYSTEMPATH\View\View.php(226): include('C:\\laragon\\www\\academy-ci4\\app\\Views\\checkout.php')
+ 3 SYSTEMPATH\View\View.php(229): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('checkout', [], true)
+ 5 APPPATH\Controllers\PageController.php(33): view('checkout', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\PageController->index('1')
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\PageController))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2025-11-07 14:39:37 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 14:39:42 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 14:44:48 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 14:45:00 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 14:45:32 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 14:45:39 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 15:03:53 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 15:04:07 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 15:04:20 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 15:04:26 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 15:04:41 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 15:04:42 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 15:04:45 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 15:04:51 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2025-11-07 15:04:51 --> TypeError: CodeIgniter\HTTP\SiteURI::stringifyRelativePath(): Return value must be of type string, null returned
+[Method: GET, Route: instructor/dashboard/meus_estudantes]
+in SYSTEMPATH\HTTP\SiteURI.php on line 419.
+ 1 SYSTEMPATH\HTTP\SiteURI.php(393): CodeIgniter\HTTP\SiteURI->stringifyRelativePath(null)
+ 2 SYSTEMPATH\Helpers\url_helper.php(59): CodeIgniter\HTTP\SiteURI->baseUrl(null, null)
+ 3 APPPATH\Views\pages\instructor\students.php(254): base_url(null)
+ 4 SYSTEMPATH\View\View.php(226): include('C:\\laragon\\www\\academy-ci4\\app\\Views\\pages\\instructor\\students.php')
+ 5 SYSTEMPATH\View\View.php(229): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 6 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('pages/instructor/students', [], true)
+ 7 APPPATH\Controllers\Instructor\Dashboard.php(182): view('pages/instructor/students', [...])
+ 8 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->students()
+ 9 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+10 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+11 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+12 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+13 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2025-11-07 15:07:34 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 15:07:40 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 15:07:40 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 15:07:51 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 15:07:57 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 15:08:14 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 15:08:23 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 15:08:28 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 15:09:06 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 15:09:31 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 15:10:28 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 15:10:32 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 15:27:33 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 15:28:04 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 15:31:03 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 15:33:43 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 15:33:52 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 15:34:25 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-07 15:36:00 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.

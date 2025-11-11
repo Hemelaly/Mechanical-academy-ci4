@@ -1,0 +1,15 @@
+{
+    "created_at": "2025-11-11T13:33:53+00:00",
+    "payment_id": 49,
+    "reference": "PAY-2025-000049",
+    "request": {
+        "amount": 6250,
+        "client_number": "258855454532"
+    },
+    "response": "{\"output_ResponseCode\":\"INS-0\",\"output_ResponseDesc\":\"Request processed successfully\",\"output_TransactionID\":\"9brasvmxnsrc\",\"output_ConversationID\":\"17de5c74d82f4ef3a6d49e8fb391e2bb\",\"output_ThirdPartyReference\":\"67843\"}",
+    "parsed": {
+        "code": "",
+        "status": ""
+    },
+    "final": "approved_and_enrolled"
+}

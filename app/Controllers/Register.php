@@ -2,10 +2,19 @@
 
 namespace App\Controllers;
 
+use App\Models\UserModel;          // Shield
+use App\Entities\User;             // Shield Entity (ajuste se necessário)
 use App\Models\PaymentModel;
+use App\Models\StudentModel;
+use App\Models\EnrollmentModel;
+use App\Models\PendingUserModel;   // para o fluxo antigo
 use CodeIgniter\Controller;
-use CodeIgniter\Shield\Models\UserModel;
+use CodeIgniter\I18n\Time;
+use CodeIgniter\Shield\Entities\User as EntitiesUser;
+use CodeIgniter\Shield\Models\UserModel as ModelsUserModel;
 use emagombe\Mpesa;
+use RecursiveArrayIterator;
+use RecursiveIteratorIterator;
 
 class Register extends Controller
 {
@@ -14,63 +23,52 @@ class Register extends Controller
         $db   = db_connect();
         $post = $this->request->getPost();
 
-        // 0) Validação básica do form (sem mudar seus campos)
-        helper(['form']);
+        // 0) Validação básica do form
+        helper(['form', 'text']);
         $validation = \Config\Services::validation();
         $validation->setRules([
             'email'          => 'required|valid_email',
             'username'       => 'required|min_length[2]',
-            'amount_payment' => 'permit_empty|numeric|greater_than_equal_to[0]',
+            'amount_payment' => 'permit_empty|numeric|greater_than[0]', // > 0 quando informado
             'client_number'  => 'permit_empty|numeric|min_length[7]|max_length[15]',
         ]);
         if (!$validation->withRequest($this->request)->run()) {
             return redirect()->back()->withInput()->with('errors', $validation->getErrors());
         }
 
-        $users      = model(UserModel::class);
-        $isLoggedIn = auth()->loggedIn();
+        // 1) Models
+        $users        = model(ModelsUserModel::class);
+        $studentModel = new StudentModel();
+        $enrollModel  = new EnrollmentModel();
+        $paymentModel = new PaymentModel();
+        $pendingModel = new PendingUserModel();
 
-        // 1) Se o email já existe e NÃO está logado -> peça login
-        $existingUser = $users->findByCredentials(['email' => $post['email'] ?? '']);
-        if ($existingUser && !$isLoggedIn) {
-            return redirect()->back()->with('swal', [
-                'icon'  => 'warning',
-                'title' => 'Já tem conta!',
-                'text'  => 'Esse email já está registrado. Por favor, faça login para continuar.',
-            ]);
-        }
+        // 2) Inputs normalizados
+        $email        = trim((string)($post['email'] ?? ''));
+        $username     = trim((string)($post['username'] ?? ''));
+        $amount       = (float)($post['amount_payment'] ?? 0);
+        $clientNumber = trim((string)($post['client_number'] ?? ''));
+        $useMpesa     = ($clientNumber !== '' && $amount > 0);
 
-        // 2) Cria o pending_user
-        $db->table('pending_users')->insert([
-            'email'      => $post['email'],
-            'username'   => $post['username'],
-            'created_at' => date('Y-m-d H:i:s'),
-        ]);
-        $pendingId = $db->insertID();
-        if (!$pendingId) {
-            return redirect()->back()->with('error', 'Erro ao criar usuário pendente.');
-        }
-
-        // 3) Upload do comprovativo (opcional) — mantém seu fluxo atual
+        // 3) Upload (opcional)
         $file     = $this->request->getFile('proof_file_payment');
         $filePath = null;
         if ($file && $file->isValid() && !$file->hasMoved()) {
+            $destDir = FCPATH . 'assets/img/';
+            if (!is_dir($destDir)) {
+                @mkdir($destDir, 0775, true);
+            }
             $newName = $file->getRandomName();
-            $file->move(FCPATH . 'assets/img/', $newName);
+            $file->move($destDir, $newName);
             $filePath = 'assets/img/' . $newName;
         }
 
-        // 4) Preparar dados para payment + (opcional) M-Pesa
-        $paymentModel = new PaymentModel();
-        $amount       = (float)($post['amount_payment'] ?? 0);
-        $clientNumber = trim((string)($post['client_number'] ?? '')); // se vier, usa M-Pesa
-        $useMpesa     = ($clientNumber !== '' && $amount > 0);
-
-        // status padrão (sem M-Pesa continua igual)
-        $statusPayment = 'Pendente';
-
-        // 5) Se veio número M-Pesa, tentar cobrança C2B — sem criar novas colunas
+        // 4) Cobrança M-Pesa (se aplicável)
+        $mpesaSuccess    = false;
         $mpesaResponseArr = null;
+        $statusField     = '';
+        $codeField       = '';
+
         if ($useMpesa) {
             $apiKey    = getenv('MPESA_API_KEY');
             $publicKey = getenv('MPESA_PUBLIC_KEY');
@@ -83,17 +81,16 @@ class Register extends Controller
                 );
             }
 
-            // refs temporárias (não vão ao banco — só para o arquivo de log)
+            // Referências (para o gateway e auditoria)
             $thirdPartyRef  = (string) random_int(10000, 99999);
             $transactionRef = (string) time();
 
             try {
-                // Ajuste o namespace da sua SDK se for diferente
                 $mpesa   = Mpesa::init($apiKey, $publicKey, $env);
                 $payload = [
                     'value'                 => $amount,
                     'client_number'         => $clientNumber,
-                    'agent_id'              => 171717,          // seu agent_id
+                    'agent_id'              => 171717, // TODO: seu agent_id
                     'third_party_reference' => $thirdPartyRef,
                     'transaction_reference' => $transactionRef,
                 ];
@@ -101,86 +98,199 @@ class Register extends Controller
                 $response         = $mpesa->c2b($payload);
                 $mpesaResponseArr = json_decode(json_encode($response), true);
 
-                // Heurística de sucesso (ajuste conforme sua SDK)
-                $statusField = strtolower((string)($mpesaResponseArr['status'] ?? ''));
-                $codeField   = strtolower((string)($mpesaResponseArr['responseCode'] ?? $mpesaResponseArr['code'] ?? ''));
-                $okCodes     = ['0', '00', 'ins-0', 'success', 'ok', 'completed'];
+                $mpesaSay = json_decode($mpesaResponseArr);
 
-                if (in_array($statusField, ['success', 'ok', 'completed'], true) || in_array($codeField, $okCodes, true)) {
-                    $statusPayment = 'Aprovado';
-                } else {
-                    $statusPayment = 'Pendente'; // pode trocar para 'Falhou' se preferir
+                if($mpesaSay->output_ResponseDesc == 'Request processed successfully'){
+                    $mpesaSuccess = true;
                 }
+
             } catch (\Throwable $e) {
-                $statusPayment    = 'Falhou';
+                $mpesaSuccess     = false;
                 $mpesaResponseArr = ['exception' => true, 'message' => $e->getMessage()];
+                log_message('error', 'M-Pesa exception: ' . $e->getMessage());
             }
+
+            // Log do braseiro pra depuração
+            log_message('info', 'M-Pesa raw: ' . print_r($mpesaResponseArr, true));
+            log_message('info', "M-Pesa parsed: code={$codeField} status={$statusField} success=" . ($mpesaSuccess ? '1' : '0'));
+        }
+ 
+        // ========== FLUXO 1: M-PESA SUCESSO -> cria tudo direto ==========
+        if ($useMpesa && $mpesaSuccess) {
+
+            $db->transStart();
+
+            // 1) Obter ou criar o User (Shield)
+            $existingUser = $users->findByCredentials(['email' => $email]);
+            if ($existingUser) {
+                $userId   = (int)$existingUser->id;
+                $userName = $existingUser->username ?? $username;
+            } else {
+                $userEntity            = new EntitiesUser(['username' => $username]);
+                $userEntity->email     = $email;
+                $tempPassword          = random_string('alnum', 12);
+                $userEntity->password  = $tempPassword; // Shield deve hashear via mutator
+                $users->save($userEntity);
+                $userId = (int)$users->getInsertID();
+
+                // Token de reset de senha
+                $token   = bin2hex(random_bytes(16));
+                $expires = date('Y-m-d H:i:s', strtotime('+1 day'));
+                $db->table('password_resets')->insert([
+                    'user_id'    => $userId,
+                    'token'      => $token,
+                    'expires_at' => $expires
+                ]);
+
+                // E-mail com link de reset
+                try {
+                    $link  = site_url("reset-password?token={$token}");
+                    $emailSrv = \Config\Services::email();
+                    $emailSrv->setTo($email);
+                    $emailSrv->setSubject('Crie sua senha e acesse o curso');
+                    $emailSrv->setMessage("
+                    Olá {$username},<br><br>
+                    Seu pagamento foi aprovado e sua matrícula será ativada agora.<br>
+                    Crie sua senha para acessar o curso:<br><br>
+                    <a href='{$link}'>Criar minha senha</a>
+                ");
+                    $emailSrv->setMailType('html');
+                    $emailSrv->send();
+                } catch (\Throwable $e) {
+                    log_message('warning', 'Falha ao enviar e-mail de reset: ' . $e->getMessage());
+                }
+            }
+
+            // 2) Garantir Student
+            $student = $studentModel->where('id_user_student', $userId)->first();
+            if ($student) {
+                $studentId = (int)$student->id_student;
+            } else {
+                $studentId = (int)$studentModel->insert([
+                    'id_user_student' => $userId,
+                    'name_student'    => $username,
+                    'email_student'   => $email,
+                ]);
+            }
+
+            // 3) Payment (Aprovado)
+            $idPayment = $paymentModel->insert([
+                'id_user_payment'    => $userId,
+                'id_course_payment'  => $idCourse,
+                'amount_payment'     => $amount,
+                'status_payment'     => 'Aprovado',
+                'proof_file_payment' => $filePath,
+                'created_at'         => date('Y-m-d H:i:s'),
+            ], true);
+            if ($idPayment === false) {
+                $db->transRollback();
+                return redirect()->back()->with('error', implode(', ', $paymentModel->errors()));
+            }
+            $reference = 'PAY-' . date('Y') . '-' . str_pad($idPayment, 6, '0', STR_PAD_LEFT);
+            $paymentModel->update($idPayment, ['reference_payment' => $reference]);
+
+            // 4) Enrollment (Ativa)
+            $enroll = $enrollModel->insert([
+                'id_course_enrollment'   => $idCourse,
+                'id_student_enrollment'  => $userId,
+                'status_enrollment'      => 'Ativa',
+                'progress_enrollment'    => 0.00,
+                'enrolled_at_enrollment' => date('Y-m-d H:i:s'),
+            ]);
+
+            $db->transComplete();
+            if ($db->transStatus() === false) {
+                return redirect()->back()->with('error', 'Falha ao concluir matrícula após pagamento.');
+            }
+
+            // Log do retorno M-Pesa (opcional)
+            $dir = rtrim(WRITEPATH, '/\\') . DIRECTORY_SEPARATOR . 'mpesa';
+            if (!is_dir($dir)) @mkdir($dir, 0775, true);
+            @file_put_contents(
+                $dir . DIRECTORY_SEPARATOR . 'payment_' . $idPayment . '.json',
+                json_encode([
+                    'created_at' => date('c'),
+                    'payment_id' => $idPayment,
+                    'reference'  => $reference,
+                    'request'    => [
+                        'amount'        => $amount,
+                        'client_number' => $clientNumber,
+                    ],
+                    'response'   => $mpesaResponseArr,
+                    'parsed'     => ['code' => $codeField, 'status' => $statusField],
+                    'final'      => 'approved_and_enrolled',
+                ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)
+            );
+
+            return redirect()->back()->with('swal', [
+                'icon'  => 'success',
+                'title' => 'Pagamento aprovado!',
+                'text'  => 'Verifique a sua caixa de email para concluir a esta inscrição!'
+            ]);
         }
 
-        // 6) Criar o registro em payments — APENAS com os campos que você já tem
-        $dataPayment = [
-            'id_user_payment'    => $pendingId,
+        // ========== FLUXO 2: SEM M-PESA OU NÃO-SUCESSO -> fluxo pendente ==========
+        $isLoggedIn   = auth()->loggedIn();
+        $existingUser = $users->findByCredentials(['email' => $email]);
+
+        if ($existingUser && !$isLoggedIn) {
+            return redirect()->back()->with('swal', [
+                'icon'  => 'warning',
+                'title' => 'Já tem conta!',
+                'text'  => 'Esse email já está registrado. Por favor, faça login para continuar.',
+            ]);
+        }
+
+        // 1) pending_users
+        $db->table('pending_users')->insert([
+            'email'      => $email,
+            'username'   => $username,
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+        $pendingId = (int)$db->insertID();
+        if (!$pendingId) {
+            return redirect()->back()->with('error', 'Erro ao criar usuário pendente.');
+        }
+
+        // 2) Payment pendente
+        $statusPayment = 'Pendente';
+
+        $idPayment = $paymentModel->insert([
+            'id_user_payment'    => $pendingId,  // guarda o ID do pending
             'id_course_payment'  => $idCourse,
             'amount_payment'     => $amount,
-            'status_payment'     => $statusPayment,   // Aprovado/Pendente/Falhou
-            'proof_file_payment' => $filePath,        // mantém seu upload (se tiver)
+            'status_payment'     => $statusPayment,
+            'proof_file_payment' => $filePath,
             'created_at'         => date('Y-m-d H:i:s'),
-        ];
-        $idPayment = $paymentModel->insert($dataPayment, true);
+        ], true);
         if ($idPayment === false) {
             return redirect()->back()->with('error', implode(', ', $paymentModel->errors()));
         }
 
-        // 7) Referência interna (mantido)
         $reference = 'PAY-' . date('Y') . '-' . str_pad($idPayment, 6, '0', STR_PAD_LEFT);
         $paymentModel->update($idPayment, ['reference_payment' => $reference]);
 
-        // 8) Se fizemos M-Pesa, guardar o retorno em arquivo (fora do banco)
+        // 3) Log do gateway (se houve tentativa M-Pesa)
         if ($useMpesa) {
             $dir = rtrim(WRITEPATH, '/\\') . DIRECTORY_SEPARATOR . 'mpesa';
-            if (!is_dir($dir)) {
-                @mkdir($dir, 0775, true);
-            }
-            // Salva como JSON com o ID do pagamento
-            $logFile = $dir . DIRECTORY_SEPARATOR . 'payment_' . $idPayment . '.json';
-            @file_put_contents($logFile, json_encode([
-                'created_at'   => date('c'),
-                'payment_id'   => $idPayment,
-                'reference'    => $reference,
-                'request'      => [
-                    'amount'        => $amount,
-                    'client_number' => $clientNumber,
-                ],
-                'response'     => $mpesaResponseArr,
-            ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+            if (!is_dir($dir)) @mkdir($dir, 0775, true);
+            @file_put_contents(
+                $dir . DIRECTORY_SEPARATOR . 'payment_' . $idPayment . '.json',
+                json_encode([
+                    'created_at' => date('c'),
+                    'payment_id' => $idPayment,
+                    'reference'  => $reference,
+                    'request'    => [
+                        'amount'        => $amount,
+                        'client_number' => $clientNumber,
+                    ],
+                    'response'   => $mpesaResponseArr,
+                    'parsed'     => ['code' => $codeField, 'status' => $statusField],
+                    'final'      => 'pending_flow',
+                ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)
+            );
         }
 
-        // 9) Mensagem para o usuário
-        if ($useMpesa) {
-            if ($statusPayment === 'Aprovado') {
-                return redirect()->to("/checkout/{$idCourse}")->with('swal', [
-                    'icon'  => 'success',
-                    'title' => 'Pagamento aprovado!',
-                    'text'  => 'Recebemos a confirmação da M-Pesa. Sua inscrição será liberada em instantes.'
-                ]);
-            }
-            if ($statusPayment === 'Falhou') {
-                $err = $mpesaResponseArr['message'] ?? 'Não foi possível concluir a transação M-Pesa.';
-                return redirect()->to("/checkout/{$idCourse}")->with('swal', [
-                    'icon'  => 'error',
-                    'title' => 'Falha no pagamento',
-                    'text'  => $err
-                ]);
-            }
-            // Pendente
-            return redirect()->to("/checkout/{$idCourse}")->with('swal', [
-                'icon'  => 'info',
-                'title' => 'Transação em processamento',
-                'text'  => 'Seu pedido foi enviado à M-Pesa. Caso já tenha aprovado no celular, a confirmação pode levar alguns instantes.'
-            ]);
-        }
-
-        // Fluxo sem M-Pesa (igual ao seu)
         return redirect()->to("/checkout/{$idCourse}")
             ->with('swal', [
                 'icon'  => 'success',

@@ -22,43 +22,62 @@ class ResetPassword extends BaseController
 
     public function submitReset()
     {
-        $token    = $this->request->getPost('token');
-        $password = $this->request->getPost('password');
+        $post     = $this->request->getPost();
+        $token    = trim((string)($post['token'] ?? ''));
+        $password = (string)($post['password'] ?? '');
+        $confirm  = array_key_exists('password_confirm', $post) ? (string)$post['password_confirm'] : null;
 
-        if (!$token || !$password) {
+        if ($token === '' || $password === '') {
             return redirect()->back()->with('error', 'Preencha todos os campos.');
+        }
+        if (strlen($password) < 8) {
+            return redirect()->back()->with('error', 'A senha deve ter pelo menos 8 caracteres.');
+        }
+        if ($confirm !== null && $confirm !== $password) {
+            return redirect()->back()->with('error', 'A confirmação da senha não confere.');
         }
 
         $passwordResetModel = new PasswordResetModel();
         $reset = $passwordResetModel->where('token', $token)->first();
-
-        if (!$reset || strtotime($reset['expires_at']) < time()) {
-            return redirect()->back()->with('error', 'Token expirado ou inválido.');
+        if (!$reset) {
+            return redirect()->back()->with('error', 'Token inválido.');
+        }
+        if (isset($reset['expires_at']) && strtotime($reset['expires_at']) < time()) {
+            return redirect()->back()->with('error', 'Token expirado.');
         }
 
-        // Recupera o usuário
-        $userModel = new UserModel();
-        $user = $userModel->find($reset['user_id']);
+        // ---------- AQUI ESTÁ A CORREÇÃO ----------
+        // Tente obter o provider do Shield (melhor caminho):
+        $users = auth()->getProvider();
+        // Se por algum motivo vier null, instancia direto o model do Shield:
+        if ($users === null) {
+            $users = new ShieldUserModel(); // \CodeIgniter\Shield\Models\UserModel
+        }
+        // -----------------------------------------
 
+        $user = $users->find((int) $reset['user_id']);
         if (!$user) {
             return redirect()->back()->with('error', 'Usuário não encontrado.');
         }
 
-        // Atualiza a senha
-        $user->fill([
-            'password' => $password, // Shield faz o hash automaticamente
+        // Atualiza a senha (Shield faz hash em password_hash via mutator)
+        $user->password = $password;
+        if (!$users->save($user)) {
+            $errs = $users->errors();
+            return redirect()->back()->with('error', $errs ? implode(', ', $errs) : 'Não foi possível atualizar a senha.');
+        }
+
+        // Apaga tokens desse usuário
+        $passwordResetModel->where('user_id', $user->id)->delete();
+
+        // Regenera sessão e faz login automático
+        session()->regenerate(true);
+        auth()->login($user);
+
+        return redirect()->to('/student/dashboard/meus_cursos')->with('swal', [
+            'icon'  => 'success',
+            'title' => 'Parabéns!',
+            'text'  => 'Você já está inscrito no curso. Começe a assistir!',
         ]);
-
-        $userModel->save($user);
-
-        // Remove o token
-        $passwordResetModel->delete($reset['id']);
-
-        // Garante que não exista sessão ativa
-        service('auth')->logout();
-
-        // Redireciona pro login
-        return redirect()->to('/login')
-            ->with('success', 'Senha criada com sucesso! Faça login para começar a estudar.');
     }
 }

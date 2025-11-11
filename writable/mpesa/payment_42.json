@@ -1,0 +1,18 @@
+{
+    "created_at": "2025-11-11T10:19:01+00:00",
+    "payment_id": 42,
+    "reference": "PAY-2025-000042",
+    "request": {
+        "amount": 1580,
+        "client_number": "258855454532"
+    },
+    "response": {
+        "exception": true,
+        "message": "ArrayIterator::__construct(): Argument #1 ($array) must be of type array, string given"
+    },
+    "parsed": {
+        "code": "",
+        "status": ""
+    },
+    "final": "pending_flow"
+}

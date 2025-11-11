@@ -1,0 +1,398 @@
+DEBUG - 2025-11-11 08:40:11 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 08:47:37 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 08:47:41 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 08:47:45 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 08:47:50 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 08:49:16 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 08:49:35 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 08:49:46 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 08:56:02 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 08:56:14 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 08:59:23 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 09:05:47 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 09:06:35 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 09:06:39 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 09:09:31 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 09:19:10 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 09:19:15 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 09:19:38 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 09:19:38 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 09:41:44 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 09:42:48 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 09:42:48 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 09:43:54 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 09:44:15 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 09:44:16 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 09:45:15 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 09:45:16 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 09:46:09 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 09:46:27 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 09:47:24 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 09:49:15 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 09:49:35 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 09:51:50 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 09:56:01 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 09:56:07 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:01:40 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:01:44 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2025-11-11 10:02:03 --> M-Pesa exception: file_get_contents(): SSL: An existing connection was forcibly closed by the remote host
+INFO - 2025-11-11 10:02:03 --> M-Pesa raw: Array
+(
+    [exception] => 1
+    [message] => file_get_contents(): SSL: An existing connection was forcibly closed by the remote host
+)
+
+INFO - 2025-11-11 10:02:03 --> M-Pesa parsed: code= status= success=0
+DEBUG - 2025-11-11 10:02:03 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:02:05 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:03:25 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:03:32 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:03:50 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:03:50 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:03:56 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:04:02 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:04:02 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:04:16 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:04:22 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:04:38 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:05:24 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:05:25 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:05:48 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:05:49 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:05:54 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:05:58 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2025-11-11 10:05:59 --> ErrorException: Undefined array key 1
+[Method: GET, Route: student/dashboard/cursos]
+in APPPATH\Views\pages\student\courses.php on line 152.
+ 1 APPPATH\Views\pages\student\courses.php(152): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined array key 1', 'C:\\laragon\\www\\academy-ci4\\app\\Views\\pages\\student\\courses.php', 152)
+ 2 SYSTEMPATH\View\View.php(226): include('C:\\laragon\\www\\academy-ci4\\app\\Views\\pages\\student\\courses.php')
+ 3 SYSTEMPATH\View\View.php(229): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1167): CodeIgniter\View\View->render('pages/student/courses', [], true)
+ 5 APPPATH\Controllers\Student\Dashboard.php(509): view('pages/student/courses', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Student\Dashboard->courses()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Student\Dashboard))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2025-11-11 10:06:19 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:08:31 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:09:39 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:09:39 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:12:30 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:12:30 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:12:34 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:12:34 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:12:41 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:12:47 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2025-11-11 10:13:09 --> M-Pesa exception: ArrayIterator::__construct(): Argument #1 ($array) must be of type array, string given
+INFO - 2025-11-11 10:13:09 --> M-Pesa raw: Array
+(
+    [exception] => 1
+    [message] => ArrayIterator::__construct(): Argument #1 ($array) must be of type array, string given
+)
+
+INFO - 2025-11-11 10:13:09 --> M-Pesa parsed: code= status= success=0
+DEBUG - 2025-11-11 10:13:09 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:13:10 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:13:38 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:13:43 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:15:08 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:16:04 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2025-11-11 10:16:29 --> M-Pesa exception: ArrayIterator::__construct(): Argument #1 ($array) must be of type array, string given
+INFO - 2025-11-11 10:16:29 --> M-Pesa raw: Array
+(
+    [exception] => 1
+    [message] => ArrayIterator::__construct(): Argument #1 ($array) must be of type array, string given
+)
+
+INFO - 2025-11-11 10:16:29 --> M-Pesa parsed: code= status= success=0
+ERROR - 2025-11-11 10:19:01 --> M-Pesa exception: ArrayIterator::__construct(): Argument #1 ($array) must be of type array, string given
+INFO - 2025-11-11 10:19:01 --> M-Pesa raw: Array
+(
+    [exception] => 1
+    [message] => ArrayIterator::__construct(): Argument #1 ($array) must be of type array, string given
+)
+
+INFO - 2025-11-11 10:19:01 --> M-Pesa parsed: code= status= success=0
+DEBUG - 2025-11-11 10:19:01 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:19:02 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:20:35 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:22:15 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:22:40 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2025-11-11 10:23:01 --> M-Pesa exception: ArrayIterator::__construct(): Argument #1 ($array) must be of type array, string given
+INFO - 2025-11-11 10:23:01 --> M-Pesa raw: Array
+(
+    [exception] => 1
+    [message] => ArrayIterator::__construct(): Argument #1 ($array) must be of type array, string given
+)
+
+INFO - 2025-11-11 10:23:01 --> M-Pesa parsed: code= status= success=0
+CRITICAL - 2025-11-11 10:23:02 --> Error: Call to undefined function App\Controllers\random_string()
+[Method: POST, Route: checkout/pending/18]
+in APPPATH\Controllers\Register.php on line 166.
+ 1 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Register->createPendingUser('18')
+ 2 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Register))
+ 3 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 5 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 6 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ERROR - 2025-11-11 10:25:32 --> M-Pesa exception: ArrayIterator::__construct(): Argument #1 ($array) must be of type array, string given
+INFO - 2025-11-11 10:25:32 --> M-Pesa raw: Array
+(
+    [exception] => 1
+    [message] => ArrayIterator::__construct(): Argument #1 ($array) must be of type array, string given
+)
+
+INFO - 2025-11-11 10:25:32 --> M-Pesa parsed: code= status= success=0
+DEBUG - 2025-11-11 10:25:38 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:25:38 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:25:39 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:26:27 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:26:41 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:26:41 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:26:56 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:26:57 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:27:02 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:27:04 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:27:07 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:27:10 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:27:16 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:30:32 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:30:32 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:30:38 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:30:43 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:30:44 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:31:26 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:31:27 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:31:30 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:31:35 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:31:39 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2025-11-11 10:32:32 --> M-Pesa exception: ArrayIterator::__construct(): Argument #1 ($array) must be of type array, string given
+INFO - 2025-11-11 10:32:32 --> M-Pesa raw: Array
+(
+    [exception] => 1
+    [message] => ArrayIterator::__construct(): Argument #1 ($array) must be of type array, string given
+)
+
+INFO - 2025-11-11 10:32:32 --> M-Pesa parsed: code= status= success=0
+ERROR - 2025-11-11 10:33:43 --> M-Pesa exception: ArrayIterator::__construct(): Argument #1 ($array) must be of type array, string given
+INFO - 2025-11-11 10:33:43 --> M-Pesa raw: Array
+(
+    [exception] => 1
+    [message] => ArrayIterator::__construct(): Argument #1 ($array) must be of type array, string given
+)
+
+INFO - 2025-11-11 10:33:43 --> M-Pesa parsed: code= status= success=0
+ERROR - 2025-11-11 10:35:26 --> M-Pesa exception: ArrayIterator::__construct(): Argument #1 ($array) must be of type array, string given
+INFO - 2025-11-11 10:35:26 --> M-Pesa raw: Array
+(
+    [exception] => 1
+    [message] => ArrayIterator::__construct(): Argument #1 ($array) must be of type array, string given
+)
+
+INFO - 2025-11-11 10:35:26 --> M-Pesa parsed: code= status= success=0
+ERROR - 2025-11-11 10:35:56 --> M-Pesa exception: ArrayIterator::__construct(): Argument #1 ($array) must be of type array, string given
+INFO - 2025-11-11 10:35:56 --> M-Pesa raw: Array
+(
+    [exception] => 1
+    [message] => ArrayIterator::__construct(): Argument #1 ($array) must be of type array, string given
+)
+
+INFO - 2025-11-11 10:35:56 --> M-Pesa parsed: code= status= success=0
+DEBUG - 2025-11-11 10:36:01 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:36:02 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:36:02 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:36:30 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:36:44 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:36:44 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:36:53 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:36:53 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:36:58 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:37:01 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:37:36 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:42:04 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:42:08 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2025-11-11 10:43:07 --> M-Pesa exception: ArrayIterator::__construct(): Argument #1 ($array) must be of type array, string given
+INFO - 2025-11-11 10:43:07 --> M-Pesa raw: Array
+(
+    [exception] => 1
+    [message] => ArrayIterator::__construct(): Argument #1 ($array) must be of type array, string given
+)
+
+INFO - 2025-11-11 10:43:07 --> M-Pesa parsed: code= status= success=0
+CRITICAL - 2025-11-11 10:43:07 --> ErrorException: Undefined array key "output_ResponseCode"
+[Method: POST, Route: checkout/pending/18]
+in APPPATH\Controllers\Register.php on line 153.
+ 1 APPPATH\Controllers\Register.php(153): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined array key "output_ResponseCode"', 'C:\\laragon\\www\\academy-ci4\\app\\Controllers\\Register.php', 153)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Register->createPendingUser('18')
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Register))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2025-11-11 10:43:46 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 10:43:50 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2025-11-11 10:44:41 --> M-Pesa exception: ArrayIterator::__construct(): Argument #1 ($array) must be of type array, string given
+INFO - 2025-11-11 10:44:41 --> M-Pesa raw: Array
+(
+    [exception] => 1
+    [message] => ArrayIterator::__construct(): Argument #1 ($array) must be of type array, string given
+)
+
+INFO - 2025-11-11 10:44:41 --> M-Pesa parsed: code= status= success=0
+INFO - 2025-11-11 10:48:45 --> M-Pesa raw: {"output_ResponseCode":"INS-0","output_ResponseDesc":"Request processed successfully","output_TransactionID":"l1fijpimiz89","output_ConversationID":"eb6d3d747df046e5962806726f140e7a","output_ThirdPartyReference":"29478"}
+INFO - 2025-11-11 10:48:45 --> M-Pesa parsed: code= status= success=0
+INFO - 2025-11-11 10:50:02 --> M-Pesa raw: {"output_ResponseCode":"INS-0","output_ResponseDesc":"Request processed successfully","output_TransactionID":"opyv1xzm2r2i","output_ConversationID":"f299718fc43e4ff7842daff88f56c04d","output_ThirdPartyReference":"42087"}
+INFO - 2025-11-11 10:50:02 --> M-Pesa parsed: code= status= success=0
+CRITICAL - 2025-11-11 10:50:02 --> TypeError: Cannot access offset of type string on string
+[Method: POST, Route: checkout/pending/18]
+in APPPATH\Controllers\Register.php on line 130.
+ 1 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Register->createPendingUser('18')
+ 2 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Register))
+ 3 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 5 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 6 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ERROR - 2025-11-11 10:52:02 --> M-Pesa exception: file_get_contents(https://api.sandbox.vm.co.mz:18352/ipg/v1x/c2bPayment/singleStage/): Failed to open stream: HTTP request failed!
+INFO - 2025-11-11 10:52:02 --> M-Pesa raw: Array
+(
+    [exception] => 1
+    [message] => file_get_contents(https://api.sandbox.vm.co.mz:18352/ipg/v1x/c2bPayment/singleStage/): Failed to open stream: HTTP request failed!
+)
+
+INFO - 2025-11-11 10:52:02 --> M-Pesa parsed: code= status= success=0
+CRITICAL - 2025-11-11 10:52:02 --> ErrorException: Attempt to read property "output_ResponseDesc" on array
+[Method: POST, Route: checkout/pending/18]
+in APPPATH\Controllers\Register.php on line 130.
+ 1 APPPATH\Controllers\Register.php(130): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Attempt to read property "output_ResponseDesc" on array', 'C:\\laragon\\www\\academy-ci4\\app\\Controllers\\Register.php', 130)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Register->createPendingUser('18')
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Register))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+INFO - 2025-11-11 10:52:05 --> M-Pesa raw: {"output_ResponseCode":"INS-0","output_ResponseDesc":"Request processed successfully","output_TransactionID":"jwl7s2d95udr","output_ConversationID":"0ea0d62407f147ddb2e1fbb937ed410d","output_ThirdPartyReference":"82248"}
+INFO - 2025-11-11 10:52:05 --> M-Pesa parsed: code= status= success=0
+CRITICAL - 2025-11-11 10:52:05 --> ErrorException: Attempt to read property "output_ResponseDesc" on string
+[Method: POST, Route: checkout/pending/18]
+in APPPATH\Controllers\Register.php on line 130.
+ 1 APPPATH\Controllers\Register.php(130): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Attempt to read property "output_ResponseDesc" on string', 'C:\\laragon\\www\\academy-ci4\\app\\Controllers\\Register.php', 130)
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Register->createPendingUser('18')
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Register))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+INFO - 2025-11-11 10:52:37 --> M-Pesa raw: {"output_ResponseCode":"INS-0","output_ResponseDesc":"Request processed successfully","output_TransactionID":"zwng8vtfjyqm","output_ConversationID":"c98455ec0ee147daa8437fdf64360915","output_ThirdPartyReference":"80503"}
+INFO - 2025-11-11 10:52:37 --> M-Pesa parsed: code= status= success=0
+INFO - 2025-11-11 10:58:11 --> M-Pesa raw: {"output_ResponseCode":"INS-0","output_ResponseDesc":"Request processed successfully","output_TransactionID":"n2b9koz8lqkl","output_ConversationID":"871cc7e6b0764f3caf1b9d99aebf6c37","output_ThirdPartyReference":"41010"}
+INFO - 2025-11-11 10:58:11 --> M-Pesa parsed: code= status= success=0
+INFO - 2025-11-11 11:01:23 --> M-Pesa raw: {"output_ResponseCode":"INS-0","output_ResponseDesc":"Request processed successfully","output_TransactionID":"cm3r6b1awjta","output_ConversationID":"c6a59e1b444f42afa2e5b0f982094b13","output_ThirdPartyReference":"13425"}
+INFO - 2025-11-11 11:01:23 --> M-Pesa parsed: code= status= success=1
+INFO - 2025-11-11 11:29:43 --> M-Pesa raw: {"output_ResponseCode":"INS-0","output_ResponseDesc":"Request processed successfully","output_TransactionID":"88f49ltrqk0c","output_ConversationID":"3ce3563cc1cc4b038e3422058ca7d33c","output_ThirdPartyReference":"14074"}
+INFO - 2025-11-11 11:29:43 --> M-Pesa parsed: code= status= success=1
+INFO - 2025-11-11 11:30:41 --> M-Pesa raw: {"output_ResponseCode":"INS-0","output_ResponseDesc":"Request processed successfully","output_TransactionID":"6n0cgdtq1181","output_ConversationID":"10dd7f1fd6184b20842b5f682c6908a6","output_ThirdPartyReference":"50361"}
+INFO - 2025-11-11 11:30:41 --> M-Pesa parsed: code= status= success=1
+INFO - 2025-11-11 11:31:06 --> M-Pesa raw: {"output_ResponseCode":"INS-6","output_ResponseDesc":"Transaction Failed","output_TransactionID":"N/A","output_ConversationID":"c8e2a8c6d16947d6ba8f3da421f4622b","output_ThirdPartyReference":"28711"}
+INFO - 2025-11-11 11:31:06 --> M-Pesa parsed: code= status= success=0
+INFO - 2025-11-11 11:31:38 --> M-Pesa raw: {"output_ResponseCode":"INS-0","output_ResponseDesc":"Request processed successfully","output_TransactionID":"0q6nqf5w4ef7","output_ConversationID":"37829b92362240d8a04cee896af98ff1","output_ThirdPartyReference":"74564"}
+INFO - 2025-11-11 11:31:38 --> M-Pesa parsed: code= status= success=1
+DEBUG - 2025-11-11 13:16:32 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-11-11 13:16:49 --> M-Pesa raw: {"output_ResponseCode":"INS-0","output_ResponseDesc":"Request processed successfully","output_TransactionID":"zrxf7xvi4fka","output_ConversationID":"84bf4fb12eea4c1ca38d69e263f631bb","output_ThirdPartyReference":"38039"}
+INFO - 2025-11-11 13:16:49 --> M-Pesa parsed: code= status= success=1
+DEBUG - 2025-11-11 13:16:54 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:16:55 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:16:55 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:17:11 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:17:23 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:17:24 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:18:14 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:18:14 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:18:25 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:18:26 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:18:42 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:18:42 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:18:52 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:18:58 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:18:59 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:29:29 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:33:02 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:33:10 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-11-11 13:33:47 --> M-Pesa raw: {"output_ResponseCode":"INS-0","output_ResponseDesc":"Request processed successfully","output_TransactionID":"9brasvmxnsrc","output_ConversationID":"17de5c74d82f4ef3a6d49e8fb391e2bb","output_ThirdPartyReference":"67843"}
+INFO - 2025-11-11 13:33:47 --> M-Pesa parsed: code= status= success=1
+DEBUG - 2025-11-11 13:33:53 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:33:54 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:33:54 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:34:17 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2025-11-11 13:34:50 --> Error: Call to a member function find() on null
+[Method: POST, Route: reset-password]
+in APPPATH\Controllers\ResetPassword.php on line 57.
+ 1 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\ResetPassword->submitReset()
+ 2 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\ResetPassword))
+ 3 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 5 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 6 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2025-11-11 13:39:41 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:40:43 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:40:49 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:40:53 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-11-11 13:41:20 --> M-Pesa raw: {"output_ResponseCode":"INS-0","output_ResponseDesc":"Request processed successfully","output_TransactionID":"avv3p372s60i","output_ConversationID":"d626a9b887fe41c28c468ec8f645e304","output_ThirdPartyReference":"93510"}
+INFO - 2025-11-11 13:41:20 --> M-Pesa parsed: code= status= success=1
+DEBUG - 2025-11-11 13:41:24 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:41:25 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:41:25 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:41:51 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:42:04 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:42:04 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:45:24 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:46:41 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:46:41 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:46:59 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:49:22 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:49:49 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:49:55 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:51:01 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:51:06 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-11-11 13:51:30 --> M-Pesa raw: {"output_ResponseCode":"INS-0","output_ResponseDesc":"Request processed successfully","output_TransactionID":"35l2mu713dae","output_ConversationID":"717132bf8056408a9930bbaf5b1ffd86","output_ThirdPartyReference":"50070"}
+INFO - 2025-11-11 13:51:30 --> M-Pesa parsed: code= status= success=1
+DEBUG - 2025-11-11 13:51:34 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:51:35 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:52:06 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:52:24 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:52:25 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:52:35 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:54:02 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:54:10 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:54:21 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:54:26 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2025-11-11 13:54:46 --> M-Pesa raw: {"output_ResponseCode":"INS-0","output_ResponseDesc":"Request processed successfully","output_TransactionID":"iaj7hkdaqbrk","output_ConversationID":"be8b2a0fd06c4548bb02688aed8f3a68","output_ThirdPartyReference":"34319"}
+INFO - 2025-11-11 13:54:46 --> M-Pesa parsed: code= status= success=1
+DEBUG - 2025-11-11 13:54:50 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:54:51 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:55:10 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:55:28 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:55:28 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 13:55:38 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 14:02:22 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 14:02:34 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 14:02:40 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 14:03:55 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 14:04:14 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 14:07:37 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 14:07:52 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 14:08:46 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 14:08:47 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 14:08:50 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 14:09:00 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 14:09:32 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 14:09:44 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 14:09:45 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 14:09:51 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 14:10:12 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 14:10:17 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 14:10:52 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 14:10:53 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 14:11:44 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 14:11:44 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.

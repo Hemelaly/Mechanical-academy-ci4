@@ -251,7 +251,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
               </div>
               <div class="modal-body text-center">
-                <img src="<?= base_url($payment->proof_file_payment) ?> " alt="Comprovativo" class="img-fluid rounded">
+                <img src="<?= base_url($payment->proof_file_payment ?? '') ?> " alt="Comprovativo" class="img-fluid rounded">
               </div>
             </div>
           </div>
