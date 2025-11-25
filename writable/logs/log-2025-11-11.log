@@ -396,3 +396,20 @@ DEBUG - 2025-11-11 14:10:52 --> Session: Class initialized using 'CodeIgniter\Se
 DEBUG - 2025-11-11 14:10:53 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
 DEBUG - 2025-11-11 14:11:44 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
 DEBUG - 2025-11-11 14:11:44 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 18:31:19 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 18:31:23 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 18:31:27 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 18:31:27 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 18:31:29 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 18:31:36 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 18:31:40 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2025-11-11 18:32:49 --> M-Pesa exception: file_get_contents(https://api.sandbox.vm.co.mz:18352/ipg/v1x/c2bPayment/singleStage/): Failed to open stream: HTTP request failed!
+INFO - 2025-11-11 18:32:49 --> M-Pesa raw: Array
+(
+    [exception] => 1
+    [message] => file_get_contents(https://api.sandbox.vm.co.mz:18352/ipg/v1x/c2bPayment/singleStage/): Failed to open stream: HTTP request failed!
+)
+
+INFO - 2025-11-11 18:32:49 --> M-Pesa parsed: code= status= success=0
+DEBUG - 2025-11-11 18:32:49 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2025-11-11 18:32:50 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.

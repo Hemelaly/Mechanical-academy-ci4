@@ -1,6 +1,11 @@
 {
   "dependencies": {
     "@tailwindcss/cli": "^4.1.16",
+    "flowbite": "^4.0.1",
     "tailwindcss": "^4.1.16"
+  },
+  "scripts": {
+    "dev": "npx @tailwindcss/cli -i ./src/input.css -o ./public/assets/css/output.css --watch",
+    "build": "npx @tailwindcss/cli -i ./src/input.css -o ./public/assets/css/output.css --minify"
   }
 }

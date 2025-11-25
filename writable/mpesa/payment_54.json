@@ -1,0 +1,18 @@
+{
+    "created_at": "2025-11-20T13:27:29+00:00",
+    "payment_id": 54,
+    "reference": "PAY-2025-000054",
+    "request": {
+        "amount": 6250,
+        "client_number": "258840392126"
+    },
+    "response": {
+        "exception": true,
+        "message": "file_get_contents(https:\/\/api.sandbox.vm.co.mz:18352\/ipg\/v1x\/c2bPayment\/singleStage\/): Failed to open stream: HTTP request failed!"
+    },
+    "parsed": {
+        "code": "",
+        "status": ""
+    },
+    "final": "pending_flow"
+}
