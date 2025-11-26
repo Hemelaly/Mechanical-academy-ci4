@@ -24,8 +24,8 @@ class Dashboard extends BaseController
             [
                 'label' => 'Meus Cursos',
                 'icon' => 'bi-book',
-                'url' => '/student/dashboard/meus_cursos',
-                'pattern' => '/student/dashboard/meus_cursos*' // Com * para subpáginas
+                'url' => '/student/dashboard/inscricoes',
+                'pattern' => '/student/dashboard/inscricoes*' // Com * para subpáginas
             ],
             [
                 'label' => 'Todos Cursos',

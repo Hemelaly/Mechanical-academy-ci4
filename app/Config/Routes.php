@@ -41,7 +41,7 @@ $routes->group('instructor', ['namespace' => 'App\Controllers\Instructor', 'filt
 // Student
 $routes->group('student', ['namespace' => 'App\Controllers\Student', 'filter' => 'role:student'], function ($routes) {
     $routes->get('dashboard', 'Dashboard::index');
-    $routes->get('dashboard/meus_cursos', 'Dashboard::my_courses');
+    $routes->get('dashboard/inscricoes', 'Dashboard::my_courses');
     $routes->get('dashboard/cursos', 'Dashboard::courses');
     $routes->get('dashboard/ver_aulas/(:num)', 'Dashboard::lessons/$1');
     $routes->get('dashboard/checkout/(:num)', 'Dashboard::checkout/$1');
