@@ -28,6 +28,11 @@ $routes->group('instructor', ['namespace' => 'App\Controllers\Instructor', 'filt
     $routes->get('dashboard', 'Dashboard::index');
     $routes->get('dashboard/meus_cursos', 'Dashboard::my_courses');
     $routes->get('dashboard/novo_curso', 'Dashboard::add_course');
+    $routes->get('dashboard/jitsi', 'Dashboard::live');
+    $routes->post('dashboard/jitsi/criar_sala', 'Dashboard::live');
+    $routes->post('dashboard/jitsi/editar/(:num)', 'Dashboard::live/$1');   // se quiser reaproveitar o mesmo método
+    $routes->get('dashboard/jitsi/deletar/(:num)', 'Dashboard::deleteJitsi/$1'); // ou outro método pra deletar
+    $routes->get('dashboard/jitsi/stream/(:num)', 'Dashboard::stream/$1');
     $routes->post('dashboard/novo_curso/criar', 'CourseController::criar');
     $routes->get('dashboard/meus_cursos/editar/(:num)', 'Dashboard::edit_course/$1');
     $routes->post('dashboard/editar_curso/(:num)', 'CourseController::editar/$1');
@@ -52,7 +57,7 @@ $routes->group('student', ['namespace' => 'App\Controllers\Student', 'filter' =>
     $routes->group('lessons', function ($r) {
         $r->post('complete',   'LessonsController::complete');
         $r->post('uncomplete', 'LessonsController::uncomplete');
-    }); 
+    });
 });
 
 // Rotas de Cursos

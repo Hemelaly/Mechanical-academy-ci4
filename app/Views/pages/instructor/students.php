@@ -1,320 +1,286 @@
-<?php
-
-// dd($payments);
-// dd($enrollments);
-
-?>
-
 <?= $this->extend('layouts/master') ?>
 
 <?= $this->section('title') ?>Alunos<?= $this->endSection() ?>
 
 <?= $this->section('students') ?>
-<style>
-  /* Cards de estatísticas */
-  .cards {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    margin-bottom: 40px;
-  }
 
-  .card {
-    flex: 1 1 250px;
-    background: linear-gradient(135deg, #2a3441 0%, #1e2837 100%);
-    border: 1px solid #2a3441;
-    border-radius: 12px;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-  }
+<!-- Bootstrap Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
 
-  .card .icon {
-    width: 48px;
-    height: 48px;
-    background-color: #4a90e2;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 12px;
-  }
+<div class="min-h-screen bg-slate-50 dark:bg-slate-900">
+  <div class="container mx-auto">
 
-  .card .number {
-    font-size: 32px;
-    font-weight: 700;
-    margin-bottom: 4px;
-  }
-
-  .card .label {
-    font-size: 14px;
-    color: #8a9ba8;
-  }
-
-  /* Tabelas arredondadas */
-  .table-container {
-    overflow-x: auto;
-    margin-bottom: 40px;
-    border-radius: 12px;
-    background-color: #2a3441;
-    padding: 10px;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    min-width: 600px;
-  }
-
-  th,
-  td {
-    padding: 12px 16px;
-    text-align: left;
-  }
-
-  th {
-    background-color: #2a3441;
-    color: #8a9ba8;
-    font-weight: 600;
-  }
-
-  tbody tr {
-    background-color: #1f2a38;
-  }
-
-  tbody tr:first-child td:first-child {
-    border-top-left-radius: 8px;
-  }
-
-  tbody tr:first-child td:last-child {
-    border-top-right-radius: 8px;
-  }
-
-  tbody tr:last-child td:first-child {
-    border-bottom-left-radius: 8px;
-  }
-
-  tbody tr:last-child td:last-child {
-    border-bottom-right-radius: 8px;
-  }
-
-  tr:hover {
-    background-color: #3a4450;
-  }
-
-  .status-badge {
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 500;
-  }
-
-  .status-ativo {
-    background-color: rgba(56, 161, 105, 0.2);
-    color: #68d391;
-  }
-
-  .status-inativo {
-    background-color: rgba(229, 62, 62, 0.2);
-    color: #e53e3e;
-  }
-
-  .status-pendente {
-    background-color: rgba(229, 162, 0, 0.2);
-    color: #d69e2e;
-  }
-
-  .actions button {
-    background: none;
-    border: none;
-    padding: 4px 8px;
-    margin: 0 2px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-  }
-
-  .btn-accept {
-    background-color: #68d391;
-    color: #fff;
-  }
-
-  .btn-reject {
-    background-color: #e53e3e;
-    color: #fff;
-  }
-
-  .btn-block {
-    background-color: #f6e05e;
-    color: #000;
-  }
-
-  @media(max-width:768px) {
-    .cards {
-      flex-direction: column;
-    }
-  }
-</style>
-
-<h1>Alunos</h1>
-<p>Gerencie seus alunos e acompanhe o progresso</p>
-
-<!-- Cards -->
-<div class="cards">
-  <div class="card">
-    <div class="icon">
-      <svg width="24" height="24" fill="white" viewBox="0 0 16 16">
-        <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
-        <path fill-rule="evenodd" d="M5.216 14A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216z" />
-        <path d="M4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" />
-      </svg>
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-2xl lg:text-3xl font-bold text-slate-800 dark:text-white mb-2">
+        Gestão de Alunos
+      </h1>
+      <p class="text-slate-600 dark:text-slate-400 text-sm">
+        Gerencie seus alunos e acompanhe o progresso dos cursos
+      </p>
     </div>
-    <div class="number text-white">4</div>
-    <div class="label">Total de Alunos</div>
-  </div>
-  <div class="card">
-    <div class="icon">
-      <svg width="24" height="24" fill="white" viewBox="0 0 16 16">
-        <path d="M9.5 3A1.5 1.5 0 0 0 8 4.5h-1A1.5 1.5 0 0 0 5.5 3H5a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h1.5a1.5 1.5 0 0 0 1.5-1.5V4.5A1.5 1.5 0 0 1 9.5 3H10a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H9.5a1.5 1.5 0 0 1-1.5-1.5V7a.5.5 0 0 1 1 0v1a.5.5 0 0 0 .5.5H10V4h-.5z" />
-        <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2z" />
-      </svg>
-    </div>
-    <div class="number text-white">2</div>
-    <div class="label">Certificados Emitidos</div>
-  </div>
-  <div class="card">
-    <div class="icon">
-      <svg width="24" height="24" fill="white" viewBox="0 0 16 16">
-        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
-      </svg>
-    </div>
-    <div class="number text-white">50%</div>
-    <div class="label">Taxa de Conclusão</div>
-  </div>
-</div>
 
-<!-- Tabela Pedidos de Inscrição -->
-<h3>Pedidos de Inscrição</h3>
-<div class="table-container">
-  <table>
-    <thead>
-      <tr>
-        <th>Aluno</th>
-        <th>Curso</th>
-        <th>Comprovativo</th>
-        <th>Status</th>
-        <th>Ações</th>
-      </tr>
-    </thead>
-    <tbody>
-      <?php foreach ($payments as $key => $payment): ?>
-        <?php if ($payment->status_payment == 'Pendente'): ?>
-          <tr class="">
-            <td><?= $payment->username ?><br><small style="color:#8a9ba8;"><?= $payment->email ?></small></td>
-            <td><?= $payment->title_course ?></td>
-            <td>
-              <!-- Botão -->
-              <button type="button"
-                class="btn btn-primary btn-sm"
-                data-bs-toggle="modal"
-                data-bs-target="#comprovativoModal<?= $payment->id_payment ?>">
-                Ver Comprovativo
-              </button>
-            </td>
-            <td><span class="status-badge status-pendente">Pendente</span></td>
-            <td class="actions d-flex align-items-center gap-2">
-              <form class="acceptForm"
-                id="acceptForm<?= $payment->id_payment ?>"
-                action="/instructor/dashboard/meus_estudantes/<?= $payment->id_course ?>/<?= $payment->id_user_payment ?>"
-                method="post">
-                <input type="hidden" name="status_enrollment" value="Ativo">
-                <input type="hidden" name="status_payment" value="Aprovado">
-                <button type="submit" class="btn btn-success btn-sm my-1">Aceitar</button>
-              </form>
-
-
-              <form action="/instructor/dashboard/meus_estudantes/<?= $payment->id_course ?>/<?= $payment->id_user_payment ?>" method="post">
-                <input type="hidden" name="status_payment" value="Rejeitado">
-                <button type="submit" class="btn btn-danger btn-sm my-1">Rejeitar</button>
-              </form>
-
-            </td>
-          </tr>
-        <?php endif; ?>
-        <div class="modal fade" id="comprovativoModal<?= $payment->id_payment ?>" tabindex="-1" aria-hidden="true">
-          <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content bg-modern-dark">
-              <div class="modal-header">
-                <h5 class="modal-title">Comprovativo de Pagamento</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-              </div>
-              <div class="modal-body text-center">
-                <img src="<?= base_url($payment->proof_file_payment ?? '') ?> " alt="Comprovativo" class="img-fluid rounded">
-              </div>
+    <!-- Cards de Estatísticas - Layout Melhorado -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+      <!-- Total de Alunos -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">
+        <div class="flex items-center justify-between">
+          <div class="flex-1 min-w-0">
+            <p class="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1 truncate">
+              Total de Alunos
+            </p>
+            <h3 class="text-2xl font-bold text-slate-800 dark:text-white mb-1">
+              4
+            </h3>
+            <div class="flex items-center gap-1">
+              <i class="bi bi-arrow-up-short text-green-500 text-sm flex-shrink-0"></i>
+              <span class="text-green-500 text-sm font-medium truncate">
+                +2 este mês
+              </span>
             </div>
           </div>
+          <div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center flex-shrink-0 ml-3">
+            <i class="bi bi-people text-blue-600 dark:text-blue-400 text-base sm:text-lg"></i>
+          </div>
         </div>
-      <?php endforeach; ?>
-    </tbody>
-  </table>
-</div> 
+      </div>
 
-<!-- Tabela Alunos Inscritos -->
-<h3>Alunos Inscritos</h3>
-<div class="table-container">
-  <table>
-    <thead>
-      <tr>
-        <th>Aluno</th>
-        <th>Curso</th>
-        <th>Progresso</th>
-        <th>Último Acesso</th>
-        <th>Status</th>
-        <th>Ações</th>
-      </tr>
-    </thead>
-    <tbody>
-      <?php foreach ($enrollments as $key => $enrollment): ?>
-        <?php if ($enrollment->status_enrollment == 'Ativa'): ?>
-          <tr>
-            <td><?= $enrollment->name_student ?><br><small style="color:#8a9ba8;"><?= $enrollment->email_student ?></small></td>
-            <td><?= $enrollment->title_course ?></td>
-            <td>35%</td>
-            <td>2 horas</td>
-            <td><span class="status-badge status-ativo">Ativo</span></td>
-            <td class="actions g-4">
-              <a href="" class="btn btn-danger btn-sm">Bloquear</a>
-            </td>
-          </tr>
-        <?php endif; ?>
-      <?php endforeach; ?>
-    </tbody>
-  </table>
+      <!-- Certificados Emitidos -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">
+        <div class="flex items-center justify-between">
+          <div class="flex-1 min-w-0">
+            <p class="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1 truncate">
+              Certificados Emitidos
+            </p>
+            <h3 class="text-2xl font-bold text-slate-800 dark:text-white mb-1">
+              2
+            </h3>
+            <div class="flex items-center gap-1">
+              <i class="bi bi-award text-amber-500 text-sm flex-shrink-0"></i>
+              <span class="text-amber-500 text-sm font-medium truncate">
+                50% dos alunos
+              </span>
+            </div>
+          </div>
+          <div class="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 dark:bg-green-900 rounded-xl flex items-center justify-center flex-shrink-0 ml-3">
+            <i class="bi bi-file-earmark-check text-green-600 dark:text-green-400 text-base sm:text-lg"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Taxa de Conclusão -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">
+        <div class="flex items-center justify-between">
+          <div class="flex-1 min-w-0">
+            <p class="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1 truncate">
+              Taxa de Conclusão
+            </p>
+            <h3 class="text-2xl font-bold text-slate-800 dark:text-white mb-1">
+              50%
+            </h3>
+            <div class="flex items-center gap-1">
+              <i class="bi bi-graph-up text-purple-500 text-sm flex-shrink-0"></i>
+              <span class="text-purple-500 text-sm font-medium truncate">
+                Média geral
+              </span>
+            </div>
+          </div>
+          <div class="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 dark:bg-purple-900 rounded-xl flex items-center justify-center flex-shrink-0 ml-3">
+            <i class="bi bi-percent text-purple-600 dark:text-purple-400 text-base sm:text-lg"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pedidos de Inscrição -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 mb-8">
+      <div class="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
+        <h3 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-white">Pedidos de Inscrição</h3>
+        <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Aprove ou rejeite solicitações de inscrição pendentes</p>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[600px]">
+          <thead class="bg-slate-50 dark:bg-slate-700">
+            <tr>
+              <th class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Aluno</th>
+              <th class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Curso</th>
+              <th class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Comprovativo</th>
+              <th class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Status</th>
+              <th class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Ações</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+            <?php foreach ($payments as $key => $payment): ?>
+              <?php if ($payment->status_payment == 'Pendente'): ?>
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                  <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                    <div class="min-w-0">
+                      <div class="font-medium text-slate-800 dark:text-white text-sm sm:text-base truncate"><?= esc($payment->username) ?></div>
+                      <div class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 truncate"><?= esc($payment->email) ?></div>
+                    </div>
+                  </td>
+                  <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                    <div class="text-sm text-slate-800 dark:text-white truncate max-w-[120px] sm:max-w-none"><?= esc($payment->title_course) ?></div>
+                  </td>
+                  <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                    <button type="button"
+                      class="inline-flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg sm:rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 text-xs sm:text-sm"
+                      data-bs-toggle="modal"
+                      data-bs-target="#comprovativoModal<?= $payment->id_payment ?>">
+                      <i class="bi bi-eye text-xs sm:text-sm"></i>
+                      <span class="hidden xs:inline">Ver</span>
+                    </button>
+                  </td>
+                  <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                    <span class="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-400">
+                      Pendente
+                    </span>
+                  </td>
+                  <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                    <div class="flex items-center gap-1 sm:gap-2 flex-wrap">
+                      <form class="acceptForm"
+                        id="acceptForm<?= $payment->id_payment ?>"
+                        action="/instructor/dashboard/meus_estudantes/<?= $payment->id_course ?>/<?= $payment->id_user_payment ?>"
+                        method="post">
+                        <input type="hidden" name="status_enrollment" value="Ativo">
+                        <input type="hidden" name="status_payment" value="Aprovado">
+                        <button type="submit"
+                          class="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg sm:rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 text-xs sm:text-sm">
+                          <i class="bi bi-check-lg text-xs sm:text-sm"></i>
+                          <span class="hidden sm:inline">Aceitar</span>
+                        </button>
+                      </form>
+
+                      <form action="/instructor/dashboard/meus_estudantes/<?= $payment->id_course ?>/<?= $payment->id_user_payment ?>" method="post">
+                        <input type="hidden" name="status_payment" value="Rejeitado">
+                        <button type="submit"
+                          class="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg sm:rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 text-xs sm:text-sm">
+                          <i class="bi bi-x-lg text-xs sm:text-sm"></i>
+                          <span class="hidden sm:inline">Rejeitar</span>
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+
+              <?php endif; ?>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Estado Vazio -->
+      <?php
+      $hasPendingPayments = false;
+      foreach ($payments as $payment) {
+        if ($payment->status_payment == 'Pendente') {
+          $hasPendingPayments = true;
+          break;
+        }
+      }
+      ?>
+      <?php if (!$hasPendingPayments): ?>
+        <div class="text-center py-8 sm:py-12">
+          <div class="w-12 h-12 sm:w-16 sm:h-16 bg-slate-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+            <i class="bi bi-check2-circle text-slate-400 text-xl sm:text-2xl"></i>
+          </div>
+          <h4 class="font-bold text-slate-700 dark:text-slate-300 mb-2 text-sm sm:text-base">Nenhum pedido pendente</h4>
+          <p class="text-slate-500 dark:text-slate-500 text-xs sm:text-sm max-w-md mx-auto">
+            Todos os pedidos de inscrição foram processados.
+          </p>
+        </div>
+      <?php endif; ?>
+    </div>
+
+    <!-- Alunos Inscritos -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700">
+      <div class="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
+        <h3 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-white">Alunos Inscritos</h3>
+        <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Acompanhe o progresso e gerencie alunos ativos</p>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[600px]">
+          <thead class="bg-slate-50 dark:bg-slate-700">
+            <tr>
+              <th class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Aluno</th>
+              <th class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Curso</th>
+              <th class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Progresso</th>
+              <th class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Último Acesso</th>
+              <th class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Status</th>
+              <th class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Ações</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+            <?php foreach ($enrollments as $key => $enrollment): ?>
+              <?php if ($enrollment->status_enrollment == 'Ativa'): ?>
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                  <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                    <div class="min-w-0">
+                      <div class="font-medium text-slate-800 dark:text-white text-sm sm:text-base truncate"><?= esc($enrollment->name_student) ?></div>
+                      <div class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 truncate"><?= esc($enrollment->email_student) ?></div>
+                    </div>
+                  </td>
+                  <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                    <div class="text-sm text-slate-800 dark:text-white truncate max-w-[120px] sm:max-w-none"><?= esc($enrollment->title_course) ?></div>
+                  </td>
+                  <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                    <div class="flex items-center gap-2 sm:gap-3">
+                      <div class="w-12 sm:w-16 bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                        <div class="bg-green-500 h-2 rounded-full" style="width: 35%"></div>
+                      </div>
+                      <span class="text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300">35%</span>
+                    </div>
+                  </td>
+                  <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                    <div class="text-xs sm:text-sm text-slate-600 dark:text-slate-400">2 horas</div>
+                  </td>
+                  <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                    <span class="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400">
+                      Ativo
+                    </span>
+                  </td>
+                  <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                    <button class="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg sm:rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 text-xs sm:text-sm">
+                      <i class="bi bi-lock text-xs sm:text-sm"></i>
+                      <span class="hidden sm:inline">Bloquear</span>
+                    </button>
+                  </td>
+                </tr>
+              <?php endif; ?>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Estado Vazio -->
+      <?php
+      $hasActiveEnrollments = false;
+      foreach ($enrollments as $enrollment) {
+        if ($enrollment->status_enrollment == 'Ativa') {
+          $hasActiveEnrollments = true;
+          break;
+        }
+      }
+      ?>
+      <?php if (!$hasActiveEnrollments): ?>
+        <div class="text-center py-8 sm:py-12">
+          <div class="w-12 h-12 sm:w-16 sm:h-16 bg-slate-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+            <i class="bi bi-people text-slate-400 text-xl sm:text-2xl"></i>
+          </div>
+          <h4 class="font-bold text-slate-700 dark:text-slate-300 mb-2 text-sm sm:text-base">Nenhum aluno inscrito</h4>
+          <p class="text-slate-500 dark:text-slate-500 text-xs sm:text-sm max-w-md mx-auto">
+            Ainda não há alunos inscritos nos seus cursos.
+          </p>
+        </div>
+      <?php endif; ?>
+    </div>
+  </div>
 </div>
 
-<style>
-  #sidebar a {
-    color: #94a3b8;
-    /* slate-400 */
-    text-decoration: none;
-    display: block;
-    padding: 12px 20px;
-    border-radius: 0.75rem;
-    transition: 0.3s;
-    font-weight: 500;
-  }
-
-  #sidebar a:hover,
-  #sidebar a.active {
-    background: #1e293b;
-    /* slate-800 */
-    color: #fff;
-  }
-</style>
-
 <script>
+  // Confirmação para aceitar aluno
   document.querySelectorAll('.acceptForm').forEach(function(form) {
     form.addEventListener('submit', function(e) {
       e.preventDefault();
@@ -324,7 +290,11 @@
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: 'Sim, aceitar',
-        cancelButtonText: 'Cancelar'
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#6b7280',
+        background: '#1f2937',
+        color: '#f9fafb'
       }).then((result) => {
         if (result.isConfirmed) {
           Swal.fire({
@@ -333,12 +303,71 @@
             allowOutsideClick: false,
             didOpen: () => {
               Swal.showLoading();
-            }
+            },
+            background: '#1f2937',
+            color: '#f9fafb'
           });
-          form.submit(); // envia o form correto
+          form.submit();
         }
       });
     });
+  });
+
+  // Confirmação para rejeitar aluno
+  document.querySelectorAll('form[action*="meus_estudantes"]').forEach(function(form) {
+    if (!form.classList.contains('acceptForm')) {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        Swal.fire({
+          title: 'Confirmar ação',
+          text: "Deseja realmente rejeitar este estudante?",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Sim, rejeitar',
+          cancelButtonText: 'Cancelar',
+          confirmButtonColor: '#ef4444',
+          cancelButtonColor: '#6b7280',
+          background: '#1f2937',
+          color: '#f9fafb'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            form.submit();
+          }
+        });
+      });
+    }
+  });
+
+  // Confirmação para bloquear aluno
+  document.querySelectorAll('button.bg-red-600').forEach(function(button) {
+    if (button.closest('td')) {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        Swal.fire({
+          title: 'Bloquear aluno',
+          text: "Deseja realmente bloquear o acesso deste aluno?",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Sim, bloquear',
+          cancelButtonText: 'Cancelar',
+          confirmButtonColor: '#ef4444',
+          cancelButtonColor: '#6b7280',
+          background: '#1f2937',
+          color: '#f9fafb'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            Swal.fire({
+              title: 'Aluno bloqueado',
+              text: 'O acesso do aluno foi bloqueado com sucesso.',
+              icon: 'success',
+              confirmButtonText: 'OK',
+              background: '#1f2937',
+              color: '#f9fafb'
+            });
+          }
+        });
+      });
+    }
   });
 </script>
 

@@ -72,6 +72,35 @@ use Faker\Provider\Base;
                     </a>
 
                 <?php endforeach; ?>
+
+                <!-- LINKS FIXOS -->
+
+                <div class="absolute bottom-2">
+                    <a
+                        href="#"
+                        id="logoutBtn"
+                        data-href="/logout/"
+                        class="side-link flex w-full <?= $isActive ? 'active' : '' ?> items-center rounded-lg px-2 py-2 text-red-500 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-white transition">
+                        <span class="flex h-8 w-8 items-center justify-center">
+                            <i class="bi bi-box-arrow-left"></i>
+                        </span>
+                        <div class="sidebar-label flex flex-col ml-2">
+                            <span class="text-xs font-medium">Sair da conta</span>
+                        </div>
+                    </a>
+
+                    <a
+                        href="/"
+                        id="side-link"
+                        class="side-link flex <?= $isActive ? 'active' : '' ?> items-center rounded-lg px-2 py-2 text-slate-900 dark:text-slate-50 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-white transition">
+                        <span class="flex h-8 w-8 items-center justify-center">
+                            <i class="bi bi-box-arrow-left"></i>
+                        </span>
+                        <div class="sidebar-label flex flex-col ml-2">
+                            <span class="text-xs font-medium">Ir para página inicial</span>
+                        </div>
+                    </a>
+                </div>
             </nav>
         </div>
     </div>
@@ -118,5 +147,25 @@ use Faker\Provider\Base;
 
         });
 
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', function(event) {
+        event.preventDefault(); // impede sair direto
+
+        const url = this.getAttribute('data-href');
+
+        Swal.fire({
+            title: "Tem certeza?",
+            text: "Deseja realmente sair da sua conta?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sim, sair",
+            cancelButtonText: "Cancelar",
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = url; // agora sim faz o logout
+            }
+        });
     });
 </script>

@@ -8,6 +8,7 @@ use App\Models\CourseModel;
 use App\Models\ModuleModel;
 use App\Models\LessonModel;
 use App\Models\CourseSettingModel;
+use App\Models\JitsiModel;
 use App\Models\PendingUserModel;
 use CodeIgniter\Shield\Entities\User;
 use CodeIgniter\Shield\Models\UserModel;
@@ -21,9 +22,10 @@ class Dashboard extends BaseController
         return [
             ['label' => 'Início', 'icon' => 'bi-house-door', 'url' => '/instructor/dashboard'],
             ['label' => 'Meus Cursos', 'icon' => 'bi-book', 'url' => '/instructor/dashboard/meus_cursos'],
+            ['label' => 'Aula ao Vivo', 'icon' => 'bi-camera-reels', 'url' => '/instructor/dashboard/jitsi'],
             ['label' => 'Estudantes', 'icon' => 'bi-people', 'url' => '/instructor/dashboard/meus_estudantes'],
             ['label' => 'Finanças', 'icon' => 'bi-cash-coin', 'url' => '/instructor/dashboard/financas'],
-            ['label' => 'User Profile', 'icon' => 'bi-person-circle', 'url' => '/instructor/dashboard/perfil'],
+            ['label' => 'Perfil', 'icon' => 'bi-person-circle', 'url' => '/instructor/dashboard/perfil'],
         ];
     }
 
@@ -169,6 +171,238 @@ class Dashboard extends BaseController
         ]);
     }
 
+    public function live($id = null)
+    {
+        $user  = service('auth')->user();
+        $req   = $this->request;
+        $model = new JitsiModel();
+        $courseModel = new CourseModel();
+
+        // ============================================================
+        // 1) GET → LISTAGEM + VIEW
+        // ============================================================
+        if ($req->getMethod() === 'GET') {
+
+            $aulas = $model->where('id_user_jitsi', $user->id)
+                ->orderBy('id_jitsi', 'DESC')
+                ->findAll();
+
+            $courses = $courseModel->getCoursesByInstructor($user->id);
+
+            return view('pages/instructor/live_class', [
+                'user'         => $user,
+                'sidebarLinks' => $this->sidebarLinks(),
+                'currentUrl'   => current_url(),
+                'aulas'        => $aulas,
+                'courses'      => $courses
+            ]);
+        }
+
+        // ============================================================
+        // 2) POST → definir se é CRIAR ou EDITAR
+        // ============================================================
+        $isEdit = !empty($req->getPost('id_jitsi'));
+        $editId = $req->getPost('id_jitsi');
+
+        // ============================================================
+        // 3) REGRAS DE VALIDAÇÃO
+        // ============================================================
+        $rules = [
+            'classTitle' => [
+                'label'  => 'Título da Aula',
+                'rules'  => 'required|min_length[3]|max_length[255]',
+            ],
+            'classDescription' => [
+                'label'  => 'Descrição',
+                'rules'  => 'permit_empty|max_length[65535]',
+            ],
+            'associatedCourse' => [
+                'label'  => 'Curso Associado',
+                'rules'  => 'permit_empty|integer',
+            ],
+            'classType' => [
+                'label' => 'Tipo de Aula',
+                'rules' => 'required|in_list[instant,scheduled]',
+            ],
+            'roomStatus' => [
+                'label' => 'Estado',
+                'rules' => 'required|in_list[Pendente,Ao vivo,Expirado]',
+            ],
+            'roomPrivacy' => [
+                'label' => 'Privacidade',
+                'rules' => 'required|in_list[public,private,password]',
+            ],
+            'roomPassword' => [
+                'label' => 'Senha da Sala',
+                'rules' => 'permit_empty|min_length[4]|max_length[100]',
+            ],
+        ];
+
+        // Se for AULA AGENDADA → obriga data e horários
+        if ($req->getPost('classType') === 'scheduled') {
+
+            $rules['classDate'] = [
+                'label' => 'Data da Aula',
+                'rules' => 'required|valid_date[Y-m-d]',
+            ];
+
+            $rules['startTime'] = [
+                'label' => 'Hora de Início',
+                'rules' => 'required',
+            ];
+
+            $rules['endTime'] = [
+                'label' => 'Hora de Término',
+                'rules' => 'required',
+            ];
+        }
+
+        // Se for PRIVACIDADE COM SENHA → obriga senha
+        if ($req->getPost('roomPrivacy') === 'password') {
+            $rules['roomPassword']['rules'] = 'required|min_length[4]|max_length[100]';
+        }
+
+        // ============================================================
+        // 4) VALIDAR
+        // ============================================================
+        if (!$this->validate($rules)) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('errors', $this->validator->getErrors());
+        }
+
+        // ============================================================
+        // 5) PREPARAR OS DADOS PARA SALVAR
+        // ============================================================
+        $data = [
+            'title_jitsi'        => $req->getPost('classTitle'),
+            'description_jitsi'  => $req->getPost('classDescription'),
+            'id_course_jitsi'    => $req->getPost('associatedCourse') ?: null,
+            'class_type_jitsi'   => $req->getPost('classType'),
+            'meeting_date_jitsi' => $req->getPost('classDate') ?: null,
+            'start_time_jitsi'   => $req->getPost('startTime') ?: null,
+            'end_time_jitsi'     => $req->getPost('endTime') ?: null,
+            'status_jitsi'       => $req->getPost('roomStatus'),
+            'privacy_jitsi'      => $req->getPost('roomPrivacy'),
+            'password_jitsi'     => $req->getPost('roomPassword') ?: null,
+            'recording_jitsi'    => $req->getPost('enableRecording') ? 1 : 0,
+            'chat_jitsi'         => $req->getPost('enableChat') ? 1 : 0,
+            'screenshare_jitsi'  => $req->getPost('enableScreenShare') ? 1 : 0,
+            'id_user_jitsi'      => $user->id,
+        ];
+
+        // Novo room_jitsi apenas ao criar
+        if (!$isEdit) {
+            $data['room_jitsi'] = "room_" . uniqid();
+        }
+
+        // ============================================================
+        // 6) SALVAR (CRIAR OU EDITAR)
+        // ============================================================
+        if ($isEdit) {
+            // Atualizar
+            $model->update($editId, $data);
+
+            return redirect()
+                ->to('/instructor/dashboard/jitsi')
+                ->with('swal', [
+                    'icon'  => 'success',
+                    'title' => 'Aula atualizada!',
+                    'text'  => 'A aula foi editada com sucesso.'
+                ]);
+        } else {
+            // Criar
+            $model->insert($data);
+
+            return redirect()
+                ->to('/instructor/dashboard/jitsi')
+                ->with('swal', [
+                    'icon'  => 'success',
+                    'title' => 'Aula criada!',
+                    'text'  => 'A nova aula virtual foi criada com sucesso.'
+                ]);
+        }
+    }
+
+    public function deleteJitsi($id)
+    {
+        $user  = service('auth')->user();
+        $model = new JitsiModel();
+
+        // Verifica se a aula existe
+        $aula = $model->find($id);
+
+        if (!$aula) {
+            return redirect()->back()->with('swal', [
+                'icon'  => 'error',
+                'title' => 'Aula não encontrada',
+                'text'  => 'A aula que tentou excluir não existe.'
+            ]);
+        }
+
+        // Impede que um instrutor exclua aula de outro instrutor
+        if ($aula->id_user_jitsi != $user->id) {
+            return redirect()->back()->with('swal', [
+                'icon'  => 'error',
+                'title' => 'Acesso negado',
+                'text'  => 'Você não tem permissão para excluir esta aula.'
+            ]);
+        }
+
+        // Delete
+        if ($model->delete($id)) {
+            return redirect()
+                ->to('/instructor/dashboard/jitsi')
+                ->with('swal', [
+                    'icon'  => 'success',
+                    'title' => 'Aula excluída!',
+                    'text'  => 'A aula foi removida com sucesso.'
+                ]);
+        }
+
+        // Caso ocorra algum erro inesperado
+        return redirect()
+            ->back()
+            ->with('swal', [
+                'icon'  => 'error',
+                'title' => 'Erro ao excluir',
+                'text'  => 'Não foi possível excluir esta aula.'
+            ]);
+    }
+
+    public function stream($id)
+    {
+        $user  = service('auth')->user();
+        $model = new JitsiModel();
+
+        $aula = $model->find($id);
+
+        if (!$aula) {
+            return redirect()->back()->with('swal', [
+                'icon' => 'error',
+                'title' => 'Aula não encontrada',
+                'text' => 'A aula que tentou acessar não existe.'
+            ]);
+        }
+
+        // Permitir somente instrutor dono + alunos inscritos (se quiser implementar depois)
+        if ($aula->id_user_jitsi != $user->id) {
+            return redirect()->back()->with('swal', [
+                'icon' => 'error',
+                'title' => 'Sem Permissão',
+                'text' => 'Você não pode acessar esta sala.'
+            ]);
+        }
+
+        return view('pages/instructor/live_stream', [
+            'aula' => $aula,
+            'user' => $user,
+            'sidebarLinks' => $this->sidebarLinks(),
+            'currentUrl' => current_url()
+        ]);
+    }
+
     public function students()
     {
         $user = service('auth')->user();
@@ -290,12 +524,12 @@ class Dashboard extends BaseController
             'username' => $pendingUser->username,
         ]);
 
-        
+
         $user->email = $pendingUser->email;
         $tempPassword = random_string('alnum', 12);
         $user->password = $tempPassword;
         $users->save($user);
-        
+
         $userId = $users->getInsertID();
         $user   = $users->find($userId);
 

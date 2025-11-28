@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Stack+Sans+Text:wght@200..700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
     <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
     <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
@@ -59,6 +60,33 @@
 
                 <?= $this->include('pages/instructor/partials/sidebar') ?>
 
+                <!-- CONTEÚDO PRINCIPAL -->
+                <div id="main-content" class="flex flex-1 flex-col transition-all duration-200 prevent-overflow">
+
+                    <?= $this->include('pages/instructor/partials/navbar') ?>
+
+                    <!-- CONTEÚDO -->
+                    <main class="flex-1 overflow-y-auto p-6 md:p-10 space-y-6 w-full max-w-full overflow-x-hidden">
+
+                        <?= $this->renderSection('home_instructor') ?>
+
+                        <?= $this->renderSection('my_courses') ?>
+
+                        <?= $this->renderSection('add_course') ?>
+
+                        <?= $this->renderSection('edit_course') ?>
+
+                        <?= $this->renderSection('profile') ?>
+
+                        <?= $this->renderSection('financial') ?>
+
+                        <?= $this->renderSection('jitsi') ?>
+
+                        <?= $this->renderSection('students') ?>
+
+                    </main>
+                </div>
+
             <?php else: ?>
 
                 <?= $this->include('pages/admin/partials/sidebar') ?>
@@ -70,6 +98,27 @@
     </div>
 
     <script src="<?= base_url('assets/js/main.js') ?>"></script>
+
+    <?php $swalPayload = session()->getFlashdata('swal') ?? session('swal'); ?>
+    <?php if (!empty($swalPayload)): ?>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+
+                const swalData = <?= json_encode($swalPayload) ?>;
+                if (!swalData || typeof Swal === 'undefined') return;
+
+                const {
+                    icon = 'info', title = '', text = '', ...options
+                } = swalData;
+                Swal.fire({
+                    icon,
+                    title,
+                    text,
+                    ...options
+                });
+            });
+        </script>
+    <?php endif; ?>
 
 </body>
 

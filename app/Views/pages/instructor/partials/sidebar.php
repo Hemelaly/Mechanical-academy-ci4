@@ -1,60 +1,171 @@
-<style>
-    #sidebar a {
-        color: #94a3b8;
-        /* slate-400 */
-        text-decoration: none;
-        display: block;
-        padding: 12px 20px;
-        border-radius: 0.75rem;
-        transition: 0.3s;
-        font-weight: 500;
-    }
+<?php
 
-    #sidebar a:hover,
-    #sidebar a.active {
-        background: #1e293b;
-        /* slate-800 */
-        color: #fff;
-    }
-</style>
-
-<div class="d-none d-md-block sticky-top pt-4" id="sidebar">
-    <div class="image mb-4" style="width: 150px; height: auto;">
-        <img class="img-fluid" src="<?= base_url('assets/img/logo_light.png') ?>" alt="">
-    </div>
-
-    <?php foreach ($sidebarLinks as $link): ?>
-        <?php
-        $currentUrl = current_url();
-        $isActive = str_ends_with($currentUrl, $link['url']);
-        ?>
-
-        <a href="<?= site_url($link['url']) ?>"
-            class="my-1 nav-link <?= $isActive ? 'active' : '' ?>">
-            <i class="bi <?= $link['icon'] ?> me-2"></i> <?= $link['label'] ?>
-        </a>
-    <?php endforeach; ?>
-    <a href="/logout" id="logoutBtn" class="nav-link text-danger mt-5">
-        <i class="bi bi-box-arrow-right me-2" onclick="return confirm('Tem certeza que deseja sair da conta?');"></i> Sair
-    </a>
+use Faker\Provider\Base;
+?>
+<!-- BACKDROP MOBILE -->
+<div id="sidebar-backdrop" class="fixed inset-0 z-30 bg-black/40 hidden lg:hidden">
 </div>
 
-<script>
-document.getElementById('logoutBtn').addEventListener('click', function(e) {
-    e.preventDefault();
+<!-- SIDEBAR -->
+<aside id="sidebar" class="fixed inset-y-0 transition-all duration-500 ease-in-out left-0 z-40 flex flex-col bg-slate-900 text-slate-200 dark:text-slate-100 w-70 transform -translate-x-full transition-transform duration-200 lg:translate-x-0 lg:static lg:w-70 border-r border-slate-200 dark:border-slate-800 bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900">
+    <!-- TOPO: LOGO + BOTÕES -->
+    <div class="flex h-16 items-center justify-between px-4 pt-5">
+        <div class="gap-2">
+            <div class="w-11">
+                <img id="favicon" class="hidden" src="<?= base_url('assets/img/favicon.png') ?>" alt="">
+            </div>
 
-    Swal.fire({
-        title: 'Tem certeza?',
-        text: "Você será desconectado da sessão.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Sim, sair',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Redireciona para a rota de logout do CI4
-            window.location.href = "<?= site_url('logout') ?>";
-        }
+            <div id="logo-text" class="flex flex-col">
+                <!-- Logo para tema claro -->
+                <span id="logo-light" class="font-semibold leading-tight w-36">
+                    <img src="<?= base_url('assets/img/logo.png') ?>" alt="">
+                </span>
+
+                <!-- Logo para tema escuro -->
+                <span id="logo-dark" class="font-semibold leading-tight w-36 hidden">
+                    <img src="<?= base_url('assets/img/logo-blue.png') ?>" alt="">
+                </span>
+            </div>
+
+        </div>
+
+        <div class="flex items-center gap-2">
+            <!-- FECHAR MOBILE -->
+            <button
+                id="close-sidebar"
+                class="inline-flex lg:hidden h-8 w-8 items-center justify-center rounded-lg hover:bg-slate-800">
+                ✕
+            </button>
+        </div>
+    </div>
+
+    <!-- SCROLL ÁREA -->
+    <div class="flex-1 overflow-y-auto py-3 prevent-overflow">
+
+        <!-- SEÇÃO DASHBOARD -->
+        <div class="px-3 mt-6">
+            <p
+                class="sidebar-label mb-1 px-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+                Menu
+            </p>
+
+            <nav class="space-y-1">
+
+                <?php foreach ($sidebarLinks as $link): ?>
+                    <?php
+                    $currentUrl = current_url();
+                    $isActive = str_ends_with($currentUrl, $link['url']);
+
+                    ?>
+
+                    <!-- LINKS -->
+                    <a
+                        href="<?= site_url($link['url']) ?>"
+                        id="side-link"
+                        class="side-link flex <?= $isActive ? 'active' : '' ?> items-center rounded-lg px-2 py-2 text-slate-900 dark:text-slate-50 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-blue-500 transition">
+                        <span class="flex h-8 w-8 items-center justify-center">
+                            <i class="bi <?= $link['icon'] ?>"></i>
+                        </span>
+                        <div class="sidebar-label flex flex-col ml-2">
+                            <span class="text-xs font-medium"><?= $link['label'] ?></span>
+                        </div>
+                    </a>
+
+                <?php endforeach; ?>
+
+                <!-- LINKS FIXOS -->
+
+                <div class="absolute bottom-2">
+                    <a
+                        href="#"
+                        id="logoutBtn"
+                        data-href="/logout/"
+                        class="side-link flex w-full <?= $isActive ? 'active' : '' ?> items-center rounded-lg px-2 py-2 text-red-500 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-white transition">
+                        <span class="flex h-8 w-8 items-center justify-center">
+                            <i class="bi bi-box-arrow-left"></i>
+                        </span>
+                        <div class="sidebar-label flex flex-col ml-2">
+                            <span class="text-xs font-medium">Sair da conta</span>
+                        </div>
+                    </a>
+
+                    <a
+                        href="/"
+                        id="side-link"
+                        class="side-link flex <?= $isActive ? 'active' : '' ?> items-center rounded-lg px-2 py-2 text-slate-900 dark:text-slate-50 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-white transition">
+                        <span class="flex h-8 w-8 items-center justify-center">
+                            <i class="bi bi-box-arrow-left"></i>
+                        </span>
+                        <div class="sidebar-label flex flex-col ml-2">
+                            <span class="text-xs font-medium">Ir para página inicial</span>
+                        </div>
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </div>
+</aside>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const links = document.querySelectorAll('#sidebar .side-link');
+
+        // página atual sem query string
+        const currentPage = window.location.pathname.split('/').pop().split('?')[0];
+
+        links.forEach(link => {
+
+            const href = link.getAttribute('href');
+            if (!href) return;
+
+            // Pega apenas o arquivo final do link (ex: meusCursos.php)
+            const cleanHref = href.split('/').pop().split('?')[0];
+
+            if (cleanHref === currentPage) {
+                link.classList.add(
+                    'bg-slate-200/60',
+                    'dark:bg-slate-700/60',
+                    'text-blue-500'
+                );
+            }
+
+            link.addEventListener('click', () => {
+                links.forEach(l =>
+                    l.classList.remove(
+                        'bg-slate-200/60',
+                        'dark:bg-slate-700/60',
+                        'text-blue-500'
+                    )
+                );
+                link.classList.add(
+                    'bg-slate-200/60',
+                    'dark:bg-slate-700/60',
+                    'text-blue-500'
+                );
+            });
+
+        });
+
     });
-});
+
+    document.getElementById('logoutBtn').addEventListener('click', function(event) {
+        event.preventDefault(); // impede sair direto
+
+        const url = this.getAttribute('data-href');
+
+        Swal.fire({
+            title: "Tem certeza?",
+            text: "Deseja realmente sair da sua conta?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sim, sair",
+            cancelButtonText: "Cancelar",
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = url; // agora sim faz o logout
+            }
+        });
+    });
 </script>

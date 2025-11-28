@@ -1,321 +1,314 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?>
-Finanças
-<?= $this->endSection() ?>
+<?= $this->section('title') ?>Finanças<?= $this->endSection() ?>
 
 <?= $this->section('financial') ?>
-<div class="container-fluid">
-  <div
-    style="
-                color: #ffffff;
-                padding: 30px;
-                min-height: 100vh;
-              ">
+
+<!-- Bootstrap Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+
+<div class="min-h-screen bg-slate-50 dark:bg-slate-900">
+  <div class="container mx-auto">
+
     <!-- Header -->
-    <div style="margin-bottom: 40px">
-      <h1 style="font-size: 28px; font-weight: 600; margin: 0">
+    <div class="mb-8">
+      <h1 class="text-2xl lg:text-3xl font-bold text-slate-800 dark:text-white mb-2">
         Financeiro
       </h1>
+      <p class="text-slate-600 dark:text-slate-400 text-sm">
+        Acompanhe sua receita e desempenho financeiro
+      </p>
     </div>
 
-    <!-- Top Stats Cards -->
-    <div class="row">
+    <!-- Cards de Estatísticas -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
       <!-- Receita Total -->
-      <div class="col-md-4 mb-4">
-        <div
-          style="
-                      background: linear-gradient(
-                        135deg,
-                        #2563eb 0%,
-                        #1e40af 100%
-                      );
-                      border-radius: 12px;
-                      padding: 24px;
-
-                      display: flex;
-                      flex-direction: column;
-                      justify-content: space-between;
-                    ">
-          <div
-            style="
-                        color: #cbd5e1;
-                        font-size: 14px;
-                        font-weight: 500;
-                        margin-bottom: 8px;
-                      ">
-            Receita Total
+      <div class="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-4 sm:p-6 text-white shadow-lg">
+        <div class="flex items-center justify-between">
+          <div class="flex-1 min-w-0">
+            <p class="text-blue-100 text-sm font-medium mb-1 truncate">
+              Receita Total
+            </p>
+            <h3 class="text-2xl sm:text-3xl font-bold mb-1 truncate">
+              R$ 15.758,00
+            </h3>
+            <div class="flex items-center gap-1">
+              <i class="bi bi-arrow-up-short text-green-300 text-sm"></i>
+              <span class="text-green-300 text-sm font-medium truncate">
+                +15% este mês
+              </span>
+            </div>
           </div>
-          <div
-            style="
-                        font-size: 32px;
-                        font-weight: 700;
-                        margin-bottom: 8px;
-                      ">
-            R$ 15.758,00
-          </div>
-          <div
-            style="color: #22c55e; font-size: 14px; font-weight: 500">
-            +15% este mês
+          <div class="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0 ml-3">
+            <i class="bi bi-currency-dollar text-white text-lg"></i>
           </div>
         </div>
       </div>
 
       <!-- Próximo Pagamento -->
-      <div class="col-md-4 mb-4">
-        <div
-          style="
-                      background: linear-gradient(
-                        135deg,
-                        #059669 0%,
-                        #047857 100%
-                      );
-                      border-radius: 12px;
-                      padding: 24px;
-
-                      display: flex;
-                      flex-direction: column;
-                      justify-content: space-between;
-                    ">
-          <div
-            style="
-                        color: #d1fae5;
-                        font-size: 14px;
-                        font-weight: 500;
-                        margin-bottom: 8px;
-                      ">
-            Próximo Pagamento
+      <div class="bg-gradient-to-br from-green-600 to-green-800 rounded-2xl p-4 sm:p-6 text-white shadow-lg">
+        <div class="flex items-center justify-between">
+          <div class="flex-1 min-w-0">
+            <p class="text-green-100 text-sm font-medium mb-1 truncate">
+              Próximo Pagamento
+            </p>
+            <h3 class="text-2xl sm:text-3xl font-bold mb-1 truncate">
+              R$ 3.245,00
+            </h3>
+            <div class="flex items-center gap-1">
+              <i class="bi bi-calendar-check text-green-100 text-sm"></i>
+              <span class="text-green-100 text-sm font-medium truncate">
+                Em 5 dias
+              </span>
+            </div>
           </div>
-          <div
-            style="
-                        font-size: 32px;
-                        font-weight: 700;
-                        margin-bottom: 8px;
-                      ">
-            R$ 3.245,00
-          </div>
-          <div
-            style="color: #d1fae5; font-size: 14px; font-weight: 500">
-            Em 5 dias
+          <div class="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0 ml-3">
+            <i class="bi bi-clock text-white text-lg"></i>
           </div>
         </div>
       </div>
 
       <!-- Receita Média/Mês -->
-      <div class="col-md-4 mb-4">
-        <div
-          style="
-                      background: linear-gradient(
-                        135deg,
-                        #7c3aed 0%,
-                        #5b21b6 100%
-                      );
-                      border-radius: 12px;
-                      padding: 24px;
-
-                      display: flex;
-                      flex-direction: column;
-                      justify-content: space-between;
-                    ">
-          <div
-            style="
-                        color: #e9d5ff;
-                        font-size: 14px;
-                        font-weight: 500;
-                        margin-bottom: 8px;
-                      ">
-            Receita Média/Mês
+      <div class="bg-gradient-to-br from-purple-600 to-purple-800 rounded-2xl p-4 sm:p-6 text-white shadow-lg">
+        <div class="flex items-center justify-between">
+          <div class="flex-1 min-w-0">
+            <p class="text-purple-100 text-sm font-medium mb-1 truncate">
+              Receita Média/Mês
+            </p>
+            <h3 class="text-2xl sm:text-3xl font-bold mb-1 truncate">
+              R$ 4.890,00
+            </h3>
+            <div class="flex items-center gap-1">
+              <i class="bi bi-graph-up text-green-300 text-sm"></i>
+              <span class="text-green-300 text-sm font-medium truncate">
+                +8% vs média anual
+              </span>
+            </div>
           </div>
-          <div
-            style="
-                        font-size: 32px;
-                        font-weight: 700;
-                        margin-bottom: 8px;
-                      ">
-            R$ 4.890,00
-          </div>
-          <div
-            style="color: #22c55e; font-size: 14px; font-weight: 500">
-            +8% vs média anual
+          <div class="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0 ml-3">
+            <i class="bi bi-bar-chart text-white text-lg"></i>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Bottom Section -->
-    <div class="row">
-      <!-- Receita por Mês (Chart Placeholder) -->
-      <div class="col-md-6 mb-3">
-        <div
-          style="
-                      background-color: #2a3441;
-                      border-radius: 12px;
-                      padding: 24px;
-                      height: 400px;
-                      display: flex;
-                      flex-direction: column;
-                    ">
-          <h3
-            style="
-                        font-size: 18px;
-                        font-weight: 600;
-                        margin-bottom: 20px;
-                      ">
+    <!-- Gráficos e Transações -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Receita por Mês -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">
+        <div class="flex items-center justify-between mb-4 sm:mb-6">
+          <h3 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-white">
             Receita por Mês
           </h3>
-          <div
-            style="
-                        flex: 1;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        color: #64748b;
-                      ">
-            <div style="text-align: center">
-              <div
-                style="
-                            width: 60px;
-                            height: 60px;
-                            margin: 0 auto 16px;
-                            opacity: 0.3;
-                          ">
-                <svg
-                  width="60"
-                  height="60"
-                  fill="currentColor"
-                  viewBox="0 0 16 16">
-                  <path
-                    d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z" />
-                  <path
-                    d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z" />
-                </svg>
-              </div>
-              <div
-                style="
-                            font-size: 16px;
-                            font-weight: 500;
-                            margin-bottom: 4px;
-                          ">
-                Gráfico de receita mensal
-              </div>
-              <div style="font-size: 14px; color: #64748b">
-                (Área para implementação do gráfico)
-              </div>
+          <div class="flex items-center gap-2">
+            <select class="text-xs sm:text-sm bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-lg px-2 sm:px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option>2024</option>
+              <option>2023</option>
+              <option>2022</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Gráfico Placeholder -->
+        <div class="h-64 sm:h-72 flex items-center justify-center bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-600">
+          <div class="text-center p-4">
+            <div class="w-16 h-16 bg-slate-200 dark:bg-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <i class="bi bi-graph-up text-slate-400 text-2xl"></i>
             </div>
+            <h4 class="font-bold text-slate-700 dark:text-slate-300 mb-2 text-sm sm:text-base">
+              Gráfico de Receita Mensal
+            </h4>
+            <p class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm max-w-xs mx-auto">
+              Área para implementação do gráfico interativo
+            </p>
+          </div>
+        </div>
+
+        <!-- Mini Stats abaixo do gráfico -->
+        <div class="grid grid-cols-3 gap-3 mt-4">
+          <div class="text-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Maior</p>
+            <p class="text-sm font-bold text-slate-800 dark:text-white">R$ 5.240</p>
+          </div>
+          <div class="text-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Média</p>
+            <p class="text-sm font-bold text-slate-800 dark:text-white">R$ 4.890</p>
+          </div>
+          <div class="text-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Cresc.</p>
+            <p class="text-sm font-bold text-green-600">+15%</p>
           </div>
         </div>
       </div>
 
       <!-- Últimas Transações -->
-      <div class="col-md-6 mb-3">
-        <div
-          style="
-                      background-color: #2a3441;
-                      border-radius: 12px;
-                      padding: 24px;
-                      height: 400px;
-                    ">
-          <h3
-            style="
-                        font-size: 18px;
-                        font-weight: 600;
-                        margin-bottom: 20px;
-                      ">
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">
+        <div class="flex items-center justify-between mb-4 sm:mb-6">
+          <h3 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-white">
             Últimas Transações
           </h3>
+          <button class="text-xs sm:text-sm text-blue-600 dark:text-blue-400 font-medium hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
+            Ver todas
+          </button>
+        </div>
 
+        <div class="space-y-3 max-h-96 overflow-y-auto pr-2">
           <!-- Transaction 1 -->
-          <div
-            style="
-                        padding: 16px;
-                        background-color: #1e2837;
-                        border-radius: 8px;
-                        margin-bottom: 12px;
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                      ">
-            <div>
-              <div style="font-weight: 600; margin-bottom: 4px">
-                Pagamento - Dezembro
+          <div class="flex items-center justify-between p-3 sm:p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-600">
+            <div class="flex items-center gap-3 flex-1 min-w-0">
+              <div class="w-8 h-8 sm:w-10 sm:h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="bi bi-arrow-down-left text-green-600 dark:text-green-400 text-sm"></i>
               </div>
-              <div style="color: #22c55e; font-weight: 600">
-                +R$ 3.245,00
+              <div class="flex-1 min-w-0">
+                <p class="font-semibold text-slate-800 dark:text-white text-sm sm:text-base truncate">
+                  Pagamento - Dezembro
+                </p>
+                <p class="text-green-600 dark:text-green-400 font-semibold text-sm">
+                  +R$ 3.245,00
+                </p>
               </div>
             </div>
-            <div
-              style="
-                          background-color: #374151;
-                          color: #9ca3af;
-                          padding: 4px 12px;
-                          border-radius: 6px;
-                          font-size: 12px;
-                        ">
+            <div class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 bg-slate-200 dark:bg-slate-700 px-2 sm:px-3 py-1 rounded-lg whitespace-nowrap ml-2">
               15 Dez 2024
             </div>
           </div>
 
           <!-- Transaction 2 -->
-          <div
-            style="
-                        padding: 16px;
-                        background-color: #1e2837;
-                        border-radius: 8px;
-                        margin-bottom: 12px;
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                      ">
-            <div>
-              <div style="font-weight: 600; margin-bottom: 4px">
-                Pagamento - Novembro
+          <div class="flex items-center justify-between p-3 sm:p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-600">
+            <div class="flex items-center gap-3 flex-1 min-w-0">
+              <div class="w-8 h-8 sm:w-10 sm:h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="bi bi-arrow-down-left text-green-600 dark:text-green-400 text-sm"></i>
               </div>
-              <div style="color: #22c55e; font-weight: 600">
-                +R$ 2.890,00
+              <div class="flex-1 min-w-0">
+                <p class="font-semibold text-slate-800 dark:text-white text-sm sm:text-base truncate">
+                  Pagamento - Novembro
+                </p>
+                <p class="text-green-600 dark:text-green-400 font-semibold text-sm">
+                  +R$ 2.890,00
+                </p>
               </div>
             </div>
-            <div
-              style="
-                          background-color: #374151;
-                          color: #9ca3af;
-                          padding: 4px 12px;
-                          border-radius: 6px;
-                          font-size: 12px;
-                        ">
+            <div class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 bg-slate-200 dark:bg-slate-700 px-2 sm:px-3 py-1 rounded-lg whitespace-nowrap ml-2">
               15 Nov 2024
             </div>
           </div>
 
           <!-- Transaction 3 -->
-          <div
-            style="
-                        padding: 16px;
-                        background-color: #1e2837;
-                        border-radius: 8px;
-                        margin-bottom: 12px;
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                      ">
-            <div>
-              <div style="font-weight: 600; margin-bottom: 4px">
-                Taxa de Plataforma
+          <div class="flex items-center justify-between p-3 sm:p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-600">
+            <div class="flex items-center gap-3 flex-1 min-w-0">
+              <div class="w-8 h-8 sm:w-10 sm:h-10 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="bi bi-arrow-up-right text-red-600 dark:text-red-400 text-sm"></i>
               </div>
-              <div style="color: #ef4444; font-weight: 600">
-                -R$ 289,00
+              <div class="flex-1 min-w-0">
+                <p class="font-semibold text-slate-800 dark:text-white text-sm sm:text-base truncate">
+                  Taxa de Plataforma
+                </p>
+                <p class="text-red-600 dark:text-red-400 font-semibold text-sm">
+                  -R$ 289,00
+                </p>
               </div>
             </div>
-            <div
-              style="
-                          background-color: #374151;
-                          color: #9ca3af;
-                          padding: 4px 12px;
-                          border-radius: 6px;
-                          font-size: 12px;
-                        ">
+            <div class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 bg-slate-200 dark:bg-slate-700 px-2 sm:px-3 py-1 rounded-lg whitespace-nowrap ml-2">
               10 Nov 2024
             </div>
           </div>
+
+          <!-- Transaction 4 -->
+          <div class="flex items-center justify-between p-3 sm:p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-600">
+            <div class="flex items-center gap-3 flex-1 min-w-0">
+              <div class="w-8 h-8 sm:w-10 sm:h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="bi bi-arrow-down-left text-green-600 dark:text-green-400 text-sm"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-semibold text-slate-800 dark:text-white text-sm sm:text-base truncate">
+                  Pagamento - Outubro
+                </p>
+                <p class="text-green-600 dark:text-green-400 font-semibold text-sm">
+                  +R$ 2.750,00
+                </p>
+              </div>
+            </div>
+            <div class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 bg-slate-200 dark:bg-slate-700 px-2 sm:px-3 py-1 rounded-lg whitespace-nowrap ml-2">
+              15 Out 2024
+            </div>
+          </div>
+        </div>
+
+        <!-- Resumo do Mês -->
+        <div class="mt-4 p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="text-sm text-blue-800 dark:text-blue-200 font-medium">Saldo do Mês</p>
+              <p class="text-lg font-bold text-blue-900 dark:text-white">R$ 2.956,00</p>
+            </div>
+            <div class="text-right">
+              <p class="text-sm text-blue-800 dark:text-blue-200">Disponível</p>
+              <p class="text-green-600 dark:text-green-400 font-semibold">+R$ 2.667,00</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Métricas Adicionais -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mt-6">
+      <!-- Cursos Mais Rentáveis -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">
+        <h4 class="font-bold text-slate-800 dark:text-white mb-4 text-sm sm:text-base">Cursos Mais Rentáveis</h4>
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-slate-600 dark:text-slate-400 truncate">JavaScript Avançado</span>
+            <span class="text-sm font-semibold text-slate-800 dark:text-white">R$ 4.230</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-slate-600 dark:text-slate-400 truncate">React Completo</span>
+            <span class="text-sm font-semibold text-slate-800 dark:text-white">R$ 3.890</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-slate-600 dark:text-slate-400 truncate">Node.js API</span>
+            <span class="text-sm font-semibold text-slate-800 dark:text-white">R$ 2.950</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Próximas Metas -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">
+        <h4 class="font-bold text-slate-800 dark:text-white mb-4 text-sm sm:text-base">Próximas Metas</h4>
+        <div class="space-y-3">
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-slate-600 dark:text-slate-400">Meta Mensal</span>
+              <span class="font-semibold text-slate-800 dark:text-white">75%</span>
+            </div>
+            <div class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full">
+              <div class="h-2 bg-green-500 rounded-full" style="width: 75%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-slate-600 dark:text-slate-400">Alunos Ativos</span>
+              <span class="font-semibold text-slate-800 dark:text-white">68%</span>
+            </div>
+            <div class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full">
+              <div class="h-2 bg-blue-500 rounded-full" style="width: 68%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ações Rápidas -->
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">
+        <h4 class="font-bold text-slate-800 dark:text-white mb-4 text-sm sm:text-base">Ações Rápidas</h4>
+        <div class="space-y-2">
+          <button class="w-full text-left px-3 py-2 text-sm bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors dark:text-white">
+            <i class="bi bi-download mr-2"></i>Exportar Relatório
+          </button>
+          <button class="w-full text-left px-3 py-2 text-sm bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors dark:text-white">
+            <i class="bi bi-receipt mr-2"></i>Ver Extrato
+          </button>
+          <button class="w-full text-left px-3 py-2 text-sm bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors dark:text-white">
+            <i class="bi bi-gear mr-2"></i>Configurações
+          </button>
         </div>
       </div>
     </div>
