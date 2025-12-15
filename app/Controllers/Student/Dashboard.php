@@ -546,18 +546,20 @@ class Dashboard extends BaseController
         $users = new ExtendedUserModel();
         $userModel = new UserModel();
 
-        $usersResult = $userModel->findAll();
-
         $user = auth()->user();
+
         if (! $user) {
             return redirect()->to(site_url('login'))
-                ->with('error', 'Sessão expirada. Faça login novamente.');
+                ->with('swal', [
+                    'icon'  => 'error',
+                    'title' => 'Sessão Expirada',
+                    'text'  => 'Por favor, faça login novamente.'
+                ]);
         }
 
-        // URLs seguras para redirecionar
-        $profileUrl = current_url(false);                    // a própria página de perfil (GET)
-        $backUrl    = previous_url() ?? $profileUrl;         // fallback se não houver referer
+        $profileUrl = current_url(false);
 
+        // GET → exibe o perfil
         if ($this->request->getMethod() !== 'POST') {
             return view('pages/student/profile', [
                 'user'         => $user,
@@ -566,50 +568,68 @@ class Dashboard extends BaseController
             ]);
         }
 
-        // Validação
+        // Validação básica
         $rules = [
-            'nome'      => 'required|min_length[2]',
+            'nome'      => 'permit_empty|min_length[2]',
             'pais'      => 'permit_empty|max_length[100]',
             'provincia' => 'permit_empty|max_length[100]',
             'cidade'    => 'permit_empty|max_length[100]',
             'telefone'  => 'permit_empty|max_length[20]',
             'imagem'    => 'if_exist|is_image[imagem]|mime_in[imagem,image/jpg,image/jpeg,image/png,image/webp]|max_size[imagem,4096]',
         ];
+
         if (! $this->validate($rules)) {
-            return redirect()->to($backUrl)
+            return redirect()->to($profileUrl)
                 ->withInput()
-                ->with('error', implode(', ', $this->validator->getErrors()));
+                ->with('swal', [
+                    'icon'  => 'error',
+                    'title' => 'Erro!',
+                    'text'  => implode(', ', $this->validator->getErrors())
+                ]);
         }
 
-        $post     = $this->request->getPost();
-        $userName = trim(($post['nome'] ?? ''));
+        $post = $this->request->getPost();
 
-        $existingUser = $userModel->where('username', $userName)->find();
+        // Verificar duplicidade do nome
+        $userName = trim($post['nome'] ?? '');
 
-        if ($existingUser) {
+        if (! empty($userName)) {
+            $existingUser = $userModel
+                ->where('username', $userName)
+                ->where('id !=', $user->id)
+                ->first();
 
-            return redirect()->to($backUrl)->with('error', 'Já existe um usuário cadastrado com esse nome!');
-
+            if ($existingUser) {
+                return redirect()->to($profileUrl)->with('swal', [
+                    'icon'  => 'error',
+                    'title' => 'Erro!',
+                    'text'  => 'Já existe um usuário com esse nome!'
+                ]);
+            }
         }
 
-        // Upload opcional
+        // Upload da imagem
         $file     = $this->request->getFile('imagem');
-        $filePath = $user->img ?? null;
+        $filePath = $user->img;
 
         if ($file && $file->isValid() && $file->getError() === UPLOAD_ERR_OK) {
+
             $targetDir = FCPATH . 'assets/img/';
             if (! is_dir($targetDir)) {
                 @mkdir($targetDir, 0755, true);
             }
 
             $newName = $file->getRandomName();
+
             if (! $file->move($targetDir, $newName)) {
-                return redirect()->to($backUrl)
-                    ->withInput()
-                    ->with('error', 'Falha ao mover a imagem.');
+                return redirect()->to($profileUrl)->with('swal', [
+                    'icon' => 'error',
+                    'title' => 'Erro!',
+                    'text' => 'Falha ao mover a imagem.'
+                ]);
             }
 
-            // apagar imagem antiga (se existir)
+            // Remover imagem antiga se existir
             if (! empty($user->img)) {
                 $old = FCPATH . $user->img;
                 if (is_file($old)) {
@@ -617,30 +637,105 @@ class Dashboard extends BaseController
                 }
             }
 
-            $filePath = 'assets/img/' . $newName; // relativo na DB
+            $filePath = 'assets/img/' . $newName;
         }
 
-        // Campos extras – garanta que estão em $allowedFields do Model
+        // Criar payload de atualização
         $dataProfile = [
-            'username' => $userName,
+            'username' => $userName ?: $user->username,
             'img'      => $filePath,
-            'country'  => $post['pais']      ?? null,
-            'province' => $post['provincia'] ?? null,
-            'city'     => $post['cidade']    ?? null,
-            'phone'    => $post['telefone']  ?? null,
+            'country'  => $post['pais']      ?? $user->country,
+            'province' => $post['provincia'] ?? $user->province,
+            'city'     => $post['cidade']    ?? $user->city,
+            'phone'    => $post['telefone']  ?? $user->phone,
         ];
 
-        if (! $users->update($user->id, $dataProfile)) {
-            return redirect()->to($backUrl)
-                ->withInput()
-                ->with('error', implode(', ', $users->errors()));
+        // ---------------------------------------
+        //    >>> ALTERAÇÃO DE SENHA (SHIELD) <<<
+        // ---------------------------------------
+        $currentPassword = $post['password_actual'] ?? '';
+        $newPassword     = $post['new_password'] ?? '';
+        $confirmPassword = $post['confirm_password'] ?? '';
+
+        if ($currentPassword || $newPassword || $confirmPassword) {
+
+            if (empty($currentPassword) || empty($newPassword) || empty($confirmPassword)) {
+                return redirect()->to($profileUrl)->with('swal', [
+                    'icon' => 'error',
+                    'title' => 'Erro!',
+                    'text' => 'Para alterar a senha, preencha todos os campos.'
+                ]);
+            }
+
+            // Buscar identidade do Shield
+            $identity = db_connect()
+                ->table('auth_identities')
+                ->where('user_id', $user->id)
+                ->where('type', 'email_password')
+                ->get()
+                ->getRow();
+
+            if (! $identity) {
+                return redirect()->to($profileUrl)->with('swal', [
+                    'icon' => 'error',
+                    'title' => 'Erro interno',
+                    'text' => 'Identidade de senha não encontrada.'
+                ]);
+            }
+
+            // Verificar senha atual
+            if (! password_verify($currentPassword, $identity->secret)) {
+                return redirect()->to($profileUrl)->with('swal', [
+                    'icon' => 'error',
+                    'title' => 'Senha incorreta',
+                    'text' => 'A senha atual fornecida está incorreta.'
+                ]);
+            }
+
+            // Nova senha
+            if (strlen($newPassword) < 6) {
+                return redirect()->to($profileUrl)->with('swal', [
+                    'icon' => 'error',
+                    'title' => 'Erro!',
+                    'text' => 'A nova senha deve ter no mínimo 6 caracteres.'
+                ]);
+            }
+
+            if ($newPassword !== $confirmPassword) {
+                return redirect()->to($profileUrl)->with('swal', [
+                    'icon' => 'error',
+                    'title' => 'Erro!',
+                    'text' => 'A confirmação da senha não coincide.'
+                ]);
+            }
+
+            // Atualizar senha no Shield
+            db_connect()
+                ->table('auth_identities')
+                ->where('id', $identity->id)
+                ->update([
+                    'secret'     => password_hash($newPassword, PASSWORD_DEFAULT),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ]);
         }
 
-        // Recarrega o usuário na sessão
+        // Atualizar dados do usuário
+        if (! $users->update($user->id, $dataProfile)) {
+            return redirect()->to($profileUrl)->with('swal', [
+                'icon' => 'error',
+                'title' => 'Erro!',
+                'text' => implode(', ', $users->errors())
+            ]);
+        }
+
+        // Atualizar sessão
         $updated = $users->find($user->id);
         auth()->setUser($updated);
 
-        // PRG: volta para a página de perfil (GET) – evita back() nulo
-        return redirect()->to($profileUrl)->with('success', 'Perfil atualizado com sucesso.');
+        return redirect()->to($profileUrl)->with('swal', [
+            'icon'  => 'success',
+            'title' => 'Sucesso!',
+            'text'  => 'Perfil atualizado com sucesso.'
+        ]);
     }
 }

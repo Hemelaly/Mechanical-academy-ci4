@@ -100,10 +100,9 @@ class Register extends Controller
 
                 $mpesaSay = json_decode($mpesaResponseArr);
 
-                if($mpesaSay->output_ResponseDesc == 'Request processed successfully'){
+                if ($mpesaSay->output_ResponseDesc == 'Request processed successfully') {
                     $mpesaSuccess = true;
                 }
-
             } catch (\Throwable $e) {
                 $mpesaSuccess     = false;
                 $mpesaResponseArr = ['exception' => true, 'message' => $e->getMessage()];
@@ -114,7 +113,7 @@ class Register extends Controller
             log_message('info', 'M-Pesa raw: ' . print_r($mpesaResponseArr, true));
             log_message('info', "M-Pesa parsed: code={$codeField} status={$statusField} success=" . ($mpesaSuccess ? '1' : '0'));
         }
- 
+
         // ========== FLUXO 1: M-PESA SUCESSO -> cria tudo direto ==========
         if ($useMpesa && $mpesaSuccess) {
 
@@ -149,11 +148,72 @@ class Register extends Controller
                     $emailSrv->setTo($email);
                     $emailSrv->setSubject('Crie sua senha e acesse o curso');
                     $emailSrv->setMessage("
-                    Olá {$username},<br><br>
-                    Seu pagamento foi aprovado e sua matrícula será ativada agora.<br>
-                    Crie sua senha para acessar o curso:<br><br>
-                    <a href='{$link}'>Criar minha senha</a>
-                ");
+                    <div style='
+                        font-family: Arial, Helvetica, sans-serif;
+                        background-color: #f4f6f8;
+                        padding: 30px;
+                    '>
+                        <div style='
+                            max-width: 600px;
+                            margin: auto;
+                            background-color: #ffffff;
+                            border-radius: 8px;
+                            padding: 30px;
+                            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+                        '>
+                            <h2 style='color: #2c3e50; margin-top: 0;'>
+                                Olá {$username} 👋
+                            </h2>
+
+                            <p style='color: #555; font-size: 15px; line-height: 1.6;'>
+                                Temos boas notícias para si!
+                            </p>
+
+                            <p style='color: #555; font-size: 15px; line-height: 1.6;'>
+                                O seu <strong>pagamento foi aprovado</strong> e a sua
+                                <strong>matrícula será ativada</strong> automaticamente.
+                            </p>
+
+                            <p style='color: #555; font-size: 15px; line-height: 1.6;'>
+                                Para começar, crie a sua senha clicando no botão abaixo:
+                            </p>
+
+                            <div style='text-align: center; margin: 30px 0;'>
+                                <a href='{$link}'
+                                style='
+                                    background-color: #1abc9c;
+                                    color: #ffffff;
+                                    text-decoration: none;
+                                    padding: 14px 28px;
+                                    border-radius: 6px;
+                                    font-weight: bold;
+                                    display: inline-block;
+                                '>
+                                    Criar minha senha
+                                </a>
+                            </div>
+
+                            <p style='color: #777; font-size: 13px; line-height: 1.6;'>
+                                Se o botão não funcionar, copie e cole o link abaixo no seu navegador:
+                            </p>
+
+                            <p style='word-break: break-all; font-size: 13px; color: #1abc9c;'>
+                                {$link}
+                            </p>
+
+                            <hr style='border: none; border-top: 1px solid #eee; margin: 30px 0;'>
+
+                            <p style='color: #999; font-size: 12px;'>
+                                Se não solicitou este acesso, por favor ignore este email.
+                            </p>
+
+                            <p style='color: #999; font-size: 12px;'>
+                                Atenciosamente,<br>
+                                <strong>Equipe da Plataforma</strong>
+                            </p>
+                        </div>
+                    </div>
+                    ");
                     $emailSrv->setMailType('html');
                     $emailSrv->send();
                 } catch (\Throwable $e) {
@@ -295,7 +355,7 @@ class Register extends Controller
             ->with('swal', [
                 'icon'  => 'success',
                 'title' => 'Pedido enviado!',
-                'text'  => 'O comprovativo foi submetido e será analisado pelo instrutor. Após a confirmação, enviaremos um link para o seu email.'
+                'text'  => 'O comprovativo foi submetido e será analisado pelo instrutor. Dentro de 48 horas, enviaremos um link para o seu email.'
             ]);
     }
 }

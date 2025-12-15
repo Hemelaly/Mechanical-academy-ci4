@@ -469,14 +469,14 @@ $session = session();
                 <h4 class="alert-heading">Você já está inscrito neste curso!</h4>
                 <p>Já tem acesso completo ao curso <?= $course->title_course ?>.</p>
                 <hr>
-                <a href="<?= base_url('/student/dashboard/meus_cursos') ?>" class="btn btn-primary">Ir para meus cursos</a>
+                <a href="<?= base_url('/student/dashboard/inscricoes') ?>" class="btn btn-primary">Ir para meus cursos</a>
               </div>
             <?php elseif (($user) && ($user->role == "instructor")): ?>
               <div class="alert alert-warning text-center">
                 <h4 class="alert-heading">Você é um instrutor!</h4>
                 <p>Não pode se inscrever neste curso.</p>
                 <hr>
-                <a href="<?= base_url('/instructor/dashboard/') ?>" class="btn btn-primary">Ir para meus cursos</a>
+                <a href="<?= base_url('/instructor/dashboard/inscricoes') ?>" class="btn btn-primary">Ir para meus cursos</a>
               </div>
             <?php else: ?>
               <form id="checkout-form" action="/checkout/pending/<?= $course->id_course ?>" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
@@ -522,7 +522,7 @@ $session = session();
                     <div class="form-check">
                       <input class="form-check-input" type="radio" name="payment" id="mobile" checked>
                       <label class="form-check-label" for="mobile">
-                        Pagar com Mpesa
+                        Tranferir para Mpesa/E-mola
                       </label>
                     </div>
                     <!-- <div class="form-check">
@@ -536,12 +536,12 @@ $session = session();
 
                 <!-- Div oculta que será exibida quando o radio estiver selecionado -->
                 <div id="payment-info" class="mt-3 d-none">
-                  <!-- <p><strong>Contacto para transferência:</strong></p>
-                  <p style="margin-top: -10px;">+258 84 123 4567 - Mpesa</p>
-                  <p style="margin-top: -10px;">+258 87 123 4567 - Emola</p> -->
+                  <p><strong>Contacto para transferência:</strong></p>
+                  <p style="margin-top: -10px;">+258 84 272 6761 - Mpesa</p>
+                  <p style="margin-top: -10px;">+258 86 010 4704 - Emola</p>
 
                   <!-- Dropzone -->
-                  <!-- <div class="divider text-muted">
+                  <div class="divider text-muted">
                     <span>Envio do Comprovativo</span>
                   </div>
 
@@ -566,23 +566,23 @@ $session = session();
                         </button>
                       </div>
                     </div>
-                  </div> -->
+                  </div>
 
-                  <input type="tel" class="form-control mb-3" name="client_number" placeholder="Nr de Telefone com Mpesa" required>
+                  <!-- <input type="tel" class="form-control mb-3" name="client_number" placeholder="Nr de Telefone com Mpesa" required>
                   <div class="invalid-feedback">
-                      Por favor, insira seu número de Telefone com Mpesa.
-                    </div>
+                    Por favor, insira seu número de Telefone com Mpesa.
+                  </div> -->
 
                   <input type="hidden" name="amount_payment" value="<?= $course->price_course ?>">
                 </div>
 
 
                 <!-- <div class="form-check mb-4">
-              <input class="form-check-input" type="checkbox" id="newsletter">
-              <label class="form-check-label small" for="newsletter">
-                Inscrever-se na nossa lista de email
-              </label>
-            </div> -->
+                  <input class="form-check-input" type="checkbox" id="newsletter">
+                  <label class="form-check-label small" for="newsletter">
+                    Inscrever-se na nossa lista de email
+                  </label>
+                </div> -->
 
                 <button type="submit" class="btn bg-blue-500 text-white w-100 py-2 fw-semibold hover:bg-blue-600">
                   Finalizar minha compra

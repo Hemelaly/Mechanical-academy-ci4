@@ -1,0 +1,15 @@
+{
+    "created_at": "2025-12-01T07:06:19+00:00",
+    "payment_id": 55,
+    "reference": "PAY-2025-000055",
+    "request": {
+        "amount": 3000,
+        "client_number": "258855454532"
+    },
+    "response": "{\"output_ResponseCode\":\"INS-0\",\"output_ResponseDesc\":\"Request processed successfully\",\"output_TransactionID\":\"8noxggwv1y6y\",\"output_ConversationID\":\"bd3fd72b6cc340bd95dc4714155a25e1\",\"output_ThirdPartyReference\":\"41888\"}",
+    "parsed": {
+        "code": "",
+        "status": ""
+    },
+    "final": "approved_and_enrolled"
+}

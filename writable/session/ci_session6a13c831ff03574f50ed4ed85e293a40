@@ -1,0 +1,1 @@
+__ci_last_regenerate|i:1764755522;csrf_test_name|s:32:"a5bf1bd56aec37cb664b55e76a90c95b";_ci_previous_url|s:48:"http://academy-ci4.test/student/dashboard/perfil";user|a:1:{s:2:"id";i:19;}swal|a:3:{s:4:"icon";s:5:"error";s:5:"title";s:15:"Senha incorreta";s:4:"text";s:40:"A senha atual fornecida está incorreta.";}__ci_vars|a:1:{s:4:"swal";s:3:"old";}

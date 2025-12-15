@@ -59,8 +59,6 @@ class CourseController extends BaseController
             dd('Erro ao inserir curso:', $courseModel->errors(), $courseModel->db->error());
         }
 
-        $courseModel->insert($courseData);
-
         $courseId = $courseModel->insertID();
 
         // 2. Salvar módulos e aulas
@@ -190,7 +188,7 @@ class CourseController extends BaseController
                 }
             }
 
-            return redirect()->to('/instructor/dashboard/meus_cursos')->with('success', 'Curso atualizado com sucesso!');
+            return redirect()->to('instructor/dashboard/meus_cursos')->with('success', 'Curso atualizado com sucesso!');
 
         }
     }

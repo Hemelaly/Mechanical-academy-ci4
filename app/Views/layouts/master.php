@@ -100,22 +100,23 @@
     <script src="<?= base_url('assets/js/main.js') ?>"></script>
 
     <?php $swalPayload = session()->getFlashdata('swal') ?? session('swal'); ?>
-    <?php if (!empty($swalPayload)): ?>
+
+    <?php if (session('success')): ?>
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                icon: 'success',
+                title: 'Sucesso!',
+                text: <?= json_encode(session('success')) ?>
+            });
+        </script>
+    <?php endif; ?>
 
-                const swalData = <?= json_encode($swalPayload) ?>;
-                if (!swalData || typeof Swal === 'undefined') return;
-
-                const {
-                    icon = 'info', title = '', text = '', ...options
-                } = swalData;
-                Swal.fire({
-                    icon,
-                    title,
-                    text,
-                    ...options
-                });
+    <?php if (session('error')): ?>
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro!',
+                text: <?= json_encode(session('error')) ?>
             });
         </script>
     <?php endif; ?>

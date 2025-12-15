@@ -74,7 +74,7 @@ class ResetPassword extends BaseController
         session()->regenerate(true);
         auth()->login($user);
 
-        return redirect()->to('/student/dashboard/meus_cursos')->with('swal', [
+        return redirect()->to('/student/dashboard/inscricoes')->with('swal', [
             'icon'  => 'success',
             'title' => 'Parabéns!',
             'text'  => 'Você já está inscrito no curso. Começe a assistir!',

@@ -8,6 +8,7 @@ use App\Models\CourseModel;
 use App\Models\ModuleModel;
 use App\Models\LessonModel;
 use App\Models\CourseSettingModel;
+use App\Models\ExtendedUserModel;
 use App\Models\JitsiModel;
 use App\Models\PendingUserModel;
 use CodeIgniter\Shield\Entities\User;
@@ -435,13 +436,108 @@ class Dashboard extends BaseController
 
     public function profile()
     {
-        $user = service('auth')->user();
+        $users = new ExtendedUserModel();
+        $userModel = new UserModel();
 
-        return view('pages/instructor/profile', [
-            'user' => $user,
-            'sidebarLinks' => $this->sidebarLinks(),
-            'currentUrl' => current_url()
-        ]);
+        $user = auth()->user();
+
+        if (! $user) {
+            return redirect()->to(site_url('login'))
+                ->with('error', 'Sessão expirada. Faça login novamente.');
+        }
+
+        $profileUrl = current_url(false);
+
+        if ($this->request->getMethod() !== 'POST') {
+            return view('pages/student/profile', [
+                'user'         => $user,
+                'sidebarLinks' => $this->sidebarLinks(),
+                'currentUrl'   => $profileUrl,
+            ]);
+        }
+
+        // Validação
+        $rules = [
+            'nome'      => 'permit_empty|min_length[2]',
+            'pais'      => 'permit_empty|max_length[100]',
+            'provincia' => 'permit_empty|max_length[100]',
+            'cidade'    => 'permit_empty|max_length[100]',
+            'telefone'  => 'permit_empty|max_length[20]',
+            'imagem'    => 'if_exist|is_image[imagem]|mime_in[imagem,image/jpg,image/jpeg,image/png,image/webp]|max_size[imagem,4096]',
+        ];
+
+        if (! $this->validate($rules)) {
+            return redirect()->to($profileUrl)
+                ->withInput()
+                ->with('error', implode(', ', $this->validator->getErrors()));
+        }
+
+        $post = $this->request->getPost();
+
+        // Se o nome foi enviado, verificar duplicidade
+        $userName = trim($post['nome'] ?? '');
+
+        if (! empty($userName)) {
+            $existingUser = $userModel
+                ->where('username', $userName)
+                ->where('id !=', $user->id)   // ignora o próprio usuário
+                ->first();
+
+            if ($existingUser) {
+                return redirect()->to($profileUrl)->with('error', 'Já existe um usuário com esse nome!');
+            }
+        }
+
+        // Upload da imagem
+        $file     = $this->request->getFile('imagem');
+        $filePath = $user->img;
+
+        if ($file && $file->isValid() && $file->getError() === UPLOAD_ERR_OK) {
+
+            $targetDir = FCPATH . 'assets/img/';
+            if (! is_dir($targetDir)) {
+                @mkdir($targetDir, 0755, true);
+            }
+
+            $newName = $file->getRandomName();
+
+            if (! $file->move($targetDir, $newName)) {
+                return redirect()->to($profileUrl)
+                    ->withInput()
+                    ->with('error', 'Falha ao mover a imagem.');
+            }
+
+            // Apagar antiga
+            if (! empty($user->img)) {
+                $old = FCPATH . $user->img;
+                if (is_file($old)) {
+                    @unlink($old);
+                }
+            }
+
+            $filePath = 'assets/img/' . $newName;
+        }
+
+        // Dados para atualizar
+        $dataProfile = [
+            'username' => $userName ?: $user->username,
+            'img'      => $filePath,
+            'country'  => $post['pais']      ?? $user->country,
+            'province' => $post['provincia'] ?? $user->province,
+            'city'     => $post['cidade']    ?? $user->city,
+            'phone'    => $post['telefone']  ?? $user->phone,
+        ];
+
+        if (! $users->update($user->id, $dataProfile)) {
+            return redirect()->to($profileUrl)
+                ->with('error', implode(', ', $users->errors()));
+        }
+
+        // Atualiza usuário logado
+        $updated = $users->find($user->id);
+        auth()->setUser($updated);
+
+        return redirect()->to($profileUrl)->with('success', 'Perfil atualizado com sucesso.');
     }
 
     public function approveEnrollment($courseId, $pendingId)
