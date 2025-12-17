@@ -99,46 +99,62 @@
         <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Aprove ou rejeite solicitações de inscrição pendentes</p>
       </div>
 
-      <div class="overflow-x-auto">
-        <table class="w-full min-w-[600px]">
-          <thead class="bg-slate-50 dark:bg-slate-700">
+      <div class="relative overflow-x-auto bg-neutral-primary-soft shadow-xs">
+        <table class="w-full text-sm text-left rtl:text-right text-body">
+          <thead class="text-sm text-body bg-neutral-secondary-medium border-b border-default-medium">
             <tr>
-              <th class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Aluno</th>
-              <th class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Curso</th>
-              <th class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Comprovativo</th>
-              <th class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Status</th>
-              <th class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Ações</th>
+              <th scope="col" class="p-4">
+                <div class="flex items-center">
+                  <input type="checkbox" class="w-4 h-4 border border-default-medium rounded-md bg-neutral-secondary-medium focus:ring-2 focus:ring-brand-soft">
+                </div>
+              </th>
+              <th scope="col" class="px-6 py-3">Aluno</th>
+              <th scope="col" class="px-6 py-3">Curso</th>
+              <th scope="col" class="px-6 py-3">Comprovativo</th>
+              <th scope="col" class="px-6 py-3">Status</th>
+              <th scope="col" class="px-6 py-3">Ações</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
-            <?php foreach ($payments as $key => $payment): ?>
-              <?php if ($payment->status_payment == 'Pendente'): ?>
-                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-                  <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
-                    <div class="min-w-0">
-                      <div class="font-medium text-slate-800 dark:text-white text-sm sm:text-base truncate"><?= esc($payment->username) ?></div>
-                      <div class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 truncate"><?= esc($payment->email) ?></div>
+
+          <tbody>
+            <?php foreach ($payments as $payment): ?>
+              <?php if ($payment->status_payment === 'Pendente'): ?>
+                <tr class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
+                  <td class="w-4 p-4">
+                    <div class="flex items-center">
+                      <input type="checkbox" class="w-4 h-4 border border-default-medium rounded-xs bg-neutral-secondary-medium focus:ring-2 focus:ring-brand-soft">
                     </div>
                   </td>
-                  <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
-                    <div class="text-sm text-slate-800 dark:text-white truncate max-w-[120px] sm:max-w-none"><?= esc($payment->title_course) ?></div>
+
+                  <th scope="row" class="px-6 py-4 font-medium text-heading whitespace-nowrap">
+                    <div class="min-w-0">
+                      <div class="truncate"><?= esc($payment->username) ?></div>
+                      <div class="text-xs text-body truncate"><?= esc($payment->email) ?></div>
+                    </div>
+                  </th>
+
+                  <td class="px-6 py-4">
+                    <?= esc($payment->title_course) ?>
                   </td>
-                  <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+
+                  <td class="px-6 py-4">
                     <button type="button"
-                      class="inline-flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg sm:rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 text-xs sm:text-sm"
+                      class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-base text-xs"
                       data-bs-toggle="modal"
                       data-bs-target="#comprovativoModal<?= $payment->id_payment ?>">
-                      <i class="bi bi-eye text-xs sm:text-sm"></i>
-                      <span class="hidden xs:inline">Ver</span>
+                      <i class="bi bi-eye"></i>
+                      Ver
                     </button>
                   </td>
-                  <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
-                    <span class="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-400">
+
+                  <td class="px-6 py-4">
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-400">
                       Pendente
                     </span>
                   </td>
-                  <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
-                    <div class="flex items-center gap-1 sm:gap-2 flex-wrap">
+
+                  <td class="px-6 py-4">
+                    <div class="flex items-center gap-2 flex-wrap">
                       <form class="acceptForm"
                         id="acceptForm<?= $payment->id_payment ?>"
                         action="/instructor/dashboard/meus_estudantes/<?= $payment->id_course ?>/<?= $payment->id_user_payment ?>"
@@ -146,24 +162,23 @@
                         <input type="hidden" name="status_enrollment" value="Ativo">
                         <input type="hidden" name="status_payment" value="Aprovado">
                         <button type="submit"
-                          class="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg sm:rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 text-xs sm:text-sm">
-                          <i class="bi bi-check-lg text-xs sm:text-sm"></i>
-                          <span class="hidden sm:inline">Aceitar</span>
+                          class="inline-flex items-center gap-2 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-base text-xs">
+                          <i class="bi bi-check-lg"></i>
+                          Aceitar
                         </button>
                       </form>
 
                       <form action="/instructor/dashboard/meus_estudantes/<?= $payment->id_course ?>/<?= $payment->id_user_payment ?>" method="post">
                         <input type="hidden" name="status_payment" value="Rejeitado">
                         <button type="submit"
-                          class="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg sm:rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 text-xs sm:text-sm">
-                          <i class="bi bi-x-lg text-xs sm:text-sm"></i>
-                          <span class="hidden sm:inline">Rejeitar</span>
+                          class="inline-flex items-center gap-2 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-base text-xs">
+                          <i class="bi bi-x-lg"></i>
+                          Rejeitar
                         </button>
                       </form>
                     </div>
                   </td>
                 </tr>
-
               <?php endif; ?>
             <?php endforeach; ?>
           </tbody>
@@ -200,58 +215,81 @@
         <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Acompanhe o progresso e gerencie alunos ativos</p>
       </div>
 
-      <div class="overflow-x-auto">
-        <table class="w-full min-w-[600px]">
-          <thead class="bg-slate-50 dark:bg-slate-700">
-            <tr>
-              <th class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Aluno</th>
-              <th class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Curso</th>
-              <th class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Progresso</th>
-              <th class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Último Acesso</th>
-              <th class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Status</th>
-              <th class="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Ações</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
-            <?php foreach ($enrollments as $key => $enrollment): ?>
-              <?php if ($enrollment->status_enrollment == 'Ativa'): ?>
-                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-                  <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
-                    <div class="min-w-0">
-                      <div class="font-medium text-slate-800 dark:text-white text-sm sm:text-base truncate"><?= esc($enrollment->name_student) ?></div>
-                      <div class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 truncate"><?= esc($enrollment->email_student) ?></div>
+      <div class="bg-neutral-primary-soft shadow-xs rounded-base overflow-hidden">
+        <div class="w-full overflow-x-auto">
+          <table class="w-full min-w-[720px] text-sm text-left rtl:text-right text-body">
+            <thead class="text-sm text-body bg-neutral-secondary-medium border-b border-default-medium">
+              <tr>
+                <th scope="col" class="p-4">
+                  <div class="flex items-center">
+                    <input type="checkbox"
+                      class="w-4 h-4 border border-default-medium rounded-xs bg-neutral-secondary-medium focus:ring-2 focus:ring-brand-soft">
+                  </div>
+                </th>
+
+                <!-- teus THs aqui -->
+                <th scope="col" class="px-6 py-3">Aluno</th>
+                <th scope="col" class="px-6 py-3">Curso</th>
+                <th scope="col" class="px-6 py-3">Progresso</th>
+                <th scope="col" class="px-6 py-3">Último Acesso</th>
+                <th scope="col" class="px-6 py-3">Status</th>
+                <th scope="col" class="px-6 py-3">Ações</th>
+              </tr>
+            </thead>
+
+            <!-- ✅ controla bordas aqui -->
+            <tbody>
+              <?php foreach ($enrollments as $enrollment): ?>
+                <tr class="bg-neutral-primary-soft hover:bg-neutral-secondary-medium">
+                  <td class="w-4 p-4">
+                    <div class="flex items-center">
+                      <input type="checkbox"
+                        class="w-4 h-4 border border-default-medium rounded-xs bg-neutral-secondary-medium focus:ring-2 focus:ring-brand-soft">
                     </div>
                   </td>
-                  <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
-                    <div class="text-sm text-slate-800 dark:text-white truncate max-w-[120px] sm:max-w-none"><?= esc($enrollment->title_course) ?></div>
-                  </td>
-                  <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
-                    <div class="flex items-center gap-2 sm:gap-3">
-                      <div class="w-12 sm:w-16 bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+
+                  <th scope="row" class="px-6 py-4 font-medium text-heading whitespace-nowrap">
+                    <div class="min-w-0">
+                      <div class="truncate"><?= esc($enrollment->name_student) ?></div>
+                      <div class="text-xs text-body truncate"><?= esc($enrollment->email_student) ?></div>
+                    </div>
+                  </th>
+
+                  <td class="px-6 py-4"><?= esc($enrollment->title_course) ?></td>
+
+                  <td class="px-6 py-4">
+                    <div class="flex items-center gap-3">
+                      <div class="w-16 bg-slate-200 dark:bg-slate-700 rounded-full h-2">
                         <div class="bg-green-500 h-2 rounded-full" style="width: 35%"></div>
                       </div>
-                      <span class="text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300">35%</span>
+                      <span class="text-xs font-medium">35%</span>
                     </div>
                   </td>
-                  <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
-                    <div class="text-xs sm:text-sm text-slate-600 dark:text-slate-400">2 horas</div>
-                  </td>
-                  <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
-                    <span class="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400">
+
+                  <td class="px-6 py-4">2 horas</td>
+
+                  <td class="px-6 py-4">
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400">
                       Ativo
                     </span>
                   </td>
-                  <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
-                    <button class="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg sm:rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 text-xs sm:text-sm">
-                      <i class="bi bi-lock text-xs sm:text-sm"></i>
-                      <span class="hidden sm:inline">Bloquear</span>
+
+                  <td class="px-6 py-4">
+                    <button class="inline-flex items-center gap-2 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-base text-xs">
+                      <i class="bi bi-lock"></i>
+                      Bloquear
                     </button>
                   </td>
                 </tr>
-              <?php endif; ?>
-            <?php endforeach; ?>
-          </tbody>
-        </table>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- pager dentro do card, com padding -->
+        <div class="flex justify-end p-4">
+          <?= $pager->links('enrollments', 'tailwind_full') ?>
+        </div>
       </div>
 
       <!-- Estado Vazio -->

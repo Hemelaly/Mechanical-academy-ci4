@@ -37,7 +37,7 @@ class PageController extends BaseController
         ]);
     }
 
-    public function excel($id_course)
+    public function coursePage($id_course)
     {
 
         $lessonModel     = new LessonModel();
@@ -69,7 +69,7 @@ class PageController extends BaseController
 
         $projects = $projectModel->where('id_course_project', $id_course)->findAll();
 
-        return view('courses/excel', [
+        return view('courses/course', [
             'course' => $course,
             'modules' => $module,
             'projects' => $projects,

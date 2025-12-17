@@ -61,7 +61,7 @@ $routes->group('student', ['namespace' => 'App\Controllers\Student', 'filter' =>
 });
 
 // Rotas de Cursos
-$routes->get('/courses/(:num)', 'PageController::excel/$1');
+$routes->get('/courses/(:num)', 'PageController::coursePage/$1');
 
 $routes->get('checkout/(:num)', 'PageController::index/$1');
 $routes->post('checkout/pending/(:num)', 'Register::createPendingUser/$1');

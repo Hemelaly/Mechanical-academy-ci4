@@ -98,26 +98,27 @@ class EnrollmentModel extends Model
 
     public function getInstructorEnrollments($instructorId)
     {
-        return $this->select('
-                enrollments.id_enrollment,
-                enrollments.enrolled_at_enrollment,
-                enrollments.status_enrollment,
+            return $this->select([
+            'enrollments.id_enrollment',
+            'enrollments.enrolled_at_enrollment',
+            'enrollments.status_enrollment',
 
-                students.id_student,
-                students.name_student,
-                students.email_student,
+            'students.id_student AS student_id',
+            'students.name_student AS name_student',
+            'students.email_student AS email_student',
 
-                courses.id_course,
-                courses.title_course,
+            'courses.id_course AS course_id',
+            'courses.title_course AS title_course',
 
-                payments.id_payment,
-                payments.status_payment,
-                payments.proof_file_payment
-            ')
-            ->join('courses', 'courses.id_course = enrollments.id_course_enrollment')
-            ->join('students', 'students.id_user_student = enrollments.id_student_enrollment')
-            ->join('payments', 'payments.id_enrollment_payment = enrollments.id_enrollment', 'left')
-            ->where('courses.id_instructor_course', $instructorId)
-            ->findAll();
+            'payments.id_payment AS payment_id',
+            'payments.status_payment AS status_payment',
+            'payments.proof_file_payment AS proof_file_payment',
+        ])
+        ->join('courses', 'courses.id_course = enrollments.id_course_enrollment')
+        ->join('students', 'students.id_user_student = enrollments.id_student_enrollment')
+        ->join('payments', 'payments.id_enrollment_payment = enrollments.id_enrollment', 'left')
+        ->where('courses.id_instructor_course', $instructorId)
+        ->where('enrollments.status_enrollment', 'Ativa');
+
     }
 }

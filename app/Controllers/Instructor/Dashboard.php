@@ -409,7 +409,10 @@ class Dashboard extends BaseController
         $user = service('auth')->user();
 
         $enrollmentModel = new \App\Models\EnrollmentModel();
-        $enrollment = $enrollmentModel->getInstructorEnrollments($user->id);
+
+        $enrollments = $enrollmentModel
+            ->getInstructorEnrollments($user->id)
+            ->paginate(5, 'enrollments');
 
         $paymentModel = new \App\Models\PaymentModel();
         $payments = $paymentModel->getInstructorPendingPayments($user->id);
@@ -417,9 +420,10 @@ class Dashboard extends BaseController
         return view('pages/instructor/students', [
             'user' => $user,
             'payments' => $payments,
-            'enrollments' => $enrollment,
+            'enrollments' => $enrollments,
+            'pager' => $enrollmentModel->pager,
             'sidebarLinks' => $this->sidebarLinks(),
-            'currentUrl' => current_url()
+            'currentUrl' => current_url(),
         ]);
     }
 
