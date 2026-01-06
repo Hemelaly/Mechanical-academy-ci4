@@ -7,30 +7,8 @@ $user = service('auth')->user();
 
 <?= $this->section('edit_course') ?>
 
-<!-- Tailwind CSS -->
-<script src="https://cdn.tailwindcss.com"></script>
 <!-- Bootstrap Icons -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-
-<script>
-    tailwind.config = {
-        darkMode: 'class',
-        theme: {
-            extend: {
-                colors: {
-                    'dark-bg': '#0f1021',
-                    'dark-panel': '#181a2e',
-                    'dark-panel-2': '#1d2040',
-                    'dark-accent': '#3b82f6',
-                    'dark-accent-2': '#1d4ed8',
-                    'dark-text': '#e5e7eb',
-                    'dark-muted': '#a5b4fc',
-                    'dark-line': '#2a2e5b',
-                }
-            }
-        }
-    }
-</script>
 
 <div class="min-h-screen bg-gray-50 dark:bg-dark-bg py-8">
     <div class="container mx-auto px-4">
@@ -661,12 +639,18 @@ $user = service('auth')->user();
                 e.target.closest(".lesson-item").remove();
             }
             // Add lesson
-            if (e.target.classList.contains("add-lesson")) {
-                const moduleId = e.target.dataset.module;
-                const lessonsContainer = e.target.previousElementSibling;
+            const addLessonBtn = e.target.closest('.add-lesson');
+            if (addLessonBtn) {
+                const moduleId = addLessonBtn.dataset.module;
+                const lessonsContainer = addLessonBtn.previousElementSibling;
                 const lessonCount = lessonsContainer.querySelectorAll(".lesson-item").length;
-                lessonsContainer.insertAdjacentHTML("beforeend", createLessonHTML(moduleId, lessonCount));
+
+                lessonsContainer.insertAdjacentHTML(
+                    "beforeend",
+                    createLessonHTML(moduleId, lessonCount)
+                );
             }
+
         });
 
         // ======================

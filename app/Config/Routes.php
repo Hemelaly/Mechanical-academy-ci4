@@ -40,6 +40,8 @@ $routes->group('instructor', ['namespace' => 'App\Controllers\Instructor', 'filt
     $routes->get('dashboard/meus_estudantes', 'Dashboard::students');
     $routes->get('dashboard/financas', 'Dashboard::financial');
     $routes->get('dashboard/perfil', 'Dashboard::profile');
+    $routes->get('dashboard/certificados', 'Dashboard::certificate');
+    $routes->post('dashboard/certificados', 'Certificates::upload');
     $routes->post('dashboard/meus_estudantes/(:num)/(:num)', 'Dashboard::approveEnrollment/$1/$2');
 });
 
@@ -52,6 +54,7 @@ $routes->group('student', ['namespace' => 'App\Controllers\Student', 'filter' =>
     $routes->get('dashboard/checkout/(:num)', 'Dashboard::checkout/$1');
     $routes->get('dashboard/perfil', 'Dashboard::profile');
     $routes->post('dashboard/perfil', 'Dashboard::profile');
+    $routes->get('dashboard/certificados', 'Dashboard::certificate');
 
     // Rotas para Marcar as aulas como completas
     $routes->group('lessons', function ($r) {
@@ -62,7 +65,6 @@ $routes->group('student', ['namespace' => 'App\Controllers\Student', 'filter' =>
 
 // Rotas de Cursos
 $routes->get('/courses/(:num)', 'PageController::coursePage/$1');
-
 $routes->get('checkout/(:num)', 'PageController::index/$1');
 $routes->post('checkout/pending/(:num)', 'Register::createPendingUser/$1');
 
@@ -74,3 +76,9 @@ $routes->post('checkout/(:num)', 'PaymentController::createPayment/$1');
 // $routes->post('student/payment/mpesa/(:num)', 'Student\PaymentController::mpesa/$1');
 // $routes->post('pay/(:num)', 'Student\PaymentController::pay/$1');
 // $routes->post('mpesa/webhook', 'MpesaWebhookController::receive');
+
+// Certificados
+$routes->post('certificados/emitir/(:num)', 'Certificates::emitir/$1');
+// $routes->get('certificados/gerar/(:segment)', 'Certificates::gerarPdf/$1');
+$routes->get('certificados/download/(:num)', 'Certificates::download/$1');
+$routes->get('certificados/verificar/(:num)', 'Certificates::verificar/$1');

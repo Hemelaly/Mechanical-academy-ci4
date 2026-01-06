@@ -98,99 +98,72 @@ class CourseController extends BaseController
         $courseModel = new \App\Models\CourseModel();
         $moduleModel = new \App\Models\ModuleModel();
         $lessonModel = new \App\Models\LessonModel();
+        $db = \Config\Database::connect();
 
-        if (!$id)
-            return redirect()->back()->with('error', 'ID do curso não fornecido');
+        if (!$this->request->is('post')) {
+            return redirect()->to('instructor/dashboard/meus_cursos');
+        }
 
         $course = $courseModel->find($id);
-        if (!$course)
-            return redirect()->back()->with('error', 'Curso não encontrado');
-        if ($course->id_instructor_course != auth()->id())
-            return redirect()->back()->with('error', 'Acesso negado');
 
-        // Carregar módulos e aulas do curso
-        $modules = $moduleModel->where('id_course_module', $id)->orderBy('position_module')->findAll();
-        foreach ($modules as &$m) {
-            $m->lessons = $lessonModel
-                ->where('id_module_lesson', $m->id_module)
-                ->orderBy('position_lesson')
-                ->findAll();
+        if (!$course || $course->id_instructor_course != auth()->id()) {
+            return redirect()->to('instructor/dashboard/meus_cursos')
+                ->with('error', 'Acesso inválido');
         }
 
-        $post = $this->request->getMethod();
+        $data = $this->request->getPost();
 
-        // POST → salvar
-        if ($post == 'POST') {
-            $data = $this->request->getPost();
-            $modulesData = $data['modules'] ?? [];
-
-            // Atualizar curso
-            $courseData = [
-                'title_course' => $data['title_course'] ?? $course->title_course,
-                'subtitle_course' => $data['subtitle_course'] ?? $course->subtitle_course,
-                'description_course' => $data['description_course'] ?? $course->description_course,
-                'price_course' => ($data['courseType'] ?? 'free') === 'paid' ? ($data['price_course'] ?? 0) : 0,
-                'status_course' => $data['status_course'] ?? $course->status_course,
-            ];
-
-            if ($file = $this->request->getFile('image_course')) {
-                if ($file->isValid() && !$file->hasMoved()) {
-                    $newName = $file->getRandomName();
-                    $file->move(FCPATH . 'assets/instructor/img/courses', $newName);
-                    $courseData['image_course'] = $newName;
-                }
-            }
-
-            $courseModel->update($id, $courseData);
-
-            // Atualizar módulos e aulas
-            foreach ($modulesData as $mIndex => $module) {
-                if (!empty($module['id_module'])) {
-                    // Update módulo existente
-                    $moduleModel->update($module['id_module'], [
-                        'title_module' => $module['title'] ?? 'Módulo ' . ($mIndex + 1),
-                        'description_module' => $module['description'] ?? '',
-                        'position_module' => $mIndex + 1,
-                    ]);
-                    $moduleId = $module['id_module'];
-                } else {
-                    // Novo módulo
-                    $moduleModel->insert([
-                        'id_course_module' => $id,
-                        'title_module' => $module['title'] ?? 'Módulo ' . ($mIndex + 1),
-                        'description_module' => $module['description'] ?? '',
-                        'position_module' => $mIndex + 1,
-                    ]);
-                    $moduleId = $moduleModel->insertID();
-                }
-
-                // Processar aulas
-                $lessons = $module['lessons'] ?? [];
-                foreach ($lessons as $lIndex => $lesson) {
-                    if (!empty($lesson['id_lesson'])) {
-                        $lessonModel->update($lesson['id_lesson'], [
-                            'title_lesson' => $lesson['title'] ?? 'Aula sem título',
-                            'type_lesson' => $lesson['type'] ?? 'text',
-                            'duration_lesson' => $lesson['duration'] ?? 0,
-                            'position_lesson' => $lIndex + 1,
-                            'video_url_lesson' => $lesson['video_url'] ?? null,
-                        ]);
-                    } else {
-                        $lessonModel->insert([
-                            'id_module_lesson' => $moduleId,
-                            'title_lesson' => $lesson['title'] ?? 'Aula sem título',
-                            'type_lesson' => $lesson['type'] ?? 'text',
-                            'duration_lesson' => $lesson['duration'] ?? 0,
-                            'position_lesson' => $lIndex + 1,
-                            'video_url_lesson' => $lesson['video_url'] ?? null,
-                        ]);
-                    }
-                }
-            }
-
-            return redirect()->to('instructor/dashboard/meus_cursos')->with('success', 'Curso atualizado com sucesso!');
-
+        $modules = [];
+        if ($this->request->getPost('modules')) {
+            $raw = $this->request->getPost('modules');
+            $modules = is_string($raw) ? json_decode($raw, true) : $raw;
         }
+
+        $db->transStart();
+
+        $courseModel->update($id, [
+            'title_course'       => $data['title_course'] ?? $course->title_course,
+            'subtitle_course'    => $data['subtitle_course'] ?? $course->subtitle_course,
+            'description_course' => $data['description_course'] ?? $course->description_course,
+            'status_course' => 'Ativo',
+            'price_course'       => ($data['courseType'] ?? 'free') === 'paid'
+                ? ($data['price_course'] ?? 0)
+                : 0,
+        ]);
+
+
+        // apagar e recriar
+        $oldModules = $moduleModel->where('id_course_module', $id)->findAll();
+        foreach ($oldModules as $mod) {
+            $lessonModel->where('id_module_lesson', $mod->id_module)->delete();
+        }
+        $moduleModel->where('id_course_module', $id)->delete();
+
+        foreach ($modules as $mIndex => $module) {
+            $moduleModel->insert([
+                'id_course_module' => $id,
+                'title_module'     => $module['title'] ?? 'Módulo ' . ($mIndex + 1),
+                'position_module'  => $mIndex + 1,
+            ]);
+
+            $moduleId = $moduleModel->insertID();
+
+            foreach (($module['lessons'] ?? []) as $lIndex => $lesson) {
+                $lessonModel->insert([
+                    'id_module_lesson' => $moduleId,
+                    'title_lesson'     => $lesson['title'] ?? 'Aula',
+                    'type_lesson'      => $lesson['type'] ?? 'text',
+                    'duration_lesson'  => (int) ($lesson['duration'] ?? 0),
+                    'video_url_lesson' => $lesson['video_url'] ?? null,
+                    'position_lesson'  => $lIndex + 1,
+                ]);
+            }
+        }
+
+        $db->transComplete();
+
+        return redirect()->to('instructor/dashboard/meus_cursos')
+            ->with('success', 'Curso atualizado com sucesso!');
     }
 
     public function deletar($id = null)

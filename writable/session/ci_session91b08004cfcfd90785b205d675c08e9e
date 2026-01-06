@@ -1,1 +1,0 @@
-__ci_last_regenerate|i:1764775540;csrf_test_name|s:32:"4685fbde9ac794d9d6b2d1ebec585a59";user|a:1:{s:2:"id";i:19;}_ci_previous_url|s:48:"http://academy-ci4.test/student/dashboard/perfil";swal|a:3:{s:4:"icon";s:7:"success";s:5:"title";s:8:"Sucesso!";s:4:"text";s:30:"Perfil atualizado com sucesso.";}__ci_vars|a:1:{s:4:"swal";s:3:"old";}

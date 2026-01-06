@@ -29,7 +29,7 @@
 
     <div class="flex h-screen flex-container">
 
-        <?php if (isset($user->role)): ?>
+        <?php if (isset($user)): ?>
 
             <?php if ($user->role === 'student'): ?>
 
@@ -53,7 +53,12 @@
 
                         <?= $this->renderSection('lessons') ?>
 
+                        <?= $this->renderSection('certificates') ?>
+
                     </main>
+
+                    <?= $this->include('pages/student/partials/footer') ?>
+
                 </div>
 
             <?php elseif ($user->role === 'instructor'): ?>

@@ -62,7 +62,7 @@ $user = service('auth')->user();
       font-weight: 700;
     }
 
-    .title{
+    .title {
       font-family: 'Fira Sans' !important;
     }
 
@@ -181,6 +181,7 @@ $user = service('auth')->user();
 </head>
 
 <body style="font-family: 'Open Sans';">
+
   <!-- PRELOADER -->
   <div id="preloader" role="status" aria-live="polite" aria-label="Carregando conteúdo">
     <div class="preloader__inner">

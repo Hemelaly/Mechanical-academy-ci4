@@ -39,6 +39,12 @@ class Dashboard extends BaseController
                 'url' => '/student/dashboard/perfil',
                 'pattern' => '/student/dashboard/perfil*' // Com * para subpáginas
             ],
+            [
+                'label' => 'Certificados',
+                'icon' => 'bi-folder',
+                'url' => '/student/dashboard/certificados',
+                'pattern' => '/student/dashboard/certificados*' // Com * para subpáginas
+            ],
         ];
     }
 
@@ -738,4 +744,19 @@ class Dashboard extends BaseController
             'text'  => 'Perfil atualizado com sucesso.'
         ]);
     }
+
+        public function certificate()
+    {
+        $courseModel = new CourseModel();
+        // $course = $courseModel->find($idCourse);
+
+        $user = service('auth')->user();
+
+        return view('pages/student/certificates', [
+            'user' => $user,
+            'sidebarLinks' => $this->sidebarLinks(),
+            'currentUrl' => current_url()
+        ]);
+    }
+
 }

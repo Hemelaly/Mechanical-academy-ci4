@@ -21,10 +21,10 @@ $auto = $autoplayFlag ? 1 : 0;
 
 <div class="min-h-screen text-gray-900 dark:text-gray-100 transition-colors duration-300">
     <div class="container mx-auto" data-enrollment-id="<?= (int)($enrollment->id_enrollment) ?>">
-        
+
         <!-- Breadcrumb -->
         <nav class="flex items-center gap-2 text-sm mb-6">
-            <a href="/student/dashboard/meus_cursos" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors flex items-center gap-1">
+            <a href="/student/dashboard/inscricoes" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors flex items-center gap-1">
                 <i class="bi bi-arrow-left"></i>
                 Voltar aos Cursos
             </a>
@@ -33,7 +33,7 @@ $auto = $autoplayFlag ? 1 : 0;
         </nav>
 
         <!-- Progress Bar -->
-        <?php 
+        <?php
         $completedLessonIds = $completedLessonIds ?? [];
         // Calcular progresso inicial
         $totalLessons = 0;
@@ -68,14 +68,15 @@ $auto = $autoplayFlag ? 1 : 0;
 
         <!-- Main Content Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
+
             <!-- Video Section -->
             <div class="lg:col-span-2 space-y-6">
                 <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-md">
                     <!-- Video Player -->
                     <div class="relative pt-[56.25%] bg-black rounded-t-xl overflow-hidden">
                         <?php
-                        function getVimeoId($url) {
+                        function getVimeoId($url)
+                        {
                             preg_match('/vimeo\.com\/(?:video\/)?([0-9]+)/', $url, $m);
                             return $m[1] ?? null;
                         }
@@ -144,12 +145,12 @@ $auto = $autoplayFlag ? 1 : 0;
                         <p class="text-gray-700 dark:text-gray-300 leading-relaxed text-sm"><?= esc($lesson->content_lesson) ?></p>
                     </div>
                 </div>
-                
+
                 <!-- Navigation Buttons -->
                 <div class="flex justify-between items-center">
                     <?php if ($prevLesson): ?>
                         <a href="<?= site_url('student/dashboard/ver_aulas/' . $prevLesson) ?>?autoplay=1"
-                           class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-5 rounded-lg transition-colors flex items-center gap-2 text-sm shadow-sm">
+                            class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-5 rounded-lg transition-colors flex items-center gap-2 text-sm shadow-sm">
                             <i class="bi bi-arrow-left"></i>
                             Aula Anterior
                         </a>
@@ -159,7 +160,7 @@ $auto = $autoplayFlag ? 1 : 0;
 
                     <?php if ($nextLesson): ?>
                         <button id="nextLessonBtn"
-                           class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-5 rounded-lg transition-colors flex items-center gap-2 text-sm shadow-sm">
+                            class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-5 rounded-lg transition-colors flex items-center gap-2 text-sm shadow-sm">
                             Próxima Aula
                             <i class="bi bi-arrow-right"></i>
                         </button>
@@ -171,14 +172,14 @@ $auto = $autoplayFlag ? 1 : 0;
             <div class="hidden lg:block space-y-4">
                 <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-sm">
                     <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Conteúdo do Curso</h3>
-                    
+
                     <!-- Course Sidebar Content -->
                     <div class="space-y-3 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
                         <?php foreach ($modules as $index => $m): ?>
                             <div class="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
                                 <!-- Module Header -->
                                 <button class="module-header w-full flex justify-between items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                                        onclick="toggleModule(<?= $index ?>)">
+                                    onclick="toggleModule(<?= $index ?>)">
                                     <div class="flex items-center gap-3">
                                         <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
                                         <span class="font-medium text-gray-900 dark:text-white text-left text-sm"><?= esc($m->title_module) ?></span>
@@ -195,8 +196,8 @@ $auto = $autoplayFlag ? 1 : 0;
                                         <?php $isCurrent = ($l->id_lesson == $lesson->id_lesson); ?>
                                         <?php $isDone = in_array($l->id_lesson, $completedLessonIds ?? [], true); ?>
                                         <div class="lesson-row flex items-center justify-between p-3 border-t border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors <?= $isCurrent ? 'bg-blue-50 dark:bg-blue-900/30 border-l-2 border-blue-500' : '' ?>"
-                                             data-lesson-id="<?= (int)$l->id_lesson ?>">
-                                            
+                                            data-lesson-id="<?= (int)$l->id_lesson ?>">
+
                                             <div class="flex items-center gap-3 flex-1 min-w-0">
                                                 <div class="relative">
                                                     <input type="checkbox"
@@ -204,9 +205,9 @@ $auto = $autoplayFlag ? 1 : 0;
                                                         <?= $isDone ? 'checked' : '' ?>
                                                         aria-label="Marcar aula como concluída">
                                                 </div>
-                                                
+
                                                 <a class="lesson-link flex items-center gap-2 text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex-1 min-w-0"
-                                                   href="<?= site_url('student/dashboard/ver_aulas/' . $l->id_lesson) ?>">
+                                                    href="<?= site_url('student/dashboard/ver_aulas/' . $l->id_lesson) ?>">
                                                     <span class="truncate text-sm"><?= esc($l->title_lesson) ?></span>
                                                     <?php if ($isCurrent): ?>
                                                         <span class="badge-current font-medium px-2 py-0.5 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 rounded-full whitespace-nowrap text-xs">
@@ -245,7 +246,7 @@ $auto = $autoplayFlag ? 1 : 0;
                             <div class="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
                                 <!-- Module Header -->
                                 <button class="module-header w-full flex justify-between items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                                        onclick="toggleModuleMobile(<?= $index ?>)">
+                                    onclick="toggleModuleMobile(<?= $index ?>)">
                                     <div class="flex items-center gap-3">
                                         <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
                                         <span class="font-medium text-gray-900 dark:text-white text-left text-sm"><?= esc($m->title_module) ?></span>
@@ -262,8 +263,8 @@ $auto = $autoplayFlag ? 1 : 0;
                                         <?php $isCurrent = ($l->id_lesson == $lesson->id_lesson); ?>
                                         <?php $isDone = in_array($l->id_lesson, $completedLessonIds ?? [], true); ?>
                                         <div class="lesson-row flex items-center justify-between p-3 border-t border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors <?= $isCurrent ? 'bg-blue-50 dark:bg-blue-900/30 border-l-2 border-blue-500' : '' ?>"
-                                             data-lesson-id="<?= (int)$l->id_lesson ?>">
-                                            
+                                            data-lesson-id="<?= (int)$l->id_lesson ?>">
+
                                             <div class="flex items-center gap-3 flex-1 min-w-0">
                                                 <div class="relative">
                                                     <input type="checkbox"
@@ -271,9 +272,9 @@ $auto = $autoplayFlag ? 1 : 0;
                                                         <?= $isDone ? 'checked' : '' ?>
                                                         aria-label="Marcar aula como concluída">
                                                 </div>
-                                                
+
                                                 <a class="lesson-link flex items-center gap-2 text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex-1 min-w-0"
-                                                   href="<?= site_url('student/dashboard/ver_aulas/' . $l->id_lesson) ?>" onclick="closeDrawerFunc()">
+                                                    href="<?= site_url('student/dashboard/ver_aulas/' . $l->id_lesson) ?>" onclick="closeDrawerFunc()">
                                                     <span class="truncate text-sm"><?= esc($l->title_lesson) ?></span>
                                                     <?php if ($isCurrent): ?>
                                                         <span class="badge-current font-medium px-2 py-0.5 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 rounded-full whitespace-nowrap text-xs">
@@ -311,6 +312,98 @@ $auto = $autoplayFlag ? 1 : 0;
     let currentVideoProgress = 0;
     let hasReached95Percent = <?= in_array($lesson->id_lesson, $completedLessonIds) ? 'true' : 'false' ?>;
 
+    // Estado do progresso vindo do backend (INITIAL)
+    const totalLessons = <?= (int)$totalLessons ?>;
+    let completedLessons = <?= (int)$completedLessons ?>;
+    let courseProgress = <?= (int)$initialProgress ?>;
+
+    let courseModalShown = false;
+
+    function setProgressUI(pct) {
+        courseProgress = pct;
+
+        const ppEl = document.getElementById('progressPercentage');
+        const barEl = document.getElementById('progressBar');
+
+        if (barEl) barEl.style.width = pct + '%';
+
+        if (!ppEl || !barEl) return;
+
+        if (pct >= 100) {
+            // Texto "Concluído"
+            ppEl.innerHTML = `
+      <span class="inline-flex items-center gap-1 text-green-600 dark:text-green-400 font-bold">
+        <i class="bi bi-check-circle"></i> Concluído
+      </span>
+    `;
+
+            // Muda a barra para verde (remove o gradiente azul)
+            barEl.classList.remove('from-blue-500', 'to-blue-600');
+            barEl.classList.add('from-green-500', 'to-green-600');
+        } else {
+            // Volta ao normal (percentual)
+            ppEl.textContent = pct + '%';
+
+            // Garante gradiente azul quando não está concluído
+            barEl.classList.remove('from-green-500', 'to-green-600');
+            barEl.classList.add('from-blue-500', 'to-blue-600');
+        }
+    }
+
+    function showCourseCompletedModal(availableAtText = 'dentro de 48 horas') {
+        if (courseModalShown) return;
+        courseModalShown = true;
+
+        document.body.style.overflow = 'hidden';
+
+        const modal = `
+            <div id="courseCompletedModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 max-w-md w-[90%] text-center shadow-xl">
+                <div class="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="bi bi-trophy text-3xl text-green-600 dark:text-green-400"></i>
+                </div>
+
+                <h4 class="text-xl font-bold mb-2 text-gray-900 dark:text-white">Parabéns! 🎉</h4>
+
+                <p class="text-gray-600 dark:text-gray-300 mb-2 text-sm">
+                Você concluiu 100% do curso.
+                </p>
+
+                <p class="text-gray-600 dark:text-gray-300 mb-5 text-sm">
+                O seu certificado estará disponível <b>${availableAtText}</b>.
+                </p>
+
+                <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <button id="certOkBtn"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm">
+                    OK
+                </button>
+
+                <a href="<?= site_url('student/dashboard/meus_certificados') ?>"
+                    class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm text-center">
+                    Ver Certificados
+                </a>
+                </div>
+            </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modal);
+
+        document.getElementById('certOkBtn').addEventListener('click', () => {
+            const m = document.getElementById('courseCompletedModal');
+            if (m) m.remove();
+            document.body.style.overflow = '';
+        });
+    }
+
+
+    function recomputeFromCounters() {
+        const pct = totalLessons ? Math.round((completedLessons / totalLessons) * 100) : 0;
+        setProgressUI(pct);
+        return pct;
+    }
+
     async function fetchJSON(url, opts = {}) {
         const cfg = {
             method: 'GET',
@@ -320,13 +413,13 @@ $auto = $autoplayFlag ? 1 : 0;
             },
             ...opts
         };
-        
+
         if (!cfg.headers) cfg.headers = {};
         if (csrfName && csrfHash && cfg.method !== 'GET') {
             cfg.headers['Content-Type'] = 'application/json';
             cfg.headers[csrfName] = csrfHash;
         }
-        
+
         const res = await fetch(url, cfg);
         const newHash = res.headers.get('X-CSRF-Hash');
         if (newHash) csrfHash = newHash;
@@ -350,7 +443,7 @@ $auto = $autoplayFlag ? 1 : 0;
             if (checkboxEl) checkboxEl.checked = !isChecked;
             return;
         }
-        
+
         if (checkboxEl) checkboxEl.disabled = true;
 
         try {
@@ -371,10 +464,23 @@ $auto = $autoplayFlag ? 1 : 0;
                 alert(data?.message || 'Não foi possível atualizar a conclusão.');
                 return;
             }
-            
+
+            // Atualiza progresso SEM computeProgress()
+            if (isChecked) {
+                completedLessons = Math.min(totalLessons, completedLessons + 1);
+            } else {
+                completedLessons = Math.max(0, completedLessons - 1);
+            }
+
+            const pct = recomputeFromCounters();
+
+            if (pct === 100) {
+                showCourseCompletedModal();
+            }
+
             // Update progress after successful completion
             computeProgress();
-            
+
         } catch (e) {
             if (checkboxEl) checkboxEl.checked = !isChecked;
             alert('Erro de rede ao salvar. Tente novamente.');
@@ -402,7 +508,7 @@ $auto = $autoplayFlag ? 1 : 0;
         const moduleContent = document.getElementById(`module-${index}`);
         const moduleHeader = document.querySelector(`button[onclick="toggleModule(${index})"]`);
         const chevron = moduleHeader.querySelector('i.bi-chevron-down');
-        
+
         if (moduleContent.classList.contains('hidden')) {
             // Close all other modules
             document.querySelectorAll('.module-content').forEach(content => {
@@ -427,7 +533,7 @@ $auto = $autoplayFlag ? 1 : 0;
         const moduleContent = document.getElementById(`module-mobile-${index}`);
         const moduleHeader = document.querySelector(`button[onclick="toggleModuleMobile(${index})"]`);
         const chevron = moduleHeader.querySelector('i.bi-chevron-down');
-        
+
         if (moduleContent.classList.contains('hidden')) {
             // Close all other mobile modules
             document.querySelectorAll('.module-content-mobile').forEach(content => {
@@ -542,7 +648,7 @@ $auto = $autoplayFlag ? 1 : 0;
         if (goNextBtn && nextUrl) {
             goNextBtn.href = withAutoplay(nextUrl);
         }
-        
+
         if (autoNote && countdownEl) {
             seconds = 5;
             countdownEl.textContent = seconds;
@@ -602,25 +708,25 @@ $auto = $autoplayFlag ? 1 : 0;
                 </div>
             </div>
         `;
-        
+
         document.body.insertAdjacentHTML('beforeend', warningModal);
-        
+
         const warning = document.getElementById('completionWarning');
         const continueWatching = document.getElementById('continueWatching');
         const forceNext = document.getElementById('forceNext');
-        
+
         continueWatching.addEventListener('click', () => {
             warning.remove();
             if (player) {
                 player.play().catch(() => {});
             }
         });
-        
+
         forceNext.addEventListener('click', () => {
             warning.remove();
             window.location.href = withAutoplay(nextUrl);
         });
-        
+
         // Close on backdrop click
         warning.addEventListener('click', (e) => {
             if (e.target === warning) {
@@ -653,7 +759,7 @@ $auto = $autoplayFlag ? 1 : 0;
     // Autoplay on page load if autoplay=1
     const urlParams = new URLSearchParams(window.location.search);
     const shouldAutoplay = urlParams.get('autoplay') === '1';
-    
+
     if (player && shouldAutoplay) {
         player.ready().then(() => {
             player.play().catch(() => {
@@ -679,7 +785,7 @@ $auto = $autoplayFlag ? 1 : 0;
                 const duration = (await player.getDuration()) || 0;
                 const watched = data.seconds || 0;
                 currentVideoProgress = duration > 0 ? (watched / duration) * 100 : 0;
-                
+
                 if (duration > 0 && currentVideoProgress >= 95 && !hasReached95Percent) {
                     const checkbox = document.querySelector(`.lesson-row[data-lesson-id="${currentLessonId}"] .lesson-check`);
                     if (checkbox && !checkbox.checked) {
@@ -693,6 +799,15 @@ $auto = $autoplayFlag ? 1 : 0;
             }
         });
     }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // já pinta a UI com o valor inicial do backend
+        setProgressUI(courseProgress);
+
+        if (courseProgress === 100) {
+            showCourseCompletedModal();
+        }
+    });
 </script>
 
 <?= $this->endSection() ?>
