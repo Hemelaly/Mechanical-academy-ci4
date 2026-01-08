@@ -89,6 +89,8 @@
 
                         <?= $this->renderSection('students') ?>
 
+                        <?= $this->renderSection('certificates') ?>
+
                     </main>
                 </div>
 

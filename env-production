@@ -22,8 +22,6 @@ CI_ENVIRONMENT = production
 
 app.baseURL = 'https://academy.mechanical.co.mz/'
 
-SITE_EXCEL = 'https://hemelaly.github.io/MT-Academy---EXCEL/'
-SITE_JS = 'https://edson-09.github.io/curso-js/'
 # If you have trouble with `.`, you could also use `_`.
 # app_baseURL = ''
 # app.forceGlobalSecureRequests = false

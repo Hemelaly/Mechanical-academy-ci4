@@ -75,7 +75,7 @@ class Auth extends ShieldAuth
      */
     public array $redirects = [
         'register'          => '/',
-        'login'             => '/',
+        'login'             => 'dashboard',
         'logout'            => 'login',
         'force_reset'       => '/',
         'permission_denied' => '/',
@@ -441,6 +441,14 @@ class Auth extends ShieldAuth
      */
     public function loginRedirect(): string
     {
+        $user = auth()->user();
+        if ($user && !empty($user->role)) {
+            $role = trim((string) $user->role);
+            if ($role !== '') {
+                return $this->getUrl($role . '/dashboard');
+            }
+        }
+
         $session = session();
         $url     = $session->getTempdata('beforeLoginUrl') ?? setting('Auth.redirects')['login'];
 
@@ -518,3 +526,4 @@ class Auth extends ShieldAuth
         };
     }
 }
+

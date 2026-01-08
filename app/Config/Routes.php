@@ -34,6 +34,8 @@ $routes->group('instructor', ['namespace' => 'App\Controllers\Instructor', 'filt
     $routes->get('dashboard/jitsi/deletar/(:num)', 'Dashboard::deleteJitsi/$1'); // ou outro método pra deletar
     $routes->get('dashboard/jitsi/stream/(:num)', 'Dashboard::stream/$1');
     $routes->post('dashboard/novo_curso/criar', 'CourseController::criar');
+    $routes->post('dashboard/novo_curso/rascunho', 'CourseController::draftCreate');
+    $routes->post('dashboard/novo_curso/rascunho/(:num)', 'CourseController::draftSave/$1');
     $routes->get('dashboard/meus_cursos/editar/(:num)', 'Dashboard::edit_course/$1');
     $routes->post('dashboard/editar_curso/(:num)', 'CourseController::editar/$1');
     $routes->post('dashboard/meus_cursos/deletar/(:num)', 'CourseController::deletar/$1');
@@ -41,7 +43,8 @@ $routes->group('instructor', ['namespace' => 'App\Controllers\Instructor', 'filt
     $routes->get('dashboard/financas', 'Dashboard::financial');
     $routes->get('dashboard/perfil', 'Dashboard::profile');
     $routes->get('dashboard/certificados', 'Dashboard::certificate');
-    $routes->post('dashboard/certificados', 'Certificates::upload');
+    $routes->post('dashboard/certificados', '\App\Controllers\Certificates::upload');
+    $routes->post('dashboard/certificados/delete', '\App\Controllers\Certificates::deleteCertificate');
     $routes->post('dashboard/meus_estudantes/(:num)/(:num)', 'Dashboard::approveEnrollment/$1/$2');
 });
 
@@ -55,6 +58,7 @@ $routes->group('student', ['namespace' => 'App\Controllers\Student', 'filter' =>
     $routes->get('dashboard/perfil', 'Dashboard::profile');
     $routes->post('dashboard/perfil', 'Dashboard::profile');
     $routes->get('dashboard/certificados', 'Dashboard::certificate');
+    $routes->post('certificates/pending', '\\App\\Controllers\\Certificates::createPending');
 
     // Rotas para Marcar as aulas como completas
     $routes->group('lessons', function ($r) {

@@ -1,0 +1,949 @@
+DEBUG - 2026-01-07 07:05:00 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 07:07:25 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 07:38:38 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 07:39:05 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 07:39:35 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 07:39:44 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 07:40:47 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 07:45:05 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 07:45:12 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 07:47:14 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 07:47:25 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 07:47:28 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 07:47:33 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 07:48:23 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 07:48:39 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 07:48:54 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 07:49:03 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 07:57:10 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 08:03:53 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 08:07:23 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 08:08:24 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 08:09:11 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 08:09:50 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 08:11:18 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 08:11:20 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 08:12:37 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 08:12:47 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 08:13:26 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 08:13:27 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 08:13:33 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 08:13:35 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 08:15:34 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 08:15:36 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 08:15:39 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 08:15:41 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 08:15:44 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 08:15:48 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 08:16:13 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 08:16:15 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 08:16:26 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 08:16:55 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 08:28:33 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 08:36:35 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 08:46:35 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-01-07 08:46:35 --> mysqli_sql_exception: Unknown column 'cert.id_course_certificate' in 'on clause' in C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `cert`.*...', 0)
+#1 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `cert`.*...')
+#2 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `cert`.*...')
+#3 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*...', Array, false)
+#4 C:\laragon\www\academy-ci4\app\Models\CertificateModel.php(57): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\laragon\www\academy-ci4\app\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getByInstructorWithCourse(1)
+#6 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+#7 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+#8 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#9 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#10 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#11 C:\laragon\www\academy-ci4\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#12 {main}
+CRITICAL - 2026-01-07 08:46:35 --> CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'cert.id_course_certificate' in 'on clause'
+[Method: GET, Route: instructor/dashboard/certificados]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `c`.`id_instructor_course` = :c.id_instructor_course:
+ORDER BY `cert`.`created_at` DESC', [...], false)
+ 2 APPPATH\Models\CertificateModel.php(57): CodeIgniter\Database\BaseBuilder->get()
+ 3 APPPATH\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getByInstructorWithCourse(1)
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-01-07 08:46:35 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'cert.id_course_certificate' in 'on clause'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `c`.`id_instructor_course` = 1
+ORDER BY `cert`.`created_at` DESC')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `c`.`id_instructor_course` = 1
+ORDER BY `cert`.`created_at` DESC')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `c`.`id_instructor_course` = :c.id_instructor_course:
+ORDER BY `cert`.`created_at` DESC', [...], false)
+ 4 APPPATH\Models\CertificateModel.php(57): CodeIgniter\Database\BaseBuilder->get()
+ 5 APPPATH\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getByInstructorWithCourse(1)
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-01-07 08:46:35 --> [Caused by] mysqli_sql_exception: Unknown column 'cert.id_course_certificate' in 'on clause'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `c`.`id_instructor_course` = 1
+ORDER BY `cert`.`created_at` DESC', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `c`.`id_instructor_course` = 1
+ORDER BY `cert`.`created_at` DESC')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `c`.`id_instructor_course` = 1
+ORDER BY `cert`.`created_at` DESC')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `c`.`id_instructor_course` = :c.id_instructor_course:
+ORDER BY `cert`.`created_at` DESC', [...], false)
+ 5 APPPATH\Models\CertificateModel.php(57): CodeIgniter\Database\BaseBuilder->get()
+ 6 APPPATH\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getByInstructorWithCourse(1)
+ 7 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 8 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 9 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-01-07 08:48:03 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2026-01-07 08:48:03 --> CodeIgniter\Exceptions\BadMethodCallException: Call to undefined method App\Models\CertificateModel::getByInstructorWithCourse
+[Method: GET, Route: instructor/dashboard/certificados]
+in SYSTEMPATH\Model.php on line 927.
+ 1 APPPATH\Controllers\Instructor\Dashboard.php(643): CodeIgniter\Model->__call('getByInstructorWithCourse', [...])
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-01-07 08:48:27 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2026-01-07 08:48:27 --> CodeIgniter\Exceptions\BadMethodCallException: Call to undefined method App\Models\CertificateModel::getByInstructorWithCourse
+[Method: GET, Route: instructor/dashboard/certificados]
+in SYSTEMPATH\Model.php on line 927.
+ 1 APPPATH\Controllers\Instructor\Dashboard.php(643): CodeIgniter\Model->__call('getByInstructorWithCourse', [...])
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-01-07 08:49:17 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2026-01-07 08:49:17 --> CodeIgniter\Exceptions\BadMethodCallException: Call to undefined method App\Models\CertificateModel::getByInstructorWithCourse
+[Method: GET, Route: instructor/dashboard/certificados]
+in SYSTEMPATH\Model.php on line 927.
+ 1 APPPATH\Controllers\Instructor\Dashboard.php(643): CodeIgniter\Model->__call('getByInstructorWithCourse', [...])
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-01-07 08:49:52 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2026-01-07 08:49:52 --> CodeIgniter\Exceptions\BadMethodCallException: Call to undefined method App\Models\CertificateModel::getByInstructorWithCourse
+[Method: GET, Route: instructor/dashboard/certificados]
+in SYSTEMPATH\Model.php on line 927.
+ 1 APPPATH\Controllers\Instructor\Dashboard.php(643): CodeIgniter\Model->__call('getByInstructorWithCourse', [...])
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-01-07 08:51:19 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2026-01-07 08:51:19 --> CodeIgniter\Exceptions\BadMethodCallException: Call to undefined method App\Models\CertificateModel::getByInstructorWithCourse
+[Method: GET, Route: instructor/dashboard/certificados]
+in SYSTEMPATH\Model.php on line 927.
+ 1 APPPATH\Controllers\Instructor\Dashboard.php(643): CodeIgniter\Model->__call('getByInstructorWithCourse', [...])
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-01-07 08:52:19 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-01-07 08:52:19 --> mysqli_sql_exception: Unknown column 'cert.id_course_certificate' in 'on clause' in C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `cert`.*...', 0)
+#1 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `cert`.*...')
+#2 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `cert`.*...')
+#3 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*...', Array, false)
+#4 C:\laragon\www\academy-ci4\app\Models\CertificateModel.php(57): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\laragon\www\academy-ci4\app\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getByInstructorWithCourse(1)
+#6 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+#7 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+#8 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#9 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#10 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#11 C:\laragon\www\academy-ci4\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#12 {main}
+CRITICAL - 2026-01-07 08:52:19 --> CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'cert.id_course_certificate' in 'on clause'
+[Method: GET, Route: instructor/dashboard/certificados]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `c`.`id_instructor_course` = :c.id_instructor_course:
+ORDER BY `cert`.`created_at` DESC', [...], false)
+ 2 APPPATH\Models\CertificateModel.php(57): CodeIgniter\Database\BaseBuilder->get()
+ 3 APPPATH\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getByInstructorWithCourse(1)
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-01-07 08:52:19 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'cert.id_course_certificate' in 'on clause'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `c`.`id_instructor_course` = 1
+ORDER BY `cert`.`created_at` DESC')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `c`.`id_instructor_course` = 1
+ORDER BY `cert`.`created_at` DESC')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `c`.`id_instructor_course` = :c.id_instructor_course:
+ORDER BY `cert`.`created_at` DESC', [...], false)
+ 4 APPPATH\Models\CertificateModel.php(57): CodeIgniter\Database\BaseBuilder->get()
+ 5 APPPATH\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getByInstructorWithCourse(1)
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-01-07 08:52:19 --> [Caused by] mysqli_sql_exception: Unknown column 'cert.id_course_certificate' in 'on clause'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `c`.`id_instructor_course` = 1
+ORDER BY `cert`.`created_at` DESC', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `c`.`id_instructor_course` = 1
+ORDER BY `cert`.`created_at` DESC')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `c`.`id_instructor_course` = 1
+ORDER BY `cert`.`created_at` DESC')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `c`.`id_instructor_course` = :c.id_instructor_course:
+ORDER BY `cert`.`created_at` DESC', [...], false)
+ 5 APPPATH\Models\CertificateModel.php(57): CodeIgniter\Database\BaseBuilder->get()
+ 6 APPPATH\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getByInstructorWithCourse(1)
+ 7 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 8 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 9 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-01-07 08:57:37 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-01-07 08:57:37 --> mysqli_sql_exception: Unknown column 'cert.id_user_certificate' in 'where clause' in C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `cert`.*...', 0)
+#1 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `cert`.*...')
+#2 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `cert`.*...')
+#3 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*...', Array, false)
+#4 C:\laragon\www\academy-ci4\app\Models\CertificateModel.php(54): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\laragon\www\academy-ci4\app\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getByUserWithCourse(1)
+#6 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+#7 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+#8 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#9 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#10 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#11 C:\laragon\www\academy-ci4\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#12 {main}
+CRITICAL - 2026-01-07 08:57:37 --> CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'cert.id_user_certificate' in 'where clause'
+[Method: GET, Route: instructor/dashboard/certificados]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = :cert.id_user_certificate:
+ORDER BY `cert`.`issued_at_certificate` DESC', [...], false)
+ 2 APPPATH\Models\CertificateModel.php(54): CodeIgniter\Database\BaseBuilder->get()
+ 3 APPPATH\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getByUserWithCourse(1)
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-01-07 08:57:37 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'cert.id_user_certificate' in 'where clause'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = 1
+ORDER BY `cert`.`issued_at_certificate` DESC')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = 1
+ORDER BY `cert`.`issued_at_certificate` DESC')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = :cert.id_user_certificate:
+ORDER BY `cert`.`issued_at_certificate` DESC', [...], false)
+ 4 APPPATH\Models\CertificateModel.php(54): CodeIgniter\Database\BaseBuilder->get()
+ 5 APPPATH\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getByUserWithCourse(1)
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-01-07 08:57:37 --> [Caused by] mysqli_sql_exception: Unknown column 'cert.id_user_certificate' in 'where clause'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = 1
+ORDER BY `cert`.`issued_at_certificate` DESC', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = 1
+ORDER BY `cert`.`issued_at_certificate` DESC')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = 1
+ORDER BY `cert`.`issued_at_certificate` DESC')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = :cert.id_user_certificate:
+ORDER BY `cert`.`issued_at_certificate` DESC', [...], false)
+ 5 APPPATH\Models\CertificateModel.php(54): CodeIgniter\Database\BaseBuilder->get()
+ 6 APPPATH\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getByUserWithCourse(1)
+ 7 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 8 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 9 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-01-07 08:57:40 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-01-07 08:57:40 --> mysqli_sql_exception: Unknown column 'cert.id_user_certificate' in 'where clause' in C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `cert`.*...', 0)
+#1 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `cert`.*...')
+#2 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `cert`.*...')
+#3 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*...', Array, false)
+#4 C:\laragon\www\academy-ci4\app\Models\CertificateModel.php(54): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\laragon\www\academy-ci4\app\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getByUserWithCourse(1)
+#6 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+#7 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+#8 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#9 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#10 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#11 C:\laragon\www\academy-ci4\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#12 {main}
+CRITICAL - 2026-01-07 08:57:40 --> CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'cert.id_user_certificate' in 'where clause'
+[Method: GET, Route: instructor/dashboard/certificados]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = :cert.id_user_certificate:
+ORDER BY `cert`.`issued_at_certificate` DESC', [...], false)
+ 2 APPPATH\Models\CertificateModel.php(54): CodeIgniter\Database\BaseBuilder->get()
+ 3 APPPATH\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getByUserWithCourse(1)
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-01-07 08:57:40 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'cert.id_user_certificate' in 'where clause'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = 1
+ORDER BY `cert`.`issued_at_certificate` DESC')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = 1
+ORDER BY `cert`.`issued_at_certificate` DESC')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = :cert.id_user_certificate:
+ORDER BY `cert`.`issued_at_certificate` DESC', [...], false)
+ 4 APPPATH\Models\CertificateModel.php(54): CodeIgniter\Database\BaseBuilder->get()
+ 5 APPPATH\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getByUserWithCourse(1)
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-01-07 08:57:40 --> [Caused by] mysqli_sql_exception: Unknown column 'cert.id_user_certificate' in 'where clause'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = 1
+ORDER BY `cert`.`issued_at_certificate` DESC', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = 1
+ORDER BY `cert`.`issued_at_certificate` DESC')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = 1
+ORDER BY `cert`.`issued_at_certificate` DESC')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = :cert.id_user_certificate:
+ORDER BY `cert`.`issued_at_certificate` DESC', [...], false)
+ 5 APPPATH\Models\CertificateModel.php(54): CodeIgniter\Database\BaseBuilder->get()
+ 6 APPPATH\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getByUserWithCourse(1)
+ 7 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 8 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 9 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-01-07 09:04:35 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-01-07 09:04:35 --> mysqli_sql_exception: Unknown column 'cert.id_user_certificate' in 'where clause' in C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `cert`.*...', 0)
+#1 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `cert`.*...')
+#2 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `cert`.*...')
+#3 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*...', Array, false)
+#4 C:\laragon\www\academy-ci4\app\Models\CertificateModel.php(54): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\laragon\www\academy-ci4\app\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getByUserWithCourse(1)
+#6 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+#7 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+#8 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#9 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#10 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#11 C:\laragon\www\academy-ci4\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#12 {main}
+CRITICAL - 2026-01-07 09:04:35 --> CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'cert.id_user_certificate' in 'where clause'
+[Method: GET, Route: instructor/dashboard/certificados]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` AS `cert`
+INNER JOIN `courses` AS `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = :cert.id_user_certificate:
+ORDER BY `cert`.`issued_at_certificate` DESC', [...], false)
+ 2 APPPATH\Models\CertificateModel.php(54): CodeIgniter\Database\BaseBuilder->get()
+ 3 APPPATH\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getByUserWithCourse(1)
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-01-07 09:04:35 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'cert.id_user_certificate' in 'where clause'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` AS `cert`
+INNER JOIN `courses` AS `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = 1
+ORDER BY `cert`.`issued_at_certificate` DESC')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` AS `cert`
+INNER JOIN `courses` AS `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = 1
+ORDER BY `cert`.`issued_at_certificate` DESC')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` AS `cert`
+INNER JOIN `courses` AS `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = :cert.id_user_certificate:
+ORDER BY `cert`.`issued_at_certificate` DESC', [...], false)
+ 4 APPPATH\Models\CertificateModel.php(54): CodeIgniter\Database\BaseBuilder->get()
+ 5 APPPATH\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getByUserWithCourse(1)
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-01-07 09:04:35 --> [Caused by] mysqli_sql_exception: Unknown column 'cert.id_user_certificate' in 'where clause'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` AS `cert`
+INNER JOIN `courses` AS `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = 1
+ORDER BY `cert`.`issued_at_certificate` DESC', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` AS `cert`
+INNER JOIN `courses` AS `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = 1
+ORDER BY `cert`.`issued_at_certificate` DESC')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` AS `cert`
+INNER JOIN `courses` AS `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = 1
+ORDER BY `cert`.`issued_at_certificate` DESC')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` AS `cert`
+INNER JOIN `courses` AS `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = :cert.id_user_certificate:
+ORDER BY `cert`.`issued_at_certificate` DESC', [...], false)
+ 5 APPPATH\Models\CertificateModel.php(54): CodeIgniter\Database\BaseBuilder->get()
+ 6 APPPATH\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getByUserWithCourse(1)
+ 7 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 8 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 9 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-01-07 09:06:34 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-01-07 09:06:34 --> mysqli_sql_exception: Unknown column 'cert.id_user_certificate' in 'where clause' in C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `cert`.*...', 0)
+#1 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `cert`.*...')
+#2 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `cert`.*...')
+#3 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*...', Array, false)
+#4 C:\laragon\www\academy-ci4\app\Models\CertificateModel.php(36): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\laragon\www\academy-ci4\app\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getByUserWithCourse(1)
+#6 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+#7 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+#8 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#9 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#10 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#11 C:\laragon\www\academy-ci4\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#12 {main}
+CRITICAL - 2026-01-07 09:06:34 --> CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'cert.id_user_certificate' in 'where clause'
+[Method: GET, Route: instructor/dashboard/certificados]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` AS `cert`
+INNER JOIN `courses` AS `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = :cert.id_user_certificate:
+ORDER BY `cert`.`issued_at_certificate` DESC', [...], false)
+ 2 APPPATH\Models\CertificateModel.php(36): CodeIgniter\Database\BaseBuilder->get()
+ 3 APPPATH\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getByUserWithCourse(1)
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-01-07 09:06:34 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'cert.id_user_certificate' in 'where clause'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` AS `cert`
+INNER JOIN `courses` AS `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = 1
+ORDER BY `cert`.`issued_at_certificate` DESC')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` AS `cert`
+INNER JOIN `courses` AS `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = 1
+ORDER BY `cert`.`issued_at_certificate` DESC')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` AS `cert`
+INNER JOIN `courses` AS `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = :cert.id_user_certificate:
+ORDER BY `cert`.`issued_at_certificate` DESC', [...], false)
+ 4 APPPATH\Models\CertificateModel.php(36): CodeIgniter\Database\BaseBuilder->get()
+ 5 APPPATH\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getByUserWithCourse(1)
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-01-07 09:06:34 --> [Caused by] mysqli_sql_exception: Unknown column 'cert.id_user_certificate' in 'where clause'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` AS `cert`
+INNER JOIN `courses` AS `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = 1
+ORDER BY `cert`.`issued_at_certificate` DESC', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` AS `cert`
+INNER JOIN `courses` AS `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = 1
+ORDER BY `cert`.`issued_at_certificate` DESC')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` AS `cert`
+INNER JOIN `courses` AS `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = 1
+ORDER BY `cert`.`issued_at_certificate` DESC')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` AS `cert`
+INNER JOIN `courses` AS `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = :cert.id_user_certificate:
+ORDER BY `cert`.`issued_at_certificate` DESC', [...], false)
+ 5 APPPATH\Models\CertificateModel.php(36): CodeIgniter\Database\BaseBuilder->get()
+ 6 APPPATH\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getByUserWithCourse(1)
+ 7 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 8 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 9 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-01-07 09:08:20 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 09:14:24 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-01-07 09:14:24 --> mysqli_sql_exception: Unknown column 'cert.id_user_certificate' in 'where clause' in C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `cert`.*...', 0)
+#1 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `cert`.*...')
+#2 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `cert`.*...')
+#3 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*...', Array, false)
+#4 C:\laragon\www\academy-ci4\app\Models\CertificateModel.php(36): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\laragon\www\academy-ci4\app\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getByUserWithCourse(1)
+#6 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+#7 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+#8 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#9 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#10 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#11 C:\laragon\www\academy-ci4\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#12 {main}
+CRITICAL - 2026-01-07 09:14:24 --> CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'cert.id_user_certificate' in 'where clause'
+[Method: GET, Route: instructor/dashboard/certificados]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` AS `cert`
+INNER JOIN `courses` AS `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = :cert.id_user_certificate:
+ORDER BY `cert`.`issued_at_certificate` DESC', [...], false)
+ 2 APPPATH\Models\CertificateModel.php(36): CodeIgniter\Database\BaseBuilder->get()
+ 3 APPPATH\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getByUserWithCourse(1)
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-01-07 09:14:24 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'cert.id_user_certificate' in 'where clause'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` AS `cert`
+INNER JOIN `courses` AS `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = 1
+ORDER BY `cert`.`issued_at_certificate` DESC')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` AS `cert`
+INNER JOIN `courses` AS `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = 1
+ORDER BY `cert`.`issued_at_certificate` DESC')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` AS `cert`
+INNER JOIN `courses` AS `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = :cert.id_user_certificate:
+ORDER BY `cert`.`issued_at_certificate` DESC', [...], false)
+ 4 APPPATH\Models\CertificateModel.php(36): CodeIgniter\Database\BaseBuilder->get()
+ 5 APPPATH\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getByUserWithCourse(1)
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-01-07 09:14:24 --> [Caused by] mysqli_sql_exception: Unknown column 'cert.id_user_certificate' in 'where clause'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` AS `cert`
+INNER JOIN `courses` AS `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = 1
+ORDER BY `cert`.`issued_at_certificate` DESC', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` AS `cert`
+INNER JOIN `courses` AS `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = 1
+ORDER BY `cert`.`issued_at_certificate` DESC')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` AS `cert`
+INNER JOIN `courses` AS `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = 1
+ORDER BY `cert`.`issued_at_certificate` DESC')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*, `c`.`title_course`
+FROM `certificates` AS `cert`
+INNER JOIN `courses` AS `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+WHERE `cert`.`id_user_certificate` = :cert.id_user_certificate:
+ORDER BY `cert`.`issued_at_certificate` DESC', [...], false)
+ 5 APPPATH\Models\CertificateModel.php(36): CodeIgniter\Database\BaseBuilder->get()
+ 6 APPPATH\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getByUserWithCourse(1)
+ 7 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 8 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 9 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-01-07 09:19:57 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 09:34:11 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 09:34:14 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 09:36:14 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2026-01-07 09:36:14 --> Error: Call to undefined method CodeIgniter\Database\MySQLi\Builder::findAll()
+[Method: GET, Route: instructor/dashboard/certificados]
+in APPPATH\Controllers\Instructor\Dashboard.php on line 643.
+ 1 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 2 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 3 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 5 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 6 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-01-07 09:36:24 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 09:36:43 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 09:43:45 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-01-07 09:43:45 --> mysqli_sql_exception: Unknown column 'u.email' in 'field list' in C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `cert`.*...', 0)
+#1 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `cert`.*...')
+#2 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `cert`.*...')
+#3 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*...', Array, false)
+#4 C:\laragon\www\academy-ci4\app\Models\CertificateModel.php(66): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\laragon\www\academy-ci4\app\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getForInstructorDashboard(1)
+#6 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+#7 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+#8 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#9 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#10 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#11 C:\laragon\www\academy-ci4\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#12 {main}
+CRITICAL - 2026-01-07 09:43:45 --> CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'u.email' in 'field list'
+[Method: GET, Route: instructor/dashboard/certificados]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*, `c`.`title_course`, `u`.`username`, `u`.`email`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+INNER JOIN `users` `u` ON `u`.`id` = `cert`.`id_user_certificate`
+WHERE `c`.`id_instructor_course` = :c.id_instructor_course:
+ORDER BY `cert`.`issued_at_certificate` DESC', [...], false)
+ 2 APPPATH\Models\CertificateModel.php(66): CodeIgniter\Database\BaseBuilder->get()
+ 3 APPPATH\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getForInstructorDashboard(1)
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-01-07 09:43:45 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'u.email' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `cert`.*, `c`.`title_course`, `u`.`username`, `u`.`email`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+INNER JOIN `users` `u` ON `u`.`id` = `cert`.`id_user_certificate`
+WHERE `c`.`id_instructor_course` = 1
+ORDER BY `cert`.`issued_at_certificate` DESC')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `cert`.*, `c`.`title_course`, `u`.`username`, `u`.`email`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+INNER JOIN `users` `u` ON `u`.`id` = `cert`.`id_user_certificate`
+WHERE `c`.`id_instructor_course` = 1
+ORDER BY `cert`.`issued_at_certificate` DESC')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*, `c`.`title_course`, `u`.`username`, `u`.`email`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+INNER JOIN `users` `u` ON `u`.`id` = `cert`.`id_user_certificate`
+WHERE `c`.`id_instructor_course` = :c.id_instructor_course:
+ORDER BY `cert`.`issued_at_certificate` DESC', [...], false)
+ 4 APPPATH\Models\CertificateModel.php(66): CodeIgniter\Database\BaseBuilder->get()
+ 5 APPPATH\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getForInstructorDashboard(1)
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-01-07 09:43:45 --> [Caused by] mysqli_sql_exception: Unknown column 'u.email' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `cert`.*, `c`.`title_course`, `u`.`username`, `u`.`email`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+INNER JOIN `users` `u` ON `u`.`id` = `cert`.`id_user_certificate`
+WHERE `c`.`id_instructor_course` = 1
+ORDER BY `cert`.`issued_at_certificate` DESC', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `cert`.*, `c`.`title_course`, `u`.`username`, `u`.`email`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+INNER JOIN `users` `u` ON `u`.`id` = `cert`.`id_user_certificate`
+WHERE `c`.`id_instructor_course` = 1
+ORDER BY `cert`.`issued_at_certificate` DESC')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `cert`.*, `c`.`title_course`, `u`.`username`, `u`.`email`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+INNER JOIN `users` `u` ON `u`.`id` = `cert`.`id_user_certificate`
+WHERE `c`.`id_instructor_course` = 1
+ORDER BY `cert`.`issued_at_certificate` DESC')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*, `c`.`title_course`, `u`.`username`, `u`.`email`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+INNER JOIN `users` `u` ON `u`.`id` = `cert`.`id_user_certificate`
+WHERE `c`.`id_instructor_course` = :c.id_instructor_course:
+ORDER BY `cert`.`issued_at_certificate` DESC', [...], false)
+ 5 APPPATH\Models\CertificateModel.php(66): CodeIgniter\Database\BaseBuilder->get()
+ 6 APPPATH\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getForInstructorDashboard(1)
+ 7 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 8 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 9 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-01-07 09:44:31 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 09:45:13 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 09:59:14 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-01-07 09:59:14 --> mysqli_sql_exception: Unknown column 'u.email' in 'field list' in C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `cert`.*...', 0)
+#1 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `cert`.*...')
+#2 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `cert`.*...')
+#3 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*...', Array, false)
+#4 C:\laragon\www\academy-ci4\app\Models\CertificateModel.php(61): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\laragon\www\academy-ci4\app\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getForInstructorDashboard(1)
+#6 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+#7 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+#8 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#9 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#10 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#11 C:\laragon\www\academy-ci4\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#12 {main}
+CRITICAL - 2026-01-07 09:59:14 --> CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'u.email' in 'field list'
+[Method: GET, Route: instructor/dashboard/certificados]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*, `c`.`title_course`, `u`.`username` AS `student_name`, `u`.`email`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+INNER JOIN `users` `u` ON `u`.`id` = `cert`.`id_user_certificate`
+WHERE `c`.`id_instructor_course` = :c.id_instructor_course:
+ORDER BY `cert`.`created_at` DESC', [...], false)
+ 2 APPPATH\Models\CertificateModel.php(61): CodeIgniter\Database\BaseBuilder->get()
+ 3 APPPATH\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getForInstructorDashboard(1)
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-01-07 09:59:14 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'u.email' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `cert`.*, `c`.`title_course`, `u`.`username` AS `student_name`, `u`.`email`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+INNER JOIN `users` `u` ON `u`.`id` = `cert`.`id_user_certificate`
+WHERE `c`.`id_instructor_course` = 1
+ORDER BY `cert`.`created_at` DESC')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `cert`.*, `c`.`title_course`, `u`.`username` AS `student_name`, `u`.`email`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+INNER JOIN `users` `u` ON `u`.`id` = `cert`.`id_user_certificate`
+WHERE `c`.`id_instructor_course` = 1
+ORDER BY `cert`.`created_at` DESC')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*, `c`.`title_course`, `u`.`username` AS `student_name`, `u`.`email`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+INNER JOIN `users` `u` ON `u`.`id` = `cert`.`id_user_certificate`
+WHERE `c`.`id_instructor_course` = :c.id_instructor_course:
+ORDER BY `cert`.`created_at` DESC', [...], false)
+ 4 APPPATH\Models\CertificateModel.php(61): CodeIgniter\Database\BaseBuilder->get()
+ 5 APPPATH\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getForInstructorDashboard(1)
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-01-07 09:59:14 --> [Caused by] mysqli_sql_exception: Unknown column 'u.email' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `cert`.*, `c`.`title_course`, `u`.`username` AS `student_name`, `u`.`email`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+INNER JOIN `users` `u` ON `u`.`id` = `cert`.`id_user_certificate`
+WHERE `c`.`id_instructor_course` = 1
+ORDER BY `cert`.`created_at` DESC', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `cert`.*, `c`.`title_course`, `u`.`username` AS `student_name`, `u`.`email`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+INNER JOIN `users` `u` ON `u`.`id` = `cert`.`id_user_certificate`
+WHERE `c`.`id_instructor_course` = 1
+ORDER BY `cert`.`created_at` DESC')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `cert`.*, `c`.`title_course`, `u`.`username` AS `student_name`, `u`.`email`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+INNER JOIN `users` `u` ON `u`.`id` = `cert`.`id_user_certificate`
+WHERE `c`.`id_instructor_course` = 1
+ORDER BY `cert`.`created_at` DESC')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `cert`.*, `c`.`title_course`, `u`.`username` AS `student_name`, `u`.`email`
+FROM `certificates` `cert`
+INNER JOIN `courses` `c` ON `c`.`id_course` = `cert`.`id_course_certificate`
+INNER JOIN `users` `u` ON `u`.`id` = `cert`.`id_user_certificate`
+WHERE `c`.`id_instructor_course` = :c.id_instructor_course:
+ORDER BY `cert`.`created_at` DESC', [...], false)
+ 5 APPPATH\Models\CertificateModel.php(61): CodeIgniter\Database\BaseBuilder->get()
+ 6 APPPATH\Controllers\Instructor\Dashboard.php(643): App\Models\CertificateModel->getForInstructorDashboard(1)
+ 7 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Instructor\Dashboard->certificate()
+ 8 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Instructor\Dashboard))
+ 9 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-01-07 09:59:39 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 10:00:58 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 10:07:38 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 10:20:03 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 10:20:55 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 10:22:44 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 10:28:12 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 10:30:01 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 10:32:30 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 10:32:41 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 10:35:40 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 10:35:52 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 10:38:34 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 10:39:27 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 10:40:37 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 10:40:41 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 10:40:53 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 10:41:03 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 12:47:36 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 12:48:26 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 13:51:14 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 13:51:17 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 13:51:19 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 13:51:21 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 13:52:34 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 13:53:08 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 13:54:09 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 13:55:01 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 13:56:24 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 13:57:09 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 13:59:11 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 13:59:49 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 14:00:15 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-07 14:00:25 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.

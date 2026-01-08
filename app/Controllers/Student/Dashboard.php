@@ -4,6 +4,7 @@ namespace App\Controllers\Student;
 
 use App\Controllers\BaseController;
 use App\Models\CourseModel;
+use App\Models\CertificateModel;
 use App\Models\EnrollmentModel;
 use App\Models\ExtendedUserModel;
 use App\Models\ModuleModel;
@@ -33,17 +34,17 @@ class Dashboard extends BaseController
                 'url' => '/student/dashboard/cursos',
                 'pattern' => '/student/dashboard/cursos*' // Com * para subpáginas
             ],
+                    [
+                'label' => 'Certificados',
+                'icon' => 'bi-folder',
+                'url' => '/student/dashboard/certificados',
+                'pattern' => '/student/dashboard/certificados*' // Com * para subpáginas
+            ],
             [
                 'label' => 'Perfil',
                 'icon' => 'bi-person-circle',
                 'url' => '/student/dashboard/perfil',
                 'pattern' => '/student/dashboard/perfil*' // Com * para subpáginas
-            ],
-            [
-                'label' => 'Certificados',
-                'icon' => 'bi-folder',
-                'url' => '/student/dashboard/certificados',
-                'pattern' => '/student/dashboard/certificados*' // Com * para subpáginas
             ],
         ];
     }
@@ -747,15 +748,16 @@ class Dashboard extends BaseController
 
         public function certificate()
     {
-        $courseModel = new CourseModel();
-        // $course = $courseModel->find($idCourse);
+        $certificateModel = new CertificateModel();
 
         $user = service('auth')->user();
+        $certificates = $certificateModel->getForStudent($user->id);
 
         return view('pages/student/certificates', [
             'user' => $user,
             'sidebarLinks' => $this->sidebarLinks(),
-            'currentUrl' => current_url()
+            'currentUrl' => current_url(),
+            'certificates' => $certificates,
         ]);
     }
 

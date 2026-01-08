@@ -307,6 +307,7 @@ $auto = $autoplayFlag ? 1 : 0;
     const csrfName = document.querySelector('meta[name="csrf-name"]')?.content;
     let csrfHash = document.querySelector('meta[name="csrf-hash"]')?.content;
     const enrollmentId = document.querySelector('.container')?.dataset?.enrollmentId;
+    const pendingCertificateUrl = "<?= site_url('student/certificates/pending') ?>";
 
     // Track video progress
     let currentVideoProgress = 0;
@@ -318,6 +319,7 @@ $auto = $autoplayFlag ? 1 : 0;
     let courseProgress = <?= (int)$initialProgress ?>;
 
     let courseModalShown = false;
+    let pendingCertificateRequested = false;
 
     function setProgressUI(pct) {
         courseProgress = pct;
@@ -391,12 +393,37 @@ $auto = $autoplayFlag ? 1 : 0;
         document.body.insertAdjacentHTML('beforeend', modal);
 
         document.getElementById('certOkBtn').addEventListener('click', () => {
+            requestPendingCertificate();
             const m = document.getElementById('courseCompletedModal');
             if (m) m.remove();
             document.body.style.overflow = '';
         });
     }
 
+
+    async function requestPendingCertificate() {
+        if (pendingCertificateRequested) return;
+        if (!enrollmentId) return;
+
+        pendingCertificateRequested = true;
+
+        try {
+            const data = await fetchJSON(pendingCertificateUrl, {
+                method: 'POST',
+                body: JSON.stringify({
+                    enrollment_id: Number(enrollmentId)
+                })
+            });
+
+            if (!data?.ok) {
+                pendingCertificateRequested = false;
+                console.warn(data?.message || 'Não foi possível emitir o certificado pendente.');
+            }
+        } catch (e) {
+            pendingCertificateRequested = false;
+            console.warn('Falha ao emitir o certificado pendente:', e);
+        }
+    }
 
     function recomputeFromCounters() {
         const pct = totalLessons ? Math.round((completedLessons / totalLessons) * 100) : 0;

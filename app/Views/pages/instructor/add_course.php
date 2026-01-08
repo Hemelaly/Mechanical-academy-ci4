@@ -96,6 +96,9 @@ $user = service('auth')->user();
             <!-- Form -->
             <form id="courseForm" action="<?= base_url('instructor/dashboard/novo_curso/criar') ?>" method="post" enctype="multipart/form-data">
                 <input type="hidden" name="id_instructor_course" value="<?= $user->id ?>">
+                <input type="hidden" id="draft-id" name="draft_id" value="<?= esc($draft->id_course ?? '') ?>">
+                <input type="hidden" id="modules-json" name="modules">
+                <input type="hidden" id="tags-json" name="tags">
 
                 <div class="p-4 sm:p-6 lg:p-8">
                     <!-- Step 1: Basic Info -->
@@ -121,12 +124,13 @@ $user = service('auth')->user();
                                             <i class="bi bi-type text-blue-600"></i>
                                             Título do Curso *
                                         </label>
-                                        <input type="text"
-                                            id="title_course"
-                                            name="title_course"
-                                            class="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                            placeholder="Ex: Desenvolvimento Web Completo"
-                                            required />
+                                <input type="text"
+                                    id="title_course"
+                                    name="title_course"
+                                    value="<?= esc($draft->title_course ?? '') ?>"
+                                    class="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                    placeholder="Ex: Desenvolvimento Web Completo"
+                                    required />
                                     </div>
 
                                     <!-- Course Subtitle -->
@@ -135,12 +139,13 @@ $user = service('auth')->user();
                                             <i class="bi bi-text-paragraph text-blue-600"></i>
                                             Subtítulo do Curso *
                                         </label>
-                                        <input type="text"
-                                            id="courseSubtitle"
-                                            name="subtitle_course"
-                                            class="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                            placeholder="Ex: Do zero ao avançado com HTML, CSS e JavaScript"
-                                            required />
+                                <input type="text"
+                                    id="courseSubtitle"
+                                    name="subtitle_course"
+                                    value="<?= esc($draft->subtitle_course ?? '') ?>"
+                                    class="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                    placeholder="Ex: Do zero ao avançado com HTML, CSS e JavaScript"
+                                    required />
                                     </div>
 
                                     <!-- Course Description -->
@@ -149,11 +154,11 @@ $user = service('auth')->user();
                                             <i class="bi bi-file-text text-blue-600"></i>
                                             Descrição do Curso *
                                         </label>
-                                        <textarea id="courseDescription"
-                                            name="description_course"
-                                            rows="8"
-                                            class="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
-                                            placeholder="Descreva detalhadamente o conteúdo, objetivos e benefícios do seu curso..."></textarea>
+                                <textarea id="courseDescription"
+                                    name="description_course"
+                                    rows="8"
+                                    class="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
+                                    placeholder="Descreva detalhadamente o conteúdo, objetivos e benefícios do seu curso..."><?= esc($draft->description_course ?? '') ?></textarea>
                                         <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">
                                             Recomendado: mínimo 200 caracteres
                                         </p>
@@ -171,7 +176,7 @@ $user = service('auth')->user();
 
                                         <!-- Upload Area -->
                                         <div id="upload-area"
-                                            class="border-2 border-dashed border-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-4 sm:p-6 text-center transition-all duration-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 cursor-pointer">
+                                            class="border-2 border-dashed border-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-4 sm:p-6 text-center transition-all duration-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 cursor-pointer <?= !empty($draft->image_course) ? 'hidden' : '' ?>">
                                             <i class="bi bi-cloud-arrow-up text-blue-500 text-2xl sm:text-3xl mb-3"></i>
                                             <h6 class="font-semibold text-slate-800 dark:text-white mb-2 text-sm">
                                                 Arraste uma imagem ou clique para selecionar
@@ -193,10 +198,10 @@ $user = service('auth')->user();
                                         </div>
 
                                         <!-- Image Preview -->
-                                        <div id="image-preview" class="hidden mt-4">
+                                        <div id="image-preview" class="<?= !empty($draft->image_course) ? '' : 'hidden' ?> mt-4">
                                             <div class="relative">
                                                 <img id="preview-img"
-                                                    src=""
+                                                    src="<?= !empty($draft->image_course) ? base_url('assets/instructor/img/courses/' . $draft->image_course) : '' ?>"
                                                     alt="Preview"
                                                     class="w-full h-32 sm:h-48 object-cover rounded-2xl shadow-lg" />
                                                 <button type="button"
@@ -267,7 +272,72 @@ $user = service('auth')->user();
                             </div>
 
                             <div id="modules-container" class="space-y-4">
-                                <!-- módulos serão inseridos aqui via JS -->
+                                <?php if (!empty($draftModules)): ?>
+                                    <?php foreach ($draftModules as $mIndex => $module): ?>
+                                        <div class="module-card mb-4 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 bg-white dark:bg-slate-900">
+                                            <div class="flex justify-between items-center mb-3 gap-2">
+                                                <input type="text"
+                                                    name="modules[<?= $mIndex ?>][title]"
+                                                    class="flex-1 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-sm text-slate-800 dark:text-slate-100"
+                                                    placeholder="Nome do módulo"
+                                                    value="<?= esc($module->title_module) ?>">
+                                                <button type="button"
+                                                    class="remove-module text-red-500 hover:text-red-600 text-lg"
+                                                    title="Remover módulo">
+                                                    <i class="bi bi-x-circle"></i>
+                                                </button>
+                                            </div>
+                                            <textarea name="modules[<?= $mIndex ?>][description]"
+                                                class="w-full px-3 py-2 mb-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-sm text-slate-800 dark:text-slate-100"
+                                                placeholder="Descrição do módulo (opcional)"><?= esc($module->description_module ?? '') ?></textarea>
+
+                                            <div class="lessons-container space-y-2 mb-3">
+                                                <?php foreach ($module->lessons as $lIndex => $lesson): ?>
+                                                    <div class="lesson-item border border-slate-200 dark:border-slate-700 rounded-xl p-3 bg-slate-50 dark:bg-slate-800">
+                                                        <div class="flex justify-between items-center mb-2 gap-2">
+                                                            <input type="text"
+                                                                name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][title]"
+                                                                class="flex-1 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
+                                                                placeholder="Título da aula"
+                                                                value="<?= esc($lesson->title_lesson) ?>">
+                                                            <button type="button"
+                                                                class="remove-lesson text-red-500 hover:text-red-600 text-base"
+                                                                title="Remover aula">
+                                                                <i class="bi bi-x-circle"></i>
+                                                            </button>
+                                                        </div>
+                                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-2">
+                                                            <select name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][type]"
+                                                                class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100">
+                                                                <option value="video" <?= $lesson->type_lesson == 'video' ? 'selected' : '' ?>>Vídeo</option>
+                                                                <option value="text" <?= $lesson->type_lesson == 'text' ? 'selected' : '' ?>>Texto</option>
+                                                                <option value="quiz" <?= $lesson->type_lesson == 'quiz' ? 'selected' : '' ?>>Quiz</option>
+                                                                <option value="exercise" <?= $lesson->type_lesson == 'exercise' ? 'selected' : '' ?>>Exercício</option>
+                                                            </select>
+                                                            <input type="number"
+                                                                name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][duration]"
+                                                                class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
+                                                                placeholder="Duração (min)"
+                                                                value="<?= esc($lesson->duration_lesson) ?>">
+                                                            <input type="url"
+                                                                name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][video_url]"
+                                                                class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
+                                                                placeholder="Link do vídeo (opcional)"
+                                                                value="<?= esc($lesson->video_url_lesson) ?>">
+                                                        </div>
+                                                    </div>
+                                                <?php endforeach; ?>
+                                            </div>
+
+                                            <button type="button"
+                                                class="btn-add-lesson inline-flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-xl"
+                                                data-module="<?= $mIndex ?>">
+                                                <i class="bi bi-plus-circle"></i>
+                                                Adicionar Aula
+                                            </button>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
                             </div>
 
                             <p class="text-xs text-slate-500 dark:text-slate-400">
@@ -297,16 +367,16 @@ $user = service('auth')->user();
                                 </h4>
                                 <div class="flex flex-col sm:flex-row gap-3">
                                     <label class="inline-flex items-center gap-2 cursor-pointer">
-                                        <input type="radio" name="courseType" value="free" class="text-blue-600" checked>
+                                        <input type="radio" name="courseType" value="free" class="text-blue-600" <?= !empty($draft->price_course) && $draft->price_course > 0 ? '' : 'checked' ?>>
                                         <span class="text-sm text-slate-700 dark:text-slate-200">Gratuito</span>
                                     </label>
                                     <label class="inline-flex items-center gap-2 cursor-pointer">
-                                        <input type="radio" name="courseType" value="paid" class="text-blue-600">
+                                        <input type="radio" name="courseType" value="paid" class="text-blue-600" <?= !empty($draft->price_course) && $draft->price_course > 0 ? 'checked' : '' ?>>
                                         <span class="text-sm text-slate-700 dark:text-slate-200">Pago</span>
                                     </label>
                                 </div>
 
-                                <div id="price-settings" class="mt-3 hidden">
+                                <div id="price-settings" class="mt-3 <?= !empty($draft->price_course) && $draft->price_course > 0 ? '' : 'hidden' ?>">
                                     <label for="price_course" class="block text-sm font-semibold text-slate-800 dark:text-white mb-2">
                                         Preço do curso
                                     </label>
@@ -319,6 +389,7 @@ $user = service('auth')->user();
                                             min="0"
                                             id="price_course"
                                             name="price_course"
+                                            value="<?= esc($draft->price_course ?? '') ?>"
                                             class="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-r-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                                             placeholder="Ex: 49.90">
                                     </div>
@@ -337,8 +408,9 @@ $user = service('auth')->user();
                                 <select name="status_course"
                                     id="status_course"
                                     class="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
-                                    <option value="Rascunho">Rascunho</option>
-                                    <option value="Publicado">Publicado</option>
+                                    <option value="Rascunho" <?= ($draft->status_course ?? '') === 'Rascunho' ? 'selected' : '' ?>>Rascunho</option>
+                                    <option value="Ativo" <?= ($draft->status_course ?? '') === 'Ativo' ? 'selected' : '' ?>>Ativo</option>
+                                    <option value="Arquivado" <?= ($draft->status_course ?? '') === 'Arquivado' ? 'selected' : '' ?>>Arquivado</option>
                                 </select>
                                 <p class="text-xs text-slate-500 dark:text-slate-400">
                                     Você pode manter o curso como rascunho e publicar depois.
@@ -400,6 +472,7 @@ $user = service('auth')->user();
 
                     <div class="order-1 sm:order-2 flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                         <button type="button"
+                            id="save-draft"
                             class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-slate-500 hover:bg-slate-600 text-white font-medium rounded-xl transition-all duration-300 transform hover:-translate-y-0.5">
                             <i class="bi bi-file-earmark"></i>
                             Salvar Rascunho
@@ -427,6 +500,10 @@ $user = service('auth')->user();
         let tags = [];
 
         const form = document.getElementById("courseForm");
+        const draftIdInput = document.getElementById("draft-id");
+        const saveDraftButton = document.getElementById("save-draft");
+        const draftCreateUrl = "<?= base_url('instructor/dashboard/novo_curso/rascunho') ?>";
+        const draftSaveBaseUrl = "<?= base_url('instructor/dashboard/novo_curso/rascunho') ?>";
 
         // Navegação / stepper / tabs
         const prevButton = document.getElementById("prev-step");
@@ -446,7 +523,7 @@ $user = service('auth')->user();
 
         // Módulos
         const modulesContainer = document.getElementById("modules-container");
-        let moduleIndex = 0;
+        let moduleIndex = modulesContainer ? modulesContainer.querySelectorAll(".module-card").length : 0;
 
         // Preço
         const priceSettings = document.getElementById("price-settings");
@@ -532,6 +609,13 @@ $user = service('auth')->user();
             }
         }
 
+        function hasExistingImage() {
+            return previewContainer &&
+                !previewContainer.classList.contains("hidden") &&
+                previewImg &&
+                previewImg.src;
+        }
+
         function validateCurrentStep() {
             switch (currentStep) {
                 case 1: {
@@ -552,7 +636,7 @@ $user = service('auth')->user();
                         alert("Por favor, preencha a descrição do curso.");
                         return false;
                     }
-                    if (!image) {
+                    if (!image && !hasExistingImage()) {
                         alert("Por favor, selecione uma imagem de capa para o curso.");
                         return false;
                     }
@@ -609,14 +693,66 @@ $user = service('auth')->user();
             if (tagsHidden) tagsHidden.value = JSON.stringify(tags);
         }
 
+        async function saveDraft({ validate = false, silent = false } = {}) {
+            if (!form) return false;
+            if (validate && !validateCurrentStep()) return false;
+
+            serializeModulesAndTags();
+
+            const currentDraftId = draftIdInput?.value?.trim();
+            const endpoint = currentDraftId ? `${draftSaveBaseUrl}/${currentDraftId}` : draftCreateUrl;
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                });
+
+                let payload = {};
+                try {
+                    payload = await response.json();
+                } catch (error) {
+                    payload = {};
+                }
+
+                if (!response.ok || !payload.ok) {
+                    if (!silent) {
+                        alert(payload.message || "Falha ao salvar rascunho.");
+                    }
+                    return false;
+                }
+
+                if (!currentDraftId && payload.id_course && draftIdInput) {
+                    draftIdInput.value = payload.id_course;
+                }
+
+                if (!silent) {
+                    alert("Rascunho salvo com sucesso.");
+                }
+
+                return true;
+            } catch (error) {
+                if (!silent) {
+                    alert("Falha ao salvar rascunho. Tente novamente.");
+                }
+                return false;
+            }
+        }
+
         // ======================
         // Navegação (próximo / anterior / clique em tabs / clique no stepper)
         // ======================
         if (nextButton) {
-            nextButton.addEventListener("click", () => {
+            nextButton.addEventListener("click", async () => {
                 if (!validateCurrentStep()) return;
 
                 if (currentStep < totalSteps) {
+                    const saved = await saveDraft({ silent: true });
+                    if (!saved) return;
                     currentStep++;
                     updateStepperUI();
                 } else {
@@ -892,15 +1028,21 @@ $user = service('auth')->user();
         });
 
         // ======================
-        // Auto-save (log simples)
+        // Auto-save
         // ======================
         let autoSaveTimer;
         document.addEventListener("input", () => {
             clearTimeout(autoSaveTimer);
             autoSaveTimer = setTimeout(() => {
-                console.log("Auto-saving (aqui você pode chamar fetch para salvar rascunho)...");
-            }, 5000);
+                saveDraft({ silent: true });
+            }, 2000);
         });
+
+        if (saveDraftButton) {
+            saveDraftButton.addEventListener("click", async () => {
+                await saveDraft({ silent: false });
+            });
+        }
 
         // inicializar UI
         updateStepperUI();

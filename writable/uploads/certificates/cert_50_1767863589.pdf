@@ -1,0 +1,890 @@
+<!-- DEBUG-VIEW START 5 APPPATH\Views\pages\student\certificates.php -->
+<!-- DEBUG-VIEW START 4 APPPATH\Views\layouts\master.php -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<script  id="debugbar_loader" data-time="1767684043.849479" src="http://academy-ci4.test/?debugbar"></script><script  id="debugbar_dynamic_script"></script><style  id="debugbar_dynamic_style"></style><script class="kint-rich-script">"use strict";(()=>{function m(n){if(!(n instanceof Element))throw new Error("Invalid argument to dedupeElement()");let t=n.ownerDocument,e=E(n);for(let s of t.querySelectorAll(e))n!==s&&s.parentNode.removeChild(s)}function d(n){return n instanceof Element?n.ownerDocument.contains(n):!1}function E(n){if(!(n instanceof Element))throw new Error("Invalid argument to buildClassSelector()");return[n.nodeName,...n.classList].join(".")}function f(n){if(!(n instanceof Element))throw new Error("Invalid argument to selectText()");let t=n.ownerDocument,e=t.getSelection(),s=t.createRange();s.selectNodeContents(n),e.removeAllRanges(),e.addRange(s)}function I(n,t){let e;return function(...s){clearTimeout(e),e=setTimeout(function(){n(...s)},t)}}function x(n){if(!(n instanceof Element))throw new Error("Invalid argument to offsetTop()");return n.offsetTop+(n.offsetParent?x(n.offsetParent):0)}var u=class n{static#e=new Set;static toggleSearchBox(t,e){let s=t.querySelector(".kint-search"),i=t.parentNode;if(s)if(s.classList.toggle("kint-show",e)){if(s.focus(),s.select(),!n.#e.has(s)){let r=i.querySelectorAll("dl").length,o=200;r>1e4&&(o=700),s.addEventListener("keyup",I(n.#t.bind(null,s),o)),n.#e.add(s)}n.#t(s)}else i.classList.remove("kint-search-root")}static#t(t){let e=t.closest(".kint-parent")?.parentNode;if(e)if(t.classList.contains("kint-show")&&t.value.length){let s=e.dataset.lastSearch;if(e.classList.add("kint-search-root"),s!==t.value){e.dataset.lastSearch=t.value,e.classList.remove("kint-search-match");for(let i of e.querySelectorAll(".kint-search-match"))i.classList.remove("kint-search-match");n.#s(e,t.value.toUpperCase())}}else e.classList.remove("kint-search-root")}static#s(t,e){let s=t.cloneNode(!0);for(let c of s.querySelectorAll(".access-path"))c.remove();if(!s.textContent.toUpperCase().includes(e))return;t.classList.add("kint-search-match");let i=t.firstElementChild;for(;i&&i.tagName!=="DT";)i=i.nextElementSibling;if(!i)return;let r=a.getChildContainer(i);if(!r)return;let o,l;for(let c of r.children)c.tagName==="DL"?n.#s(c,e):c.tagName==="UL"&&(c.classList.contains("kint-tabs")?o=c.children:c.classList.contains("kint-tab-contents")&&(l=c.children));if(!(!o||o.length!==l?.length))for(let c=o.length;c--;){let k=!1,F=!1;o[c].textContent.toUpperCase().includes(e)&&(k=!0);let O=l[c].cloneNode(!0);for(let v of O.querySelectorAll(".access-path"))v.remove();if(O.textContent.toUpperCase().includes(e)&&(k=!0,F=!0),k&&o[c].classList.add("kint-search-match"),F)for(let v of l[c].children)v.tagName==="DL"&&n.#s(v,e)}}};var g=class{static sort(t,e){let s=t.dataset.kintTableSort,i=parseInt(s)===e?-1:1,r=t.tBodies[0];[...r.rows].sort(function(o,l){o=o.cells[e].textContent.trim().toLocaleLowerCase(),l=l.cells[e].textContent.trim().toLocaleLowerCase();let c=0;return!isNaN(o)&&!isNaN(l)?(o=parseFloat(o),l=parseFloat(l),c=o-l):isNaN(o)&&!isNaN(l)?c=1:isNaN(l)&&!isNaN(o)?c=-1:c=(""+o).localeCompare(""+l),c*i}).forEach(o=>r.appendChild(o)),i<0?t.dataset.kintTableSort=null:t.dataset.kintTableSort=e}};var a=class n{#e;#t;#s;constructor(t){if(!(t instanceof h))throw new Error("Invalid argument to Rich.constructor()");this.#e=t,this.#e.runOnInit(this.#i.bind(this));let e=new q(this,t);new b(this,t.window,e)}#i(){let t=this.#e.window.document;if(d(this.#t)||(this.#t=t.querySelector("style.kint-rich-style")),this.#t&&m(this.#t),t.querySelector(".kint-rich.kint-file")){this.setupFolder(t);let e=this.#s.querySelector("dd.kint-foldout"),s=Array.from(t.querySelectorAll(".kint-rich.kint-file"));for(let i of s)i.parentNode!==e&&e.appendChild(i);this.#s.classList.add("kint-show")}}addToFolder(t){let e=t.closest(".kint-rich");if(!e)throw new Error("Bad addToFolder");let s=this.#e.window.document;if(this.setupFolder(s),this.folder.contains(t))throw new Error("Bad addToFolder");let i=this.#s.querySelector("dd.kint-foldout"),r=t.closest(".kint-parent, .kint-rich"),o=Array.from(e.querySelectorAll(".kint-folder-trigger"));if(e===r||e.querySelectorAll(".kint-rich > dl").length===1){for(let l of o)l.remove();e.classList.add("kint-file"),i.insertBefore(e,i.firstChild)}else{let l=s.createElement("div");l.classList.add("kint-rich"),l.classList.add("kint-file"),l.appendChild(r.closest(".kint-rich > dl"));let c=e.lastElementChild;c.matches(".kint-rich > footer")&&l.appendChild(c.cloneNode(!0));for(let k of o)k.remove();i.insertBefore(l,i.firstChild)}n.toggle(this.#s.querySelector(".kint-parent"),!0)}setupFolder(t){if(this.#s)d(this.#s)||(this.#s=t.querySelector(".kint-rich.kint-folder"));else{let e=t.createElement("template");e.innerHTML='<div class="kint-rich kint-folder"><dl><dt class="kint-parent"><nav></nav>Kint</dt><dd class="kint-foldout"></dd></dl></div>',this.#s=e.content.firstChild,t.body.appendChild(this.#s)}}get folder(){return d(this.#s)||(this.#s=this.#e.window.document.querySelector(".kint-rich.kint-folder")),this.#s&&m(this.#s),this.#s}isFolderOpen(){let t=this.#s?.querySelector("dd.kint-foldout");if(t)return t.previousSibling.classList.contains("kint-show")}static getChildContainer(t){let e=t.nextElementSibling;for(;e&&!e.matches("dd");)e=e.nextElementSibling;return e}static toggle(t,e){let s=n.getChildContainer(t);s&&(e=t.classList.toggle("kint-show",e),n.#n(s,e))}static switchTab(t){t.parentNode.getElementsByClassName("kint-active-tab")[0].classList.remove("kint-active-tab"),t.classList.add("kint-active-tab");let e=t,s=0;for(;e=e.previousElementSibling;)s++;let i=t.parentNode.nextSibling.children;for(let r=i.length;r--;)r===s?(i[r].classList.add("kint-show"),n.#n(i[r],!0)):i[r].classList.remove("kint-show")}static toggleChildren(t,e){let s=n.getChildContainer(t);if(!s)return;e===void 0&&(e=t.classList.contains("kint-show"));let i=Array.from(s.getElementsByClassName("kint-parent"));for(let r of i)r.classList.toggle("kint-show",e)}static toggleAccessPath(t,e){let s=t.querySelector(".access-path");s?.classList.toggle("kint-show",e)&&f(s)}static#n(t,e){if(t.children.length===2&&t.lastElementChild.matches("ul.kint-tab-contents"))for(let s of t.lastElementChild.children)s.matches("li.kint-show")&&(t=s);if(t.children.length===1&&t.firstElementChild.matches("dl")){let s=t.firstElementChild.firstElementChild;s?.classList?.contains("kint-parent")&&n.toggle(s,e)}}},b=class{#e;#t;#s;#i=null;#n=null;#o=0;constructor(t,e,s){this.#e=t,this.#t=s,this.#s=e,this.#s.addEventListener("click",this.#a.bind(this),!0)}#r(){clearTimeout(this.#i),this.#i=setTimeout(this.#l.bind(this),250)}#l(){clearTimeout(this.#i),this.#i=null,this.#n=null,this.#o=0}#c(){let t=this.#n;if(!t.matches(".kint-parent > nav"))return;let e=t.parentNode;if(this.#o===1)a.toggleChildren(e),this.#t.onTreeChanged(),this.#r(),this.#o=2;else if(this.#o===2){this.#l();let s=e.classList.contains("kint-show"),i=this.#e.folder?.querySelector(".kint-parent"),r=Array.from(this.#s.document.getElementsByClassName("kint-parent"));for(let o of r)o!==i&&o.classList.toggle("kint-show",s);this.#t.onTreeChanged(),this.#t.scrollToFocus()}}#a(t){if(this.#o){this.#c();return}let e=t.target;if(!e.closest(".kint-rich"))return;if(e.tagName==="DFN"&&f(e),e.tagName==="TH"){t.ctrlKey||g.sort(e.closest("table"),e.cellIndex);return}if(e.tagName==="LI"&&e.parentNode.className==="kint-tabs"){if(e.className!=="kint-active-tab"){let i=e.closest("dl")?.querySelector(".kint-parent > nav")??e;a.switchTab(e),this.#t.onTreeChanged(),this.#t.setCursor(i)}return}let s=e.closest("dt");if(e.tagName==="NAV")e.parentNode.tagName==="FOOTER"?(this.#t.setCursor(e),e.parentNode.classList.toggle("kint-show")):s?.classList.contains("kint-parent")&&(a.toggle(s),this.#t.onTreeChanged(),this.#t.setCursor(e),this.#r(),this.#o=1,this.#n=e);else if(e.classList.contains("kint-access-path-trigger"))s&&a.toggleAccessPath(s);else if(e.classList.contains("kint-search-trigger"))s?.matches(".kint-rich > dl > dt.kint-parent")&&u.toggleSearchBox(s);else if(e.classList.contains("kint-folder-trigger")){if(s?.matches(".kint-rich > dl > dt.kint-parent"))this.#e.addToFolder(e),this.#t.onTreeChanged(),this.#t.setCursor(s.querySelector("nav")),this.#t.scrollToFocus();else if(e.parentNode.tagName==="FOOTER"){let i=e.closest(".kint-rich").querySelector(".kint-parent > nav, .kint-rich > footer > nav");this.#e.addToFolder(e),this.#t.onTreeChanged(),this.#t.setCursor(i),this.#t.scrollToFocus()}}else e.classList.contains("kint-search")||(e.tagName==="PRE"&&t.detail===3?f(e):e.closest(".kint-source")&&t.detail===3?f(e.closest(".kint-source")):e.classList.contains("access-path")?f(e):e.tagName!=="A"&&s?.classList.contains("kint-parent")&&(a.toggle(s),this.#t.onTreeChanged(),this.#t.setCursor(s.querySelector("nav"))))}},j=65,G=68,A=70,S=72,K=74,D=75,p=76,V=83,P=9,T=13,B=27,L=32,N=37,R=38,C=39,H=40,M=".kint-rich .kint-parent > nav, .kint-rich > footer > nav, .kint-rich .kint-tabs > li:not(.kint-active-tab)",q=class{#e=[];#t=0;#s=!1;#i;#n;constructor(t,e){this.#i=t,this.#n=e.window,this.#n.addEventListener("keydown",this.#c.bind(this),!0),e.runOnInit(this.onTreeChanged.bind(this))}scrollToFocus(){let t=this.#e[this.#t];if(!t)return;let e=this.#i.folder;if(t===e?.querySelector(".kint-parent > nav"))return;let s=x(t);if(this.#i.isFolderOpen()){let i=e.querySelector("dd.kint-foldout");i.scrollTo(0,s-i.clientHeight/2)}else this.#n.scrollTo(0,s-this.#n.innerHeight/2)}onTreeChanged(){let t=this.#e[this.#t];this.#e=[];let e=this.#i.folder,s=e?.querySelector(".kint-parent > nav"),i=this.#n.document;this.#i.isFolderOpen()&&(i=e,this.#e.push(s));let r=Array.from(i.querySelectorAll(M));for(let o of r)o.offsetParent!==null&&o!==s&&this.#e.push(o);if(s&&!this.#i.isFolderOpen()&&this.#e.push(s),this.#e.length===0){this.#s=!1,this.#r();return}t&&this.#e.indexOf(t)!==-1?this.#t=this.#e.indexOf(t):this.#r()}setCursor(t){if(this.#i.isFolderOpen()&&!this.#i.folder.contains(t)||!t.matches(M))return!1;let e=this.#e.indexOf(t);if(e===-1&&(this.onTreeChanged(),e=this.#e.indexOf(t)),e!==-1){if(e!==this.#t)return this.#t=e,this.#r(),!0;this.#e[e]?.classList.remove("kint-weak-focus")}else console.error("setCursor failed to find target in list",t),console.info("Please report this as a bug in Kint at https://github.com/kint-php/kint");return!1}#o(t){if(this.#e.length===0)return this.#t=0,null;for(this.#t+=t;this.#t<0;)this.#t+=this.#e.length;for(;this.#t>=this.#e.length;)this.#t-=this.#e.length;return this.#r(),this.#t}#r(){let t=this.#n.document.querySelector(".kint-focused");t&&(t.classList.remove("kint-focused"),t.classList.remove("kint-weak-focus")),this.#s&&this.#e[this.#t]?.classList.add("kint-focused")}#l(t){let e=t.closest(".kint-rich .kint-parent ~ dd")?.parentNode.querySelector(".kint-parent > nav");e&&(this.setCursor(e),this.scrollToFocus())}#c(t){if(this.#s&&t.keyCode===B&&t.target.matches(".kint-search")){t.target.blur(),this.#r();return}if(t.target!==this.#n.document.body||t.altKey||t.ctrlKey)return;if(t.keyCode===G){if(this.#s)this.#s=!1;else{if(this.#s=!0,this.onTreeChanged(),this.#e.length===0){this.#s=!1;return}this.scrollToFocus()}this.#r(),t.preventDefault();return}else if(t.keyCode===B){this.#s&&(this.#s=!1,this.#r(),t.preventDefault());return}else if(!this.#s)return;t.preventDefault(),d(this.#e[this.#t])||this.onTreeChanged();let e=this.#e[this.#t];if([P,R,D,H,K].includes(t.keyCode)){t.keyCode===P?this.#o(t.shiftKey?-1:1):t.keyCode===R||t.keyCode===D?this.#o(-1):(t.keyCode===H||t.keyCode===K)&&this.#o(1),this.scrollToFocus();return}if(e.tagName==="LI"&&[L,T,C,p,N,S].includes(t.keyCode)){t.keyCode===L||t.keyCode===T?(a.switchTab(e),this.onTreeChanged()):t.keyCode===C||t.keyCode===p?this.#o(1):(t.keyCode===N||t.keyCode===S)&&this.#o(-1),this.scrollToFocus();return}if(e.parentNode.tagName==="FOOTER"&&e.closest(".kint-rich")){if(t.keyCode===L||t.keyCode===T)e.parentNode.classList.toggle("kint-show");else if(t.keyCode===N||t.keyCode===S)if(e.parentNode.classList.contains("kint-show"))e.parentNode.classList.remove("kint-show");else{this.#l(e.closest(".kint-rich"));return}else if(t.keyCode===C||t.keyCode===p)e.parentNode.classList.add("kint-show");else if(t.keyCode===A&&!this.#i.isFolderOpen()&&e.matches(".kint-rich > footer > nav")){let i=e.closest(".kint-rich").querySelector(".kint-parent > nav, .kint-rich > footer > nav");this.#i.addToFolder(e),this.onTreeChanged(),this.setCursor(i),this.scrollToFocus()}return}let s=e.closest(".kint-parent");if(s){if(t.keyCode===j){a.toggleAccessPath(s);return}if(t.keyCode===A){!this.#i.isFolderOpen()&&s.matches(".kint-rich:not(.kint-folder) > dl > .kint-parent")&&(this.#i.addToFolder(e),this.onTreeChanged(),this.setCursor(e),this.scrollToFocus());return}if(t.keyCode===V){let i=s.closest(".kint-rich > dl")?.querySelector(".kint-search")?.closest(".kint-parent");if(i){e.classList.add("kint-weak-focus"),u.toggleSearchBox(i,!0);return}}if(t.keyCode===L||t.keyCode===T){a.toggle(s),this.onTreeChanged();return}if([C,p,N,S].includes(t.keyCode)){let i=s.classList.contains("kint-show");if(t.keyCode===C||t.keyCode===p){i&&a.toggleChildren(s,!0),a.toggle(s,!0),this.onTreeChanged();return}else if(i){a.toggleChildren(s,!1),a.toggle(s,!1),this.onTreeChanged();return}else{this.#l(s);return}}}}};var y=class{#e;#t;constructor(t){if(!(t instanceof h))throw new Error("Invalid argument to Plain.constructor()");this.#e=t.window,t.runOnInit(this.#s.bind(this))}#s(){d(this.#t)||(this.#t=this.#e.document.querySelector("style.kint-plain-style")),this.#t&&m(this.#t)}};var w=class{#e;constructor(t){if(!(t instanceof h))throw new Error("Invalid argument to Microtime.constructor()");this.#e=t.window,t.runOnInit(this.#t.bind(this))}#t(){let t={},e=this.#e.document.querySelectorAll("[data-kint-microtime-group]");for(let s of e){let i=s.querySelector(".kint-microtime-lap");if(!i)continue;let r=s.dataset.kintMicrotimeGroup,o=parseFloat(i.textContent),l=parseFloat(s.querySelector(".kint-microtime-avg").textContent);t[r]??={min:o,max:o,avg:l},t[r].min>o&&(t[r].min=o),t[r].max<o&&(t[r].max=o),t[r].avg=l}for(let s of e){let i=s.querySelector(".kint-microtime-lap");if(!i)continue;let r=parseFloat(i.textContent),o=t[s.dataset.kintMicrotimeGroup];if(s.querySelector(".kint-microtime-avg").textContent=o.avg,!(r===o.min&&r===o.max))if(s.classList.add("kint-microtime-js"),r>o.avg){let l=(r-o.avg)/(o.max-o.avg);i.style.background="hsl("+(40-40*l)+", 100%, 65%)"}else{let l=0;o.avg!==o.min&&(l=(o.avg-r)/(o.avg-o.min)),i.style.background="hsl("+(40+80*l)+", 100%, 65%)"}}}};var U=Symbol(),h=class n{static#e=null;#t;#s=[];#i=new Set;static init(t){return n.#e??=new n(t,U),n.#e.#n(),n.#e.runOnLoad(n.#r),n.#e}get window(){return this.#t}constructor(t,e){if(U!==e)throw new Error("Kint constructor is private. Use Kint.init()");if(!(t instanceof Window))throw new Error("Invalid argument to Kint.init()");this.#t=t,this.runOnInit(this.#o.bind(this)),new y(this),new a(this),new w(this)}runOnLoad(t){if(this.#t.document.readyState==="complete")try{t()}catch{}else this.#t.addEventListener("load",t)}runOnInit(t){this.#s.push(t)}#n(){this.#t.document.currentScript&&(this.#i.add(E(window.document.currentScript)),window.document.currentScript.remove())}#o(){for(let t of this.#i.keys())for(let e of this.#t.document.querySelectorAll(t))e.remove()}static#r(){for(let t of n.#e.#s)t()}};window.Kint||(window.Kint=h);window.Kint.init(window);})();
+</script><style class="kint-rich-style">.kint-rich{--spacing: 4px;--nav-size: 15px;--backdrop-color: rgba(255, 255, 255, 0.9);--main-background: #e0eaef;--secondary-background: #c1d4df;--text-color: #1d1e1e;--variable-name-color: #1d1e1e;--variable-type-color: #0092db;--variable-type-color-hover: #5cb730;--border-color: #b6cedb;--border-color-hover: #0092db;--border: 1px solid var(--border-color);--foldout-max-size: calc(100vh - 100px);--foldout-zindex: 999999;--caret-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 150'><g stroke-width='2' fill='%23FFF'><path d='M1 1h28v28H1zm5 14h18m-9 9V6M1 61h28v28H1zm5 14h18' stroke='%23379'/><path d='M1 31h28v28H1zm5 14h18m-9 9V36M1 91h28v28H1zm5 14h18' stroke='%235A3'/><path d='M1 121h28v28H1zm5 5l18 18m-18 0l18-18' stroke='%23CCC'/></g></svg>");--ap-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><g stroke='%23000' fill='transparent'><path d='M2 8h3m3 3v3M8 2v3m3 3h3M3 8' stroke-width='2' stroke-linecap='round'/><circle stroke-width='1.5' r='4.5' cx='8' cy='8'/></g></svg>");--folder-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M2 2h4l2 2h6v9H2V2h2' stroke-width='2' stroke='%23000' fill='transparent' stroke-linejoin='round'/></svg>");--search-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><g stroke='%23000' fill='transparent'><path d='M2 14l3-3' stroke-linecap='round' stroke-width='3'/><circle stroke-width='2' r='5' cx='9' cy='7'/></g></svg>");font-size:13px;overflow-x:auto;white-space:nowrap;background:var(--backdrop-color);direction:ltr;contain:content}.kint-rich.kint-folder{position:fixed;bottom:0;left:0;right:0;z-index:var(--foldout-zindex);width:100%;margin:0;display:block}.kint-rich.kint-folder dd.kint-foldout{max-height:var(--foldout-max-size);padding-right:calc(var(--spacing)*2);overflow-y:scroll;display:none}.kint-rich.kint-folder dd.kint-foldout.kint-show{display:block}.kint-rich::selection{background:var(--border-color-hover);color:var(--text-color)}.kint-rich .kint-focused{box-shadow:0 0 3px 3px var(--variable-type-color-hover)}.kint-rich .kint-focused.kint-weak-focus{box-shadow:0 0 3px 1px color-mix(in srgb, var(--variable-type-color-hover) 50%, transparent)}.kint-rich,.kint-rich::before,.kint-rich::after,.kint-rich *,.kint-rich *::before,.kint-rich *::after{box-sizing:border-box;border-radius:0;color:var(--text-color);float:none !important;font-family:Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,serif;line-height:15px;margin:0;padding:0;text-align:left}.kint-rich{margin:calc(var(--spacing)*2) 0}.kint-rich dt,.kint-rich dl{width:auto}.kint-rich dt,.kint-rich div.access-path{background:var(--main-background);border:var(--border);color:var(--text-color);display:block;font-weight:bold;list-style:none outside none;overflow:auto;padding:var(--spacing)}.kint-rich dt:hover,.kint-rich div.access-path:hover{border-color:var(--border-color-hover)}.kint-rich>dl dl{padding:0 0 0 calc(var(--spacing)*3)}.kint-rich dt.kint-parent>nav,.kint-rich>footer>nav{background:var(--caret-image) no-repeat scroll 0 0/var(--nav-size) 75px rgba(0,0,0,0);cursor:pointer;display:inline-block;height:var(--nav-size);width:var(--nav-size);margin-right:3px;vertical-align:middle}.kint-rich dt.kint-parent:hover>nav,.kint-rich>footer>nav:hover{background-position:0 25%}.kint-rich dt.kint-parent.kint-show>nav,.kint-rich>footer.kint-show>nav{background-position:0 50%}.kint-rich dt.kint-parent.kint-show:hover>nav,.kint-rich>footer.kint-show>nav:hover{background-position:0 75%}.kint-rich dt.kint-parent.kint-locked>nav{background-position:0 100%}.kint-rich dt.kint-parent+dd{display:none;border-left:1px dashed var(--border-color);contain:strict}.kint-rich dt.kint-parent.kint-show+dd{display:block;contain:content}.kint-rich var,.kint-rich var a{color:var(--variable-type-color);font-style:normal}.kint-rich dt:hover var,.kint-rich dt:hover var a{color:var(--variable-type-color-hover)}.kint-rich dfn{font-style:normal;font-family:monospace;color:var(--variable-name-color)}.kint-rich pre{color:var(--text-color);margin:0 0 0 calc(var(--spacing)*3);padding:5px;overflow-y:hidden;border-top:0;border:var(--border);background:var(--main-background);display:block;word-break:normal}.kint-rich .kint-access-path-trigger,.kint-rich .kint-folder-trigger,.kint-rich .kint-search-trigger{background:color-mix(in srgb, var(--text-color) 80%, transparent);border-radius:3px;padding:2px;height:var(--nav-size);width:var(--nav-size);font-size:var(--nav-size);margin-left:5px;font-weight:bold;text-align:center;line-height:1;float:right !important;cursor:pointer;position:relative;overflow:hidden}.kint-rich .kint-access-path-trigger::before,.kint-rich .kint-folder-trigger::before,.kint-rich .kint-search-trigger::before{display:block;content:"";width:100%;height:100%;background:var(--main-background);mask:center/contain no-repeat alpha}.kint-rich .kint-access-path-trigger:hover,.kint-rich .kint-folder-trigger:hover,.kint-rich .kint-search-trigger:hover{background:var(--main-background)}.kint-rich .kint-access-path-trigger:hover::before,.kint-rich .kint-folder-trigger:hover::before,.kint-rich .kint-search-trigger:hover::before{background:var(--text-color)}.kint-rich .kint-access-path-trigger::before{mask-image:var(--ap-image)}.kint-rich .kint-folder-trigger::before{mask-image:var(--folder-image)}.kint-rich .kint-search-trigger::before{mask-image:var(--search-image)}.kint-rich input.kint-search{display:none;border:var(--border);border-top-width:0;border-bottom-width:0;padding:var(--spacing);float:right !important;margin:calc(var(--spacing)*-1) 0;color:var(--variable-name-color);background:var(--secondary-background);height:calc(var(--nav-size) + var(--spacing)*2);width:calc(var(--nav-size)*10);position:relative;z-index:100}.kint-rich input.kint-search.kint-show{display:block}.kint-rich .kint-search-root ul.kint-tabs>li:not(.kint-search-match){background:var(--secondary-background);filter:saturate(0);opacity:.5}.kint-rich .kint-search-root dl:not(.kint-search-match){opacity:.5}.kint-rich .kint-search-root dl:not(.kint-search-match)>dt{background:var(--main-background);filter:saturate(0)}.kint-rich .kint-search-root dl:not(.kint-search-match) dl,.kint-rich .kint-search-root dl:not(.kint-search-match) ul.kint-tabs>li:not(.kint-search-match){opacity:1}.kint-rich div.access-path{background:var(--secondary-background);display:none;margin-top:5px;padding:4px;white-space:pre}.kint-rich div.access-path.kint-show{display:block}.kint-rich footer{padding:0 3px 3px;font-size:9px;background:rgba(0,0,0,0)}.kint-rich footer>.kint-folder-trigger{background:rgba(0,0,0,0)}.kint-rich footer>.kint-folder-trigger::before{background:var(--text-color)}.kint-rich footer nav{height:10px;width:10px;background-size:10px 50px}.kint-rich footer>ol{display:none;margin-left:32px}.kint-rich footer.kint-show>ol{display:block}.kint-rich a{color:var(--text-color);text-shadow:none;text-decoration:underline}.kint-rich a:hover{color:var(--variable-name-color);border-bottom:1px dotted var(--variable-name-color)}.kint-rich ul{list-style:none;padding-left:calc(var(--spacing)*3)}.kint-rich ul:not(.kint-tabs) li{border-left:1px dashed var(--border-color)}.kint-rich ul:not(.kint-tabs) li>dl{border-left:none}.kint-rich ul.kint-tabs{margin:0 0 0 calc(var(--spacing)*3);padding-left:0;background:var(--main-background);border:var(--border);border-top:0}.kint-rich ul.kint-tabs>li{background:var(--secondary-background);border:var(--border);cursor:pointer;display:inline-block;height:calc(var(--spacing)*6);margin:calc(var(--spacing)/2);padding:0 calc(2px + var(--spacing)*2.5);vertical-align:top}.kint-rich ul.kint-tabs>li:hover,.kint-rich ul.kint-tabs>li.kint-active-tab:hover{border-color:var(--border-color-hover);color:var(--variable-type-color-hover)}.kint-rich ul.kint-tabs>li.kint-active-tab{background:var(--main-background);border-top:0;margin-top:-1px;height:27px;line-height:24px}.kint-rich ul.kint-tabs>li:not(.kint-active-tab){line-height:calc(var(--spacing)*5)}.kint-rich ul.kint-tabs li+li{margin-left:0}.kint-rich ul.kint-tab-contents>li{display:none;contain:strict}.kint-rich ul.kint-tab-contents>li.kint-show{display:block;contain:content}.kint-rich dt:hover+dd>ul>li.kint-active-tab{border-color:var(--border-color-hover);color:var(--variable-type-color-hover)}.kint-rich dt>.kint-color-preview{width:var(--nav-size);height:var(--nav-size);display:inline-block;vertical-align:middle;margin-left:10px;border:var(--border);background-color:#ccc;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><path fill="%23FFF" d="M0 0h1v2h1V1H0z"/></svg>');background-size:min(20px,100%)}.kint-rich dt>.kint-color-preview:hover{border-color:var(--border-color-hover)}.kint-rich dt>.kint-color-preview>div{width:100%;height:100%}.kint-rich table{border-collapse:collapse;empty-cells:show;border-spacing:0}.kint-rich table *{font-size:12px}.kint-rich table dt{background:none;padding:calc(var(--spacing)/2)}.kint-rich table dt .kint-parent{min-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.kint-rich table td,.kint-rich table th{border:var(--border);padding:calc(var(--spacing)/2);vertical-align:center}.kint-rich table th{cursor:alias}.kint-rich table td:first-child,.kint-rich table th{font-weight:bold;background:var(--secondary-background);color:var(--variable-name-color)}.kint-rich table td{background:var(--main-background);white-space:pre}.kint-rich table td>dl{padding:0}.kint-rich table pre{border-top:0;border-right:0}.kint-rich table thead th:first-child{background:none;border:0}.kint-rich table tr:hover>td{box-shadow:0 0 1px 0 var(--border-color-hover) inset}.kint-rich table tr:hover var{color:var(--variable-type-color-hover)}.kint-rich table ul.kint-tabs li.kint-active-tab{height:20px;line-height:17px}.kint-rich pre.kint-source{margin-left:-1px}.kint-rich pre.kint-source[data-kint-filename]:before{display:block;content:attr(data-kint-filename);margin-bottom:var(--spacing);padding-bottom:var(--spacing);border-bottom:1px solid var(--secondary-background)}.kint-rich pre.kint-source>div:before{display:inline-block;content:counter(kint-l);counter-increment:kint-l;border-right:1px solid var(--border-color-hover);padding-right:calc(var(--spacing)*2);margin-right:calc(var(--spacing)*2)}.kint-rich pre.kint-source>div.kint-highlight{background:var(--secondary-background)}.kint-rich .kint-microtime-js .kint-microtime-lap{text-shadow:-1px 0 var(--border-color-hover),0 1px var(--border-color-hover),1px 0 var(--border-color-hover),0 -1px var(--border-color-hover);color:var(--main-background);font-weight:bold}input.kint-note-input{width:100%}.kint-rich{--main-background: #f8f8f8;--secondary-background: #f8f8f8;--variable-type-color: #06f;--variable-type-color-hover: #f00;--border-color: #d7d7d7;--border-color-hover: #aaa;--alternative-background: #fff;--highlight-color: #cfc;--caret-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 150'><path d='M6 7h18l-9 15zm0 30h18l-9 15zm0 45h18l-9-15zm0 30h18l-9-15zm0 12l18 18m-18 0l18-18' fill='%23555'/><path d='M6 126l18 18m-18 0l18-18' stroke-width='2' stroke='%23555'/></svg>")}.kint-rich .kint-focused{box-shadow:0 0 3px 2px var(--variable-type-color-hover)}.kint-rich dt{font-weight:normal}.kint-rich dt.kint-parent{margin-top:4px}.kint-rich dl dl{margin-top:4px;padding-left:25px;border-left:none}.kint-rich>dl>dt{background:var(--secondary-background)}.kint-rich ul{margin:0;padding-left:0}.kint-rich ul:not(.kint-tabs)>li{border-left:0}.kint-rich ul.kint-tabs{background:var(--secondary-background);border:var(--border);border-width:0 1px 1px 1px;padding:4px 0 0 12px;margin-left:-1px;margin-top:-1px}.kint-rich ul.kint-tabs li,.kint-rich ul.kint-tabs li+li{margin:0 0 0 4px}.kint-rich ul.kint-tabs li{border-bottom-width:0;height:calc(var(--spacing)*6 + 1px)}.kint-rich ul.kint-tabs li:first-child{margin-left:0}.kint-rich ul.kint-tabs li.kint-active-tab{border-top:var(--border);background:var(--alternative-background);font-weight:bold;padding-top:0;border-bottom:1px solid var(--alternative-background) !important;margin-bottom:-1px}.kint-rich ul.kint-tabs li.kint-active-tab:hover{border-bottom:1px solid var(--alternative-background)}.kint-rich ul>li>pre{border:var(--border)}.kint-rich dt:hover+dd>ul{border-color:var(--border-color-hover)}.kint-rich pre{background:var(--alternative-background);margin-top:4px;margin-left:25px}.kint-rich .kint-source{margin-left:-1px}.kint-rich .kint-source .kint-highlight{background:var(--highlight-color)}.kint-rich .kint-parent.kint-show>.kint-search{border-bottom-width:1px}.kint-rich table td{background:var(--alternative-background)}.kint-rich table td>dl{padding:0;margin:0}.kint-rich table td>dl>dt.kint-parent{margin:0}.kint-rich table td:first-child,.kint-rich table td,.kint-rich table th{padding:2px 4px}.kint-rich table dd,.kint-rich table dt{background:var(--alternative-background)}.kint-rich table tr:hover>td{box-shadow:none;background:var(--highlight-color)}
+</style>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificados</title>
+    <link rel="stylesheet" href="http://academy-ci4.test/assets/css/output.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Stack+Sans+Text:wght@200..700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+    <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+    <link rel="shortcut icon" href="http://academy-ci4.test/assets/img/favicon.png" width="100%" type="image/x-icon">
+
+    <style>
+        body {
+            font-family: 'Stack Sans Text', sans-serif !important;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-900 transition-all duration-500 ease-in-out overflow-x-hidden prevent-overflow">
+
+    <div class="flex h-screen flex-container">
+
+        
+            
+                <!-- DEBUG-VIEW START 1 APPPATH\Views\pages\student\partials\sidebar.php -->
+<!-- BACKDROP MOBILE -->
+<div id="sidebar-backdrop" class="fixed inset-0 z-30 bg-black/40 hidden lg:hidden">
+</div>
+
+<!-- SIDEBAR -->
+<aside id="sidebar" class="fixed inset-y-0 transition-all duration-500 ease-in-out left-0 z-40 flex flex-col bg-slate-900 text-slate-200 dark:text-slate-100 w-70 transform -translate-x-full transition-transform duration-200 lg:translate-x-0 lg:static lg:w-70 border-r border-slate-200 dark:border-slate-800 bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900">
+    <!-- TOPO: LOGO + BOTÕES -->
+    <div class="flex h-16 items-center justify-between px-4 pt-5">
+        <div class="gap-2">
+            <div class="w-11">
+                <img id="favicon" class="hidden" src="http://academy-ci4.test/assets/img/favicon.png" alt="">
+            </div>
+
+            <div id="logo-text" class="flex flex-col">
+                <!-- Logo para tema claro -->
+                <span id="logo-light" class="font-semibold leading-tight w-36">
+                    <img src="http://academy-ci4.test/assets/img/logo.png" alt="">
+                </span>
+
+                <!-- Logo para tema escuro -->
+                <span id="logo-dark" class="font-semibold leading-tight w-36 hidden">
+                    <img src="http://academy-ci4.test/assets/img/logo-blue.png" alt="">
+                </span>
+            </div>
+
+        </div>
+
+        <div class="flex items-center gap-2">
+            <!-- FECHAR MOBILE -->
+            <button
+                id="close-sidebar"
+                class="inline-flex lg:hidden h-8 w-8 items-center justify-center rounded-lg hover:bg-slate-800">
+                ✕
+            </button>
+        </div>
+    </div>
+
+    <!-- SCROLL ÁREA -->
+    <div class="flex-1 overflow-y-auto py-3 prevent-overflow">
+
+        <!-- SEÇÃO DASHBOARD -->
+        <div class="px-3 mt-6">
+            <p
+                class="sidebar-label mb-1 px-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+                Menu
+            </p>
+
+            <nav class="space-y-1">
+
+                                    
+                    <!-- LINKS -->
+                    <a
+                        href="http://academy-ci4.test/student/dashboard"
+                        id="side-link"
+                        class="side-link flex  items-center rounded-lg px-2 py-2 text-slate-900 dark:text-slate-50 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-blue-500 transition">
+                        <span class="flex h-8 w-8 items-center justify-center">
+                            <i class="bi bi-house-door"></i>
+                        </span>
+                        <div class="sidebar-label flex flex-col ml-2">
+                            <span class="text-xs font-medium">Início</span>
+                        </div>
+                    </a>
+
+                                    
+                    <!-- LINKS -->
+                    <a
+                        href="http://academy-ci4.test/student/dashboard/inscricoes"
+                        id="side-link"
+                        class="side-link flex  items-center rounded-lg px-2 py-2 text-slate-900 dark:text-slate-50 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-blue-500 transition">
+                        <span class="flex h-8 w-8 items-center justify-center">
+                            <i class="bi bi-book"></i>
+                        </span>
+                        <div class="sidebar-label flex flex-col ml-2">
+                            <span class="text-xs font-medium">Meus Cursos</span>
+                        </div>
+                    </a>
+
+                                    
+                    <!-- LINKS -->
+                    <a
+                        href="http://academy-ci4.test/student/dashboard/cursos"
+                        id="side-link"
+                        class="side-link flex  items-center rounded-lg px-2 py-2 text-slate-900 dark:text-slate-50 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-blue-500 transition">
+                        <span class="flex h-8 w-8 items-center justify-center">
+                            <i class="bi bi-book"></i>
+                        </span>
+                        <div class="sidebar-label flex flex-col ml-2">
+                            <span class="text-xs font-medium">Todos Cursos</span>
+                        </div>
+                    </a>
+
+                                    
+                    <!-- LINKS -->
+                    <a
+                        href="http://academy-ci4.test/student/dashboard/perfil"
+                        id="side-link"
+                        class="side-link flex  items-center rounded-lg px-2 py-2 text-slate-900 dark:text-slate-50 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-blue-500 transition">
+                        <span class="flex h-8 w-8 items-center justify-center">
+                            <i class="bi bi-person-circle"></i>
+                        </span>
+                        <div class="sidebar-label flex flex-col ml-2">
+                            <span class="text-xs font-medium">Perfil</span>
+                        </div>
+                    </a>
+
+                                    
+                    <!-- LINKS -->
+                    <a
+                        href="http://academy-ci4.test/student/dashboard/certificados"
+                        id="side-link"
+                        class="side-link flex active items-center rounded-lg px-2 py-2 text-slate-900 dark:text-slate-50 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-blue-500 transition">
+                        <span class="flex h-8 w-8 items-center justify-center">
+                            <i class="bi bi-folder"></i>
+                        </span>
+                        <div class="sidebar-label flex flex-col ml-2">
+                            <span class="text-xs font-medium">Certificados</span>
+                        </div>
+                    </a>
+
+                
+                <!-- LINKS FIXOS -->
+
+                <div class="absolute bottom-2">
+                    <a
+                        href="#"
+                        id="logoutBtn"
+                        data-href="/logout/"
+                        class="side-link flex w-full active items-center rounded-lg px-2 py-2 text-red-500 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-white transition">
+                        <span class="flex h-8 w-8 items-center justify-center">
+                            <i class="bi bi-box-arrow-left"></i>
+                        </span>
+                        <div class="sidebar-label flex flex-col ml-2">
+                            <span class="text-xs font-medium">Sair da conta</span>
+                        </div>
+                    </a>
+
+                    <a
+                        href="/"
+                        id="side-link"
+                        class="side-link flex active items-center rounded-lg px-2 py-2 text-slate-900 dark:text-slate-50 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-white transition">
+                        <span class="flex h-8 w-8 items-center justify-center">
+                            <i class="bi bi-box-arrow-left"></i>
+                        </span>
+                        <div class="sidebar-label flex flex-col ml-2">
+                            <span class="text-xs font-medium">Ir para página inicial</span>
+                        </div>
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </div>
+</aside>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const links = document.querySelectorAll('#sidebar .side-link');
+
+        // página atual sem query string
+        const currentPage = window.location.pathname.split('/').pop().split('?')[0];
+
+        links.forEach(link => {
+
+            const href = link.getAttribute('href');
+            if (!href) return;
+
+            // Pega apenas o arquivo final do link (ex: meusCursos.php)
+            const cleanHref = href.split('/').pop().split('?')[0];
+
+            if (cleanHref === currentPage) {
+                link.classList.add(
+                    'bg-slate-200/60',
+                    'dark:bg-slate-700/60',
+                    'text-blue-500'
+                );
+            }
+
+            link.addEventListener('click', () => {
+                links.forEach(l =>
+                    l.classList.remove(
+                        'bg-slate-200/60',
+                        'dark:bg-slate-700/60',
+                        'text-blue-500'
+                    )
+                );
+                link.classList.add(
+                    'bg-slate-200/60',
+                    'dark:bg-slate-700/60',
+                    'text-blue-500'
+                );
+            });
+
+        });
+
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', function(event) {
+        event.preventDefault(); // impede sair direto
+
+        const url = this.getAttribute('data-href');
+
+        Swal.fire({
+            title: "Tem certeza?",
+            text: "Deseja realmente sair da sua conta?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sim, sair",
+            cancelButtonText: "Cancelar",
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = url; // agora sim faz o logout
+            }
+        });
+    });
+</script>
+<!-- DEBUG-VIEW ENDED 1 APPPATH\Views\pages\student\partials\sidebar.php -->
+
+                <!-- CONTEÚDO PRINCIPAL -->
+                <div id="main-content" class="flex flex-1 flex-col transition-all duration-200 prevent-overflow">
+
+                    <!-- DEBUG-VIEW START 2 APPPATH\Views\pages\student\partials\navbar.php -->
+
+<header
+    class="flex py-3 items-center justify-between border-b border-white bg-white dark:bg-slate-800/50 dark:border-slate-800 px-4 shadow-sm transition-all duration-500 ease-in-out">
+    <div class="flex items-center gap-2">
+
+        <!-- COLAPSAR DESKTOP -->
+        <button
+            id="collapse-desktop"
+            class="hidden lg:inline-flex w-11 h-11 transition-all duration-500 ease-in-out items-center border border-slate-300 text-slate-500 dark:border-slate-700 justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-white"
+            title="Colapsar sidebar">
+            <i class="bi bi-list"></i>
+        </button>
+
+        <!-- ABRIR SIDEBAR NO MOBILE -->
+        <button
+            id="open-sidebar"
+            class="inline-flex lg:hidden h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:bg-">
+            ☰
+        </button>
+
+        <div class="hidden md:flex items-center gap-2">
+            <input
+                type="text"
+                placeholder="Pesquisar..."
+                class="w-70 rounded-lg border text-slate-400 dark:text-white bg-white border-slate-300 dark:border-slate-700 dark:bg-slate-900 bg-slate-50 px-3 py-3.5 text-xs outline-none focus:bg-slate-900 :focus:bg-white" />
+        </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+        <button
+            id="theme-toggle"
+            class="inline-flex px-[11px] py-1.5 items-center cursor-pointer justify-center rounded-full border border-slate-200 dark:border-slate-700
+                            bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-400 text-lg hover:bg-slate-50 dark:hover:bg-slate-800"
+            aria-label="Trocar tema">
+            <i id="theme-toggle-icon" class="bi bi-moon-stars"></i>
+        </button>
+
+        <div class="relative">
+            <!-- <button class="relative inline-flex px-[12px] py-1.5 cursor-pointer items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-400 text-lg hover:bg-slate-50 dark:hover:bg-slate-800 dropdown-toggle">
+                <i class="bi bi-bell"></i>
+                <span class="absolute -top-0 -right-0 flex h-3 w-3">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                </span>
+            </button> -->
+
+            <!-- Dropdown Menu -->
+            <div class="absolute right-0 top-full mt-2 w-80 rounded-2xl bg-white dark:bg-slate-800 shadow-xl border border-slate-200 dark:border-slate-700 z-50 hidden dropdown-menu transform origin-top-right transition-all duration-200 ease-out opacity-0 scale-95">
+                <!-- Cabeçalho do Dropdown -->
+                <div class="p-4 border-b border-slate-200 dark:border-slate-700">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-semibold text-slate-800 dark:text-white">Notificações</h3>
+                        <span class="text-xs bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 px-2 py-1 rounded-full">12 novas</span>
+                    </div>
+                </div>
+
+                <!-- Lista de Notificações -->
+                <div class="max-h-96 overflow-y-auto">
+                    <!-- Notificação 1 -->
+                    <div class="p-4 border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors duration-150">
+                        <div class="flex gap-3">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center flex-shrink-0">
+                                <i class="bi bi-house text-blue-600 dark:text-blue-400"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-slate-800 dark:text-white truncate">
+                                    Nova visita agendada
+                                </p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                    T3 Sommerschield - Hoje às 15:30
+                                </p>
+                                <span class="inline-block mt-2 text-xs text-blue-600 dark:text-blue-400">
+                                    Há 5 minutos
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notificação 2 -->
+                    <div class="p-4 border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors duration-150">
+                        <div class="flex gap-3">
+                            <div class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center flex-shrink-0">
+                                <i class="bi bi-cash-coin text-emerald-600 dark:text-emerald-400"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-slate-800 dark:text-white truncate">
+                                    Pagamento recebido
+                                </p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                    Marta Zimba - 25.000 MT
+                                </p>
+                                <span class="inline-block mt-2 text-xs text-emerald-600 dark:text-emerald-400">
+                                    Há 1 hora
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notificação 3 -->
+                    <div class="p-4 border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors duration-150">
+                        <div class="flex gap-3">
+                            <div class="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900 flex items-center justify-center flex-shrink-0">
+                                <i class="bi bi-tools text-amber-600 dark:text-amber-400"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-slate-800 dark:text-white truncate">
+                                    Manutenção solicitada
+                                </p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                    Moradia Matola - Torneira com vazamento
+                                </p>
+                                <span class="inline-block mt-2 text-xs text-amber-600 dark:text-amber-400">
+                                    Há 2 horas
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notificação 4 -->
+                    <div class="p-4 hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors duration-150">
+                        <div class="flex gap-3">
+                            <div class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center flex-shrink-0">
+                                <i class="bi bi-chat-dots text-purple-600 dark:text-purple-400"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-slate-800 dark:text-white truncate">
+                                    Nova mensagem
+                                </p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                    Carlos Manuel - "Gostaria de agendar uma visita..."
+                                </p>
+                                <span class="inline-block mt-2 text-xs text-purple-600 dark:text-purple-400">
+                                    Há 3 horas
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rodapé do Dropdown -->
+                <div class="p-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-b-2xl">
+                    <a href="../notificacoes.php" class="w-full text-center text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium py-2 transition-colors duration-150">
+                        Ver todas as notificações
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <a href="http://academy-ci4.test/student/dashboard/perfil"
+            class="flex w-full items-center gap-3 rounded-lg py-2 text-xs text-slate-200 pointer">
+            <span
+                class="flex px-[11px] py-3 rounded-full items-center justify-center rounded-full bg-slate-700 text-[14px] font-semibold">
+                EM
+            </span>
+            <div class="sidebar-label hidden sm:block text-left">
+                <p class="text-xs font-medium text-slate-800 dark:text-white">Hemel Aly</p>
+                <p class="text-[11px] text-slate-400">Ver Perfil</p>
+            </div>
+        </a>
+    </div>
+</header>
+<!-- DEBUG-VIEW ENDED 2 APPPATH\Views\pages\student\partials\navbar.php -->
+
+                    <!-- CONTEÚDO -->
+                    <main class="flex-1 overflow-y-auto p-6 md:p-10 space-y-6 w-full max-w-full overflow-x-hidden">
+
+                        
+                        
+                        
+                        
+                        
+                        <style>
+    /* Estilos para o modal de visualização */
+    .modal-enter {
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    /* Estilos para os certificados */
+    .certificate-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .certificate-card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+
+<div class="h-full text-dark-800 dark:text-white transition-colors duration-300">
+    <div class="min-h-screen flex flex-col">
+
+        <!-- Conteúdo principal -->
+        <main class="flex-grow container mx-auto py-2 px-4">
+            <div class="mb-10">
+                <h2 class="text-3xl font-bold mb-2">Seus Certificados de Conclusão</h2>
+                <p class="text-gray-600 dark:text-gray-400">Visualize e faça download dos seus certificados de cursos concluídos</p>
+
+                <!-- Estatísticas -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 mb-8">
+                    <div class="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-5 border border-blue-100 dark:border-blue-800">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-blue-700 dark:text-blue-300">Total de Certificados</p>
+                                <p class="text-3xl font-bold mt-1">8</p>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center">
+                                <i class="fas fa-certificate text-blue-600 dark:text-blue-300 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-green-50 dark:bg-green-900/30 rounded-xl p-5 border border-green-100 dark:border-green-800">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-green-700 dark:text-green-300">Concluídos Recentemente</p>
+                                <p class="text-3xl font-bold mt-1">3</p>
+                            </div>
+                            <div class="w-12 h-12 bg-green-100 dark:bg-green-800 rounded-full flex items-center justify-center">
+                                <i class="fas fa-calendar-check text-green-600 dark:text-green-300 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-purple-50 dark:bg-purple-900/30 rounded-xl p-5 border border-purple-100 dark:border-purple-800">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-purple-700 dark:text-purple-300">Download Disponíveis</p>
+                                <p class="text-3xl font-bold mt-1">8</p>
+                            </div>
+                            <div class="w-12 h-12 bg-purple-100 dark:bg-purple-800 rounded-full flex items-center justify-center">
+                                <i class="fas fa-download text-purple-600 dark:text-purple-300 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div class="mb-4 md:mb-0">
+                    <h3 class="text-xl font-semibold">Todos os Certificados</h3>
+                    <p class="text-gray-600 dark:text-gray-400">Clique em um certificado para visualizá-lo</p>
+                </div>
+
+                <div class="flex flex-wrap gap-3">
+                    <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition flex items-center space-x-2">
+                        <i class="fas fa-filter"></i>
+                        <span>Filtrar</span>
+                    </button>
+
+                    <button class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition flex items-center space-x-2">
+                        <i class="fas fa-sort"></i>
+                        <span>Ordenar</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Grid de certificados -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8" id="certificates-grid">
+                <!-- Os certificados serão carregados aqui via JavaScript -->
+            </div>
+        </main>
+
+    </div>
+
+    <!-- Modal para visualização de certificado -->
+    <div id="certificate-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden modal-enter">
+        <div class="absolute inset-0 bg-black bg-opacity-70"></div>
+
+        <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-11/12 max-w-4xl max-h-[90vh] overflow-hidden z-10">
+            <div class="flex justify-between items-center p-5 border-b border-gray-200 dark:border-gray-700">
+                <h3 id="modal-title" class="text-xl font-bold">Visualização do Certificado</h3>
+                <button id="close-modal" class="text-gray-500 hover:text-gray-800 dark:hover:text-gray-300 text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="p-5 overflow-y-auto max-h-[70vh]">
+                <div class="flex flex-col items-center">
+                    <!-- Imagem do certificado no modal -->
+                    <img id="modal-image" src="" alt="Certificado" class="w-full max-w-2xl rounded-lg shadow-lg mb-6">
+
+                    <!-- Detalhes do certificado -->
+                    <div class="w-full max-w-2xl grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Curso</p>
+                            <p id="modal-course" class="font-semibold">-</p>
+                        </div>
+
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Data de Conclusão</p>
+                            <p id="modal-date" class="font-semibold">-</p>
+                        </div>
+
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Código do Certificado</p>
+                            <p id="modal-code" class="font-semibold font-mono">-</p>
+                        </div>
+
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Carga Horária</p>
+                            <p id="modal-hours" class="font-semibold">-</p>
+                        </div>
+                    </div>
+
+                    <!-- Botões de ação -->
+                    <div class="flex flex-wrap justify-center gap-4">
+                        <button id="download-pdf" class="px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition flex items-center space-x-2">
+                            <i class="fas fa-file-pdf"></i>
+                            <span>Baixar PDF</span>
+                        </button>
+
+                        <button id="share-certificate" class="px-5 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition flex items-center space-x-2">
+                            <i class="fas fa-share-alt"></i>
+                            <span>Compartilhar</span>
+                        </button>
+
+                        <button id="print-certificate" class="px-5 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition flex items-center space-x-2">
+                            <i class="fas fa-print"></i>
+                            <span>Imprimir</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dados dos certificados
+        const certificates = [{
+                id: 1,
+                title: "JavaScript Moderno ES6+",
+                course: "Desenvolvimento Web Avançado",
+                date: "15 de Outubro de 2023",
+                hours: "40 horas",
+                code: "JS-2023-001",
+                image: "https://images.unsplash.com/photo-1627398242454-45a1465c2479?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+                pdfUrl: "#"
+            },
+            {
+                id: 2,
+                title: "UI/UX Design Principles",
+                course: "Design de Interface do Usuário",
+                date: "5 de Setembro de 2023",
+                hours: "35 horas",
+                code: "UX-2023-045",
+                image: "https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+                pdfUrl: "#"
+            },
+            {
+                id: 3,
+                title: "Data Science Fundamentals",
+                course: "Ciência de Dados e Machine Learning",
+                date: "22 de Agosto de 2023",
+                hours: "60 horas",
+                code: "DS-2023-012",
+                image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+                pdfUrl: "#"
+            },
+            {
+                id: 4,
+                title: "React.js & Next.js",
+                course: "Desenvolvimento Front-end",
+                date: "10 de Julho de 2023",
+                hours: "50 horas",
+                code: "RE-2023-023",
+                image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+                pdfUrl: "#"
+            },
+            {
+                id: 5,
+                title: "Cloud Computing AWS",
+                course: "Infraestrutura em Nuvem",
+                date: "28 de Junho de 2023",
+                hours: "45 horas",
+                code: "CC-2023-034",
+                image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+                pdfUrl: "#"
+            },
+            {
+                id: 6,
+                title: "Cybersecurity Essentials",
+                course: "Segurança da Informação",
+                date: "12 de Maio de 2023",
+                hours: "30 horas",
+                code: "CS-2023-018",
+                image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+                pdfUrl: "#"
+            }
+        ];
+
+        // Elementos do DOM
+        const certificatesGrid = document.getElementById('certificates-grid');
+        const modal = document.getElementById('certificate-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const modalImage = document.getElementById('modal-image');
+        const modalTitle = document.getElementById('modal-title');
+        const modalCourse = document.getElementById('modal-course');
+        const modalDate = document.getElementById('modal-date');
+        const modalCode = document.getElementById('modal-code');
+        const modalHours = document.getElementById('modal-hours');
+        const downloadPdfBtn = document.getElementById('download-pdf');
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+
+        // Certificado atualmente selecionado
+        let currentCertificate = null;
+
+        // Carregar certificados na grid
+        function loadCertificates() {
+            certificatesGrid.innerHTML = '';
+
+            certificates.forEach(cert => {
+                const card = document.createElement('div');
+                card.className = 'certificate-card bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-xl cursor-pointer';
+                card.setAttribute('data-id', cert.id);
+
+                card.innerHTML = `
+                    <div class="relative overflow-hidden">
+                        <img src="${cert.image}" alt="${cert.title}" class="w-full h-48 object-cover transition-transform duration-500 hover:scale-105">
+                        <div class="absolute top-3 right-3 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                            ${cert.hours}
+                        </div>
+                    </div>
+                    <div class="p-5">
+                        <h4 class="font-bold text-lg mb-2 line-clamp-1">${cert.title}</h4>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-3">${cert.course}</p>
+                        
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <p class="text-xs text-gray-500 dark:text-gray-500">Concluído em</p>
+                                <p class="font-medium text-sm">${cert.date}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs text-gray-500 dark:text-gray-500">Código</p>
+                                <p class="font-mono text-sm">${cert.code}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between">
+                            <button class="view-btn px-3 py-2 bg-blue-100 dark:bg-blue-900/40 hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 rounded-lg text-sm font-medium transition flex items-center space-x-1">
+                                <i class="fas fa-eye"></i>
+                                <span>Visualizar</span>
+                            </button>
+                            <button class="download-btn px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg text-sm font-medium transition flex items-center space-x-1">
+                                <i class="fas fa-download"></i>
+                                <span>PDF</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                certificatesGrid.appendChild(card);
+
+                // Adicionar evento para visualizar
+                const viewBtn = card.querySelector('.view-btn');
+                viewBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openCertificateModal(cert);
+                });
+
+                // Adicionar evento para download
+                const downloadBtn = card.querySelector('.download-btn');
+                downloadBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    downloadCertificatePdf(cert);
+                });
+
+                // Adicionar evento para abrir modal ao clicar no card
+                card.addEventListener('click', () => {
+                    openCertificateModal(cert);
+                });
+            });
+        }
+
+        // Abrir modal com certificado
+        function openCertificateModal(certificate) {
+            currentCertificate = certificate;
+
+            modalImage.src = certificate.image;
+            modalTitle.textContent = certificate.title;
+            modalCourse.textContent = certificate.course;
+            modalDate.textContent = certificate.date;
+            modalCode.textContent = certificate.code;
+            modalHours.textContent = certificate.hours;
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Fechar modal
+        function closeCertificateModal() {
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Baixar PDF do certificado
+        function downloadCertificatePdf(certificate) {
+            // Em um cenário real, aqui seria feita a requisição para o servidor
+            alert(`Iniciando download do certificado: ${certificate.title}\n\nEm um sistema real, o PDF seria baixado do servidor.`);
+
+            // Simular download
+            const link = document.createElement('a');
+            link.href = certificate.pdfUrl;
+            link.download = `certificado-${certificate.code}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Compartilhar certificado
+        function shareCertificate() {
+            if (navigator.share && currentCertificate) {
+                navigator.share({
+                        title: `Meu certificado: ${currentCertificate.title}`,
+                        text: `Concluí o curso ${currentCertificate.course} e obtive este certificado!`,
+                        url: window.location.href,
+                    })
+                    .catch(console.error);
+            } else {
+                alert(`Compartilhe o link para o certificado: ${currentCertificate ? currentCertificate.title : 'Certificado'}`);
+            }
+        }
+
+        // Alternar modo dark/light
+        function toggleDarkMode() {
+            const html = document.documentElement;
+
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Inicializar tema
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const html = document.documentElement;
+
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                html.classList.add('dark');
+                darkModeToggle.checked = true;
+            } else {
+                html.classList.remove('dark');
+                darkModeToggle.checked = false;
+            }
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCertificates();
+            initTheme();
+
+            // Eventos do modal
+            closeModalBtn.addEventListener('click', closeCertificateModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeCertificateModal();
+                }
+            });
+
+            // Eventos dos botões do modal
+            downloadPdfBtn.addEventListener('click', () => {
+                if (currentCertificate) {
+                    downloadCertificatePdf(currentCertificate);
+                }
+            });
+
+            document.getElementById('share-certificate').addEventListener('click', shareCertificate);
+
+            document.getElementById('print-certificate').addEventListener('click', () => {
+                window.print();
+            });
+
+            // Evento do toggle dark/light
+            darkModeToggle.addEventListener('change', toggleDarkMode);
+
+            // Evento de tecla ESC para fechar modal
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                    closeCertificateModal();
+                }
+            });
+        });
+    </script>
+</div>
+
+
+                    </main>
+
+                    <!-- DEBUG-VIEW START 3 APPPATH\Views\pages\student\partials\footer.php -->
+<!-- Footer -->
+<footer class="bg-white bg-white dark:bg-slate-800/50 dark:border-slate-800 py-4 px-4 border-t border-white">
+    <div class="container mx-auto text-center">
+        <p class="text-gray-600 text-sm dark:text-gray-400">© 2023 Sistema de Gestão de Aprendizagem (LMS). Todos os direitos reservados.</p>
+        <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">Esta página suporta modo claro e escuro automaticamente</p>
+    </div>
+</footer>
+<!-- DEBUG-VIEW ENDED 3 APPPATH\Views\pages\student\partials\footer.php -->
+
+                </div>
+
+            
+        
+    </div>
+
+    <script src="http://academy-ci4.test/assets/js/main.js"></script>
+
+    
+    
+    
+</body>
+
+</html>
+<!-- DEBUG-VIEW ENDED 4 APPPATH\Views\layouts\master.php -->
+
+<!-- DEBUG-VIEW ENDED 5 APPPATH\Views\pages\student\certificates.php -->

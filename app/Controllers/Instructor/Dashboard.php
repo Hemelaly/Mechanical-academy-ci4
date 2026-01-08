@@ -3,6 +3,7 @@
 namespace App\Controllers\Instructor;
 
 use App\Controllers\BaseController;
+use App\Models\CertificateModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\CourseModel;
 use App\Models\ModuleModel;
@@ -26,6 +27,7 @@ class Dashboard extends BaseController
             ['label' => 'Aula ao Vivo', 'icon' => 'bi-camera-reels', 'url' => '/instructor/dashboard/jitsi'],
             ['label' => 'Estudantes', 'icon' => 'bi-people', 'url' => '/instructor/dashboard/meus_estudantes'],
             ['label' => 'Finanças', 'icon' => 'bi-cash-coin', 'url' => '/instructor/dashboard/financas'],
+            ['label' => 'Certificados', 'icon' => 'bi-folder', 'url' => '/instructor/dashboard/certificados'],
             ['label' => 'Perfil', 'icon' => 'bi-person-circle', 'url' => '/instructor/dashboard/perfil'],
         ];
     }
@@ -58,9 +60,36 @@ class Dashboard extends BaseController
     public function add_course()
     {
         $user = service('auth')->user();
+        $courseModel = new CourseModel();
+        $moduleModel = new ModuleModel();
+        $lessonModel = new LessonModel();
+
+        $draft = $courseModel
+            ->where('id_instructor_course', $user->id)
+            ->where('status_course', 'Rascunho')
+            ->orderBy('updated_at', 'DESC')
+            ->first();
+
+        $draftModules = [];
+        if ($draft) {
+            $draftModules = $moduleModel
+                ->where('id_course_module', $draft->id_course)
+                ->orderBy('position_module')
+                ->findAll();
+
+            foreach ($draftModules as &$m) {
+                $m->lessons = $lessonModel
+                    ->where('id_module_lesson', $m->id_module)
+                    ->orderBy('position_lesson')
+                    ->findAll();
+            }
+            unset($m);
+        }
 
         return view('pages/instructor/add_course', [
             'user' => $user,
+            'draft' => $draft,
+            'draftModules' => $draftModules,
             'sidebarLinks' => $this->sidebarLinks(),
             'currentUrl' => current_url()
         ]);
@@ -628,5 +657,23 @@ class Dashboard extends BaseController
         $pendingUserModel->delete($pendingId);
 
         return redirect()->back()->with('success', 'Inscrição aprovada e usuário criado com sucesso!');
+    }
+
+    public function certificate()
+    {
+        $courseModel = new CourseModel();
+        // $course = $courseModel->find($idCourse);
+        $certificateModel = new CertificateModel();
+
+        $user = service('auth')->user();
+
+        $certificates = $certificateModel->getForInstructorDashboard($user->id);
+
+        return view('pages/instructor/certificates', [
+            'user' => $user,
+            'sidebarLinks' => $this->sidebarLinks(),
+            'currentUrl' => current_url(),
+            'certificates' => $certificates
+        ]);
     }
 }
