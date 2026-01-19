@@ -1,7 +1,9 @@
 <?php
 
 use Faker\Provider\Base;
+
 ?>
+
 <!-- BACKDROP MOBILE -->
 <div id="sidebar-backdrop" class="fixed inset-0 z-30 bg-black/40 hidden lg:hidden">
 </div>
@@ -62,7 +64,7 @@ use Faker\Provider\Base;
                     <a
                         href="<?= site_url($link['url']) ?>"
                         id="side-link"
-                        class="side-link flex <?= $isActive ? 'active' : '' ?> items-center rounded-lg px-2 py-2 text-slate-900 dark:text-slate-50 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-blue-500 transition">
+                        class="side-link flex <?= $isActive ? 'active bg-slate-200/60 dark:bg-slate-700/60 text-slate-800 dark:text-white font-semibold' : 'text-slate-500 dark:text-slate-400' ?> items-center rounded-lg px-2 py-2 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-blue-500 transition">
                         <span class="flex h-8 w-8 items-center justify-center">
                             <i class="bi <?= $link['icon'] ?>"></i>
                         </span>
@@ -92,7 +94,7 @@ use Faker\Provider\Base;
                     <a
                         href="/"
                         id="side-link"
-                        class="side-link flex <?= $isActive ? 'active' : '' ?> items-center rounded-lg px-2 py-2 text-slate-900 dark:text-slate-50 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-white transition">
+                        class="side-link flex <?= $isActive ? 'active bg-slate-200/60 dark:bg-slate-700/60 text-blue-600 dark:text-blue-400 font-semibold' : 'text-slate-500 dark:text-slate-400' ?> items-center rounded-lg px-2 py-2 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-white transition">
                         <span class="flex h-8 w-8 items-center justify-center">
                             <i class="bi bi-box-arrow-left"></i>
                         </span>
@@ -126,7 +128,13 @@ use Faker\Provider\Base;
                 link.classList.add(
                     'bg-slate-200/60',
                     'dark:bg-slate-700/60',
-                    'text-blue-500'
+                    'text-blue-600',
+                    'dark:text-blue-400',
+                    'font-semibold'
+                );
+                link.classList.remove(
+                    'text-slate-500',
+                    'dark:text-slate-400'
                 );
             }
 
@@ -135,13 +143,27 @@ use Faker\Provider\Base;
                     l.classList.remove(
                         'bg-slate-200/60',
                         'dark:bg-slate-700/60',
-                        'text-blue-500'
+                        'text-blue-600',
+                        'dark:text-blue-400',
+                        'font-semibold'
+                    )
+                );
+                links.forEach(l =>
+                    l.classList.add(
+                        'text-slate-500',
+                        'dark:text-slate-400'
                     )
                 );
                 link.classList.add(
                     'bg-slate-200/60',
                     'dark:bg-slate-700/60',
-                    'text-blue-500'
+                    'text-blue-600',
+                    'dark:text-blue-400',
+                    'font-semibold'
+                );
+                link.classList.remove(
+                    'text-slate-500',
+                    'dark:text-slate-400'
                 );
             });
 

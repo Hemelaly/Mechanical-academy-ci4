@@ -308,6 +308,15 @@ $auto = $autoplayFlag ? 1 : 0;
     let csrfHash = document.querySelector('meta[name="csrf-hash"]')?.content;
     const enrollmentId = document.querySelector('.container')?.dataset?.enrollmentId;
     const pendingCertificateUrl = "<?= site_url('student/certificates/pending') ?>";
+    let certificateInfo = <?= json_encode(array_merge(
+        [
+            'completedAt' => null,
+            'availableAt' => null,
+            'pdfReady' => false,
+        ],
+        $certificateInfo ?? []
+    ), JSON_UNESCAPED_SLASHES) ?>;
+    certificateInfo.downloadUrl = "<?= site_url('certificados/download/' . (int) ($enrollment->id_enrollment ?? 0)) ?>";
 
     // Track video progress
     let currentVideoProgress = 0;
@@ -352,11 +361,63 @@ $auto = $autoplayFlag ? 1 : 0;
         }
     }
 
-    function showCourseCompletedModal(availableAtText = 'dentro de 48 horas') {
+    const CERT_WAIT_MS = 48 * 60 * 60 * 1000;
+
+    function parseIsoDate(value) {
+        if (!value) return null;
+        const d = new Date(value);
+        return Number.isNaN(d.getTime()) ? null : d;
+    }
+
+    function computeAvailableAt(info) {
+        const available = parseIsoDate(info.availableAt);
+        if (available) return available;
+        const completed = parseIsoDate(info.completedAt);
+        if (!completed) return null;
+        return new Date(completed.getTime() + CERT_WAIT_MS);
+    }
+
+    function formatCountdown(ms) {
+        if (!ms || ms <= 0) return 'agora';
+        const totalSeconds = Math.ceil(ms / 1000);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        return `${hours}h ${minutes}m ${seconds}s`;
+    }
+
+    function startCertificateCountdown(availableAt) {
+        const counter = document.getElementById('certCountdown');
+        if (!counter || !availableAt) return;
+
+        const tick = () => {
+            const remaining = availableAt.getTime() - Date.now();
+            counter.textContent = formatCountdown(remaining);
+            if (remaining <= 0) {
+                clearInterval(timer);
+            }
+        };
+
+        tick();
+        const timer = setInterval(tick, 1000);
+    }
+
+    function showCourseCompletedModal(overrides = {}) {
         if (courseModalShown) return;
         courseModalShown = true;
 
         document.body.style.overflow = 'hidden';
+
+        certificateInfo = { ...certificateInfo, ...overrides };
+
+        const availableAt = computeAvailableAt(certificateInfo);
+        const isReady = Boolean(certificateInfo.pdfReady) && availableAt && Date.now() >= availableAt.getTime();
+        const message = isReady
+            ? 'O seu certificado em PDF ja foi gerado e esta disponivel.'
+            : `O seu certificado estara disponivel em <b><span id="certCountdown">${formatCountdown(availableAt ? (availableAt.getTime() - Date.now()) : CERT_WAIT_MS)}</span></b>.`;
+        const actionButton = isReady
+            ? `<a href="${certificateInfo.downloadUrl}" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm text-center">Ver PDF</a>`
+            : `<a href="<?= site_url('student/dashboard/meus_certificados') ?>" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm text-center">Ver Certificados</a>`;
 
         const modal = `
             <div id="courseCompletedModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
@@ -365,14 +426,14 @@ $auto = $autoplayFlag ? 1 : 0;
                 <i class="bi bi-trophy text-3xl text-green-600 dark:text-green-400"></i>
                 </div>
 
-                <h4 class="text-xl font-bold mb-2 text-gray-900 dark:text-white">Parabéns! 🎉</h4>
+                <h4 class="text-xl font-bold mb-2 text-gray-900 dark:text-white">Parabens!</h4>
 
                 <p class="text-gray-600 dark:text-gray-300 mb-2 text-sm">
-                Você concluiu 100% do curso.
+                Voce concluiu 100% do curso.
                 </p>
 
                 <p class="text-gray-600 dark:text-gray-300 mb-5 text-sm">
-                O seu certificado estará disponível <b>${availableAtText}</b>.
+                ${message}
                 </p>
 
                 <div class="flex flex-col sm:flex-row gap-3 justify-center">
@@ -381,16 +442,16 @@ $auto = $autoplayFlag ? 1 : 0;
                     OK
                 </button>
 
-                <a href="<?= site_url('student/dashboard/meus_certificados') ?>"
-                    class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm text-center">
-                    Ver Certificados
-                </a>
+                ${actionButton}
                 </div>
             </div>
             </div>
         `;
 
         document.body.insertAdjacentHTML('beforeend', modal);
+        if (!isReady) {
+            startCertificateCountdown(availableAt);
+        }
 
         document.getElementById('certOkBtn').addEventListener('click', () => {
             requestPendingCertificate();
@@ -418,6 +479,13 @@ $auto = $autoplayFlag ? 1 : 0;
             if (!data?.ok) {
                 pendingCertificateRequested = false;
                 console.warn(data?.message || 'Não foi possível emitir o certificado pendente.');
+            }
+
+            if (data?.available_at) {
+                certificateInfo.availableAt = data.available_at;
+            }
+            if (data?.completed_at) {
+                certificateInfo.completedAt = data.completed_at;
             }
         } catch (e) {
             pendingCertificateRequested = false;
@@ -502,7 +570,16 @@ $auto = $autoplayFlag ? 1 : 0;
             const pct = recomputeFromCounters();
 
             if (pct === 100) {
-                showCourseCompletedModal();
+                if (data?.completed_at) {
+                    certificateInfo.completedAt = data.completed_at;
+                }
+                if (data?.available_at) {
+                    certificateInfo.availableAt = data.available_at;
+                }
+                showCourseCompletedModal({
+                    completedAt: data?.completed_at || null,
+                    availableAt: data?.available_at || null,
+                });
             }
 
             // Update progress after successful completion

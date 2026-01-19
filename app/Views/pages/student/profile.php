@@ -66,17 +66,6 @@
                         </div>
                     </div>
 
-                    <!-- Stats -->
-                    <div class="flex items-center gap-6">
-                        <div class="text-center">
-                            <div class="text-2xl font-bold text-slate-800 dark:text-white">12</div>
-                            <div class="text-slate-500 dark:text-slate-400 text-sm">Cursos</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-2xl font-bold text-slate-800 dark:text-white">85%</div>
-                            <div class="text-slate-500 dark:text-slate-400 text-sm">Progresso</div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -199,7 +188,7 @@
 
             <div class="p-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <button class="group p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300 text-left">
+                    <button id="openPasswordSettings" type="button" class="group p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300 text-left">
                         <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                             <i class="bi bi-key text-blue-600 dark:text-blue-400 text-sm"></i>
                         </div>
@@ -207,7 +196,7 @@
                         <div class="text-slate-500 dark:text-slate-400 text-xs">Atualize sua senha de acesso</div>
                     </button>
 
-                    <button class="group p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-green-300 dark:hover:border-green-600 transition-all duration-300 text-left">
+                    <button id="openNotificationSettings" type="button" class="group p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-green-300 dark:hover:border-green-600 transition-all duration-300 text-left">
                         <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                             <i class="bi bi-bell text-green-600 dark:text-green-400 text-sm"></i>
                         </div>
@@ -215,7 +204,7 @@
                         <div class="text-slate-500 dark:text-slate-400 text-xs">Gerencie alertas e emails</div>
                     </button>
 
-                    <button class="group p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-300 text-left">
+                    <button id="toggleAppearanceSettings" type="button" class="group p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-300 text-left">
                         <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                             <i class="bi bi-palette text-purple-600 dark:text-purple-400 text-sm"></i>
                         </div>
@@ -223,7 +212,7 @@
                         <div class="text-slate-500 dark:text-slate-400 text-xs">Tema claro/escuro</div>
                     </button>
 
-                    <button class="group p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-red-300 dark:hover:border-red-600 transition-all duration-300 text-left">
+                    <button id="profileLogout" type="button" data-href="<?= site_url('logout') ?>" class="group p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-red-300 dark:hover:border-red-600 transition-all duration-300 text-left">
                         <div class="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                             <i class="bi bi-box-arrow-right text-red-600 dark:text-red-400 text-sm"></i>
                         </div>
@@ -259,7 +248,7 @@
 
         <!-- Modal Content -->
         <div class="p-6">
-            <form action="/student/dashboard/perfil" method="POST" enctype="multipart/form-data" class="space-y-6">
+            <form action="<?= site_url('/student/dashboard/perfil') ?>" method="POST" enctype="multipart/form-data" class="space-y-6">
 
                 <!-- Profile Image Section -->
                 <div class="flex flex-col items-center text-center mb-6">
@@ -366,7 +355,7 @@
                             <i class="bi bi-lock-fill text-red-500 mr-2"></i>
                             Senha Atual
                         </label>
-                        <input type="password" name="password_actual"
+                        <input type="password" name="password_actual" id="currentPassword"
                             class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900
                       border border-slate-200 dark:border-slate-700
                       text-slate-800 dark:text-white
@@ -447,6 +436,10 @@
         const img = document.getElementById('profilePreview');
         const MAX_SIZE = 2 * 1024 * 1024;
         const ALLOWED = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        const changePasswordBtn = document.getElementById('openPasswordSettings');
+        const notificationBtn = document.getElementById('openNotificationSettings');
+        const appearanceBtn = document.getElementById('toggleAppearanceSettings');
+        const logoutBtn = document.getElementById('profileLogout');
 
         input.addEventListener('change', () => {
             const file = input.files[0];
@@ -466,6 +459,70 @@
 
             img.src = URL.createObjectURL(file);
         });
+
+        if (changePasswordBtn) {
+            changePasswordBtn.addEventListener('click', () => {
+                profileModal.classList.remove('hidden');
+                const passwordInput = document.getElementById('currentPassword');
+                if (passwordInput) {
+                    passwordInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    passwordInput.focus();
+                }
+            });
+        }
+
+        if (appearanceBtn) {
+            appearanceBtn.addEventListener('click', () => {
+                const themeToggle = document.getElementById('theme-toggle');
+                if (themeToggle) {
+                    themeToggle.click();
+                    return;
+                }
+                const root = document.documentElement;
+                const nextTheme = root.classList.contains('dark') ? 'light' : 'dark';
+                root.classList.toggle('dark');
+                localStorage.setItem('theme', nextTheme);
+            });
+        }
+
+        if (notificationBtn) {
+            notificationBtn.addEventListener('click', () => {
+                if (window.Swal) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Em breve',
+                        text: 'Configurações de notificações ainda não estão disponíveis.'
+                    });
+                } else {
+                    alert('Configurações de notificações ainda não estão disponíveis.');
+                }
+            });
+        }
+
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                const href = logoutBtn.getAttribute('data-href');
+                if (!href) return;
+
+                if (window.Swal) {
+                    Swal.fire({
+                        title: 'Tem certeza?',
+                        text: 'Deseja realmente sair da sua conta?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Sim, sair',
+                        cancelButtonText: 'Cancelar',
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = href;
+                        }
+                    });
+                } else if (confirm('Deseja realmente sair da sua conta?')) {
+                    window.location.href = href;
+                }
+            });
+        }
     });
 </script>
 

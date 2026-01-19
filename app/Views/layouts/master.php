@@ -43,6 +43,8 @@
                     <!-- CONTEÚDO -->
                     <main class="flex-1 overflow-y-auto p-6 md:p-10 space-y-6 w-full max-w-full overflow-x-hidden">
 
+                        <?= $this->renderSection('home_admin') ?>
+
                         <?= $this->renderSection('home_student') ?>
 
                         <?= $this->renderSection('my_courses') ?>
@@ -97,6 +99,32 @@
             <?php else: ?>
 
                 <?= $this->include('pages/admin/partials/sidebar') ?>
+
+                <!-- CONTEÚDO PRINCIPAL -->
+                <div id="main-content" class="flex flex-1 flex-col transition-all duration-200 prevent-overflow">
+
+                    <?= $this->include('pages/admin/partials/navbar') ?>
+
+                    <!-- CONTEÚDO -->
+                    <main class="flex-1 overflow-y-auto p-6 md:p-10 space-y-6 w-full max-w-full overflow-x-hidden">
+
+                        <?= $this->renderSection('home_admin') ?>
+
+                        <?= $this->renderSection('courses') ?>
+
+                        <?= $this->renderSection('all_courses') ?>
+
+                        <?= $this->renderSection('profile') ?>
+
+                        <?= $this->renderSection('lessons') ?>
+
+                        <?= $this->renderSection('certificates') ?>
+
+                    </main>
+
+                    <?= $this->include('pages/student/partials/footer') ?>
+
+                </div>
 
             <?php endif ?>
 

@@ -413,6 +413,7 @@ class Dashboard extends BaseController
     {
         $users = new ExtendedUserModel();
         $userModel = new UserModel();
+        $courseModel = new CourseModel();
 
         $user = auth()->user();
 
@@ -422,10 +423,24 @@ class Dashboard extends BaseController
         }
 
         $profileUrl = current_url(false);
+        $db = db_connect();
+        $courseCount = (int) $courseModel
+            ->where('id_instructor_course', $user->id)
+            ->countAllResults();
+        $avgProgressRow = $db->table('enrollments e')
+            ->selectAvg('e.progress_enrollment', 'avg_progress')
+            ->join('courses c', 'c.id_course = e.id_course_enrollment')
+            ->where('c.id_instructor_course', $user->id)
+            ->where('e.status_enrollment', 'Ativa')
+            ->get()
+            ->getRow();
+        $avgProgress = (int) round($avgProgressRow->avg_progress ?? 0);
 
         if ($this->request->getMethod() !== 'POST') {
-            return view('pages/student/profile', [
+            return view('pages/instructor/profile', [
                 'user'         => $user,
+                'courseCount'  => $courseCount,
+                'avgProgress'  => $avgProgress,
                 'sidebarLinks' => $this->sidebarLinks(),
                 'currentUrl'   => $profileUrl,
             ]);
@@ -434,6 +449,7 @@ class Dashboard extends BaseController
         // Validação
         $rules = [
             'nome'      => 'permit_empty|min_length[2]',
+            'email'     => 'permit_empty|valid_email',
             'pais'      => 'permit_empty|max_length[100]',
             'provincia' => 'permit_empty|max_length[100]',
             'cidade'    => 'permit_empty|max_length[100]',
@@ -451,6 +467,7 @@ class Dashboard extends BaseController
 
         // Se o nome foi enviado, verificar duplicidade
         $userName = trim($post['nome'] ?? '');
+        $email    = trim($post['email'] ?? '');
 
         if (! empty($userName)) {
             $existingUser = $userModel
@@ -460,6 +477,20 @@ class Dashboard extends BaseController
 
             if ($existingUser) {
                 return redirect()->to($profileUrl)->with('error', 'Já existe um usuário com esse nome!');
+            }
+        }
+
+        if (! empty($email) && $email !== ($user->email ?? '')) {
+            $existingEmail = db_connect()
+                ->table('auth_identities')
+                ->where('type', 'email_password')
+                ->where('secret', $email)
+                ->where('user_id !=', $user->id)
+                ->get()
+                ->getRow();
+
+            if ($existingEmail) {
+                return redirect()->to($profileUrl)->with('error', 'Ja existe um usuario com esse email!');
             }
         }
 
@@ -502,6 +533,72 @@ class Dashboard extends BaseController
             'city'     => $post['cidade']    ?? $user->city,
             'phone'    => $post['telefone']  ?? $user->phone,
         ];
+
+        // ---------------------------------------
+        //    >>> ALTERACAO DE SENHA (SHIELD) <<<
+        // ---------------------------------------
+        $currentPassword = $post['password_actual'] ?? '';
+        $newPassword     = $post['new_password'] ?? '';
+        $confirmPassword = $post['confirm_password'] ?? '';
+        $emailChanged    = ! empty($email) && $email !== ($user->email ?? '');
+
+        if ($emailChanged) {
+            $identity = db_connect()
+                ->table('auth_identities')
+                ->where('user_id', $user->id)
+                ->where('type', 'email_password')
+                ->get()
+                ->getRow();
+
+            if (! $identity) {
+                return redirect()->to($profileUrl)->with('error', 'Identidade de senha nao encontrada.');
+            }
+
+            db_connect()
+                ->table('auth_identities')
+                ->where('id', $identity->id)
+                ->update([
+                    'secret'     => $email,
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ]);
+        }
+
+        if ($currentPassword || $newPassword || $confirmPassword) {
+            if (empty($currentPassword) || empty($newPassword) || empty($confirmPassword)) {
+                return redirect()->to($profileUrl)->with('error', 'Para alterar a senha, preencha todos os campos.');
+            }
+
+            $identity = db_connect()
+                ->table('auth_identities')
+                ->where('user_id', $user->id)
+                ->where('type', 'email_password')
+                ->get()
+                ->getRow();
+
+            if (! $identity) {
+                return redirect()->to($profileUrl)->with('error', 'Identidade de senha nao encontrada.');
+            }
+
+            if (! password_verify($currentPassword, $identity->secret2)) {
+                return redirect()->to($profileUrl)->with('error', 'A senha atual fornecida esta incorreta.');
+            }
+
+            if (strlen($newPassword) < 6) {
+                return redirect()->to($profileUrl)->with('error', 'A nova senha deve ter no minimo 6 caracteres.');
+            }
+
+            if ($newPassword !== $confirmPassword) {
+                return redirect()->to($profileUrl)->with('error', 'A confirmacao da senha nao coincide.');
+            }
+
+            db_connect()
+                ->table('auth_identities')
+                ->where('id', $identity->id)
+                ->update([
+                    'secret2'    => password_hash($newPassword, PASSWORD_DEFAULT),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ]);
+        }
 
         if (! $users->update($user->id, $dataProfile)) {
             return redirect()->to($profileUrl)

@@ -28,8 +28,37 @@ class LessonsController extends BaseController
 
         $percent = (new \App\Services\ProgressService($db))->recalcAndSave($idEnrollment);
 
+        $completedAt = null;
+        $availableAt = null;
+
+        if ($percent >= 100) {
+            $row = $db->table('enrollments')
+                ->select('completed_enrollment')
+                ->where('id_enrollment', $idEnrollment)
+                ->get()
+                ->getRowArray();
+
+            $completedAt = $row['completed_enrollment'] ?? null;
+            if (empty($completedAt)) {
+                $completedAt = date('Y-m-d H:i:s');
+                $db->table('enrollments')
+                    ->where('id_enrollment', $idEnrollment)
+                    ->update(['completed_enrollment' => $completedAt]);
+            }
+
+            $availableAt = date('Y-m-d H:i:s', strtotime($completedAt . ' +48 hours'));
+        }
+
+        $completedAtIso = $completedAt ? date('c', strtotime($completedAt)) : null;
+        $availableAtIso = $availableAt ? date('c', strtotime($availableAt)) : null;
+
         return $this->response->setHeader('X-CSRF-Hash', csrf_hash())
-            ->setJSON(['ok' => true, 'progress' => $percent]);
+            ->setJSON([
+                'ok'           => true,
+                'progress'     => $percent,
+                'completed_at' => $completedAtIso,
+                'available_at' => $availableAtIso,
+            ]);
     }
 
     public function uncomplete()
@@ -53,6 +82,12 @@ class LessonsController extends BaseController
         // (ou opção B: deletar a linha)
 
         $percent = (new ProgressService($db))->recalcAndSave($idEnrollment);
+
+        if ($percent < 100) {
+            $db->table('enrollments')
+                ->where('id_enrollment', $idEnrollment)
+                ->update(['completed_enrollment' => null]);
+        }
 
         return $this->response->setHeader('X-CSRF-Hash', csrf_hash())
             ->setJSON(['ok' => true, 'progress' => $percent]);

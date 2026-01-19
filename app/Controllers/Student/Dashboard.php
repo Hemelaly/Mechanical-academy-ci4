@@ -417,6 +417,33 @@ class Dashboard extends BaseController
             ? $orderedIds[$currIndex + 1]
             : null;
 
+        $certificateModel = new CertificateModel();
+        $certificate = $certificateModel
+            ->where('id_user_certificate', (int) $userId)
+            ->where('id_course_certificate', (int) $course->id_course)
+            ->first();
+
+        $completedAt = $enrollment->completed_enrollment ?? null;
+        if (empty($completedAt) && (int) ($enrollment->progress_enrollment ?? 0) >= 100) {
+            $completedAtRow = $db->table('progress')
+                ->selectMax('completed_at_progress', 'completed_at')
+                ->where('id_enrollment_progress', (int) $enrollment->id_enrollment)
+                ->get()
+                ->getRowArray();
+            $completedAt = $completedAtRow['completed_at'] ?? null;
+            if (! empty($completedAt)) {
+                $db->table('enrollments')
+                    ->where('id_enrollment', (int) $enrollment->id_enrollment)
+                    ->update(['completed_enrollment' => $completedAt]);
+            }
+        }
+        $availableAt = $certificate['avaiable_at_certificate'] ?? null;
+        if (empty($availableAt) && !empty($completedAt)) {
+            $availableAt = date('Y-m-d H:i:s', strtotime($completedAt . ' +48 hours'));
+        }
+        $availableAtTs = $availableAt ? strtotime($availableAt) : null;
+        $pdfReady = !empty($certificate['pdf_path_certificate']) && $availableAtTs && time() >= $availableAtTs;
+
         return view('pages/student/lessons', [
             'course'             => $course,
             'enrollment'         => (object) $enrollment,
@@ -425,6 +452,11 @@ class Dashboard extends BaseController
             'prevLesson'         => $prevLesson,
             'nextLesson'         => $nextLesson,
             'completedLessonIds' => $completedLessonIds,
+            'certificateInfo'    => [
+                'completedAt' => $completedAt ? date('c', strtotime($completedAt)) : null,
+                'availableAt' => $availableAt ? date('c', strtotime($availableAt)) : null,
+                'pdfReady'    => $pdfReady,
+            ],
             'user'               => $authUser,
             'sidebarLinks'       => $this->sidebarLinks(),
             'currentUrl'         => current_url(false),
@@ -578,6 +610,7 @@ class Dashboard extends BaseController
         // Validação básica
         $rules = [
             'nome'      => 'permit_empty|min_length[2]',
+            'email'     => 'permit_empty|valid_email',
             'pais'      => 'permit_empty|max_length[100]',
             'provincia' => 'permit_empty|max_length[100]',
             'cidade'    => 'permit_empty|max_length[100]',
@@ -599,6 +632,7 @@ class Dashboard extends BaseController
 
         // Verificar duplicidade do nome
         $userName = trim($post['nome'] ?? '');
+        $email    = trim($post['email'] ?? '');
 
         if (! empty($userName)) {
             $existingUser = $userModel
@@ -611,6 +645,24 @@ class Dashboard extends BaseController
                     'icon'  => 'error',
                     'title' => 'Erro!',
                     'text'  => 'Já existe um usuário com esse nome!'
+                ]);
+            }
+        }
+
+        if (! empty($email) && $email !== ($user->email ?? '')) {
+            $existingEmail = db_connect()
+                ->table('auth_identities')
+                ->where('type', 'email_password')
+                ->where('secret', $email)
+                ->where('user_id !=', $user->id)
+                ->get()
+                ->getRow();
+
+            if ($existingEmail) {
+                return redirect()->to($profileUrl)->with('swal', [
+                    'icon'  => 'error',
+                    'title' => 'Erro!',
+                    'text'  => 'Ja existe um usuario com esse email!'
                 ]);
             }
         }
@@ -663,6 +715,32 @@ class Dashboard extends BaseController
         $currentPassword = $post['password_actual'] ?? '';
         $newPassword     = $post['new_password'] ?? '';
         $confirmPassword = $post['confirm_password'] ?? '';
+        $emailChanged    = ! empty($email) && $email !== ($user->email ?? '');
+
+        if ($emailChanged) {
+            $identity = db_connect()
+                ->table('auth_identities')
+                ->where('user_id', $user->id)
+                ->where('type', 'email_password')
+                ->get()
+                ->getRow();
+
+            if (! $identity) {
+                return redirect()->to($profileUrl)->with('swal', [
+                    'icon'  => 'error',
+                    'title' => 'Erro interno',
+                    'text'  => 'Identidade de senha nao encontrada.'
+                ]);
+            }
+
+            db_connect()
+                ->table('auth_identities')
+                ->where('id', $identity->id)
+                ->update([
+                    'secret'     => $email,
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ]);
+        }
 
         if ($currentPassword || $newPassword || $confirmPassword) {
 
@@ -691,7 +769,7 @@ class Dashboard extends BaseController
             }
 
             // Verificar senha atual
-            if (! password_verify($currentPassword, $identity->secret)) {
+            if (! password_verify($currentPassword, $identity->secret2)) {
                 return redirect()->to($profileUrl)->with('swal', [
                     'icon' => 'error',
                     'title' => 'Senha incorreta',
@@ -721,7 +799,7 @@ class Dashboard extends BaseController
                 ->table('auth_identities')
                 ->where('id', $identity->id)
                 ->update([
-                    'secret'     => password_hash($newPassword, PASSWORD_DEFAULT),
+                    'secret2'    => password_hash($newPassword, PASSWORD_DEFAULT),
                     'updated_at' => date('Y-m-d H:i:s'),
                 ]);
         }

@@ -21,6 +21,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ro
     $routes->get('dashboard/estudantes', 'Dashboard::students');
     $routes->get('dashboard/instrutores', 'Dashboard::instructors');
     $routes->get('dashboard/perfil', 'Dashboard::profile');
+    $routes->post('dashboard/perfil', 'Dashboard::profile');
 });
 
 // Instructor

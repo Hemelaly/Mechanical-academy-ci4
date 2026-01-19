@@ -8,6 +8,8 @@ use App\Models\CourseModel;
 use App\Models\ModuleModel;
 use App\Models\LessonModel;
 use App\Models\CourseSettingModel;
+use App\Models\ExtendedUserModel;
+use CodeIgniter\Shield\Models\UserModel;
 
 class Dashboard extends BaseController
 {
@@ -137,12 +139,183 @@ class Dashboard extends BaseController
 
     public function profile()
     {
+        $users     = new ExtendedUserModel();
+        $userModel = new UserModel();
+        $courseModel = new CourseModel();
+
         $user = service('auth')->user();
 
-        return view('pages/admin/profile', [
-            'user' => $user,
-            'sidebarLinks' => $this->sidebarLinks(),
-            'currentUrl' => current_url()
-        ]);
+        if (! $user) {
+            return redirect()->to(site_url('login'))
+                ->with('error', 'Sessão expirada. Faça login novamente.');
+        }
+
+        $profileUrl = current_url(false);
+        $db = db_connect();
+        $courseCount = (int) $courseModel->builder()->countAllResults();
+        $avgProgressRow = $db->table('enrollments')
+            ->selectAvg('progress_enrollment', 'avg_progress')
+            ->where('status_enrollment', 'Ativa')
+            ->get()
+            ->getRow();
+        $avgProgress = (int) round($avgProgressRow->avg_progress ?? 0);
+
+        if ($this->request->getMethod() !== 'POST') {
+            return view('pages/admin/profile', [
+                'user'         => $user,
+                'courseCount'  => $courseCount,
+                'avgProgress'  => $avgProgress,
+                'sidebarLinks' => $this->sidebarLinks(),
+                'currentUrl'   => $profileUrl
+            ]);
+        }
+
+        $rules = [
+            'nome'      => 'permit_empty|min_length[2]',
+            'email'     => 'permit_empty|valid_email',
+            'pais'      => 'permit_empty|max_length[100]',
+            'provincia' => 'permit_empty|max_length[100]',
+            'cidade'    => 'permit_empty|max_length[100]',
+            'telefone'  => 'permit_empty|max_length[20]',
+            'imagem'    => 'if_exist|is_image[imagem]|mime_in[imagem,image/jpg,image/jpeg,image/png,image/webp]|max_size[imagem,4096]',
+        ];
+
+        if (! $this->validate($rules)) {
+            return redirect()->to($profileUrl)
+                ->withInput()
+                ->with('error', implode(', ', $this->validator->getErrors()));
+        }
+
+        $post = $this->request->getPost();
+        $userName = trim($post['nome'] ?? '');
+        $email    = trim($post['email'] ?? '');
+
+        if (! empty($userName)) {
+            $existingUser = $userModel
+                ->where('username', $userName)
+                ->where('id !=', $user->id)
+                ->first();
+
+            if ($existingUser) {
+                return redirect()->to($profileUrl)
+                    ->with('error', 'Já existe um usuário com esse nome!');
+            }
+        }
+
+        if (! empty($email) && $email !== ($user->email ?? '')) {
+            $existingEmail = db_connect()
+                ->table('auth_identities')
+                ->where('type', 'email_password')
+                ->where('secret', $email)
+                ->where('user_id !=', $user->id)
+                ->get()
+                ->getRow();
+
+            if ($existingEmail) {
+                return redirect()->to($profileUrl)
+                    ->with('error', 'Já existe um usuário com esse email!');
+            }
+        }
+
+        $file     = $this->request->getFile('imagem');
+        $filePath = $user->img;
+
+        if ($file && $file->isValid() && $file->getError() === UPLOAD_ERR_OK) {
+            $targetDir = FCPATH . 'assets/img/';
+            if (! is_dir($targetDir)) {
+                @mkdir($targetDir, 0755, true);
+            }
+
+            $newName = $file->getRandomName();
+
+            if (! $file->move($targetDir, $newName)) {
+                return redirect()->to($profileUrl)
+                    ->withInput()
+                    ->with('error', 'Falha ao mover a imagem.');
+            }
+
+            if (! empty($user->img)) {
+                $old = FCPATH . $user->img;
+                if (is_file($old)) {
+                    @unlink($old);
+                }
+            }
+
+            $filePath = 'assets/img/' . $newName;
+        }
+
+        $dataProfile = [
+            'username' => $userName ?: $user->username,
+            'img'      => $filePath,
+            'country'  => $post['pais']      ?? $user->country,
+            'province' => $post['provincia'] ?? $user->province,
+            'city'     => $post['cidade']    ?? $user->city,
+            'phone'    => $post['telefone']  ?? $user->phone,
+        ];
+
+        $currentPassword = $post['password_actual'] ?? '';
+        $newPassword     = $post['new_password'] ?? '';
+        $confirmPassword = $post['confirm_password'] ?? '';
+        $emailChanged    = ! empty($email) && $email !== ($user->email ?? '');
+        $wantsPassword   = $currentPassword || $newPassword || $confirmPassword;
+
+        if ($emailChanged || $wantsPassword) {
+            $identity = db_connect()
+                ->table('auth_identities')
+                ->where('user_id', $user->id)
+                ->where('type', 'email_password')
+                ->get()
+                ->getRow();
+
+            if (! $identity) {
+                return redirect()->to($profileUrl)->with('error', 'Identidade de senha não encontrada.');
+            }
+
+            if ($emailChanged) {
+                db_connect()
+                    ->table('auth_identities')
+                    ->where('id', $identity->id)
+                    ->update([
+                        'secret'     => $email,
+                        'updated_at' => date('Y-m-d H:i:s'),
+                    ]);
+            }
+        }
+
+        if ($wantsPassword) {
+            if (empty($currentPassword) || empty($newPassword) || empty($confirmPassword)) {
+                return redirect()->to($profileUrl)->with('error', 'Para alterar a senha, preencha todos os campos.');
+            }
+
+            if (! password_verify($currentPassword, $identity->secret2)) {
+                return redirect()->to($profileUrl)->with('error', 'A senha atual fornecida está incorreta.');
+            }
+
+            if (strlen($newPassword) < 6) {
+                return redirect()->to($profileUrl)->with('error', 'A nova senha deve ter no mínimo 6 caracteres.');
+            }
+
+            if ($newPassword !== $confirmPassword) {
+                return redirect()->to($profileUrl)->with('error', 'A confirmação da senha não coincide.');
+            }
+
+            db_connect()
+                ->table('auth_identities')
+                ->where('id', $identity->id)
+                ->update([
+                    'secret2'    => password_hash($newPassword, PASSWORD_DEFAULT),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ]);
+        }
+
+        if (! $users->update($user->id, $dataProfile)) {
+            return redirect()->to($profileUrl)
+                ->with('error', implode(', ', $users->errors()));
+        }
+
+        $updated = $users->find($user->id);
+        auth()->setUser($updated);
+
+        return redirect()->to($profileUrl)->with('success', 'Perfil atualizado com sucesso.');
     }
 }

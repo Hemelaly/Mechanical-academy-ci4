@@ -41,7 +41,7 @@ class Certificates extends BaseController
         }
 
         $row = $db->table('enrollments')
-            ->select('id_enrollment, id_student_enrollment, id_course_enrollment, progress_enrollment')
+            ->select('id_enrollment, id_student_enrollment, id_course_enrollment, progress_enrollment, completed_enrollment')
             ->where('id_enrollment', $enrollmentId)
             ->get()
             ->getRowArray();
@@ -54,13 +54,34 @@ class Certificates extends BaseController
             return $respond(['ok' => false, 'message' => 'Curso ainda não concluído.'], 400);
         }
 
+        $completedAt = $row['completed_enrollment'] ?? null;
+        if (empty($completedAt)) {
+            $completedAt = date('Y-m-d H:i:s');
+            $db->table('enrollments')
+                ->where('id_enrollment', $enrollmentId)
+                ->update(['completed_enrollment' => $completedAt]);
+        }
+        $availableAt = date('Y-m-d H:i:s', strtotime($completedAt . ' +48 hours'));
+
         $existing = $certificateModel
             ->where('id_user_certificate', $row['id_student_enrollment'])
             ->where('id_course_certificate', $row['id_course_enrollment'])
             ->first();
 
         if ($existing) {
-            return $respond(['ok' => true, 'created' => false, 'id_certificate' => (int) $existing['id_certificate']]);
+            if (empty($existing['avaiable_at_certificate'])) {
+                $certificateModel->update((int) $existing['id_certificate'], [
+                    'avaiable_at_certificate' => $availableAt,
+                    'updated_at'              => date('Y-m-d H:i:s'),
+                ]);
+            }
+            return $respond([
+                'ok'             => true,
+                'created'        => false,
+                'id_certificate' => (int) $existing['id_certificate'],
+                'available_at'   => date('c', strtotime($availableAt)),
+                'completed_at'   => date('c', strtotime($completedAt)),
+            ]);
         }
 
         $uuid = bin2hex(random_bytes(16));
@@ -72,6 +93,7 @@ class Certificates extends BaseController
             'id_course_certificate' => (int) $row['id_course_enrollment'],
             'uuid_certificate'      => $uuid,
             'hash_certificate'      => $hash,
+            'avaiable_at_certificate' => $availableAt,
             'created_at'            => $now,
             'updated_at'            => $now,
         ]);
@@ -80,6 +102,8 @@ class Certificates extends BaseController
             'ok'             => true,
             'created'        => true,
             'id_certificate' => (int) $newId,
+            'available_at'   => date('c', strtotime($availableAt)),
+            'completed_at'   => date('c', strtotime($completedAt)),
         ]);
     }
 
