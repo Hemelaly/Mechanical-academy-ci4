@@ -32,11 +32,15 @@ fi
 
 echo ">>> Commitando e enviando para o GitHub (branch ${BRANCH_NAME})"
 if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-  if [[ -n "$(git status --porcelain)" ]]; then
+  if [[ -n "$(git status --porcelain --ignore-submodules=dirty)" ]]; then
     COMMIT_MSG="deploy: $(date +'%Y-%m-%d %H:%M:%S')"
     git add -A
-    git commit -m "${COMMIT_MSG}"
-    git push "${REMOTE_NAME}" "${BRANCH_NAME}"
+    if git diff --cached --quiet; then
+      echo ">>> Sem alteracoes para commit. Pulando commit/push."
+    else
+      git commit -m "${COMMIT_MSG}"
+      git push "${REMOTE_NAME}" "${BRANCH_NAME}"
+    fi
   else
     echo ">>> Sem alteracoes locais. Pulando commit/push."
   fi
