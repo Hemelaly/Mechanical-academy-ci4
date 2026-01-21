@@ -17,8 +17,13 @@ TAR_OPTS="${TAR_OPTS:---exclude=.git --exclude=node_modules --exclude=build/logs
 
 # Reuse the same SSH connection so the password is requested only once.
 SAFE_HOST="${REMOTE_HOST//[:]/_}"
-CONTROL_PATH="${CONTROL_PATH:-$HOME/.ssh/cm-${REMOTE_USER}@${SAFE_HOST}-${REMOTE_PORT}}"
-SSH_OPTS="${SSH_OPTS} -o ControlMaster=auto -o ControlPersist=10m -o ControlPath=${CONTROL_PATH}"
+CONTROL_PATH="${CONTROL_PATH:-/tmp/ssh-${REMOTE_USER}@${SAFE_HOST}-${REMOTE_PORT}}"
+SSH_BASE_OPTS=()
+if [[ -n "${SSH_OPTS}" ]]; then
+  read -r -a SSH_EXTRA_OPTS <<< "${SSH_OPTS}"
+  SSH_BASE_OPTS+=("${SSH_EXTRA_OPTS[@]}")
+fi
+SSH_BASE_OPTS+=(-o ControlMaster=auto -o ControlPersist=10m -o "ControlPath=${CONTROL_PATH}")
 
 if [[ -z "${REMOTE_USER}" || -z "${REMOTE_HOST}" || -z "${REMOTE_PATH}" ]]; then
   echo "Defina DEPLOY_USER, DEPLOY_HOST e DEPLOY_PATH antes de executar o deploy."
@@ -54,28 +59,31 @@ fi
 
 echo ">>> Sincronizando arquivos para ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_PATH}"
 if command -v rsync >/dev/null 2>&1; then
+  RSYNC_SSH_CMD=(ssh "${SSH_BASE_OPTS[@]}" -p "${REMOTE_PORT}")
+  RSYNC_SSH_STR="$(printf '%q ' "${RSYNC_SSH_CMD[@]}")"
+  RSYNC_SSH_STR="${RSYNC_SSH_STR% }"
   rsync -avz --delete \
     --exclude '.git' \
     --exclude 'node_modules' \
     --exclude 'build/logs' \
     --exclude 'vendor' \
     --exclude '.env' \
-    -e "ssh ${SSH_OPTS} -p ${REMOTE_PORT}" \
+    -e "${RSYNC_SSH_STR}" \
     "${SOURCE_DIR}/" "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_PATH}"
 else
   echo ">>> rsync nao encontrado. Usando tar+ssh (sem delete remoto)."
-  tar -czf - ${TAR_OPTS} "${SOURCE_DIR}" | ssh ${SSH_OPTS} -p "${REMOTE_PORT}" "${REMOTE_USER}@${REMOTE_HOST}" "mkdir -p \"${REMOTE_PATH}\" && tar -xzf - -C \"${REMOTE_PATH}\" --strip-components=1"
+  tar -czf - ${TAR_OPTS} "${SOURCE_DIR}" | ssh "${SSH_BASE_OPTS[@]}" -p "${REMOTE_PORT}" "${REMOTE_USER}@${REMOTE_HOST}" "mkdir -p \"${REMOTE_PATH}\" && tar -xzf - -C \"${REMOTE_PATH}\" --strip-components=1"
 fi
 
 if [[ -n "${LOCAL_ENV_FILE}" && -f "${LOCAL_ENV_FILE}" ]]; then
   echo ">>> Enviando ${LOCAL_ENV_FILE} como .env"
-  scp -P "${REMOTE_PORT}" ${SSH_OPTS} "${LOCAL_ENV_FILE}" "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_PATH}/.env"
+  scp "${SSH_BASE_OPTS[@]}" -P "${REMOTE_PORT}" "${LOCAL_ENV_FILE}" "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_PATH}/.env"
 else
   echo ">>> Aviso: arquivo .env nao enviado (LOCAL_ENV_FILE nao encontrado)."
 fi
 
 echo ">>> Executando comandos remotos"
-ssh ${SSH_OPTS} -p "${REMOTE_PORT}" "${REMOTE_USER}@${REMOTE_HOST}" <<EOF
+ssh "${SSH_BASE_OPTS[@]}" -p "${REMOTE_PORT}" "${REMOTE_USER}@${REMOTE_HOST}" <<EOF
 cd "${REMOTE_PATH}"
 composer install --no-dev --optimize-autoloader --prefer-dist
 php spark migrate --all --force
