@@ -11,7 +11,7 @@ $userName = $userName ?? ($user->username ?? 'Administrador');
 $stats = $stats ?? [
     ['label' => 'Usuarios ativos', 'value' => 1248, 'delta' => 12.4, 'icon' => 'bi-people', 'tone' => 'blue'],
     ['label' => 'Novas inscricoes', 'value' => 84, 'delta' => 4.1, 'icon' => 'bi-journal-check', 'tone' => 'emerald'],
-    ['label' => 'Receita do mes', 'value' => 256400, 'delta' => -2.7, 'icon' => 'bi-cash-coin', 'tone' => 'amber', 'prefix' => 'MZN '],
+    ['label' => 'Receita do mes', 'value' => 0, 'delta' => 0.0, 'icon' => 'bi-cash-coin', 'tone' => 'amber', 'prefix' => 'MZN '],
     ['label' => 'Cursos ativos', 'value' => 38, 'delta' => 1.8, 'icon' => 'bi-book', 'tone' => 'purple'],
 ];
 
@@ -81,7 +81,9 @@ $quickActions = $quickActions ?? [
             $value = $card['value'] ?? 0;
             $prefix = $card['prefix'] ?? '';
             $tone = $card['tone'] ?? 'blue';
-            $valueFormatted = is_numeric($value) ? number_format((float) $value, 0, ',', '.') : $value;
+            $valueFormatted = is_numeric($value)
+                ? number_format((float) $value, $prefix ? 2 : 0, ',', '.')
+                : $value;
             ?>
             <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
                 <div class="flex items-start justify-between">

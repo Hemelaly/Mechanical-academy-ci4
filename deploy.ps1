@@ -10,7 +10,7 @@ $remoteName = 'origin'
 $branchName = 'main'
 $sshHost = '168.231.113.60'
 $sshUser = 'mechanical-academy'
-$repoPath = '/home/mechanical-academy/htdocs/academy.mechanical.co.mz'
+$repoPath = '/home/mechanical-academy/htdocs/academy.mechanical.co.mz/'
 
 $pending = git status --porcelain
 $hasChanges = $pending -and $pending.Length -gt 0

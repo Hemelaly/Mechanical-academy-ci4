@@ -409,6 +409,43 @@ class Dashboard extends BaseController
         ]);
     }
 
+    public function financialData()
+    {
+        $user = service('auth')->user();
+        $year = (int) $this->request->getGet('year');
+        if ($year <= 0) {
+            $year = (int) date('Y');
+        }
+
+        $db = db_connect();
+        $rows = $db->table('payments p')
+            ->select('MONTH(p.created_at) as month, SUM(p.amount_payment) as total')
+            ->join('courses c', 'c.id_course = p.id_course_payment')
+            ->where('p.status_payment', 'Aprovado')
+            ->where('c.id_instructor_course', $user->id)
+            ->where('YEAR(p.created_at)', $year)
+            ->groupBy('MONTH(p.created_at)')
+            ->orderBy('MONTH(p.created_at)')
+            ->get()
+            ->getResultArray();
+
+        $totals = array_fill(1, 12, 0.0);
+        foreach ($rows as $row) {
+            $month = (int) ($row['month'] ?? 0);
+            if ($month >= 1 && $month <= 12) {
+                $totals[$month] = (float) ($row['total'] ?? 0);
+            }
+        }
+
+        $labels = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+        $series = array_values($totals);
+
+        return $this->response->setJSON([
+            'labels' => $labels,
+            'data' => $series,
+        ]);
+    }
+
     public function profile()
     {
         $users = new ExtendedUserModel();

@@ -254,7 +254,7 @@
                                     <div class="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-700">
                                         <div class="flex items-center gap-2">
                                             <span class="font-bold text-slate-800 dark:text-white">
-                                                MT <?= number_format($course->price_course, 2, ',', '.') ?>
+                                                0,00 MZN
                                             </span>
                                         </div>
 

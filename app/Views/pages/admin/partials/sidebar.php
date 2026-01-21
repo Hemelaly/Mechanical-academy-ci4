@@ -55,8 +55,9 @@ use Faker\Provider\Base;
 
                 <?php foreach ($sidebarLinks as $link): ?>
                     <?php
-                    $currentUrl = current_url();
-                    $isActive = str_ends_with($currentUrl, $link['url']);
+                    $currentUrl = rtrim(current_url(), '/');
+                    $linkUrl = rtrim(site_url($link['url']), '/');
+                    $isActive = $currentUrl === $linkUrl;
 
                     ?>
 
@@ -77,12 +78,13 @@ use Faker\Provider\Base;
 
                 <!-- LINKS FIXOS -->
 
-                <div class="absolute bottom-2">
+                <?php $isHome = rtrim(current_url(), '/') === rtrim(site_url('/'), '/'); ?>
+                <div class="absolute bottom-2 left-0 w-full px-3">
                     <a
                         href="#"
                         id="logoutBtn"
                         data-href="/logout/"
-                        class="side-link flex w-full <?= $isActive ? 'active' : '' ?> items-center rounded-lg px-2 py-2 text-red-500 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-white transition">
+                        class="side-link flex w-full items-center rounded-lg px-2 py-2 text-red-500 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-white transition">
                         <span class="flex h-8 w-8 items-center justify-center">
                             <i class="bi bi-box-arrow-left"></i>
                         </span>
@@ -94,7 +96,7 @@ use Faker\Provider\Base;
                     <a
                         href="/"
                         id="side-link"
-                        class="side-link flex <?= $isActive ? 'active bg-slate-200/60 dark:bg-slate-700/60 text-blue-600 dark:text-blue-400 font-semibold' : 'text-slate-500 dark:text-slate-400' ?> items-center rounded-lg px-2 py-2 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-white transition">
+                        class="side-link flex w-full <?= $isHome ? 'active bg-slate-200/60 dark:bg-slate-700/60 text-blue-600 dark:text-blue-400 font-semibold' : 'text-slate-500 dark:text-slate-400' ?> items-center rounded-lg px-2 py-2 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-white transition">
                         <span class="flex h-8 w-8 items-center justify-center">
                             <i class="bi bi-box-arrow-left"></i>
                         </span>
@@ -119,12 +121,10 @@ use Faker\Provider\Base;
         links.forEach(link => {
 
             const href = link.getAttribute('href');
-            if (!href) return;
+            if (!href || href === '#') return;
+            const linkPath = new URL(href, window.location.origin).pathname.replace(/\/$/, '');
 
-            // Pega apenas o arquivo final do link (ex: meusCursos.php)
-            const cleanHref = href.split('/').pop().split('?')[0];
-
-            if (cleanHref === currentPage) {
+            if (linkPath === currentPath) {
                 link.classList.add(
                     'bg-slate-200/60',
                     'dark:bg-slate-700/60',

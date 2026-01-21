@@ -14,10 +14,55 @@ class ResetPassword extends BaseController
     {
         $token = $this->request->getGet('token');
         if (!$token) {
-            return redirect()->to('/')->with('error', 'Token inválido.');
+            return view('auth/forgot_password');
         }
 
         return view('reset_password', ['token' => $token]);
+    }
+
+    public function requestReset()
+    {
+        $email = trim((string) $this->request->getPost('email'));
+
+        if ($email == '' || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return redirect()->back()->withInput()->with('error', 'Informe um email valido.');
+        }
+
+        $users = auth()->getProvider();
+        if ($users === null) {
+            $users = new UserModel();
+        }
+
+        $user = $users->findByCredentials(['email' => $email]);
+
+        if ($user) {
+            $passwordResetModel = new PasswordResetModel();
+            $passwordResetModel->where('user_id', $user->id)->delete();
+
+            $token = bin2hex(random_bytes(16));
+            $expires = date('Y-m-d H:i:s', strtotime('+1 day'));
+
+            $passwordResetModel->insert([
+                'user_id'    => $user->id,
+                'token'      => $token,
+                'expires_at' => $expires,
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+
+            $link = site_url("reset-password?token={$token}");
+
+            $mail = \Config\Services::email();
+            $mail->setTo($user->email);
+            $mail->setSubject('Redefinicao de senha');
+            $mail->setMessage(
+                "Ola {$user->username},<br><br>" .
+                "Clique no link abaixo para redefinir sua senha:<br><br>" .
+                "<a href=\"{$link}\">Redefinir senha</a>"
+            );
+            $mail->send();
+        }
+
+        return redirect()->back()->with('message', 'Se o email existir, enviaremos um link de redefinicao.');
     }
 
     public function submitReset()
@@ -74,10 +119,10 @@ class ResetPassword extends BaseController
         session()->regenerate(true);
         auth()->login($user);
 
-        return redirect()->to('/student/dashboard/inscricoes')->with('swal', [
+        return redirect()->to('/login')->with('swal', [
             'icon'  => 'success',
-            'title' => 'Parabéns!',
-            'text'  => 'Você já está inscrito no curso. Começe a assistir!',
+            'title' => 'Senha atualizada',
+            'text'  => 'Sua senha foi redefinida com sucesso. Faça login novamente.',
         ]);
     }
 }

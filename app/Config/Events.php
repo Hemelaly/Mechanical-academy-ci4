@@ -7,6 +7,8 @@ use CodeIgniter\Exceptions\FrameworkException;
 use CodeIgniter\Shield\Authentication\Events\AuthEvents;
 use CodeIgniter\HotReloader\HotReloader;
 use App\Models\StudentModel;
+use App\Models\InstructorModel;
+use App\Models\ExtendedUserModel;
 
 /*
  * --------------------------------------------------------------------
@@ -28,17 +30,37 @@ Events::on('register', function ($user) {
     $request = service('request');
     $post = $request->getPost();
 
-    // Pega os dados personalizados do formulário
+    // Pega os dados personalizados do formulario
     $email    = $post['email'] ?? null;
     $username = $post['username'] ?? null;
+    $role     = $post['role'] ?? 'student';
 
-    // Inserir na tabela students
-    $studentModel = new StudentModel();
-    $studentModel->insert([
-        'id_user_student' => $user->id,  // chave estrangeira para tabela users
-        'email_student'   => $email,
-        'name_student'    => $username
-    ]);
+    $allowedRoles = ['student', 'instructor', 'admin'];
+    if (! in_array($role, $allowedRoles, true)) {
+        $role = 'student';
+    }
+
+    // Atualiza o role do usuario
+    $userModel = new ExtendedUserModel();
+    $userModel->update($user->id, ['role' => $role]);
+
+    if ($role === 'student') {
+        // Inserir na tabela students
+        $studentModel = new StudentModel();
+        $studentModel->insert([
+            'id_user_student' => $user->id,  // chave estrangeira para tabela users
+            'email_student'   => $email,
+            'name_student'    => $username
+        ]);
+    } elseif ($role === 'instructor') {
+        // Inserir na tabela instructors
+        $instructorModel = new InstructorModel();
+        $instructorModel->insert([
+            'id_user_instructor' => $user->id,
+            'email_instructor'   => $email,
+            'name_instructor'    => $username
+        ]);
+    }
 });
 
 Events::on('login', function ($user) {

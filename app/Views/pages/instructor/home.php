@@ -82,10 +82,10 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">Receita Mensal</p>
-                        <h3 class="text-2xl font-bold text-slate-800 dark:text-white">R$ 5,430</h3>
+                        <h3 class="text-2xl font-bold text-slate-800 dark:text-white">0,00 MZN</h3>
                         <div class="flex items-center gap-1 mt-1">
                             <i class="bi bi-arrow-up-short text-green-500 text-sm"></i>
-                            <span class="text-green-500 text-sm font-medium">+R$ 800</span>
+                            <span class="text-green-500 text-sm font-medium">0,00 MZN</span>
                         </div>
                     </div>
                     <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-xl flex items-center justify-center">

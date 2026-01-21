@@ -13,6 +13,6 @@ class ExtendedUserModel extends ShieldUserModel
         'created_at', 'updated_at', 'deleted_at', 'last_active', 'last_login',
 
         // Seus campos extras:
-        'img', 'country', 'province', 'city', 'phone',
+        'img', 'country', 'province', 'city', 'phone', 'role',
     ];
 }

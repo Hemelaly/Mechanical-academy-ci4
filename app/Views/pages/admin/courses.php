@@ -107,7 +107,7 @@ $categories = $categories ?? ['Programação', 'Design', 'Dados', 'Marketing', '
         <div class="flex justify-between items-start mb-4">
             <div>
                 <p class="text-sm text-gray-400 mb-1">Receita Mensal</p>
-                <p class="text-xl font-bold text-white"><?= number_to_currency($metrics['receita_mes'] ?? 0, 'MZN', 'pt_BR', 2) ?></p>
+                <p class="text-xl font-bold text-white">0,00 MZN</p>
             </div>
             <div class="p-2.5 bg-yellow-900/20 rounded-lg group-hover:bg-yellow-900/30 transition-colors">
                 <i class="bi bi-currency-dollar text-lg text-yellow-400"></i>
@@ -357,7 +357,7 @@ $categories = $categories ?? ['Programação', 'Design', 'Dados', 'Marketing', '
                             </td>
                             <td class="py-4 px-6 text-center">
                                 <div class="text-lg font-bold text-white">
-                                    <?= $c->price_course > 0 ? number_format($c->price_course, 2) . ' MZN' : 'Gratuito' ?>
+                                    0,00 MZN
                                 </div>
                             </td>
                             <td class="py-4 px-6">
@@ -471,7 +471,7 @@ $categories = $categories ?? ['Programação', 'Design', 'Dados', 'Marketing', '
                                     <?= esc($totalLessons ?? 0) ?> aulas
                                 </span>
                                 <span class="text-lg font-bold text-white">
-                                    <?= $c->price_course > 0 ? number_format($c->price_course, 2) . ' MZN' : 'Grátis' ?>
+                                    0,00 MZN
                                 </span>
                             </div>
                         </div>

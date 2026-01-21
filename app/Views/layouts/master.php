@@ -114,7 +114,13 @@
 
                         <?= $this->renderSection('all_courses') ?>
 
+                        <?= $this->renderSection('students') ?>
+
+                        <?= $this->renderSection('instructors') ?>
+
                         <?= $this->renderSection('profile') ?>
+
+                        <?= $this->renderSection('financial') ?>
 
                         <?= $this->renderSection('lessons') ?>
 

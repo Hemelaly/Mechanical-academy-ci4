@@ -92,7 +92,7 @@ $user = service('auth')->user();
                                     Pagamento recebido
                                 </p>
                                 <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                    Marta Zimba - 25.000 MT
+                                    Marta Zimba - 0,00 MZN
                                 </p>
                                 <span class="inline-block mt-2 text-xs text-emerald-600 dark:text-emerald-400">
                                     Há 1 hora

@@ -30,12 +30,12 @@
               Receita Total
             </p>
             <h3 class="text-2xl sm:text-3xl font-bold mb-1 truncate">
-              R$ 15.758,00
+              0,00 MZN
             </h3>
             <div class="flex items-center gap-1">
               <i class="bi bi-arrow-up-short text-green-300 text-sm"></i>
               <span class="text-green-300 text-sm font-medium truncate">
-                +15% este mês
+                0,00 MZN este mês
               </span>
             </div>
           </div>
@@ -53,12 +53,12 @@
               Próximo Pagamento
             </p>
             <h3 class="text-2xl sm:text-3xl font-bold mb-1 truncate">
-              R$ 3.245,00
+              0,00 MZN
             </h3>
             <div class="flex items-center gap-1">
               <i class="bi bi-calendar-check text-green-100 text-sm"></i>
               <span class="text-green-100 text-sm font-medium truncate">
-                Em 5 dias
+                0,00 MZN em 5 dias
               </span>
             </div>
           </div>
@@ -76,12 +76,12 @@
               Receita Média/Mês
             </p>
             <h3 class="text-2xl sm:text-3xl font-bold mb-1 truncate">
-              R$ 4.890,00
+              0,00 MZN
             </h3>
             <div class="flex items-center gap-1">
               <i class="bi bi-graph-up text-green-300 text-sm"></i>
               <span class="text-green-300 text-sm font-medium truncate">
-                +8% vs média anual
+                0,00 MZN anual
               </span>
             </div>
           </div>
@@ -94,11 +94,11 @@
 
     <!-- Gráficos e Transações -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- Receita por Mês -->
+      <!-- Pagamentos aprovados por mes -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">
         <div class="flex items-center justify-between mb-4 sm:mb-6">
           <h3 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-white">
-            Receita por Mês
+            Pagamentos aprovados por mes
           </h3>
           <div class="flex items-center gap-2">
             <select class="text-xs sm:text-sm bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-lg px-2 sm:px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -109,34 +109,23 @@
           </div>
         </div>
 
-        <!-- Gráfico Placeholder -->
-        <div class="h-64 sm:h-72 flex items-center justify-center bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-600">
-          <div class="text-center p-4">
-            <div class="w-16 h-16 bg-slate-200 dark:bg-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <i class="bi bi-graph-up text-slate-400 text-2xl"></i>
-            </div>
-            <h4 class="font-bold text-slate-700 dark:text-slate-300 mb-2 text-sm sm:text-base">
-              Gráfico de Receita Mensal
-            </h4>
-            <p class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm max-w-xs mx-auto">
-              Área para implementação do gráfico interativo
-            </p>
-          </div>
+        <div class="h-64 sm:h-72">
+          <canvas id="instructor-finance-chart"></canvas>
         </div>
 
-        <!-- Mini Stats abaixo do gráfico -->
+        <!-- Mini Stats abaixo do gr?fico -->
         <div class="grid grid-cols-3 gap-3 mt-4">
           <div class="text-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
             <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Maior</p>
-            <p class="text-sm font-bold text-slate-800 dark:text-white">R$ 5.240</p>
+            <p class="text-sm font-bold text-slate-800 dark:text-white">0,00 MZN</p>
           </div>
           <div class="text-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
             <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Média</p>
-            <p class="text-sm font-bold text-slate-800 dark:text-white">R$ 4.890</p>
+            <p class="text-sm font-bold text-slate-800 dark:text-white">0,00 MZN</p>
           </div>
           <div class="text-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
             <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Cresc.</p>
-            <p class="text-sm font-bold text-green-600">+15%</p>
+            <p class="text-sm font-bold text-green-600">0,00 MZN</p>
           </div>
         </div>
       </div>
@@ -164,7 +153,7 @@
                   Pagamento - Dezembro
                 </p>
                 <p class="text-green-600 dark:text-green-400 font-semibold text-sm">
-                  +R$ 3.245,00
+                  0,00 MZN
                 </p>
               </div>
             </div>
@@ -184,7 +173,7 @@
                   Pagamento - Novembro
                 </p>
                 <p class="text-green-600 dark:text-green-400 font-semibold text-sm">
-                  +R$ 2.890,00
+                  0,00 MZN
                 </p>
               </div>
             </div>
@@ -204,7 +193,7 @@
                   Taxa de Plataforma
                 </p>
                 <p class="text-red-600 dark:text-red-400 font-semibold text-sm">
-                  -R$ 289,00
+                  0,00 MZN
                 </p>
               </div>
             </div>
@@ -224,7 +213,7 @@
                   Pagamento - Outubro
                 </p>
                 <p class="text-green-600 dark:text-green-400 font-semibold text-sm">
-                  +R$ 2.750,00
+                  0,00 MZN
                 </p>
               </div>
             </div>
@@ -239,11 +228,11 @@
           <div class="flex justify-between items-center">
             <div>
               <p class="text-sm text-blue-800 dark:text-blue-200 font-medium">Saldo do Mês</p>
-              <p class="text-lg font-bold text-blue-900 dark:text-white">R$ 2.956,00</p>
+              <p class="text-lg font-bold text-blue-900 dark:text-white">0,00 MZN</p>
             </div>
             <div class="text-right">
               <p class="text-sm text-blue-800 dark:text-blue-200">Disponível</p>
-              <p class="text-green-600 dark:text-green-400 font-semibold">+R$ 2.667,00</p>
+              <p class="text-green-600 dark:text-green-400 font-semibold">0,00 MZN</p>
             </div>
           </div>
         </div>
@@ -258,15 +247,15 @@
         <div class="space-y-3">
           <div class="flex justify-between items-center">
             <span class="text-sm text-slate-600 dark:text-slate-400 truncate">JavaScript Avançado</span>
-            <span class="text-sm font-semibold text-slate-800 dark:text-white">R$ 4.230</span>
+            <span class="text-sm font-semibold text-slate-800 dark:text-white">0,00 MZN</span>
           </div>
           <div class="flex justify-between items-center">
             <span class="text-sm text-slate-600 dark:text-slate-400 truncate">React Completo</span>
-            <span class="text-sm font-semibold text-slate-800 dark:text-white">R$ 3.890</span>
+            <span class="text-sm font-semibold text-slate-800 dark:text-white">0,00 MZN</span>
           </div>
           <div class="flex justify-between items-center">
             <span class="text-sm text-slate-600 dark:text-slate-400 truncate">Node.js API</span>
-            <span class="text-sm font-semibold text-slate-800 dark:text-white">R$ 2.950</span>
+            <span class="text-sm font-semibold text-slate-800 dark:text-white">0,00 MZN</span>
           </div>
         </div>
       </div>
@@ -314,5 +303,70 @@
     </div>
   </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  (function () {
+    const yearSelect = document.querySelector('select');
+    const ctx = document.getElementById('instructor-finance-chart').getContext('2d');
+    let chart;
+
+    const loadData = (year) => {
+      const url = new URL(<?= json_encode(site_url('instructor/dashboard/financas/data')) ?>, window.location.origin);
+      url.searchParams.set('year', year);
+      return fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(res => res.json());
+    };
+
+    const renderChart = (labels, data) => {
+      if (chart) {
+        chart.data.labels = labels;
+        chart.data.datasets[0].data = data;
+        chart.update();
+        return;
+      }
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Pagamentos aprovados',
+            data,
+            borderColor: '#2563eb',
+            backgroundColor: 'rgba(37, 99, 235, 0.2)',
+            tension: 0.35,
+            fill: true,
+            pointRadius: 3,
+            pointBackgroundColor: '#2563eb'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              ticks: {
+                callback: (value) => `${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MZN`
+              }
+            }
+          }
+        }
+      });
+    };
+
+    const refresh = () => {
+      const year = yearSelect?.value || new Date().getFullYear();
+      loadData(year).then(payload => {
+        renderChart(payload.labels || [], payload.data || []);
+      });
+    };
+
+    yearSelect?.addEventListener('change', refresh);
+    refresh();
+  })();
+</script>
 
 <?= $this->endSection() ?>

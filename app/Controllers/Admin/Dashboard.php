@@ -10,6 +10,9 @@ use App\Models\LessonModel;
 use App\Models\CourseSettingModel;
 use App\Models\ExtendedUserModel;
 use CodeIgniter\Shield\Models\UserModel;
+use Config\Services;
+use CodeIgniter\Shield\Entities\User;
+use CodeIgniter\Events\Events;
 
 class Dashboard extends BaseController
 {
@@ -115,6 +118,11 @@ class Dashboard extends BaseController
         ]);
     }
 
+    public function studentsData()
+    {
+        return $this->usersDataResponse('student');
+    }
+
     public function instructors()
     {
         $user = service('auth')->user();
@@ -126,6 +134,11 @@ class Dashboard extends BaseController
         ]);
     }
 
+    public function instructorsData()
+    {
+        return $this->usersDataResponse('instructor');
+    }
+
     public function financial()
     {
         $user = service('auth')->user();
@@ -134,6 +147,40 @@ class Dashboard extends BaseController
             'user' => $user,
             'sidebarLinks' => $this->sidebarLinks(),
             'currentUrl' => current_url()
+        ]);
+    }
+
+    public function financialData()
+    {
+        $year = (int) $this->request->getGet('year');
+        if ($year <= 0) {
+            $year = (int) date('Y');
+        }
+
+        $db = db_connect();
+        $rows = $db->table('payments p')
+            ->select('MONTH(p.created_at) as month, SUM(p.amount_payment) as total')
+            ->where('p.status_payment', 'Aprovado')
+            ->where('YEAR(p.created_at)', $year)
+            ->groupBy('MONTH(p.created_at)')
+            ->orderBy('MONTH(p.created_at)')
+            ->get()
+            ->getResultArray();
+
+        $totals = array_fill(1, 12, 0.0);
+        foreach ($rows as $row) {
+            $month = (int) ($row['month'] ?? 0);
+            if ($month >= 1 && $month <= 12) {
+                $totals[$month] = (float) ($row['total'] ?? 0);
+            }
+        }
+
+        $labels = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+        $series = array_values($totals);
+
+        return $this->response->setJSON([
+            'labels' => $labels,
+            'data' => $series,
         ]);
     }
 
@@ -317,5 +364,243 @@ class Dashboard extends BaseController
         auth()->setUser($updated);
 
         return redirect()->to($profileUrl)->with('success', 'Perfil atualizado com sucesso.');
+    }
+
+    private function usersDataResponse(string $role)
+    {
+        $search = trim((string) $this->request->getGet('q'));
+        $status = (string) $this->request->getGet('status');
+        $page = max(1, (int) $this->request->getGet('page'));
+        $perPage = (int) $this->request->getGet('per_page');
+        if ($perPage <= 0) {
+            $perPage = 10;
+        }
+        $perPage = min(max($perPage, 5), 50);
+
+        $offset = ($page - 1) * $perPage;
+
+        $builder = $this->baseUsersQuery($role);
+        $this->applyUserFilters($builder, $search, $status);
+
+        $countBuilder = clone $builder;
+        $total = (int) $countBuilder->countAllResults();
+
+        $rows = $builder
+            ->orderBy('u.id', 'DESC')
+            ->limit($perPage, $offset)
+            ->get()
+            ->getResultArray();
+
+        $totalPages = (int) ceil($total / $perPage);
+
+        return $this->response->setJSON([
+            'items' => $rows,
+            'pagination' => [
+                'page' => $page,
+                'per_page' => $perPage,
+                'total' => $total,
+                'total_pages' => $totalPages,
+            ],
+        ]);
+    }
+
+    private function baseUsersQuery(string $role)
+    {
+        $db = db_connect();
+
+        return $db->table('users u')
+            ->select('u.id, u.username, u.active, u.last_active, u.created_at, u.img, u.role, ai.secret as email')
+            ->join('auth_identities ai', 'ai.user_id = u.id AND ai.type = "email_password"', 'left')
+            ->where('u.role', $role)
+            ->where('u.deleted_at', null);
+    }
+
+    private function applyUserFilters($builder, string $search, string $status): void
+    {
+        if ($search !== '') {
+            $builder->groupStart()
+                ->like('u.username', $search)
+                ->orLike('ai.secret', $search)
+                ->orLike('u.id', $search)
+                ->groupEnd();
+        }
+
+        if ($status === 'ativo') {
+            $builder->where('u.active', 1);
+        } elseif ($status === 'inativo') {
+            $builder->where('u.active', 0);
+        }
+    }
+
+    public function toggleUserStatus()
+    {
+        $id = (int) $this->request->getPost('id');
+        $role = (string) $this->request->getPost('role');
+
+        if ($id <= 0 || ! in_array($role, ['student', 'instructor'], true)) {
+            return $this->response->setStatusCode(400)->setJSON([
+                'message' => 'Dados invalidos.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        $users = new ExtendedUserModel();
+        $user = $users->find($id);
+        if (! $user || $user->role !== $role) {
+            return $this->response->setStatusCode(404)->setJSON([
+                'message' => 'Usuario nao encontrado.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        $newStatus = $user->active ? 0 : 1;
+        $users->update($id, ['active' => $newStatus]);
+
+        return $this->response->setJSON([
+            'message' => $newStatus ? 'Usuario ativado.' : 'Usuario desativado.',
+            'active' => $newStatus,
+            'csrf' => csrf_hash(),
+        ]);
+    }
+
+    public function deleteUser()
+    {
+        $id = (int) $this->request->getPost('id');
+        $role = (string) $this->request->getPost('role');
+
+        if ($id <= 0 || ! in_array($role, ['student', 'instructor'], true)) {
+            return $this->response->setStatusCode(400)->setJSON([
+                'message' => 'Dados invalidos.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        $users = new ExtendedUserModel();
+        $user = $users->find($id);
+        if (! $user || $user->role !== $role) {
+            return $this->response->setStatusCode(404)->setJSON([
+                'message' => 'Usuario nao encontrado.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        $users->delete($id);
+
+        return $this->response->setJSON([
+            'message' => 'Usuario excluido.',
+            'csrf' => csrf_hash(),
+        ]);
+    }
+
+    public function sendUserMessage()
+    {
+        $id = (int) $this->request->getPost('id');
+        $role = (string) $this->request->getPost('role');
+        $message = trim((string) $this->request->getPost('message'));
+
+        if ($id <= 0 || $message === '' || ! in_array($role, ['student', 'instructor'], true)) {
+            return $this->response->setStatusCode(400)->setJSON([
+                'message' => 'Dados invalidos.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        $db = db_connect();
+        $row = $db->table('users u')
+            ->select('u.id, u.username, ai.secret as email, u.role')
+            ->join('auth_identities ai', 'ai.user_id = u.id AND ai.type = "email_password"', 'left')
+            ->where('u.id', $id)
+            ->get()
+            ->getRow();
+
+        if (! $row || $row->role !== $role || empty($row->email)) {
+            return $this->response->setStatusCode(404)->setJSON([
+                'message' => 'Usuario nao encontrado.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        $mail = Services::email();
+        $mail->setTo($row->email);
+        $mail->setSubject('Mensagem do administrador');
+        $mail->setMessage(nl2br(esc($message)));
+        $mail->send();
+
+        return $this->response->setJSON([
+            'message' => 'Mensagem enviada.',
+            'csrf' => csrf_hash(),
+        ]);
+    }
+
+    public function createUser()
+    {
+        $role = (string) $this->request->getPost('role');
+        $email = trim((string) $this->request->getPost('email'));
+        $username = trim((string) $this->request->getPost('username'));
+        $password = (string) $this->request->getPost('password');
+        $confirm = (string) $this->request->getPost('password_confirm');
+
+        if (! in_array($role, ['student', 'instructor'], true)) {
+            return $this->response->setStatusCode(400)->setJSON([
+                'message' => 'Role invalido.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        $rules = [
+            'email'            => 'required|valid_email',
+            'username'         => 'required|min_length[3]|max_length[30]',
+            'password'         => 'required|min_length[8]',
+            'password_confirm' => 'required|matches[password]',
+        ];
+
+        if (! $this->validate($rules)) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'message' => implode(', ', $this->validator->getErrors()),
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        $users = new UserModel();
+
+        $existing = $users->findByCredentials(['email' => $email]);
+        if ($existing) {
+            return $this->response->setStatusCode(409)->setJSON([
+                'message' => 'Email ja registrado.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        $existingUsername = $users->where('username', $username)->first();
+        if ($existingUsername) {
+            return $this->response->setStatusCode(409)->setJSON([
+                'message' => 'Nome de usuario ja registrado.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        $user = new User([
+            'username' => $username,
+        ]);
+        $user->email = $email;
+        $user->password = $password;
+
+        if (! $users->save($user)) {
+            return $this->response->setStatusCode(500)->setJSON([
+                'message' => 'Nao foi possivel criar o usuario.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        $userId = (int) $users->getInsertID();
+        $created = $users->find($userId);
+
+        // Trigger existing register hook to set role and related records.
+        Events::trigger('register', $created);
+
+        return $this->response->setJSON([
+            'message' => 'Usuario criado com sucesso.',
+            'csrf' => csrf_hash(),
+        ]);
     }
 }

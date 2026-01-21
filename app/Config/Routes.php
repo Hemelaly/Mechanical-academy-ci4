@@ -9,17 +9,28 @@ use CodeIgniter\Router\RouteCollection;
 $routes->get('/', 'Home::index');
 
 // Rotas do Shield (login, logout, etc.)
-service('auth')->routes($routes);
+service('auth')->routes($routes, ['except' => ['register']]);
+$routes->get('novo_usuario', '\CodeIgniter\Shield\Controllers\RegisterController::registerView', ['as' => 'register', 'filter' => 'role:admin']);
+$routes->post('novo_usuario', '\CodeIgniter\Shield\Controllers\RegisterController::registerAction', ['filter' => 'role:admin']);
 
 $routes->get('reset-password',  'ResetPassword::showResetForm');
 $routes->post('reset-password', 'ResetPassword::submitReset');
+$routes->post('reset-password/request', 'ResetPassword::requestReset');
 
 // Admin
 $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'role:admin'], function ($routes) {
     $routes->get('dashboard', 'Dashboard::index');
     $routes->get('dashboard/cursos', 'Dashboard::courses');
     $routes->get('dashboard/estudantes', 'Dashboard::students');
+    $routes->get('dashboard/estudantes/data', 'Dashboard::studentsData');
     $routes->get('dashboard/instrutores', 'Dashboard::instructors');
+    $routes->get('dashboard/instrutores/data', 'Dashboard::instructorsData');
+    $routes->post('dashboard/usuarios/toggle', 'Dashboard::toggleUserStatus');
+    $routes->post('dashboard/usuarios/delete', 'Dashboard::deleteUser');
+    $routes->post('dashboard/usuarios/message', 'Dashboard::sendUserMessage');
+    $routes->post('dashboard/usuarios/create', 'Dashboard::createUser');
+    $routes->get('dashboard/financas', 'Dashboard::financial');
+    $routes->get('dashboard/financas/data', 'Dashboard::financialData');
     $routes->get('dashboard/perfil', 'Dashboard::profile');
     $routes->post('dashboard/perfil', 'Dashboard::profile');
 });
@@ -42,7 +53,9 @@ $routes->group('instructor', ['namespace' => 'App\Controllers\Instructor', 'filt
     $routes->post('dashboard/meus_cursos/deletar/(:num)', 'CourseController::deletar/$1');
     $routes->get('dashboard/meus_estudantes', 'Dashboard::students');
     $routes->get('dashboard/financas', 'Dashboard::financial');
+    $routes->get('dashboard/financas/data', 'Dashboard::financialData');
     $routes->get('dashboard/perfil', 'Dashboard::profile');
+    $routes->post('dashboard/perfil', 'Dashboard::profile');
     $routes->get('dashboard/certificados', 'Dashboard::certificate');
     $routes->post('dashboard/certificados', '\App\Controllers\Certificates::upload');
     $routes->post('dashboard/certificados/delete', '\App\Controllers\Certificates::deleteCertificate');
