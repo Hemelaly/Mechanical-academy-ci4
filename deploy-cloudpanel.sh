@@ -16,14 +16,26 @@ SSH_OPTS="${SSH_OPTS:-}"
 TAR_OPTS="${TAR_OPTS:---exclude=.git --exclude=node_modules --exclude=build/logs --exclude=vendor --exclude=.env}"
 
 # Reuse the same SSH connection so the password is requested only once.
-SAFE_HOST="${REMOTE_HOST//[:]/_}"
-CONTROL_PATH="${CONTROL_PATH:-/tmp/ssh-${REMOTE_USER}@${SAFE_HOST}-${REMOTE_PORT}}"
+# On Git Bash (MINGW/MSYS) multiplexing is unreliable, so disable by default.
+SSH_MULTIPLEX="${SSH_MULTIPLEX:-auto}"
+if [[ "${SSH_MULTIPLEX}" == "auto" ]]; then
+  case "${MSYSTEM:-}" in
+    MINGW*|MSYS*) SSH_MULTIPLEX="off" ;;
+    *) SSH_MULTIPLEX="on" ;;
+  esac
+fi
+
 SSH_BASE_OPTS=()
 if [[ -n "${SSH_OPTS}" ]]; then
   read -r -a SSH_EXTRA_OPTS <<< "${SSH_OPTS}"
   SSH_BASE_OPTS+=("${SSH_EXTRA_OPTS[@]}")
 fi
-SSH_BASE_OPTS+=(-o ControlMaster=auto -o ControlPersist=10m -o "ControlPath=${CONTROL_PATH}")
+
+if [[ "${SSH_MULTIPLEX}" == "on" ]]; then
+  SAFE_HOST="${REMOTE_HOST//[:]/_}"
+  CONTROL_PATH="${CONTROL_PATH:-/tmp/ssh-${REMOTE_USER}@${SAFE_HOST}-${REMOTE_PORT}}"
+  SSH_BASE_OPTS+=(-o ControlMaster=auto -o ControlPersist=10m -o "ControlPath=${CONTROL_PATH}")
+fi
 
 if [[ -z "${REMOTE_USER}" || -z "${REMOTE_HOST}" || -z "${REMOTE_PATH}" ]]; then
   echo "Defina DEPLOY_USER, DEPLOY_HOST e DEPLOY_PATH antes de executar o deploy."
