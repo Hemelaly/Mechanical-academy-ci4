@@ -11,11 +11,13 @@ REMOTE_PATH="${DEPLOY_PATH:-/home/mechanical-academy/htdocs/academy.mechanical.c
 LOCAL_ENV_FILE="${LOCAL_ENV_FILE:-.env}"
 REMOTE_NAME="${REMOTE_NAME:-origin}"
 BRANCH_NAME="${BRANCH_NAME:-main}"
+REMOTE_PORT="${DEPLOY_PORT:-22}"
 SSH_OPTS="${SSH_OPTS:-}"
 TAR_OPTS="${TAR_OPTS:---exclude=.git --exclude=node_modules --exclude=build/logs --exclude=vendor --exclude=.env}"
 
 # Reuse the same SSH connection so the password is requested only once.
-CONTROL_PATH="${CONTROL_PATH:-$HOME/.ssh/cm-%r@%h:%p}"
+SAFE_HOST="${REMOTE_HOST//[:]/_}"
+CONTROL_PATH="${CONTROL_PATH:-$HOME/.ssh/cm-${REMOTE_USER}@${SAFE_HOST}-${REMOTE_PORT}}"
 SSH_OPTS="${SSH_OPTS} -o ControlMaster=auto -o ControlPersist=10m -o ControlPath=${CONTROL_PATH}"
 
 if [[ -z "${REMOTE_USER}" || -z "${REMOTE_HOST}" || -z "${REMOTE_PATH}" ]]; then
@@ -58,22 +60,22 @@ if command -v rsync >/dev/null 2>&1; then
     --exclude 'build/logs' \
     --exclude 'vendor' \
     --exclude '.env' \
-    -e "ssh ${SSH_OPTS}" \
+    -e "ssh ${SSH_OPTS} -p ${REMOTE_PORT}" \
     "${SOURCE_DIR}/" "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_PATH}"
 else
   echo ">>> rsync nao encontrado. Usando tar+ssh (sem delete remoto)."
-  tar -czf - ${TAR_OPTS} "${SOURCE_DIR}" | ssh ${SSH_OPTS} "${REMOTE_USER}@${REMOTE_HOST}" "mkdir -p \"${REMOTE_PATH}\" && tar -xzf - -C \"${REMOTE_PATH}\" --strip-components=1"
+  tar -czf - ${TAR_OPTS} "${SOURCE_DIR}" | ssh ${SSH_OPTS} -p "${REMOTE_PORT}" "${REMOTE_USER}@${REMOTE_HOST}" "mkdir -p \"${REMOTE_PATH}\" && tar -xzf - -C \"${REMOTE_PATH}\" --strip-components=1"
 fi
 
 if [[ -n "${LOCAL_ENV_FILE}" && -f "${LOCAL_ENV_FILE}" ]]; then
   echo ">>> Enviando ${LOCAL_ENV_FILE} como .env"
-  scp "${LOCAL_ENV_FILE}" "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_PATH}/.env"
+  scp -P "${REMOTE_PORT}" ${SSH_OPTS} "${LOCAL_ENV_FILE}" "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_PATH}/.env"
 else
   echo ">>> Aviso: arquivo .env nao enviado (LOCAL_ENV_FILE nao encontrado)."
 fi
 
 echo ">>> Executando comandos remotos"
-ssh ${SSH_OPTS} "${REMOTE_USER}@${REMOTE_HOST}" <<EOF
+ssh ${SSH_OPTS} -p "${REMOTE_PORT}" "${REMOTE_USER}@${REMOTE_HOST}" <<EOF
 cd "${REMOTE_PATH}"
 composer install --no-dev --optimize-autoloader --prefer-dist
 php spark migrate --all --force
