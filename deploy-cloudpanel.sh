@@ -13,7 +13,7 @@ REMOTE_NAME="${REMOTE_NAME:-origin}"
 BRANCH_NAME="${BRANCH_NAME:-main}"
 REMOTE_PORT="${DEPLOY_PORT:-22}"
 SSH_OPTS="${SSH_OPTS:-}"
-TAR_OPTS="${TAR_OPTS:---exclude=.git --exclude=node_modules --exclude=build/logs --exclude=vendor --exclude=.env}"
+TAR_OPTS="${TAR_OPTS:---exclude=.git --exclude=node_modules --exclude=build/logs --exclude=vendor --exclude=.env --exclude=public/assets/img/_orig}"
 
 # Reuse the same SSH connection so the password is requested only once.
 # On Git Bash (MINGW/MSYS) multiplexing is unreliable, so disable by default.
@@ -84,6 +84,7 @@ if command -v rsync >/dev/null 2>&1; then
     --exclude 'build/logs' \
     --exclude 'vendor' \
     --exclude '.env' \
+    --exclude 'public/assets/img/_orig' \
     -e "${RSYNC_SSH_STR}" \
     "${SOURCE_DIR}/" "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_PATH}"
 else
