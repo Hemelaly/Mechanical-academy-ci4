@@ -13,6 +13,7 @@ class LessonsController extends BaseController
         $payload      = $this->request->getJSON(true);
         $idLesson     = (int)($payload['lesson_id'] ?? 0);
         $idEnrollment = (int)($payload['enrollment_id'] ?? 0);
+        $score        = isset($payload['score']) ? (float) $payload['score'] : null;
         if (!$idLesson || !$idEnrollment) {
             return $this->response->setJSON(['ok' => false, 'message' => 'Parâmetros inválidos']);
         }
@@ -20,10 +21,10 @@ class LessonsController extends BaseController
         $db = db_connect();
         // upsert progresso
         $db->query(
-            'INSERT INTO progress (id_enrollment_progress, id_lesson_progress, completed_at_progress, created_at, updated_at)
-         VALUES (?, ?, NOW(), NOW(), NOW())
-         ON DUPLICATE KEY UPDATE completed_at_progress = VALUES(completed_at_progress), updated_at = NOW()',
-            [$idEnrollment, $idLesson]
+            'INSERT INTO progress (id_enrollment_progress, id_lesson_progress, completed_at_progress, score_progress, created_at, updated_at)
+         VALUES (?, ?, NOW(), ?, NOW(), NOW())
+         ON DUPLICATE KEY UPDATE completed_at_progress = VALUES(completed_at_progress), score_progress = IFNULL(VALUES(score_progress), score_progress), updated_at = NOW()',
+            [$idEnrollment, $idLesson, $score]
         );
 
         $percent = (new \App\Services\ProgressService($db))->recalcAndSave($idEnrollment);

@@ -156,7 +156,12 @@
                                             </div>
 
                                             <!-- Action Button -->
-                                            <a href="<?= '/student/dashboard/ver_aulas/' . ($lesson[$key]->resumeLessonId ?? '') ?>?autoplay=1"
+                                            <?php
+                                            $lessonUrl = (!empty($lesson[$key]->courseSlug) && !empty($lesson[$key]->resumeLessonSlug))
+                                                ? site_url('student/dashboard/inscricoes/' . $lesson[$key]->courseSlug . '/' . $lesson[$key]->resumeLessonSlug)
+                                                : site_url('student/dashboard/ver_aulas/' . ($lesson[$key]->resumeLessonId ?? ''));
+                                            ?>
+                                            <a href="<?= $lessonUrl ?>?autoplay=1"
                                                 class="group/btn px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-blue-500/25 flex items-center gap-2 whitespace-nowrap">
                                                 <i class="bi bi-play-circle group-hover/btn:scale-110 transition-transform"></i>
                                                 Continuar
@@ -260,7 +265,12 @@
 
                                         <div class="flex gap-2">
                                             <?php if (in_array($course->id_course, $activeCourseIds)): ?>
-                                                <a href="<?= '/student/dashboard/ver_aulas/' . ($lesson[$key]->resumeLessonId ?? '') ?>?autoplay=1"
+                                                <?php
+                                                $lessonUrl = (!empty($lesson[$key]->courseSlug) && !empty($lesson[$key]->resumeLessonSlug))
+                                                    ? site_url('student/dashboard/inscricoes/' . $lesson[$key]->courseSlug . '/' . $lesson[$key]->resumeLessonSlug)
+                                                    : site_url('student/dashboard/ver_aulas/' . ($lesson[$key]->resumeLessonId ?? ''));
+                                                ?>
+                                                <a href="<?= $lessonUrl ?>?autoplay=1"
                                                     class="group/btn inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-green-500/25">
                                                     <i class="bi bi-play-circle group-hover/btn:scale-110 transition-transform"></i>
                                                     Continuar

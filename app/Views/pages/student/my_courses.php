@@ -212,7 +212,12 @@
                 </div>
 
                 <!-- Action Button -->
-                <a href="<?= site_url('student/dashboard/ver_aulas/' . $course->resumeLessonId) ?>?autoplay=1"
+                <?php
+                $lessonUrl = (!empty($course->courseSlug) && !empty($course->resumeLessonSlug))
+                    ? site_url('student/dashboard/inscricoes/' . $course->courseSlug . '/' . $course->resumeLessonSlug)
+                    : site_url('student/dashboard/ver_aulas/' . $course->resumeLessonId);
+                ?>
+                <a href="<?= $lessonUrl ?>?autoplay=1"
                   class="group/btn w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-blue-500/25">
                   <?php if (!empty($course->resumeLessonId) && $courseProgress > 0): ?>
                     <i class="fas fa-play-circle group-hover/btn:scale-110 transition-transform"></i>

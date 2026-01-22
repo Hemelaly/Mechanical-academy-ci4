@@ -55,15 +55,21 @@ use Faker\Provider\Base;
 
                 <?php foreach ($sidebarLinks as $link): ?>
                     <?php
-                    $currentUrl = rtrim(current_url(), '/');
-                    $linkUrl = rtrim(site_url($link['url']), '/');
-                    $isActive = $currentUrl === $linkUrl;
+                    $currentPath = rtrim(parse_url(current_url(), PHP_URL_PATH) ?? '', '/');
+                    $linkPath = rtrim(parse_url(site_url($link['url']), PHP_URL_PATH) ?? '', '/');
+                    $pattern = $link['pattern'] ?? $link['url'];
+                    $isActive = $currentPath === $linkPath;
+                    if (str_ends_with($pattern, '*')) {
+                        $base = rtrim(parse_url(site_url(rtrim($pattern, '*')), PHP_URL_PATH) ?? '', '/');
+                        $isActive = $base !== '' && strpos($currentPath, $base) === 0;
+                    }
 
                     ?>
 
                     <!-- LINKS -->
                     <a
                         href="<?= site_url($link['url']) ?>"
+                        data-pattern="<?= esc($pattern) ?>"
                         id="side-link"
                         class="side-link flex <?= $isActive ? 'active bg-slate-200/60 dark:bg-slate-700/60 text-slate-800 dark:text-white font-semibold' : 'text-slate-500 dark:text-slate-400' ?> items-center rounded-lg px-2 py-2 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-blue-500 transition">
                         <span class="flex h-8 w-8 items-center justify-center">
@@ -114,17 +120,18 @@ use Faker\Provider\Base;
     document.addEventListener('DOMContentLoaded', function() {
 
         const links = document.querySelectorAll('#sidebar .side-link');
-
-        // página atual sem query string
-        const currentPage = window.location.pathname.split('/').pop().split('?')[0];
+        const currentPath = window.location.pathname.replace(/\/$/, '');
 
         links.forEach(link => {
 
             const href = link.getAttribute('href');
             if (!href || href === '#') return;
             const linkPath = new URL(href, window.location.origin).pathname.replace(/\/$/, '');
+            const pattern = link.dataset.pattern || linkPath;
+            const base = pattern.endsWith('*') ? pattern.replace(/\*$/, '').replace(/\/$/, '') : linkPath;
+            const isActive = pattern.endsWith('*') ? currentPath.startsWith(base) : linkPath === currentPath;
 
-            if (linkPath === currentPath) {
+            if (isActive) {
                 link.classList.add(
                     'bg-slate-200/60',
                     'dark:bg-slate-700/60',

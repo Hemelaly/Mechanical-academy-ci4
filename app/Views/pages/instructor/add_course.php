@@ -98,6 +98,7 @@ $user = service('auth')->user();
                 <input type="hidden" name="id_instructor_course" value="<?= $user->id ?>">
                 <input type="hidden" id="draft-id" name="draft_id" value="<?= esc($draft->id_course ?? '') ?>">
                 <input type="hidden" id="modules-json" name="modules">
+                <input type="hidden" id="modules-json-alt" name="modules_json">
                 <input type="hidden" id="tags-json" name="tags">
 
                 <div class="p-4 sm:p-6 lg:p-8">
@@ -291,9 +292,49 @@ $user = service('auth')->user();
                                                 class="w-full px-3 py-2 mb-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-sm text-slate-800 dark:text-slate-100"
                                                 placeholder="Descrição do módulo (opcional)"><?= esc($module->description_module ?? '') ?></textarea>
 
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                                                <div>
+                                                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                                                        Nota mínima do quiz (%)
+                                                    </label>
+                                                    <input type="number"
+                                                        name="modules[<?= $mIndex ?>][min_score]"
+                                                        min="0"
+                                                        max="100"
+                                                        value="<?= esc($module->min_score_module ?? 75) ?>"
+                                                        class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
+                                                        placeholder="Ex: 75">
+                                                </div>
+                                            </div>
+
                                             <div class="lessons-container space-y-2 mb-3">
                                                 <?php foreach ($module->lessons as $lIndex => $lesson): ?>
                                                     <div class="lesson-item border border-slate-200 dark:border-slate-700 rounded-xl p-3 bg-slate-50 dark:bg-slate-800">
+                                                        <?php
+                                                        $quizQuestions = [];
+                                                        if (($lesson->type_lesson ?? '') === 'quiz' && !empty($lesson->content_lesson)) {
+                                                            $decodedQuiz = json_decode($lesson->content_lesson, true);
+                                                            if (is_array($decodedQuiz) && !empty($decodedQuiz['questions'])) {
+                                                                $quizQuestions = $decodedQuiz['questions'];
+                                                            }
+                                                        }
+
+                                                        foreach ($quizQuestions as $qIndex => $q) {
+                                                            if (!is_array($q)) {
+                                                                $quizQuestions[$qIndex] = [
+                                                                    'question' => (string) $q,
+                                                                    'options' => ['', '', '', ''],
+                                                                    'correct' => 0,
+                                                                ];
+                                                                continue;
+                                                            }
+
+                                                            if (!isset($q['options'])) {
+                                                                $quizQuestions[$qIndex]['options'] = ['', '', '', ''];
+                                                                $quizQuestions[$qIndex]['correct'] = 0;
+                                                            }
+                                                        }
+                                                        ?>
                                                         <div class="flex justify-between items-center mb-2 gap-2">
                                                             <input type="text"
                                                                 name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][title]"
@@ -308,7 +349,7 @@ $user = service('auth')->user();
                                                         </div>
                                                         <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-2">
                                                             <select name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][type]"
-                                                                class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100">
+                                                                class="lesson-type px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100">
                                                                 <option value="video" <?= $lesson->type_lesson == 'video' ? 'selected' : '' ?>>Vídeo</option>
                                                                 <option value="text" <?= $lesson->type_lesson == 'text' ? 'selected' : '' ?>>Texto</option>
                                                                 <option value="quiz" <?= $lesson->type_lesson == 'quiz' ? 'selected' : '' ?>>Quiz</option>
@@ -319,11 +360,84 @@ $user = service('auth')->user();
                                                                 class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
                                                                 placeholder="Duração (min)"
                                                                 value="<?= esc($lesson->duration_lesson) ?>">
-                                                            <input type="url"
-                                                                name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][video_url]"
-                                                                class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
-                                                                placeholder="Link do vídeo (opcional)"
-                                                                value="<?= esc($lesson->video_url_lesson) ?>">
+                                                            <div class="video-fields">
+                                                                <input type="url"
+                                                                    name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][video_url]"
+                                                                    class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
+                                                                    placeholder="Link do vídeo (opcional)"
+                                                                    value="<?= esc($lesson->video_url_lesson) ?>">
+                                                            </div>
+                                                        </div>
+                                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
+                                                            <div>
+                                                                <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                                                                    Arquivo da aula (opcional)
+                                                                </label>
+                                                                <input type="file"
+                                                                    name="lesson_files[<?= $mIndex ?>][<?= $lIndex ?>]"
+                                                                    accept=".zip,.rar,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx"
+                                                                    class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100" />
+                                                                <input type="hidden"
+                                                                    name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][file_existing]"
+                                                                    value="<?= esc($lesson->attachment_path_lesson ?? '') ?>">
+                                                                <input type="hidden"
+                                                                    name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][file_existing_name]"
+                                                                    value="<?= esc($lesson->attachment_name_lesson ?? '') ?>">
+                                                                <?php if (!empty($lesson->attachment_path_lesson)): ?>
+                                                                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                                                                        Atual: <?= esc($lesson->attachment_name_lesson ?? $lesson->attachment_path_lesson) ?>
+                                                                    </p>
+                                                                <?php endif; ?>
+                                                            </div>
+                                                        </div>
+                                                        <div class="quiz-fields <?= $lesson->type_lesson === 'quiz' ? '' : 'hidden' ?> bg-white/60 dark:bg-slate-900/60 border border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-3">
+                                                            <div class="flex items-center justify-between mb-2">
+                                                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                                                                    Perguntas do quiz
+                                                                </span>
+                                                                <button type="button"
+                                                                    class="btn-add-quiz-question inline-flex items-center gap-1 px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-medium rounded-lg">
+                                                                    <i class="bi bi-plus"></i>
+                                                                    Adicionar pergunta
+                                                                </button>
+                                                            </div>
+                                                            <div class="quiz-questions space-y-2">
+                                                                <?php foreach ($quizQuestions as $qIndex => $question): ?>
+                                                                    <div class="quiz-question grid grid-cols-1 md:grid-cols-2 gap-2 items-center">
+                                                                        <input type="text"
+                                                                            name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][quiz][<?= $qIndex ?>][question]"
+                                                                            class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
+                                                                            placeholder="Pergunta"
+                                                                            value="<?= esc($question['question'] ?? '') ?>">
+                                                                        <div class="flex flex-col gap-2">
+                                                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                                                <?php for ($opt = 0; $opt < 4; $opt++): ?>
+                                                                                    <input type="text"
+                                                                                        name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][quiz][<?= $qIndex ?>][options][<?= $opt ?>]"
+                                                                                        class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
+                                                                                        placeholder="Alternativa <?= $opt + 1 ?>"
+                                                                                        value="<?= esc($question['options'][$opt] ?? '') ?>">
+                                                                                <?php endfor; ?>
+                                                                            </div>
+                                                                            <div class="flex gap-2 items-center">
+                                                                                <select name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][quiz][<?= $qIndex ?>][correct]"
+                                                                                    class="flex-1 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100">
+                                                                                    <?php for ($opt = 0; $opt < 4; $opt++): ?>
+                                                                                        <option value="<?= $opt ?>" <?= (int) ($question['correct'] ?? 0) === $opt ? 'selected' : '' ?>>
+                                                                                            Correta: alternativa <?= $opt + 1 ?>
+                                                                                        </option>
+                                                                                    <?php endfor; ?>
+                                                                                </select>
+                                                                                <button type="button"
+                                                                                    class="remove-quiz-question text-red-500 hover:text-red-600 text-base"
+                                                                                    title="Remover pergunta">
+                                                                                    <i class="bi bi-x-circle"></i>
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                <?php endforeach; ?>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 <?php endforeach; ?>
@@ -662,6 +776,8 @@ $user = service('auth')->user();
                     modCard.querySelector('input[name$="[title]"]')?.value || `Módulo ${i + 1}`;
                 const moduleDescription =
                     modCard.querySelector('textarea[name$="[description]"]')?.value || "";
+                const moduleMinScore =
+                    modCard.querySelector('input[name$="[min_score]"]')?.value || 75;
                 const lessons = [];
 
                 modCard.querySelectorAll(".lesson-item").forEach((lessonEl, j) => {
@@ -673,23 +789,60 @@ $user = service('auth')->user();
                         lessonEl.querySelector('input[name$="[duration]"]')?.value || 0;
                     const video_url =
                         lessonEl.querySelector('input[name$="[video_url]"]')?.value || null;
+                    const fileExisting =
+                        lessonEl.querySelector('input[name$="[file_existing]"]')?.value || "";
+                    const fileExistingName =
+                        lessonEl.querySelector('input[name$="[file_existing_name]"]')?.value || "";
+                    const fileInput = lessonEl.querySelector('input[type="file"][name^="lesson_files"]');
+                    let fileInputIndex = null;
+                    if (fileInput?.name) {
+                        const match = fileInput.name.match(/lesson_files\[(\d+)\]\[(\d+)\]/);
+                        fileInputIndex = match ? parseInt(match[2], 10) : null;
+                    }
+                    const quiz_questions = [];
+
+                    if (type === "quiz") {
+                        lessonEl.querySelectorAll(".quiz-question").forEach((qEl) => {
+                            const question = qEl.querySelector('input[name$="[question]"]')?.value?.trim() || "";
+                            const options = [];
+                            qEl.querySelectorAll('input[name*="[options]"]').forEach((optEl) => {
+                                options.push(optEl.value?.trim() || "");
+                            });
+                            const correctRaw = qEl.querySelector('select[name$="[correct]"]')?.value;
+                            const correct = Number.isFinite(parseInt(correctRaw, 10)) ? parseInt(correctRaw, 10) : 0;
+
+                            if (question || options.some(Boolean)) {
+                                quiz_questions.push({ question, options, correct });
+                            }
+                        });
+                    }
 
                     lessons.push({
                         title,
                         type,
                         duration,
-                        video_url
+                        video_url,
+                        quiz_questions,
+                        file_input_index: fileInputIndex,
+                        file_existing: fileExisting,
+                        file_existing_name: fileExistingName
                     });
                 });
+
+                const minScoreValue = parseInt(moduleMinScore, 10);
 
                 modules.push({
                     title: moduleTitle,
                     description: moduleDescription,
+                    min_score: Number.isFinite(minScoreValue) ? minScoreValue : 75,
                     lessons,
                 });
             });
 
-            if (modulesHidden) modulesHidden.value = JSON.stringify(modules);
+            const modulesJson = JSON.stringify(modules);
+            if (modulesHidden) modulesHidden.value = modulesJson;
+            const modulesHiddenAlt = document.getElementById("modules-json-alt");
+            if (modulesHiddenAlt) modulesHiddenAlt.value = modulesJson;
             if (tagsHidden) tagsHidden.value = JSON.stringify(tags);
         }
 
@@ -871,6 +1024,73 @@ $user = service('auth')->user();
         // ======================
         // Módulos e Aulas (dinâmico)
         // ======================
+        function syncQuizFields(lessonEl) {
+            const typeSelect = lessonEl.querySelector(".lesson-type");
+            const quizFields = lessonEl.querySelector(".quiz-fields");
+            if (!typeSelect || !quizFields) return;
+
+            if (typeSelect.value === "quiz") {
+                quizFields.classList.remove("hidden");
+            } else {
+                quizFields.classList.add("hidden");
+            }
+        }
+
+        function syncVideoFields(lessonEl) {
+            const typeSelect = lessonEl.querySelector(".lesson-type");
+            const videoFields = lessonEl.querySelector(".video-fields");
+            if (!typeSelect || !videoFields) return;
+
+            if (typeSelect.value === "video") {
+                videoFields.classList.remove("hidden");
+            } else {
+                videoFields.classList.add("hidden");
+            }
+        }
+
+        function addQuizQuestion(lessonEl) {
+            const questionsContainer = lessonEl.querySelector(".quiz-questions");
+            if (!questionsContainer) return;
+
+            const index = questionsContainer.querySelectorAll(".quiz-question").length;
+            const moduleId = lessonEl.closest(".module-card")?.querySelector('input[name$="[title]"]')?.name?.match(/modules\[(\d+)\]/)?.[1] || 0;
+            const lessonCount = lessonEl.querySelector('input[name$="[title]"]')?.name?.match(/lessons\[(\d+)\]/)?.[1] || index;
+
+            const questionHtml = `
+                <div class="quiz-question grid grid-cols-1 md:grid-cols-2 gap-2 items-center">
+                    <input type="text"
+                           name="modules[${moduleId}][lessons][${lessonCount}][quiz][${index}][question]"
+                           class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
+                           placeholder="Pergunta">
+                    <div class="flex flex-col gap-2">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            ${[0,1,2,3].map(opt => `
+                                <input type="text"
+                                       name="modules[${moduleId}][lessons][${lessonCount}][quiz][${index}][options][${opt}]"
+                                       class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
+                                       placeholder="Alternativa ${opt + 1}">
+                            `).join("")}
+                        </div>
+                        <div class="flex gap-2 items-center">
+                            <select name="modules[${moduleId}][lessons][${lessonCount}][quiz][${index}][correct]"
+                                    class="flex-1 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100">
+                                ${[0,1,2,3].map(opt => `
+                                    <option value="${opt}">Correta: alternativa ${opt + 1}</option>
+                                `).join("")}
+                            </select>
+                            <button type="button"
+                                    class="remove-quiz-question text-red-500 hover:text-red-600 text-base"
+                                    title="Remover pergunta">
+                                <i class="bi bi-x-circle"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            questionsContainer.insertAdjacentHTML("beforeend", questionHtml);
+        }
+
         if (modulesContainer) {
             const addModuleBtn = document.getElementById("add-module");
 
@@ -891,6 +1111,21 @@ $user = service('auth')->user();
                     <textarea name="modules[${moduleIndex}][description]"
                               class="w-full px-3 py-2 mb-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-sm text-slate-800 dark:text-slate-100"
                               placeholder="Descrição do módulo (opcional)"></textarea>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                                Nota mínima do quiz (%)
+                            </label>
+                            <input type="number"
+                                   name="modules[${moduleIndex}][min_score]"
+                                   min="0"
+                                   max="100"
+                                   value="75"
+                                   class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
+                                   placeholder="Ex: 75">
+                        </div>
+                    </div>
 
                     <div class="lessons-container space-y-2 mb-3"></div>
 
@@ -937,7 +1172,7 @@ $user = service('auth')->user();
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-2">
                             <select name="modules[${moduleId}][lessons][${lessonCount}][type]"
-                                    class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100">
+                                    class="lesson-type px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100">
                                 <option value="video">Vídeo</option>
                                 <option value="text">Texto</option>
                                 <option value="quiz">Quiz</option>
@@ -947,10 +1182,42 @@ $user = service('auth')->user();
                                    name="modules[${moduleId}][lessons][${lessonCount}][duration]"
                                    class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
                                    placeholder="Duração (min)">
-                            <input type="url"
-                                   name="modules[${moduleId}][lessons][${lessonCount}][video_url]"
-                                   class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
-                                   placeholder="Link do vídeo (opcional)">
+                            <div class="video-fields">
+                                <input type="url"
+                                       name="modules[${moduleId}][lessons][${lessonCount}][video_url]"
+                                       class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
+                                       placeholder="Link do vídeo (opcional)">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                                    Arquivo da aula (opcional)
+                                </label>
+                                <input type="file"
+                                       name="lesson_files[${moduleId}][${lessonCount}]"
+                                       accept=".zip,.rar,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx"
+                                       class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100" />
+                                <input type="hidden"
+                                       name="modules[${moduleId}][lessons][${lessonCount}][file_existing]"
+                                       value="">
+                                <input type="hidden"
+                                       name="modules[${moduleId}][lessons][${lessonCount}][file_existing_name]"
+                                       value="">
+                            </div>
+                        </div>
+                        <div class="quiz-fields hidden bg-white/60 dark:bg-slate-900/60 border border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-3">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                                    Perguntas do quiz
+                                </span>
+                                <button type="button"
+                                        class="btn-add-quiz-question inline-flex items-center gap-1 px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-medium rounded-lg">
+                                    <i class="bi bi-plus"></i>
+                                    Adicionar pergunta
+                                </button>
+                            </div>
+                            <div class="quiz-questions space-y-2"></div>
                         </div>
                     </div>
                 `;
@@ -959,12 +1226,38 @@ $user = service('auth')->user();
                     return;
                 }
 
+                // adicionar pergunta de quiz
+                if (target.closest(".btn-add-quiz-question")) {
+                    const lessonEl = target.closest(".lesson-item");
+                    addQuizQuestion(lessonEl);
+                    return;
+                }
+
+                // remover pergunta de quiz
+                if (target.closest(".remove-quiz-question")) {
+                    target.closest(".quiz-question")?.remove();
+                    return;
+                }
+
                 // remover aula
                 if (target.closest(".remove-lesson")) {
                     target.closest(".lesson-item").remove();
                 }
             });
+
+            modulesContainer.addEventListener("change", (e) => {
+                if (e.target.classList.contains("lesson-type")) {
+                    const lessonEl = e.target.closest(".lesson-item");
+                    syncQuizFields(lessonEl);
+                    syncVideoFields(lessonEl);
+                }
+            });
         }
+
+        document.querySelectorAll(".lesson-item").forEach((lessonEl) => {
+            syncQuizFields(lessonEl);
+            syncVideoFields(lessonEl);
+        });
 
         // ======================
         // Tags

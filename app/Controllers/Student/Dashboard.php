@@ -13,6 +13,24 @@ use CodeIgniter\Shield\Models\UserModel;
 
 class Dashboard extends BaseController
 {
+    private function makeSlug(string $value): string
+    {
+        helper('text');
+        $value = convert_accented_characters($value);
+        return url_title($value, '-', true);
+    }
+
+    private function getLessonSlugById(int $lessonId): ?string
+    {
+        $lessonModel = new LessonModel();
+        $lesson = $lessonModel->find($lessonId);
+        if (! $lesson) {
+            return null;
+        }
+
+        return $this->makeSlug((string) $lesson->title_lesson);
+    }
+
     private function sidebarLinks()
     {
         return [
@@ -143,6 +161,11 @@ class Dashboard extends BaseController
                 $courseRow->resumeLessonId = null;
             }
 
+            $courseRow->courseSlug = $this->makeSlug((string) $courseRow->title_course);
+            $courseRow->resumeLessonSlug = $courseRow->resumeLessonId
+                ? $this->getLessonSlugById((int) $courseRow->resumeLessonId)
+                : null;
+
             // progresso do enrollment (direto na linha do curso)
             $courseRow->progress = isset($progressByCourseArr[$courseId])
                 ? $progressByCourseArr[$courseId]->progress
@@ -232,6 +255,11 @@ class Dashboard extends BaseController
             $enrollmentId = $enrollmentByCourse[$courseId] ?? 0;
 
             $course->resumeLessonId = $enrollmentId ? $calcResume($courseId, $enrollmentId) : null;
+
+            $course->courseSlug = $this->makeSlug((string) $course->title_course);
+            $course->resumeLessonSlug = $course->resumeLessonId
+                ? $this->getLessonSlugById((int) $course->resumeLessonId)
+                : null;
 
             // progresso direto no objeto do curso
             $course->progress = isset($progressByCourseArr[$courseId])
@@ -338,6 +366,12 @@ class Dashboard extends BaseController
 
             [$resumeId] = $calcResume((int) $course->id_course, (int) $enrollment->id_enrollment);
             if ($resumeId) {
+                $courseSlug = $this->makeSlug((string) $course->title_course);
+                $lessonSlug = $this->getLessonSlugById((int) $resumeId);
+                if ($lessonSlug) {
+                    return redirect()->to('/student/dashboard/inscricoes/' . $courseSlug . '/' . $lessonSlug)
+                        ->with('info', 'Retomando de onde parou.');
+                }
                 return redirect()->to('/student/dashboard/ver_aulas/' . $resumeId)
                     ->with('info', 'Retomando de onde parou.');
             }
@@ -372,6 +406,46 @@ class Dashboard extends BaseController
                 ->with('warning', 'Você precisa estar inscrito neste curso.');
         }
 
+        $moduleList = $moduleModel->where('id_course_module', $course->id_course)
+            ->orderBy('position_module')
+            ->findAll();
+
+        // Bloqueia o módulo seguinte até atingir a nota mínima no quiz do módulo anterior
+        $moduleIndex = null;
+        foreach ($moduleList as $idx => $mod) {
+            if ((int) $mod->id_module === (int) $module->id_module) {
+                $moduleIndex = $idx;
+                break;
+            }
+        }
+
+        if ($moduleIndex !== null && $moduleIndex > 0) {
+            $prevModule = $moduleList[$moduleIndex - 1];
+            $quizLesson = $lessonModel->where('id_module_lesson', $prevModule->id_module)
+                ->where('type_lesson', 'quiz')
+                ->orderBy('position_lesson')
+                ->first();
+
+            if ($quizLesson) {
+                $scoreRow = $db->table('progress')
+                    ->select('score_progress')
+                    ->where('id_enrollment_progress', (int) $enrollment->id_enrollment)
+                    ->where('id_lesson_progress', (int) $quizLesson->id_lesson)
+                    ->get()
+                    ->getRowArray();
+
+                $score = $scoreRow['score_progress'] ?? null;
+                $minScore = (int) ($prevModule->min_score_module ?? 75);
+
+                if ($score === null) {
+                    $courseSlug = $this->makeSlug((string) $course->title_course);
+                    $lessonSlug = $this->makeSlug((string) $quizLesson->title_lesson);
+                    return redirect()->to('/student/dashboard/inscricoes/' . $courseSlug . '/' . $lessonSlug)
+                        ->with('warning', 'Faça o quiz do módulo anterior e obtenha no mínimo ' . $minScore . '% para avançar.');
+                }
+            }
+        }
+
         // Força retomar apenas se tentar ir à frente
         $override = (int) (service('request')->getGet('override') ?? 0);
         [$resumeId, $orderedIds] = $calcResume((int) $course->id_course, (int) $enrollment->id_enrollment);
@@ -381,15 +455,19 @@ class Dashboard extends BaseController
             $resumeIndex = array_search((int) $resumeId,          $orderedIds, true);
 
             if ($reqIndex !== false && $resumeIndex !== false && $reqIndex > $resumeIndex) {
+                $courseSlug = $this->makeSlug((string) $course->title_course);
+                $lessonSlug = $this->getLessonSlugById((int) $resumeId);
+                if ($lessonSlug) {
+                    return redirect()->to('/student/dashboard/inscricoes/' . $courseSlug . '/' . $lessonSlug)
+                        ->with('warning', 'Conclua a aula anterior para continuar.');
+                }
                 return redirect()->to('/student/dashboard/ver_aulas/' . $resumeId)
                     ->with('warning', 'Conclua a aula anterior para continuar.');
             }
         }
 
         // Sidebar: módulos + aulas (sem interferir em prev/next)
-        $modules = $moduleModel->where('id_course_module', $course->id_course)
-            ->orderBy('position_module')
-            ->findAll();
+        $modules = $moduleList;
 
         foreach ($modules as &$m) {
             $m->lessons = $lessonModel->where('id_module_lesson', $m->id_module)
@@ -397,6 +475,14 @@ class Dashboard extends BaseController
                 ->findAll();
         }
         unset($m);
+
+        $courseSlug = $this->makeSlug((string) $course->title_course);
+        $lessonSlugById = [];
+        foreach ($modules as $m) {
+            foreach ($m->lessons as $l) {
+                $lessonSlugById[(int) $l->id_lesson] = $this->makeSlug((string) $l->title_lesson);
+            }
+        }
 
         // IDs concluídos POR ESTA MATRÍCULA
         $completedLessonIds = array_column(
@@ -408,6 +494,14 @@ class Dashboard extends BaseController
             'id_lesson_progress'
         );
 
+        $quizScoreRow = $db->table('progress')
+            ->select('score_progress')
+            ->where('id_enrollment_progress', (int) $enrollment->id_enrollment)
+            ->where('id_lesson_progress', (int) $lesson->id_lesson)
+            ->get()
+            ->getRowArray();
+        $quizScore = $quizScoreRow['score_progress'] ?? null;
+
         // Prev/Next globais com base em $orderedIds
         $currIndex = array_search((int) $lesson->id_lesson, $orderedIds, true);
         $prevLesson = ($currIndex !== false && $currIndex > 0)
@@ -416,6 +510,22 @@ class Dashboard extends BaseController
         $nextLesson = ($currIndex !== false && $currIndex < count($orderedIds) - 1)
             ? $orderedIds[$currIndex + 1]
             : null;
+
+        $prevLessonSlug = $prevLesson ? ($lessonSlugById[$prevLesson] ?? null) : null;
+        $nextLessonSlug = $nextLesson ? ($lessonSlugById[$nextLesson] ?? null) : null;
+
+        $nextModuleLessonId = null;
+        $nextModuleLessonSlug = null;
+        foreach ($modules as $idx => $m) {
+            if ((int) $m->id_module === (int) $lesson->id_module_lesson) {
+                $nextModule = $modules[$idx + 1] ?? null;
+                if ($nextModule && !empty($nextModule->lessons)) {
+                    $nextModuleLessonId = (int) $nextModule->lessons[0]->id_lesson;
+                    $nextModuleLessonSlug = $lessonSlugById[$nextModuleLessonId] ?? null;
+                }
+                break;
+            }
+        }
 
         $certificateModel = new CertificateModel();
         $certificate = $certificateModel
@@ -451,7 +561,14 @@ class Dashboard extends BaseController
             'lesson'             => $lesson,
             'prevLesson'         => $prevLesson,
             'nextLesson'         => $nextLesson,
+            'courseSlug'         => $courseSlug,
+            'prevLessonSlug'     => $prevLessonSlug,
+            'nextLessonSlug'     => $nextLessonSlug,
+            'nextModuleLessonId' => $nextModuleLessonId,
+            'nextModuleLessonSlug' => $nextModuleLessonSlug,
+            'lessonSlugById'     => $lessonSlugById,
             'completedLessonIds' => $completedLessonIds,
+            'quizScore'          => $quizScore,
             'certificateInfo'    => [
                 'completedAt' => $completedAt ? date('c', strtotime($completedAt)) : null,
                 'availableAt' => $availableAt ? date('c', strtotime($availableAt)) : null,
@@ -461,6 +578,48 @@ class Dashboard extends BaseController
             'sidebarLinks'       => $this->sidebarLinks(),
             'currentUrl'         => current_url(false),
         ]);
+    }
+
+    public function lessonsBySlug($courseSlug, $lessonSlug)
+    {
+        $courseModel = new CourseModel();
+        $lessonModel = new LessonModel();
+
+        $courseId = null;
+        $courses = $courseModel->findAll();
+        foreach ($courses as $course) {
+            if ($this->makeSlug((string) $course->title_course) === $courseSlug) {
+                $courseId = (int) $course->id_course;
+                break;
+            }
+        }
+
+        if (! $courseId) {
+            return redirect()->to('/student/dashboard/inscricoes')
+                ->with('error', 'Curso não encontrado.');
+        }
+
+        $lessons = $lessonModel
+            ->select('lessons.id_lesson, lessons.title_lesson')
+            ->join('modules', 'modules.id_module = lessons.id_module_lesson')
+            ->where('modules.id_course_module', $courseId)
+            ->get()
+            ->getResult();
+
+        $lessonId = null;
+        foreach ($lessons as $l) {
+            if ($this->makeSlug((string) $l->title_lesson) === $lessonSlug) {
+                $lessonId = (int) $l->id_lesson;
+                break;
+            }
+        }
+
+        if (! $lessonId) {
+            return redirect()->to('/student/dashboard/inscricoes')
+                ->with('error', 'Aula não encontrada.');
+        }
+
+        return $this->lessons($lessonId);
     }
 
     public function courses()
@@ -539,6 +698,11 @@ class Dashboard extends BaseController
             } else {
                 $row->resumeLessonId = null;
             }
+
+            $row->courseSlug = $this->makeSlug((string) $row->title_course);
+            $row->resumeLessonSlug = $row->resumeLessonId
+                ? $this->getLessonSlugById((int) $row->resumeLessonId)
+                : null;
 
             // progresso (progress_enrollment da tabela enrollments)
             $row->progress = $enrollment ? (int) ($enrollment->progress_enrollment ?? 0) : 0;

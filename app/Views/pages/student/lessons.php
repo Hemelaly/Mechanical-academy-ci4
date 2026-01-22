@@ -2,6 +2,62 @@
 // dd($enrollment)
 $autoplayFlag = (int) ($_GET['autoplay'] ?? 0);
 $auto = $autoplayFlag ? 1 : 0;
+helper('text');
+$isQuiz = ($lesson->type_lesson ?? '') === 'quiz';
+$quizQuestions = [];
+$quizMinScore = 75;
+$quizScore = isset($quizScore) ? (float) $quizScore : null;
+$quizAttempted = $isQuiz && $quizScore !== null;
+$quizPassed = $quizAttempted && $quizScore >= $quizMinScore;
+$currentModule = null;
+if (!empty($modules)) {
+    foreach ($modules as $mod) {
+        if ((int) $mod->id_module === (int) $lesson->id_module_lesson) {
+            $currentModule = $mod;
+            break;
+        }
+    }
+}
+if ($currentModule && isset($currentModule->min_score_module)) {
+    $quizMinScore = (int) $currentModule->min_score_module;
+}
+if ($isQuiz && $quizScore !== null) {
+    $quizPassed = $quizScore >= $quizMinScore;
+}
+if ($isQuiz && !empty($lesson->content_lesson)) {
+    $decodedQuiz = json_decode($lesson->content_lesson, true);
+    if (is_array($decodedQuiz) && !empty($decodedQuiz['questions'])) {
+        $quizQuestions = $decodedQuiz['questions'];
+    }
+}
+
+foreach ($quizQuestions as $qIndex => $q) {
+    if (!is_array($q)) {
+        $quizQuestions[$qIndex] = [
+            'question' => (string) $q,
+            'options' => ['', '', '', ''],
+            'correct' => 0,
+        ];
+        continue;
+    }
+
+    if (!isset($q['options'])) {
+        $quizQuestions[$qIndex]['options'] = ['', '', '', ''];
+        $quizQuestions[$qIndex]['correct'] = 0;
+    }
+}
+
+$isLastInModule = false;
+if ($currentModule && !empty($currentModule->lessons)) {
+    $lastIndex = count($currentModule->lessons) - 1;
+    if ($lastIndex >= 0) {
+        $lastLesson = $currentModule->lessons[$lastIndex];
+        $isLastInModule = (int) $lastLesson->id_lesson === (int) $lesson->id_lesson;
+    }
+}
+$nextModuleUrl = !empty($nextModuleLessonSlug)
+    ? site_url('student/dashboard/inscricoes/' . $courseSlug . '/' . $nextModuleLessonSlug)
+    : '';
 ?>
 
 <?= $this->extend('layouts/master') ?>
@@ -70,64 +126,92 @@ $auto = $autoplayFlag ? 1 : 0;
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
             <!-- Video Section -->
-            <div class="lg:col-span-2 space-y-6">
+            <?php
+            $nextUrlAttr = $nextLesson
+                ? (!empty($courseSlug) && !empty($nextLessonSlug)
+                    ? site_url('student/dashboard/inscricoes/' . $courseSlug . '/' . $nextLessonSlug)
+                    : site_url('student/dashboard/ver_aulas/' . $nextLesson))
+                : '';
+            $prevUrlAttr = $prevLesson
+                ? (!empty($courseSlug) && !empty($prevLessonSlug)
+                    ? site_url('student/dashboard/inscricoes/' . $courseSlug . '/' . $prevLessonSlug)
+                    : site_url('student/dashboard/ver_aulas/' . $prevLesson))
+                : '';
+            ?>
+            <div id="lesson-content"
+                data-lesson-id="<?= (int) $lesson->id_lesson ?>"
+                data-next-url="<?= esc($nextUrlAttr) ?>"
+                data-prev-url="<?= esc($prevUrlAttr) ?>"
+                data-is-quiz="<?= $isQuiz ? '1' : '0' ?>"
+                data-quiz-attempted="<?= $quizAttempted ? '1' : '0' ?>"
+                data-quiz-passed="<?= $quizPassed ? '1' : '0' ?>"
+                data-is-last-module="<?= $isLastInModule ? '1' : '0' ?>"
+                data-next-module-url="<?= esc($nextModuleUrl) ?>"
+                class="lg:col-span-2 space-y-6">
                 <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-md">
-                    <!-- Video Player -->
-                    <div class="relative pt-[56.25%] bg-black rounded-t-xl overflow-hidden">
-                        <?php
-                        function getVimeoId($url)
-                        {
-                            preg_match('/vimeo\.com\/(?:video\/)?([0-9]+)/', $url, $m);
-                            return $m[1] ?? null;
-                        }
-                        $videoId = getVimeoId($lesson->video_url_lesson);
-                        ?>
-                        <?php if ($videoId): ?>
-                            <iframe id="vimeoPlayer"
-                                src="https://player.vimeo.com/video/<?= esc($videoId) ?>?badge=0&autopause=0&player_id=<?= esc($lesson->id_lesson) ?>&app_id=58479&title=0&byline=0&portrait=0&autoplay=<?= $auto ?>"
-                                allow="autoplay; fullscreen; picture-in-picture"
-                                allowfullscreen referrerpolicy="no-referrer" loading="lazy"
-                                sandbox="allow-same-origin allow-scripts allow-presentation"
-                                class="absolute inset-0 w-full h-full"
-                                oncontextmenu="return false">
-                            </iframe>
-                        <?php else: ?>
-                            <div class="absolute inset-0 flex items-center justify-center text-white">
-                                <div class="text-center p-4">
-                                    <i class="bi bi-exclamation-triangle text-3xl mb-3 text-yellow-400"></i>
-                                    <p class="text-lg font-medium">Link de vídeo inválido</p>
-                                    <p class="text-sm text-gray-300 mt-1">Entre em contato com o suporte técnico</p>
-                                </div>
-                            </div>
-                        <?php endif; ?>
-
-                        <!-- End Overlay -->
-                        <?php if ($nextLesson): ?>
-                            <div id="endOverlay" class="absolute inset-0 hidden items-center justify-center backdrop-blur-sm bg-black bg-opacity-70 z-10">
-                                <div class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl p-6 max-w-md w-[90%] text-center shadow-xl">
-                                    <div class="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <i class="bi bi-check-lg text-2xl text-green-600 dark:text-green-400"></i>
+                    <?php if (!$isQuiz): ?>
+                        <!-- Video Player -->
+                        <div class="relative pt-[56.25%] bg-black rounded-t-xl overflow-hidden">
+                            <?php
+                            function getVimeoId($url)
+                            {
+                                preg_match('/vimeo\.com\/(?:video\/)?([0-9]+)/', $url, $m);
+                                return $m[1] ?? null;
+                            }
+                            $videoId = getVimeoId($lesson->video_url_lesson);
+                            ?>
+                            <?php if ($videoId): ?>
+                                <iframe id="vimeoPlayer"
+                                    src="https://player.vimeo.com/video/<?= esc($videoId) ?>?badge=0&autopause=0&player_id=<?= esc($lesson->id_lesson) ?>&app_id=58479&title=0&byline=0&portrait=0&autoplay=<?= $auto ?>"
+                                    allow="autoplay; fullscreen; picture-in-picture"
+                                    allowfullscreen referrerpolicy="no-referrer" loading="lazy"
+                                    sandbox="allow-same-origin allow-scripts allow-presentation"
+                                    class="absolute inset-0 w-full h-full"
+                                    oncontextmenu="return false">
+                                </iframe>
+                            <?php else: ?>
+                                <div class="absolute inset-0 flex items-center justify-center text-white">
+                                    <div class="text-center p-4">
+                                        <i class="bi bi-exclamation-triangle text-3xl mb-3 text-yellow-400"></i>
+                                        <p class="text-lg font-medium">Link de vídeo inválido</p>
+                                        <p class="text-sm text-gray-300 mt-1">Entre em contato com o suporte técnico</p>
                                     </div>
-                                    <h4 class="text-xl font-bold mb-3 text-gray-900 dark:text-white">Aula concluída 🎉</h4>
-                                    <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm">Avance para a próxima aula quando quiser.</p>
-                                    <div class="flex flex-col sm:flex-row gap-3 justify-center mb-4">
+                                </div>
+                            <?php endif; ?>
+
+                            <!-- End Overlay -->
+                            <?php if ($nextLesson): ?>
+                                <div id="endOverlay" class="absolute inset-0 hidden items-center justify-center backdrop-blur-sm bg-black bg-opacity-70 z-10">
+                                    <div class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl p-6 max-w-md w-[90%] text-center shadow-xl">
+                                        <div class="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <i class="bi bi-check-lg text-2xl text-green-600 dark:text-green-400"></i>
+                                        </div>
+                                        <h4 class="text-xl font-bold mb-3 text-gray-900 dark:text-white">Aula concluída 🎉</h4>
+                                        <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm">Avance para a próxima aula quando quiser.</p>
+                                        <div class="flex flex-col sm:flex-row gap-3 justify-center mb-4">
+                                        <?php
+                                        $nextUrl = (!empty($courseSlug) && !empty($nextLessonSlug))
+                                            ? site_url('student/dashboard/inscricoes/' . $courseSlug . '/' . $nextLessonSlug)
+                                            : site_url('student/dashboard/ver_aulas/' . $nextLesson);
+                                        ?>
                                         <a id="goNextBtn"
-                                            href="<?= site_url('student/dashboard/ver_aulas/' . $nextLesson) ?>?autoplay=1"
+                                            href="<?= $nextUrl ?>?autoplay=1"
                                             class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
                                             Próxima Aula
                                             <i class="bi bi-arrow-right"></i>
                                         </a>
-                                        <button id="stayBtn" type="button" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm">
-                                            Ficar aqui
-                                        </button>
-                                    </div>
-                                    <div id="autoNote" class="text-gray-500 dark:text-gray-400 text-xs">
-                                        Indo automaticamente em <span id="countdown" class="font-semibold">5</span>s…
+                                            <button id="stayBtn" type="button" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm">
+                                                Ficar aqui
+                                            </button>
+                                        </div>
+                                        <div id="autoNote" class="text-gray-500 dark:text-gray-400 text-xs">
+                                            Indo automaticamente em <span id="countdown" class="font-semibold">5</span>s…
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        <?php endif; ?>
-                    </div>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
 
                     <!-- Lesson Info -->
                     <div class="p-5">
@@ -142,14 +226,89 @@ $auto = $autoplayFlag ? 1 : 0;
                                 <span><?= date('d/m/Y', strtotime($lesson->created_at)) ?></span>
                             </div>
                         </div>
-                        <p class="text-gray-700 dark:text-gray-300 leading-relaxed text-sm"><?= esc($lesson->content_lesson) ?></p>
+                        <?php if (!$isQuiz): ?>
+                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed text-sm"><?= esc($lesson->content_lesson) ?></p>
+                        <?php endif; ?>
+
+                        <?php if (!empty($lesson->attachment_path_lesson)): ?>
+                            <div class="mt-4">
+                                <a href="<?= esc(base_url('assets/instructor/lesson_files/' . $lesson->attachment_path_lesson)) ?>"
+                                    class="inline-flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white text-sm font-medium rounded-lg transition-colors"
+                                    download>
+                                    <i class="bi bi-paperclip"></i>
+                                    <?= esc($lesson->attachment_name_lesson ?? 'Baixar anexo') ?>
+                                </a>
+                            </div>
+                        <?php endif; ?>
                     </div>
+
+                    <?php if ($isQuiz): ?>
+                        <div class="p-5 border-t border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+                                    Quiz
+                                </h3>
+                                <span class="text-xs text-gray-500 dark:text-gray-400">
+                                    Nota mínima: <?= (int) $quizMinScore ?>%
+                                </span>
+                            </div>
+
+                            <?php if ($quizAttempted): ?>
+                                <div class="mb-4 rounded-lg border border-emerald-200 dark:border-emerald-700 bg-emerald-50/80 dark:bg-emerald-900/30 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-200">
+                                    Você já realizou este quiz e obteve <strong><?= (int) $quizScore ?>%</strong>.
+                                </div>
+                            <?php endif; ?>
+
+                            <?php if (empty($quizQuestions)): ?>
+                                <p class="text-sm text-gray-600 dark:text-gray-300">
+                                    Este quiz ainda não tem perguntas cadastradas.
+                                </p>
+                            <?php else: ?>
+                                <form id="quizForm" class="space-y-4">
+                                    <?php foreach ($quizQuestions as $qIndex => $question): ?>
+                                        <div class="quiz-question-item bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4"
+                                            data-correct="<?= (int) ($question['correct'] ?? 0) ?>">
+                                        <p class="font-semibold text-gray-900 dark:text-slate-100 text-sm mb-3">
+                                            <?= esc(($qIndex + 1) . '. ' . ($question['question'] ?? '')) ?>
+                                        </p>
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                <?php for ($opt = 0; $opt < 4; $opt++): ?>
+                                                    <label class="flex items-center gap-2 p-2 rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-sm cursor-pointer hover:border-blue-400 transition-colors">
+                                                        <input type="radio"
+                                                            name="quiz_q_<?= $qIndex ?>"
+                                                            value="<?= $opt ?>"
+                                                            class="text-blue-600 focus:ring-blue-500">
+                                                        <span class="text-gray-800 dark:text-slate-100">
+                                                            <?= esc($question['options'][$opt] ?? '') ?>
+                                                        </span>
+                                                    </label>
+                                                <?php endfor; ?>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+
+                                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                                        <button type="submit"
+                                            class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-5 rounded-lg transition-colors text-sm">
+                                            Enviar respostas
+                                        </button>
+                                        <div id="quizResult" class="text-sm text-gray-600 dark:text-gray-300"></div>
+                                    </div>
+                                </form>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
 
                 <!-- Navigation Buttons -->
                 <div class="flex justify-between items-center">
                     <?php if ($prevLesson): ?>
-                        <a href="<?= site_url('student/dashboard/ver_aulas/' . $prevLesson) ?>?autoplay=1"
+                        <?php
+                        $prevUrl = (!empty($courseSlug) && !empty($prevLessonSlug))
+                            ? site_url('student/dashboard/inscricoes/' . $courseSlug . '/' . $prevLessonSlug)
+                            : site_url('student/dashboard/ver_aulas/' . $prevLesson);
+                        ?>
+                        <a href="<?= $prevUrl ?>?autoplay=1"
                             class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-5 rounded-lg transition-colors flex items-center gap-2 text-sm shadow-sm">
                             <i class="bi bi-arrow-left"></i>
                             Aula Anterior
@@ -160,8 +319,9 @@ $auto = $autoplayFlag ? 1 : 0;
 
                     <?php if ($nextLesson): ?>
                         <button id="nextLessonBtn"
-                            class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-5 rounded-lg transition-colors flex items-center gap-2 text-sm shadow-sm">
-                            Próxima Aula
+                            class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-5 rounded-lg transition-colors flex items-center gap-2 text-sm shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                            <?= ($isQuiz && ! $quizAttempted) ? 'disabled' : '' ?>>
+                            <span class="next-lesson-label"><?= $isLastInModule ? 'Próximo Módulo' : 'Próxima Aula' ?></span>
                             <i class="bi bi-arrow-right"></i>
                         </button>
                     <?php endif; ?>
@@ -206,9 +366,26 @@ $auto = $autoplayFlag ? 1 : 0;
                                                         aria-label="Marcar aula como concluída">
                                                 </div>
 
+                                                <?php $lessonSlug = url_title($l->title_lesson, '-', true); ?>
+                                                <?php
+                                                $lessonSlug = $lessonSlugById[(int) $l->id_lesson] ?? '';
+                                                $iconClass = in_array($l->type_lesson, ['quiz', 'text'], true) ? 'bi-file-text' : 'bi-camera-video';
+                                                ?>
+                                                <?php
+                                                $lessonUrl = $lessonSlug
+                                                    ? site_url('student/dashboard/inscricoes/' . $courseSlug . '/' . $lessonSlug)
+                                                    : site_url('student/dashboard/ver_aulas/' . $l->id_lesson);
+                                                ?>
                                                 <a class="lesson-link flex items-center gap-2 text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex-1 min-w-0"
-                                                    href="<?= site_url('student/dashboard/ver_aulas/' . $l->id_lesson) ?>">
+                                                    href="<?= $lessonUrl ?>">
+                                                    <i class="bi <?= $iconClass ?> text-slate-400"></i>
                                                     <span class="truncate text-sm"><?= esc($l->title_lesson) ?></span>
+                                                    <?php if (!empty($l->attachment_path_lesson)): ?>
+                                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-200 text-slate-700 dark:bg-slate-600 dark:text-slate-100 rounded-full text-[10px] font-medium">
+                                                            <i class="bi bi-paperclip"></i>
+                                                            Arquivo
+                                                        </span>
+                                                    <?php endif; ?>
                                                     <?php if ($isCurrent): ?>
                                                         <span class="badge-current font-medium px-2 py-0.5 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 rounded-full whitespace-nowrap text-xs">
                                                             Atual
@@ -273,9 +450,25 @@ $auto = $autoplayFlag ? 1 : 0;
                                                         aria-label="Marcar aula como concluída">
                                                 </div>
 
+                                                <?php
+                                                $lessonSlug = $lessonSlugById[(int) $l->id_lesson] ?? '';
+                                                $iconClass = in_array($l->type_lesson, ['quiz', 'text'], true) ? 'bi-file-text' : 'bi-camera-video';
+                                                ?>
+                                                <?php
+                                                $lessonUrl = $lessonSlug
+                                                    ? site_url('student/dashboard/inscricoes/' . $courseSlug . '/' . $lessonSlug)
+                                                    : site_url('student/dashboard/ver_aulas/' . $l->id_lesson);
+                                                ?>
                                                 <a class="lesson-link flex items-center gap-2 text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex-1 min-w-0"
-                                                    href="<?= site_url('student/dashboard/ver_aulas/' . $l->id_lesson) ?>" onclick="closeDrawerFunc()">
+                                                    href="<?= $lessonUrl ?>" onclick="closeDrawerFunc()">
+                                                    <i class="bi <?= $iconClass ?> text-slate-400"></i>
                                                     <span class="truncate text-sm"><?= esc($l->title_lesson) ?></span>
+                                                    <?php if (!empty($l->attachment_path_lesson)): ?>
+                                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-200 text-slate-700 dark:bg-slate-600 dark:text-slate-100 rounded-full text-[10px] font-medium">
+                                                            <i class="bi bi-paperclip"></i>
+                                                            Arquivo
+                                                        </span>
+                                                    <?php endif; ?>
                                                     <?php if ($isCurrent): ?>
                                                         <span class="badge-current font-medium px-2 py-0.5 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 rounded-full whitespace-nowrap text-xs">
                                                             Atual
@@ -593,6 +786,43 @@ $auto = $autoplayFlag ? 1 : 0;
         }
     }
 
+    async function submitQuizScore(score) {
+        if (!enrollmentId) {
+            alert('Matrícula não identificada. Recarregue a página.');
+            return null;
+        }
+
+        const checkbox = document.querySelector(`.lesson-row[data-lesson-id="${currentLessonId}"] .lesson-check`);
+
+        try {
+            const data = await fetchJSON('<?= site_url('student/lessons/complete') ?>', {
+                method: 'POST',
+                body: JSON.stringify({
+                    lesson_id: Number(currentLessonId),
+                    enrollment_id: Number(enrollmentId),
+                    score: Number(score)
+                })
+            });
+
+            if (!data?.ok) {
+                alert(data?.message || 'Não foi possível salvar o quiz.');
+                return null;
+            }
+
+            if (checkbox && !checkbox.checked) {
+                checkbox.checked = true;
+                completedLessons = Math.min(totalLessons, completedLessons + 1);
+                recomputeFromCounters();
+                computeProgress();
+            }
+
+            return data;
+        } catch (e) {
+            alert('Erro de rede ao salvar o quiz.');
+            return null;
+        }
+    }
+
     // Initialize lesson checkboxes
     document.querySelectorAll('.lesson-check').forEach(cb => {
         cb.addEventListener('change', (e) => {
@@ -604,6 +834,7 @@ $auto = $autoplayFlag ? 1 : 0;
 
     // Compute initial progress
     computeProgress();
+
 
     /* =========================
        Module Accordion - Desktop
@@ -723,22 +954,237 @@ $auto = $autoplayFlag ? 1 : 0;
     /* =========================
        Vimeo Player & Navigation
        ========================= */
-    const vimeoIframe = document.getElementById('vimeoPlayer');
-    const player = vimeoIframe ? new Vimeo.Player(vimeoIframe) : null;
+    let vimeoIframe = document.getElementById('vimeoPlayer');
+    let player = vimeoIframe ? new Vimeo.Player(vimeoIframe) : null;
 
-    const currentLessonId = <?= (int)$lesson->id_lesson ?>;
-    const hasNext = <?= $nextLesson ? 'true' : 'false' ?>;
-    const nextUrl = "<?= $nextLesson ? site_url('student/dashboard/ver_aulas/' . $nextLesson) : '' ?>";
+    let currentLessonId = <?= (int)$lesson->id_lesson ?>;
+    let hasNext = <?= $nextLesson ? 'true' : 'false' ?>;
+    let nextUrl = "<?= esc($nextUrlAttr) ?>";
+    let isQuizLesson = <?= $isQuiz ? 'true' : 'false' ?>;
+    let quizAttempted = <?= $quizAttempted ? 'true' : 'false' ?>;
+    let quizPassed = <?= ($isQuiz && $quizPassed) ? 'true' : 'false' ?>;
+    let isLastInModule = <?= $isLastInModule ? 'true' : 'false' ?>;
+    let nextModuleUrl = "<?= $nextModuleUrl ?>";
 
-    const endOverlay = document.getElementById('endOverlay');
-    const goNextBtn = document.getElementById('goNextBtn');
-    const stayBtn = document.getElementById('stayBtn');
-    const countdownEl = document.getElementById('countdown');
-    const autoNote = document.getElementById('autoNote');
-    const nextLessonBtn = document.getElementById('nextLessonBtn');
+    let endOverlay = document.getElementById('endOverlay');
+    let goNextBtn = document.getElementById('goNextBtn');
+    let stayBtn = document.getElementById('stayBtn');
+    let countdownEl = document.getElementById('countdown');
+    let autoNote = document.getElementById('autoNote');
+    let nextLessonBtn = document.getElementById('nextLessonBtn');
 
     function withAutoplay(url) {
         return url + (url.includes('?') ? '&' : '?') + 'autoplay=1';
+    }
+
+    function readLessonStateFromDom() {
+        const lessonContent = document.getElementById('lesson-content');
+        if (!lessonContent) return;
+
+        currentLessonId = Number(lessonContent.dataset.lessonId || 0);
+        nextUrl = lessonContent.dataset.nextUrl || '';
+        hasNext = Boolean(nextUrl);
+        isQuizLesson = lessonContent.dataset.isQuiz === '1';
+        quizAttempted = lessonContent.dataset.quizAttempted === '1';
+        quizPassed = lessonContent.dataset.quizPassed === '1';
+        isLastInModule = lessonContent.dataset.isLastModule === '1';
+        nextModuleUrl = lessonContent.dataset.nextModuleUrl || '';
+
+        const currentCheckbox = document.querySelector(`.lesson-row[data-lesson-id="${currentLessonId}"] .lesson-check`);
+        hasReached95Percent = currentCheckbox ? currentCheckbox.checked : false;
+        currentVideoProgress = 0;
+
+        endOverlay = document.getElementById('endOverlay');
+        goNextBtn = document.getElementById('goNextBtn');
+        stayBtn = document.getElementById('stayBtn');
+        countdownEl = document.getElementById('countdown');
+        autoNote = document.getElementById('autoNote');
+        nextLessonBtn = document.getElementById('nextLessonBtn');
+
+        vimeoIframe = document.getElementById('vimeoPlayer');
+        if (player) {
+            player.unload().catch(() => {});
+        }
+        player = vimeoIframe ? new Vimeo.Player(vimeoIframe) : null;
+    }
+
+    function highlightCurrentLesson() {
+        document.querySelectorAll('.lesson-row').forEach((row) => {
+            row.classList.remove('bg-blue-50', 'dark:bg-blue-900/30', 'border-l-2', 'border-blue-500');
+            const badge = row.querySelector('.badge-current');
+            if (badge) badge.remove();
+        });
+
+        const currentRow = document.querySelector(`.lesson-row[data-lesson-id="${currentLessonId}"]`);
+        if (currentRow) {
+            currentRow.classList.add('bg-blue-50', 'dark:bg-blue-900/30', 'border-l-2', 'border-blue-500');
+            const link = currentRow.querySelector('.lesson-link');
+            if (link) {
+                link.insertAdjacentHTML('beforeend',
+                    '<span class="badge-current font-medium px-2 py-0.5 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 rounded-full whitespace-nowrap text-xs">Atual</span>'
+                );
+            }
+        }
+    }
+
+    function bindLessonContent() {
+        if (stayBtn) {
+            stayBtn.addEventListener('click', hideEndOverlay);
+        }
+
+        if (nextLessonBtn) {
+            nextLessonBtn.addEventListener('click', () => {
+                if (canProceedToNextLesson()) {
+                    window.location.href = withAutoplay(nextUrl);
+                } else {
+                    showCompletionWarning();
+                }
+            });
+        }
+
+        const quizForm = document.getElementById('quizForm');
+        if (quizForm && !quizForm.dataset.bound) {
+            quizForm.dataset.bound = '1';
+            quizForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const questions = document.querySelectorAll('.quiz-question-item');
+                const total = questions.length;
+                if (!total) return;
+
+                let correct = 0;
+                let answered = 0;
+
+                questions.forEach((qEl, idx) => {
+                    const selected = qEl.querySelector(`input[name="quiz_q_${idx}"]:checked`);
+                    if (!selected) return;
+                    answered++;
+                    const correctIndex = parseInt(qEl.dataset.correct || '0', 10);
+                    if (parseInt(selected.value, 10) === correctIndex) {
+                        correct++;
+                    }
+                });
+
+                const resultEl = document.getElementById('quizResult');
+                if (answered < total) {
+                    if (resultEl) {
+                        resultEl.textContent = 'Responda todas as perguntas antes de enviar.';
+                        resultEl.className = 'text-sm text-yellow-600 dark:text-yellow-400';
+                    }
+                    return;
+                }
+
+                const score = Math.round((correct / total) * 100);
+                const data = await submitQuizScore(score);
+                if (!data) return;
+
+                if (resultEl) {
+                    const minScore = <?= (int) $quizMinScore ?>;
+                    if (score >= minScore) {
+                        resultEl.textContent = `Parabéns! Você fez ${score}% e atingiu a nota mínima.`;
+                        resultEl.className = 'text-sm text-green-600 dark:text-green-400';
+                        quizAttempted = true;
+                        quizPassed = true;
+                        if (nextLessonBtn) {
+                            nextLessonBtn.disabled = false;
+                            const label = nextLessonBtn.querySelector('.next-lesson-label');
+                            if (label) {
+                                label.textContent = isLastInModule ? 'Próximo Módulo' : 'Próxima Aula';
+                            }
+                        }
+                        if (window.Swal) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Parabéns!',
+                                text: `Você alcançou ${score}% e já pode avançar para a próxima fase.`,
+                                confirmButtonText: 'Continuar'
+                            }).then(() => {
+                                if (nextModuleUrl) {
+                                    window.location.href = nextModuleUrl;
+                                }
+                            });
+                            return;
+                        }
+                        if (nextModuleUrl) {
+                            window.location.href = nextModuleUrl;
+                        }
+                    } else {
+                        resultEl.textContent = `Você fez ${score}%. Tente novamente para alcançar ${minScore}%.`;
+                        resultEl.className = 'text-sm text-red-600 dark:text-red-400';
+                        quizAttempted = true;
+                        if (nextLessonBtn) {
+                            nextLessonBtn.disabled = false;
+                        }
+                    }
+                }
+            });
+        }
+
+        bindVideoPlayer();
+    }
+
+    function bindVideoPlayer() {
+        if (!player) return;
+
+        player.off('ended');
+        player.off('timeupdate');
+
+        player.on('ended', async function() {
+            try {
+                await markCompletedOnEnd();
+            } catch (e) {
+                console.warn('Falha ao marcar concluída no término:', e);
+            }
+            if (hasNext && nextUrl) showEndOverlay();
+        });
+
+        // Track progress and mark as completed at 95%
+        player.on('timeupdate', async function(data) {
+            try {
+                const duration = (await player.getDuration()) || 0;
+                const watched = data.seconds || 0;
+                currentVideoProgress = duration > 0 ? (watched / duration) * 100 : 0;
+
+                if (duration > 0 && currentVideoProgress >= 95 && !hasReached95Percent) {
+                    const checkbox = document.querySelector(`.lesson-row[data-lesson-id="${currentLessonId}"] .lesson-check`);
+                    if (checkbox && !checkbox.checked) {
+                        checkbox.checked = true;
+                        await toggleLessonComplete(currentLessonId, true, checkbox);
+                        hasReached95Percent = true;
+                    }
+                }
+            } catch (error) {
+                // Silent fail
+            }
+        });
+    }
+
+    async function loadLesson(url) {
+        try {
+            const res = await fetch(url, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            if (!res.ok) {
+                window.location.href = url;
+                return;
+            }
+
+            const html = await res.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newContent = doc.getElementById('lesson-content');
+            const currentContent = document.getElementById('lesson-content');
+            if (newContent && currentContent) {
+                currentContent.replaceWith(newContent);
+                history.pushState({}, '', url);
+                readLessonStateFromDom();
+                bindLessonContent();
+                highlightCurrentLesson();
+            } else {
+                window.location.href = url;
+            }
+        } catch (e) {
+            window.location.href = url;
+        }
     }
 
     let autoTimer = null;
@@ -777,12 +1223,11 @@ $auto = $autoplayFlag ? 1 : 0;
         }
     }
 
-    if (stayBtn) {
-        stayBtn.addEventListener('click', hideEndOverlay);
-    }
-
     // Check if user can proceed to next lesson
     function canProceedToNextLesson() {
+        if (isQuizLesson) {
+            return quizAttempted || !nextLessonBtn?.disabled;
+        }
         const currentCheckbox = document.querySelector(`.lesson-row[data-lesson-id="${currentLessonId}"] .lesson-check`);
         return currentCheckbox?.checked || hasReached95Percent;
     }
@@ -849,17 +1294,6 @@ $auto = $autoplayFlag ? 1 : 0;
         }
     }
 
-    // Next lesson button handler
-    if (nextLessonBtn) {
-        nextLessonBtn.addEventListener('click', () => {
-            if (canProceedToNextLesson()) {
-                window.location.href = withAutoplay(nextUrl);
-            } else {
-                showCompletionWarning();
-            }
-        });
-    }
-
     // Autoplay on page load if autoplay=1
     const urlParams = new URLSearchParams(window.location.search);
     const shouldAutoplay = urlParams.get('autoplay') === '1';
@@ -872,38 +1306,6 @@ $auto = $autoplayFlag ? 1 : 0;
         });
     }
 
-    // Video event handlers
-    if (player) {
-        player.on('ended', async function() {
-            try {
-                await markCompletedOnEnd();
-            } catch (e) {
-                console.warn('Falha ao marcar concluída no término:', e);
-            }
-            if (hasNext && nextUrl) showEndOverlay();
-        });
-
-        // Track progress and mark as completed at 95%
-        player.on('timeupdate', async function(data) {
-            try {
-                const duration = (await player.getDuration()) || 0;
-                const watched = data.seconds || 0;
-                currentVideoProgress = duration > 0 ? (watched / duration) * 100 : 0;
-
-                if (duration > 0 && currentVideoProgress >= 95 && !hasReached95Percent) {
-                    const checkbox = document.querySelector(`.lesson-row[data-lesson-id="${currentLessonId}"] .lesson-check`);
-                    if (checkbox && !checkbox.checked) {
-                        checkbox.checked = true;
-                        await toggleLessonComplete(currentLessonId, true, checkbox);
-                        hasReached95Percent = true;
-                    }
-                }
-            } catch (error) {
-                // Silent fail
-            }
-        });
-    }
-
     document.addEventListener('DOMContentLoaded', () => {
         // já pinta a UI com o valor inicial do backend
         setProgressUI(courseProgress);
@@ -911,6 +1313,24 @@ $auto = $autoplayFlag ? 1 : 0;
         if (courseProgress === 100) {
             showCourseCompletedModal();
         }
+
+        readLessonStateFromDom();
+        bindLessonContent();
+        highlightCurrentLesson();
+    });
+
+    document.addEventListener('click', (e) => {
+        const link = e.target.closest('.lesson-link');
+        if (!link) return;
+        e.preventDefault();
+        const url = link.getAttribute('href');
+        if (url) {
+            loadLesson(url);
+        }
+    });
+
+    window.addEventListener('popstate', () => {
+        loadLesson(window.location.href);
     });
 </script>
 
