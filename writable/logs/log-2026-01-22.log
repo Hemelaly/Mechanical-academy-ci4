@@ -476,3 +476,213 @@ in SYSTEMPATH\Router\Router.php on line 741.
 DEBUG - 2026-01-22 16:53:00 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
 DEBUG - 2026-01-22 16:53:04 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
 DEBUG - 2026-01-22 16:55:16 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-22 18:14:09 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-22 18:14:12 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-22 18:14:19 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-22 18:14:21 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-22 18:14:32 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-01-22 18:14:32 --> mysqli_sql_exception: Unknown column 'avaiable_at_certificate' in 'field list' in C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php(327): mysqli->query('INSERT INTO `ce...', 0)
+#1 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('INSERT INTO `ce...')
+#2 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('INSERT INTO `ce...')
+#3 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseBuilder.php(2345): CodeIgniter\Database\BaseConnection->query('INSERT INTO `ce...', Array, false)
+#4 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Model.php(394): CodeIgniter\Database\BaseBuilder->insert()
+#5 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\BaseModel.php(838): CodeIgniter\Model->doInsert(Array)
+#6 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Model.php(797): CodeIgniter\BaseModel->insert(Array, true)
+#7 C:\laragon\www\academy-ci4\app\Controllers\Certificates.php(91): CodeIgniter\Model->insert(Array)
+#8 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(933): App\Controllers\Certificates->createPending()
+#9 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Certificates))
+#10 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#11 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#12 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#13 C:\laragon\www\academy-ci4\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#14 {main}
+CRITICAL - 2026-01-22 18:14:32 --> CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'avaiable_at_certificate' in 'field list'
+[Method: POST, Route: student/certificates/pending]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(2345): CodeIgniter\Database\BaseConnection->query('INSERT INTO `certificates` (`id_user_certificate`, `id_course_certificate`, `uuid_certificate`, `hash_certificate`, `avaiable_at_certificate`, `created_at`, `updated_at`) VALUES (:id_user_certificate:, :id_course_certificate:, :uuid_certificate:, :hash_certificate:, :avaiable_at_certificate:, :created_at:, :updated_at:)', [...], false)
+ 2 SYSTEMPATH\Model.php(394): CodeIgniter\Database\BaseBuilder->insert()
+ 3 SYSTEMPATH\BaseModel.php(838): CodeIgniter\Model->doInsert([...])
+ 4 SYSTEMPATH\Model.php(797): CodeIgniter\BaseModel->insert([...], true)
+ 5 APPPATH\Controllers\Certificates.php(91): CodeIgniter\Model->insert([...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Certificates->createPending()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Certificates))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-01-22 18:14:32 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'avaiable_at_certificate' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('INSERT INTO `certificates` (`id_user_certificate`, `id_course_certificate`, `uuid_certificate`, `hash_certificate`, `avaiable_at_certificate`, `created_at`, `updated_at`) VALUES (19, 21, \'cee62d95dce4ee28ae1b999ecb9d47f7\', \'6d022068489571dc9585e54efe27d9e2badacaae05b2ddcc1063aac52f6cfdf4\', \'2026-01-24 18:14:21\', \'2026-01-22 18:14:32\', \'2026-01-22 18:14:32\')')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('INSERT INTO `certificates` (`id_user_certificate`, `id_course_certificate`, `uuid_certificate`, `hash_certificate`, `avaiable_at_certificate`, `created_at`, `updated_at`) VALUES (19, 21, \'cee62d95dce4ee28ae1b999ecb9d47f7\', \'6d022068489571dc9585e54efe27d9e2badacaae05b2ddcc1063aac52f6cfdf4\', \'2026-01-24 18:14:21\', \'2026-01-22 18:14:32\', \'2026-01-22 18:14:32\')')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(2345): CodeIgniter\Database\BaseConnection->query('INSERT INTO `certificates` (`id_user_certificate`, `id_course_certificate`, `uuid_certificate`, `hash_certificate`, `avaiable_at_certificate`, `created_at`, `updated_at`) VALUES (:id_user_certificate:, :id_course_certificate:, :uuid_certificate:, :hash_certificate:, :avaiable_at_certificate:, :created_at:, :updated_at:)', [...], false)
+ 4 SYSTEMPATH\Model.php(394): CodeIgniter\Database\BaseBuilder->insert()
+ 5 SYSTEMPATH\BaseModel.php(838): CodeIgniter\Model->doInsert([...])
+ 6 SYSTEMPATH\Model.php(797): CodeIgniter\BaseModel->insert([...], true)
+ 7 APPPATH\Controllers\Certificates.php(91): CodeIgniter\Model->insert([...])
+ 8 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Certificates->createPending()
+ 9 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Certificates))
+10 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+11 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+12 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+13 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-01-22 18:14:32 --> [Caused by] mysqli_sql_exception: Unknown column 'avaiable_at_certificate' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('INSERT INTO `certificates` (`id_user_certificate`, `id_course_certificate`, `uuid_certificate`, `hash_certificate`, `avaiable_at_certificate`, `created_at`, `updated_at`) VALUES (19, 21, \'cee62d95dce4ee28ae1b999ecb9d47f7\', \'6d022068489571dc9585e54efe27d9e2badacaae05b2ddcc1063aac52f6cfdf4\', \'2026-01-24 18:14:21\', \'2026-01-22 18:14:32\', \'2026-01-22 18:14:32\')', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('INSERT INTO `certificates` (`id_user_certificate`, `id_course_certificate`, `uuid_certificate`, `hash_certificate`, `avaiable_at_certificate`, `created_at`, `updated_at`) VALUES (19, 21, \'cee62d95dce4ee28ae1b999ecb9d47f7\', \'6d022068489571dc9585e54efe27d9e2badacaae05b2ddcc1063aac52f6cfdf4\', \'2026-01-24 18:14:21\', \'2026-01-22 18:14:32\', \'2026-01-22 18:14:32\')')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('INSERT INTO `certificates` (`id_user_certificate`, `id_course_certificate`, `uuid_certificate`, `hash_certificate`, `avaiable_at_certificate`, `created_at`, `updated_at`) VALUES (19, 21, \'cee62d95dce4ee28ae1b999ecb9d47f7\', \'6d022068489571dc9585e54efe27d9e2badacaae05b2ddcc1063aac52f6cfdf4\', \'2026-01-24 18:14:21\', \'2026-01-22 18:14:32\', \'2026-01-22 18:14:32\')')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(2345): CodeIgniter\Database\BaseConnection->query('INSERT INTO `certificates` (`id_user_certificate`, `id_course_certificate`, `uuid_certificate`, `hash_certificate`, `avaiable_at_certificate`, `created_at`, `updated_at`) VALUES (:id_user_certificate:, :id_course_certificate:, :uuid_certificate:, :hash_certificate:, :avaiable_at_certificate:, :created_at:, :updated_at:)', [...], false)
+ 5 SYSTEMPATH\Model.php(394): CodeIgniter\Database\BaseBuilder->insert()
+ 6 SYSTEMPATH\BaseModel.php(838): CodeIgniter\Model->doInsert([...])
+ 7 SYSTEMPATH\Model.php(797): CodeIgniter\BaseModel->insert([...], true)
+ 8 APPPATH\Controllers\Certificates.php(91): CodeIgniter\Model->insert([...])
+ 9 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Certificates->createPending()
+10 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Certificates))
+11 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+12 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+13 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+14 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-01-22 18:14:40 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-22 18:14:41 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-22 18:14:44 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-22 18:14:52 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-22 18:14:53 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-22 18:14:56 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-22 18:14:57 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-22 18:14:59 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-22 18:15:05 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-22 18:15:27 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-22 18:15:33 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-22 18:15:39 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-22 18:15:41 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-01-22 18:15:41 --> mysqli_sql_exception: Unknown column 'avaiable_at_certificate' in 'field list' in C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php(327): mysqli->query('INSERT INTO `ce...', 0)
+#1 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('INSERT INTO `ce...')
+#2 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('INSERT INTO `ce...')
+#3 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseBuilder.php(2345): CodeIgniter\Database\BaseConnection->query('INSERT INTO `ce...', Array, false)
+#4 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Model.php(394): CodeIgniter\Database\BaseBuilder->insert()
+#5 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\BaseModel.php(838): CodeIgniter\Model->doInsert(Array)
+#6 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Model.php(797): CodeIgniter\BaseModel->insert(Array, true)
+#7 C:\laragon\www\academy-ci4\app\Controllers\Certificates.php(91): CodeIgniter\Model->insert(Array)
+#8 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(933): App\Controllers\Certificates->createPending()
+#9 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Certificates))
+#10 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#11 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#12 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#13 C:\laragon\www\academy-ci4\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#14 {main}
+CRITICAL - 2026-01-22 18:15:41 --> CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'avaiable_at_certificate' in 'field list'
+[Method: POST, Route: student/certificates/pending]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(2345): CodeIgniter\Database\BaseConnection->query('INSERT INTO `certificates` (`id_user_certificate`, `id_course_certificate`, `uuid_certificate`, `hash_certificate`, `avaiable_at_certificate`, `created_at`, `updated_at`) VALUES (:id_user_certificate:, :id_course_certificate:, :uuid_certificate:, :hash_certificate:, :avaiable_at_certificate:, :created_at:, :updated_at:)', [...], false)
+ 2 SYSTEMPATH\Model.php(394): CodeIgniter\Database\BaseBuilder->insert()
+ 3 SYSTEMPATH\BaseModel.php(838): CodeIgniter\Model->doInsert([...])
+ 4 SYSTEMPATH\Model.php(797): CodeIgniter\BaseModel->insert([...], true)
+ 5 APPPATH\Controllers\Certificates.php(91): CodeIgniter\Model->insert([...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Certificates->createPending()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Certificates))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-01-22 18:15:41 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'avaiable_at_certificate' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('INSERT INTO `certificates` (`id_user_certificate`, `id_course_certificate`, `uuid_certificate`, `hash_certificate`, `avaiable_at_certificate`, `created_at`, `updated_at`) VALUES (19, 21, \'0cb990d34608256bcc1acb18841fefae\', \'09ef5c0d57b4843f6f15dbfd79e9d68381e48547eba97566abf4d66c0038566a\', \'2026-01-24 18:14:21\', \'2026-01-22 18:15:41\', \'2026-01-22 18:15:41\')')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('INSERT INTO `certificates` (`id_user_certificate`, `id_course_certificate`, `uuid_certificate`, `hash_certificate`, `avaiable_at_certificate`, `created_at`, `updated_at`) VALUES (19, 21, \'0cb990d34608256bcc1acb18841fefae\', \'09ef5c0d57b4843f6f15dbfd79e9d68381e48547eba97566abf4d66c0038566a\', \'2026-01-24 18:14:21\', \'2026-01-22 18:15:41\', \'2026-01-22 18:15:41\')')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(2345): CodeIgniter\Database\BaseConnection->query('INSERT INTO `certificates` (`id_user_certificate`, `id_course_certificate`, `uuid_certificate`, `hash_certificate`, `avaiable_at_certificate`, `created_at`, `updated_at`) VALUES (:id_user_certificate:, :id_course_certificate:, :uuid_certificate:, :hash_certificate:, :avaiable_at_certificate:, :created_at:, :updated_at:)', [...], false)
+ 4 SYSTEMPATH\Model.php(394): CodeIgniter\Database\BaseBuilder->insert()
+ 5 SYSTEMPATH\BaseModel.php(838): CodeIgniter\Model->doInsert([...])
+ 6 SYSTEMPATH\Model.php(797): CodeIgniter\BaseModel->insert([...], true)
+ 7 APPPATH\Controllers\Certificates.php(91): CodeIgniter\Model->insert([...])
+ 8 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Certificates->createPending()
+ 9 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Certificates))
+10 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+11 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+12 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+13 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-01-22 18:15:41 --> [Caused by] mysqli_sql_exception: Unknown column 'avaiable_at_certificate' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('INSERT INTO `certificates` (`id_user_certificate`, `id_course_certificate`, `uuid_certificate`, `hash_certificate`, `avaiable_at_certificate`, `created_at`, `updated_at`) VALUES (19, 21, \'0cb990d34608256bcc1acb18841fefae\', \'09ef5c0d57b4843f6f15dbfd79e9d68381e48547eba97566abf4d66c0038566a\', \'2026-01-24 18:14:21\', \'2026-01-22 18:15:41\', \'2026-01-22 18:15:41\')', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('INSERT INTO `certificates` (`id_user_certificate`, `id_course_certificate`, `uuid_certificate`, `hash_certificate`, `avaiable_at_certificate`, `created_at`, `updated_at`) VALUES (19, 21, \'0cb990d34608256bcc1acb18841fefae\', \'09ef5c0d57b4843f6f15dbfd79e9d68381e48547eba97566abf4d66c0038566a\', \'2026-01-24 18:14:21\', \'2026-01-22 18:15:41\', \'2026-01-22 18:15:41\')')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('INSERT INTO `certificates` (`id_user_certificate`, `id_course_certificate`, `uuid_certificate`, `hash_certificate`, `avaiable_at_certificate`, `created_at`, `updated_at`) VALUES (19, 21, \'0cb990d34608256bcc1acb18841fefae\', \'09ef5c0d57b4843f6f15dbfd79e9d68381e48547eba97566abf4d66c0038566a\', \'2026-01-24 18:14:21\', \'2026-01-22 18:15:41\', \'2026-01-22 18:15:41\')')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(2345): CodeIgniter\Database\BaseConnection->query('INSERT INTO `certificates` (`id_user_certificate`, `id_course_certificate`, `uuid_certificate`, `hash_certificate`, `avaiable_at_certificate`, `created_at`, `updated_at`) VALUES (:id_user_certificate:, :id_course_certificate:, :uuid_certificate:, :hash_certificate:, :avaiable_at_certificate:, :created_at:, :updated_at:)', [...], false)
+ 5 SYSTEMPATH\Model.php(394): CodeIgniter\Database\BaseBuilder->insert()
+ 6 SYSTEMPATH\BaseModel.php(838): CodeIgniter\Model->doInsert([...])
+ 7 SYSTEMPATH\Model.php(797): CodeIgniter\BaseModel->insert([...], true)
+ 8 APPPATH\Controllers\Certificates.php(91): CodeIgniter\Model->insert([...])
+ 9 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Certificates->createPending()
+10 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Certificates))
+11 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+12 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+13 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+14 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-01-22 18:17:11 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-22 18:17:13 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-22 18:17:18 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-22 18:17:45 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-22 18:17:49 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-01-22 18:17:59 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-01-22 18:18:00 --> mysqli_sql_exception: Unknown column 'avaiable_at_certificate' in 'field list' in C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php(327): mysqli->query('INSERT INTO `ce...', 0)
+#1 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('INSERT INTO `ce...')
+#2 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('INSERT INTO `ce...')
+#3 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseBuilder.php(2345): CodeIgniter\Database\BaseConnection->query('INSERT INTO `ce...', Array, false)
+#4 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Model.php(394): CodeIgniter\Database\BaseBuilder->insert()
+#5 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\BaseModel.php(838): CodeIgniter\Model->doInsert(Array)
+#6 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Model.php(797): CodeIgniter\BaseModel->insert(Array, true)
+#7 C:\laragon\www\academy-ci4\app\Controllers\Certificates.php(91): CodeIgniter\Model->insert(Array)
+#8 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(933): App\Controllers\Certificates->createPending()
+#9 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Certificates))
+#10 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#11 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#12 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#13 C:\laragon\www\academy-ci4\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#14 {main}
+CRITICAL - 2026-01-22 18:18:00 --> CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'avaiable_at_certificate' in 'field list'
+[Method: POST, Route: student/certificates/pending]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(2345): CodeIgniter\Database\BaseConnection->query('INSERT INTO `certificates` (`id_user_certificate`, `id_course_certificate`, `uuid_certificate`, `hash_certificate`, `avaiable_at_certificate`, `created_at`, `updated_at`) VALUES (:id_user_certificate:, :id_course_certificate:, :uuid_certificate:, :hash_certificate:, :avaiable_at_certificate:, :created_at:, :updated_at:)', [...], false)
+ 2 SYSTEMPATH\Model.php(394): CodeIgniter\Database\BaseBuilder->insert()
+ 3 SYSTEMPATH\BaseModel.php(838): CodeIgniter\Model->doInsert([...])
+ 4 SYSTEMPATH\Model.php(797): CodeIgniter\BaseModel->insert([...], true)
+ 5 APPPATH\Controllers\Certificates.php(91): CodeIgniter\Model->insert([...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Certificates->createPending()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Certificates))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-01-22 18:18:00 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'avaiable_at_certificate' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('INSERT INTO `certificates` (`id_user_certificate`, `id_course_certificate`, `uuid_certificate`, `hash_certificate`, `avaiable_at_certificate`, `created_at`, `updated_at`) VALUES (19, 21, \'f1778e961de1db38b44941b1de64d15f\', \'3276134545b0cac3f9aef32dff4ce91c8f01f64f077c161d53b44abaea2f3594\', \'2026-01-24 18:17:13\', \'2026-01-22 18:18:00\', \'2026-01-22 18:18:00\')')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('INSERT INTO `certificates` (`id_user_certificate`, `id_course_certificate`, `uuid_certificate`, `hash_certificate`, `avaiable_at_certificate`, `created_at`, `updated_at`) VALUES (19, 21, \'f1778e961de1db38b44941b1de64d15f\', \'3276134545b0cac3f9aef32dff4ce91c8f01f64f077c161d53b44abaea2f3594\', \'2026-01-24 18:17:13\', \'2026-01-22 18:18:00\', \'2026-01-22 18:18:00\')')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(2345): CodeIgniter\Database\BaseConnection->query('INSERT INTO `certificates` (`id_user_certificate`, `id_course_certificate`, `uuid_certificate`, `hash_certificate`, `avaiable_at_certificate`, `created_at`, `updated_at`) VALUES (:id_user_certificate:, :id_course_certificate:, :uuid_certificate:, :hash_certificate:, :avaiable_at_certificate:, :created_at:, :updated_at:)', [...], false)
+ 4 SYSTEMPATH\Model.php(394): CodeIgniter\Database\BaseBuilder->insert()
+ 5 SYSTEMPATH\BaseModel.php(838): CodeIgniter\Model->doInsert([...])
+ 6 SYSTEMPATH\Model.php(797): CodeIgniter\BaseModel->insert([...], true)
+ 7 APPPATH\Controllers\Certificates.php(91): CodeIgniter\Model->insert([...])
+ 8 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Certificates->createPending()
+ 9 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Certificates))
+10 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+11 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+12 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+13 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-01-22 18:18:00 --> [Caused by] mysqli_sql_exception: Unknown column 'avaiable_at_certificate' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('INSERT INTO `certificates` (`id_user_certificate`, `id_course_certificate`, `uuid_certificate`, `hash_certificate`, `avaiable_at_certificate`, `created_at`, `updated_at`) VALUES (19, 21, \'f1778e961de1db38b44941b1de64d15f\', \'3276134545b0cac3f9aef32dff4ce91c8f01f64f077c161d53b44abaea2f3594\', \'2026-01-24 18:17:13\', \'2026-01-22 18:18:00\', \'2026-01-22 18:18:00\')', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('INSERT INTO `certificates` (`id_user_certificate`, `id_course_certificate`, `uuid_certificate`, `hash_certificate`, `avaiable_at_certificate`, `created_at`, `updated_at`) VALUES (19, 21, \'f1778e961de1db38b44941b1de64d15f\', \'3276134545b0cac3f9aef32dff4ce91c8f01f64f077c161d53b44abaea2f3594\', \'2026-01-24 18:17:13\', \'2026-01-22 18:18:00\', \'2026-01-22 18:18:00\')')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('INSERT INTO `certificates` (`id_user_certificate`, `id_course_certificate`, `uuid_certificate`, `hash_certificate`, `avaiable_at_certificate`, `created_at`, `updated_at`) VALUES (19, 21, \'f1778e961de1db38b44941b1de64d15f\', \'3276134545b0cac3f9aef32dff4ce91c8f01f64f077c161d53b44abaea2f3594\', \'2026-01-24 18:17:13\', \'2026-01-22 18:18:00\', \'2026-01-22 18:18:00\')')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(2345): CodeIgniter\Database\BaseConnection->query('INSERT INTO `certificates` (`id_user_certificate`, `id_course_certificate`, `uuid_certificate`, `hash_certificate`, `avaiable_at_certificate`, `created_at`, `updated_at`) VALUES (:id_user_certificate:, :id_course_certificate:, :uuid_certificate:, :hash_certificate:, :avaiable_at_certificate:, :created_at:, :updated_at:)', [...], false)
+ 5 SYSTEMPATH\Model.php(394): CodeIgniter\Database\BaseBuilder->insert()
+ 6 SYSTEMPATH\BaseModel.php(838): CodeIgniter\Model->doInsert([...])
+ 7 SYSTEMPATH\Model.php(797): CodeIgniter\BaseModel->insert([...], true)
+ 8 APPPATH\Controllers\Certificates.php(91): CodeIgniter\Model->insert([...])
+ 9 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Certificates->createPending()
+10 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Certificates))
+11 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+12 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+13 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+14 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
