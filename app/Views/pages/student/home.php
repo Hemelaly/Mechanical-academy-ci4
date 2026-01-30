@@ -31,7 +31,7 @@
         </div>
         
         <div class="flex flex-wrap gap-4 mt-6">
-            <a href="/student/dashboard/meus_cursos"
+            <a href="/student/dashboard/inscricoes"
                 class="group px-6 py-3.5 bg-white text-blue-600 font-semibold rounded-xl hover:bg-white/95 transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl flex items-center gap-2">
                 <i class="bi bi-play-circle text-sm"></i>
                 Ver Meus Cursos
@@ -215,7 +215,7 @@
 
 <!-- Quick Actions -->
 <div class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-    <a href="/student/dashboard/meus_cursos" 
+    <a href="/student/dashboard/inscricoes" 
         class="p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300 group text-center">
         <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
             <i class="bi bi-collection-play text-blue-600 dark:text-blue-400 text-xl"></i>
