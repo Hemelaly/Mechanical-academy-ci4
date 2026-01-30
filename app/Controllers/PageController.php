@@ -16,7 +16,12 @@ class PageController extends BaseController
         $courseModel = new CourseModel();
         $user = service('auth')->user();
 
-        $course = $courseModel->find($id_course);
+        $course = $courseModel
+            ->where('status_course', 'Ativo')
+            ->find($id_course);
+        if (! $course) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Curso não encontrado');
+        }
 
         $enrollmentModel = new \App\Models\EnrollmentModel();
         $userId = $user ? $user->id : null;
@@ -26,7 +31,7 @@ class PageController extends BaseController
             $isEnrolled = $enrollmentModel
                 ->where('id_student_enrollment', $userId)
                 ->where('id_course_enrollment', $course->id_course)
-                ->where('status_enrollment', 'Ativa')
+                ->where('status_enrollment', 'ativa')
                 ->first();
         }
 
@@ -47,7 +52,12 @@ class PageController extends BaseController
 
         $user = service('auth')->user();
 
-        $course = $courseModel->find($id_course);
+        $course = $courseModel
+            ->where('status_course', 'Ativo')
+            ->find($id_course);
+        if (! $course) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Curso não encontrado');
+        }
 
         $enrollmentModel = new \App\Models\EnrollmentModel();
         $userId = $user ? $user->id : null;
@@ -63,7 +73,7 @@ class PageController extends BaseController
             $isEnrolled = $enrollmentModel
                 ->where('id_student_enrollment', $userId)
                 ->where('id_course_enrollment', $course->id_course)
-                ->where('status_enrollment', 'Ativa')
+                ->where('status_enrollment', 'ativa')
                 ->first();
         }
 

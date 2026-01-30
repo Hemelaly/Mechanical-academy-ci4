@@ -32,7 +32,7 @@ class MpesaWebhookController extends Controller
                     $enrollmentModel->insert([
                         'id_student_enrollment'  => $studentId,
                         'id_course_enrollment'   => $courseId,
-                        'status_enrollment'      => 'active',
+                        'status_enrollment'      => 'ativa',
                         'progress_enrollment'    => 0,
                         'enrolled_at_enrollment' => date('Y-m-d H:i:s')
                     ]);

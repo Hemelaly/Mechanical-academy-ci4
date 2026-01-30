@@ -35,34 +35,34 @@ class Dashboard extends BaseController
     {
         return [
             [
-                'label' => 'Início',
+                'label' => 'Iní­cio',
                 'icon' => 'bi-house-door',
                 'url' => '/student/dashboard',
-                'pattern' => '/student/dashboard' // Apenas correspondência exata
+                'pattern' => '/student/dashboard' // Apenas correspondÃªncia exata
             ],
             [
                 'label' => 'Meus Cursos',
                 'icon' => 'bi-book',
                 'url' => '/student/dashboard/inscricoes',
-                'pattern' => '/student/dashboard/inscricoes*' // Com * para subpáginas
+                'pattern' => '/student/dashboard/inscricoes*' // Com * para subpÃ¡ginas
             ],
             [
                 'label' => 'Todos Cursos',
                 'icon' => 'bi-book',
                 'url' => '/student/dashboard/cursos',
-                'pattern' => '/student/dashboard/cursos*' // Com * para subpáginas
+                'pattern' => '/student/dashboard/cursos*' // Com * para subpÃ¡ginas
             ],
                     [
                 'label' => 'Certificados',
                 'icon' => 'bi-folder',
                 'url' => '/student/dashboard/certificados',
-                'pattern' => '/student/dashboard/certificados*' // Com * para subpáginas
+                'pattern' => '/student/dashboard/certificados*' // Com * para subpÃ¡ginas
             ],
             [
                 'label' => 'Perfil',
                 'icon' => 'bi-person-circle',
                 'url' => '/student/dashboard/perfil',
-                'pattern' => '/student/dashboard/perfil*' // Com * para subpáginas
+                'pattern' => '/student/dashboard/perfil*' // Com * para subpÃ¡ginas
             ],
         ];
     }
@@ -78,14 +78,14 @@ class Dashboard extends BaseController
         $db               = db_connect();
 
         // Todos os cursos (se ainda usa na home)
-        $courses = $coursesModel->findAll();
+        $courses = $coursesModel->where('status_course', 'Ativo')->findAll();
 
-        // Inscrições do usuário
+        // InscriÃ§Ãµes do usuÃ¡rio
         $enrollments = $enrollmentModel
             ->where('id_student_enrollment', $user->id)
             ->findAll();
 
-        // Mapas úteis
+        // Mapas Ãºteis
         $activeCourseIds      = [];
         $pendingCourseIds     = [];
         $enrollmentByCourseId = []; // [id_course => enrollment row]
@@ -93,9 +93,10 @@ class Dashboard extends BaseController
         foreach ($enrollments as $enr) {
             $courseId = (int) $enr->id_course_enrollment;
             $enrollmentByCourseId[$courseId] = $enr;
+            $status = strtolower((string) $enr->status_enrollment);
 
-            if ($enr->status_enrollment === 'Ativa')    $activeCourseIds[]  = $courseId;
-            if ($enr->status_enrollment === 'Pendente') $pendingCourseIds[] = $courseId;
+            if ($status === 'ativa')    $activeCourseIds[]  = $courseId;
+            if ($status === 'pendente') $pendingCourseIds[] = $courseId;
         }
 
         // === OBJETO DE PROGRESSO POR CURSO ===
@@ -108,15 +109,15 @@ class Dashboard extends BaseController
             $progressByCourseArr[$courseId] = (object) [
                 'courseId'     => (int) $courseId,
                 'enrollmentId' => (int) $enr->id_enrollment,
-                'status'       => (string) $enr->status_enrollment,
+                'status'       => strtolower((string) $enr->status_enrollment),
                 'progress'     => (int) ($enr->progress_enrollment ?? 0),
                 'updatedAt'    => $enr->updated_at ?? null,
             ];
         }
-        // Converte o array associativo para stdClass (objeto) como você pediu
+        // Converte o array associativo para stdClass (objeto) como vocÃª pediu
         $progressByCourse = (object) $progressByCourseArr;
 
-        // Cursos nos quais o aluno está inscrito (tua função custom)
+        // Cursos nos quais o aluno estÃ¡ inscrito (tua funÃ§Ã£o custom)
         $lessons = $enrollmentModel->getStudentEnrolledCourses($user->id);
 
         // Helper para calcular a aula de retomada (resume) por curso/enrollment
@@ -143,9 +144,9 @@ class Dashboard extends BaseController
             $completedSet = array_flip($completedLessonIds);
 
             foreach ($orderedIds as $lid) {
-                if (!isset($completedSet[$lid])) return $lid; // primeira não concluída
+                if (!isset($completedSet[$lid])) return $lid; // primeira nÃ£o concluÃ­da
             }
-            return end($orderedIds); // todas concluídas -> última
+            return end($orderedIds); // todas concluÃ­das -> Ãºltima
         };
 
         // Para cada curso inscrito: calcular resume e anexar progresso
@@ -193,10 +194,10 @@ class Dashboard extends BaseController
 
         $user = service('auth')->user();
 
-        // Cursos nos quais o aluno está inscrito (função custom)
+        // Cursos nos quais o aluno estÃ¡ inscrito (funÃ§Ã£o custom)
         $courses = $enrollmentModel->getStudentEnrolledCourses($user->id);
 
-        // Todas as matrículas do aluno
+        // Todas as matrÃ­culas do aluno
         $enrollments = $enrollmentModel
             ->where('id_student_enrollment', $user->id)
             ->findAll();
@@ -212,15 +213,15 @@ class Dashboard extends BaseController
             $progressByCourseArr[$courseId] = (object) [
                 'courseId'     => $courseId,
                 'enrollmentId' => (int) $enr->id_enrollment,
-                'status'       => (string) $enr->status_enrollment,
-                // se sua coluna já é % inteiro (0–100), mantenha (int). Se for decimal (0–100.x), use (float)
+                'status'       => strtolower((string) $enr->status_enrollment),
+                // se sua coluna jÃ¡ Ã© % inteiro (0â€“100), mantenha (int). Se for decimal (0â€“100.x), use (float)
                 'progress'     => (int) ($enr->progress_enrollment ?? 0),
                 'updatedAt'    => $enr->updated_at ?? null,
             ];
         }
         $progressByCourse = (object) $progressByCourseArr;
 
-        // Helper: retorna a aula de retomada (primeira não concluída; se todas, a última)
+        // Helper: retorna a aula de retomada (primeira nÃ£o concluÃ­da; se todas, a Ãºltima)
         $calcResume = function (int $courseId, int $enrollmentId) use ($db) {
             $ordered = $db->table('lessons l')
                 ->select('l.id_lesson')
@@ -244,9 +245,9 @@ class Dashboard extends BaseController
             $completedSet = array_flip($completedLessonIds);
 
             foreach ($orderedIds as $lid) {
-                if (!isset($completedSet[$lid])) return $lid; // primeira não concluída
+                if (!isset($completedSet[$lid])) return $lid; // primeira nÃ£o concluÃ­da
             }
-            return end($orderedIds); // todas concluídas -> última
+            return end($orderedIds); // todas concluÃ­das -> Ãºltima
         };
 
         // Para cada curso, definir resumeLessonId e anexar progresso
@@ -266,7 +267,7 @@ class Dashboard extends BaseController
                 ? $progressByCourseArr[$courseId]->progress
                 : 0;
 
-            // se quiser, também pode anexar enrollmentId/status
+            // se quiser, tambÃ©m pode anexar enrollmentId/status
             $course->enrollmentId = isset($progressByCourseArr[$courseId]) ? $progressByCourseArr[$courseId]->enrollmentId : null;
             $course->enrollmentStatus = isset($progressByCourseArr[$courseId]) ? $progressByCourseArr[$courseId]->status : null;
         }
@@ -289,11 +290,11 @@ class Dashboard extends BaseController
         $enrollmentModel = new EnrollmentModel();
         $db              = db_connect();
 
-        // Usuário atual
+        // UsuÃ¡rio atual
         $authUser = service('auth')->user();
         if (! $authUser) {
             return redirect()->to(site_url('login'))
-                ->with('error', 'Sessão expirada. Faça login novamente.');
+                ->with('error', 'SessÃ£o expirada. FaÃ§a login novamente.');
         }
         $userId = function_exists('user_id') ? user_id() : ($authUser->id ?? $authUser->getId());
 
@@ -314,7 +315,7 @@ class Dashboard extends BaseController
                 return [null, $orderedIds];
             }
 
-            // Concluídas POR ESTA MATRÍCULA
+            // ConcluÃ­das POR ESTA MATRÃCULA
             $completedLessonIds = array_column(
                 $db->table('progress')
                     ->select('id_lesson_progress')
@@ -333,7 +334,7 @@ class Dashboard extends BaseController
                 }
             }
             if ($resumeId === null) {
-                // tudo concluído → volta à última
+                // tudo concluÃ­do â†’ volta Ã  Ãºltima
                 $resumeId = end($orderedIds);
             }
 
@@ -344,16 +345,16 @@ class Dashboard extends BaseController
         $lesson = $lessonModel->find($id);
 
         // ===========================
-        // NÃO É AULA → tratar como CURSO
+        // NÃƒO Ã‰ AULA â†’ tratar como CURSO
         // ===========================
         if (! $lesson) {
             $course = $courseModel->find($id);
             if (! $course) {
                 return redirect()->to('/student/dashboard/meus_cursos')
-                    ->with('error', 'Curso não encontrado.');
+                    ->with('error', 'Curso nÃ£o encontrado.');
             }
 
-            // MATRÍCULA do usuário logado nesse curso
+            // MATRÃCULA do usuÃ¡rio logado nesse curso
             $enrollment = $enrollmentModel
                 ->where('id_course_enrollment',  (int) $course->id_course)
                 ->where('id_student_enrollment', (int) $userId)   // <<< FILTRO PELO ESTUDANTE
@@ -361,7 +362,18 @@ class Dashboard extends BaseController
 
             if (! $enrollment) {
                 return redirect()->to('/student/dashboard/checkout/' . (int) $course->id_course)
-                    ->with('warning', 'Você precisa estar inscrito neste curso.');
+                    ->with('warning', 'VocÃª precisa estar inscrito neste curso.');
+            }
+
+            if (strtolower((string) ($enrollment->status_enrollment ?? '')) === 'cancelada') {
+                [$resumeId, $orderedIds] = $calcResume((int) $course->id_course, (int) $enrollment->id_enrollment);
+                $targetId = $resumeId ?: ($orderedIds[0] ?? null);
+                if ($targetId) {
+                    return redirect()->to('/student/dashboard/ver_aulas/' . (int) $targetId)
+                        ->with('blocked_access', true);
+                }
+                return redirect()->to('/student/dashboard/meus_cursos')
+                    ->with('error', 'Seu acesso a este curso está bloqueado.');
             }
 
             [$resumeId] = $calcResume((int) $course->id_course, (int) $enrollment->id_enrollment);
@@ -381,21 +393,21 @@ class Dashboard extends BaseController
         }
 
         // ===========================
-        // É AULA → obter módulo/curso
+        // Ã‰ AULA â†’ obter mÃ³dulo/curso
         // ===========================
         $module = $moduleModel->find($lesson->id_module_lesson);
         if (! $module) {
             return redirect()->to('/student/dashboard/meus_cursos')
-                ->with('error', 'Módulo da aula não encontrado.');
+                ->with('error', 'MÃ³dulo da aula nÃ£o encontrado.');
         }
 
         $course = $courseModel->find($module->id_course_module);
         if (! $course) {
             return redirect()->to('/student/dashboard/meus_cursos')
-                ->with('error', 'Curso da aula não encontrado.');
+                ->with('error', 'Curso da aula nÃ£o encontrado.');
         }
 
-        // MATRÍCULA do usuário logado nesse curso
+        // MATRÃCULA do usuÃ¡rio logado nesse curso
         $enrollment = $enrollmentModel
             ->where('id_course_enrollment',  (int) $course->id_course)
             ->where('id_student_enrollment', (int) $userId)      // <<< FILTRO PELO ESTUDANTE
@@ -403,14 +415,16 @@ class Dashboard extends BaseController
 
         if (! $enrollment) {
             return redirect()->to('/student/dashboard/checkout/' . (int) $course->id_course)
-                ->with('warning', 'Você precisa estar inscrito neste curso.');
+                ->with('warning', 'VocÃª precisa estar inscrito neste curso.');
         }
+
+        $accessBlocked = strtolower((string) ($enrollment->status_enrollment ?? '')) === 'cancelada';
 
         $moduleList = $moduleModel->where('id_course_module', $course->id_course)
             ->orderBy('position_module')
             ->findAll();
 
-        // Bloqueia o módulo seguinte até atingir a nota mínima no quiz do módulo anterior
+        // Bloqueia o mÃ³dulo seguinte atÃ© atingir a nota mÃ­nima no quiz do mÃ³dulo anterior
         $moduleIndex = null;
         foreach ($moduleList as $idx => $mod) {
             if ((int) $mod->id_module === (int) $module->id_module) {
@@ -441,12 +455,12 @@ class Dashboard extends BaseController
                     $courseSlug = $this->makeSlug((string) $course->title_course);
                     $lessonSlug = $this->makeSlug((string) $quizLesson->title_lesson);
                     return redirect()->to('/student/dashboard/inscricoes/' . $courseSlug . '/' . $lessonSlug)
-                        ->with('warning', 'Faça o quiz do módulo anterior e obtenha no mínimo ' . $minScore . '% para avançar.');
+                        ->with('warning', 'FaÃ§a o quiz do mÃ³dulo anterior e obtenha no mÃ­nimo ' . $minScore . '% para avanÃ§ar.');
                 }
             }
         }
 
-        // Força retomar apenas se tentar ir à frente
+        // ForÃ§a retomar apenas se tentar ir Ã  frente
         $override = (int) (service('request')->getGet('override') ?? 0);
         [$resumeId, $orderedIds] = $calcResume((int) $course->id_course, (int) $enrollment->id_enrollment);
 
@@ -466,7 +480,7 @@ class Dashboard extends BaseController
             }
         }
 
-        // Sidebar: módulos + aulas (sem interferir em prev/next)
+        // Sidebar: mÃ³dulos + aulas (sem interferir em prev/next)
         $modules = $moduleList;
 
         foreach ($modules as &$m) {
@@ -484,7 +498,7 @@ class Dashboard extends BaseController
             }
         }
 
-        // IDs concluídos POR ESTA MATRÍCULA
+        // IDs concluÃ­dos POR ESTA MATRÃCULA
         $completedLessonIds = array_column(
             $db->table('progress')
                 ->select('id_lesson_progress')
@@ -557,6 +571,7 @@ class Dashboard extends BaseController
         return view('pages/student/lessons', [
             'course'             => $course,
             'enrollment'         => (object) $enrollment,
+            'accessBlocked'      => $accessBlocked ?? false,
             'modules'            => $modules,
             'lesson'             => $lesson,
             'prevLesson'         => $prevLesson,
@@ -596,7 +611,7 @@ class Dashboard extends BaseController
 
         if (! $courseId) {
             return redirect()->to('/student/dashboard/inscricoes')
-                ->with('error', 'Curso não encontrado.');
+                ->with('error', 'Curso nÃ£o encontrado.');
         }
 
         $lessons = $lessonModel
@@ -616,7 +631,7 @@ class Dashboard extends BaseController
 
         if (! $lessonId) {
             return redirect()->to('/student/dashboard/inscricoes')
-                ->with('error', 'Aula não encontrada.');
+                ->with('error', 'Aula nÃ£o encontrada.');
         }
 
         return $this->lessons($lessonId);
@@ -634,12 +649,12 @@ class Dashboard extends BaseController
         // Todos os cursos (se a view usa)
         $courses = $coursesModel->findAll();
 
-        // Todas as matrículas do usuário
+        // Todas as matrÃ­culas do usuÃ¡rio
         $enrollments = $enrollmentModel
             ->where('id_student_enrollment', $user->id)
             ->findAll();
 
-        // IDs de cursos por status + mapa curso→enrollment row
+        // IDs de cursos por status + mapa cursoâ†’enrollment row
         $activeCourseIds      = [];
         $pendingCourseIds     = [];
         $enrollmentByCourseId = []; // [id_course => enrollment row]
@@ -648,14 +663,15 @@ class Dashboard extends BaseController
             $courseId = (int) $enr->id_course_enrollment;
             $enrollmentByCourseId[$courseId] = $enr;
 
-            if ($enr->status_enrollment === 'Ativa')    $activeCourseIds[]  = $courseId;
-            if ($enr->status_enrollment === 'Pendente') $pendingCourseIds[] = $courseId;
+            $status = strtolower((string) $enr->status_enrollment);
+            if ($status === 'ativa')    $activeCourseIds[]  = $courseId;
+            if ($status === 'pendente') $pendingCourseIds[] = $courseId;
         }
 
-        // Cursos nos quais o aluno está inscrito (tua função custom)
+        // Cursos nos quais o aluno estÃ¡ inscrito (tua funÃ§Ã£o custom)
         $lessons = $enrollmentModel->getStudentEnrolledCourses($user->id);
 
-        // Helper: retorna a aula de retomada (primeira não concluída; se todas, a última)
+        // Helper: retorna a aula de retomada (primeira nÃ£o concluÃ­da; se todas, a Ãºltima)
         $calcResume = function (int $courseId, int $enrollmentId) use ($db) {
             // ordem global das aulas do curso
             $ordered = $db->table('lessons l')
@@ -669,7 +685,7 @@ class Dashboard extends BaseController
             $orderedIds = array_map(fn($r) => (int)$r['id_lesson'], $ordered);
             if (empty($orderedIds)) return null;
 
-            // aulas concluídas desta matrícula
+            // aulas concluÃ­das desta matrÃ­cula
             $completedLessonIds = array_column(
                 $db->table('progress')
                     ->select('id_lesson_progress')
@@ -680,7 +696,7 @@ class Dashboard extends BaseController
             );
             $completedSet = array_flip($completedLessonIds);
 
-            // primeira NÃO concluída; se todas concluídas, a última
+            // primeira NÃƒO concluÃ­da; se todas concluÃ­das, a Ãºltima
             foreach ($orderedIds as $lid) {
                 if (!isset($completedSet[$lid])) return $lid;
             }
@@ -724,6 +740,9 @@ class Dashboard extends BaseController
     {
         $courseModel = new CourseModel();
         $course = $courseModel->find($idCourse);
+        if (! $course || $course->status_course !== 'Ativo') {
+            return redirect()->back()->with('error', 'Curso nÃƒÂ£o encontrado.');
+        }
 
         $enrollmentModel = new EnrollmentModel();
         $existingEnrollment = $enrollmentModel
@@ -755,14 +774,14 @@ class Dashboard extends BaseController
             return redirect()->to(site_url('login'))
                 ->with('swal', [
                     'icon'  => 'error',
-                    'title' => 'Sessão Expirada',
-                    'text'  => 'Por favor, faça login novamente.'
+                    'title' => 'SessÃ£o Expirada',
+                    'text'  => 'Por favor, faÃ§a login novamente.'
                 ]);
         }
 
         $profileUrl = current_url(false);
 
-        // GET → exibe o perfil
+        // GET â†’ exibe o perfil
         if ($this->request->getMethod() !== 'POST') {
             return view('pages/student/profile', [
                 'user'         => $user,
@@ -771,7 +790,7 @@ class Dashboard extends BaseController
             ]);
         }
 
-        // Validação básica
+        // ValidaÃ§Ã£o bÃ¡sica
         $rules = [
             'nome'      => 'permit_empty|min_length[2]',
             'email'     => 'permit_empty|valid_email',
@@ -808,7 +827,7 @@ class Dashboard extends BaseController
                 return redirect()->to($profileUrl)->with('swal', [
                     'icon'  => 'error',
                     'title' => 'Erro!',
-                    'text'  => 'Já existe um usuário com esse nome!'
+                    'text'  => 'JÃ¡ existe um usuÃ¡rio com esse nome!'
                 ]);
             }
         }
@@ -863,7 +882,7 @@ class Dashboard extends BaseController
             $filePath = 'assets/img/' . $newName;
         }
 
-        // Criar payload de atualização
+        // Criar payload de atualizaÃ§Ã£o
         $dataProfile = [
             'username' => $userName ?: $user->username,
             'img'      => $filePath,
@@ -874,7 +893,7 @@ class Dashboard extends BaseController
         ];
 
         // ---------------------------------------
-        //    >>> ALTERAÇÃO DE SENHA (SHIELD) <<<
+        //    >>> ALTERAÃ‡ÃƒO DE SENHA (SHIELD) <<<
         // ---------------------------------------
         $currentPassword = $post['password_actual'] ?? '';
         $newPassword     = $post['new_password'] ?? '';
@@ -893,7 +912,7 @@ class Dashboard extends BaseController
                 return redirect()->to($profileUrl)->with('swal', [
                     'icon'  => 'error',
                     'title' => 'Erro interno',
-                    'text'  => 'Identidade de senha nao encontrada.'
+                    'text'  => 'Identidade de senha não encontrada.'
                 ]);
             }
 
@@ -928,7 +947,7 @@ class Dashboard extends BaseController
                 return redirect()->to($profileUrl)->with('swal', [
                     'icon' => 'error',
                     'title' => 'Erro interno',
-                    'text' => 'Identidade de senha não encontrada.'
+                    'text' => 'Identidade de senha nÃ£o encontrada.'
                 ]);
             }
 
@@ -937,7 +956,7 @@ class Dashboard extends BaseController
                 return redirect()->to($profileUrl)->with('swal', [
                     'icon' => 'error',
                     'title' => 'Senha incorreta',
-                    'text' => 'A senha atual fornecida está incorreta.'
+                    'text' => 'A senha atual fornecida estÃ¡ incorreta.'
                 ]);
             }
 
@@ -946,7 +965,7 @@ class Dashboard extends BaseController
                 return redirect()->to($profileUrl)->with('swal', [
                     'icon' => 'error',
                     'title' => 'Erro!',
-                    'text' => 'A nova senha deve ter no mínimo 6 caracteres.'
+                    'text' => 'A nova senha deve ter no mÃ­nimo 6 caracteres.'
                 ]);
             }
 
@@ -954,7 +973,7 @@ class Dashboard extends BaseController
                 return redirect()->to($profileUrl)->with('swal', [
                     'icon' => 'error',
                     'title' => 'Erro!',
-                    'text' => 'A confirmação da senha não coincide.'
+                    'text' => 'A confirmaÃ§Ã£o da senha nÃ£o coincide.'
                 ]);
             }
 
@@ -968,7 +987,7 @@ class Dashboard extends BaseController
                 ]);
         }
 
-        // Atualizar dados do usuário
+        // Atualizar dados do usuÃ¡rio
         if (! $users->update($user->id, $dataProfile)) {
             return redirect()->to($profileUrl)->with('swal', [
                 'icon' => 'error',
@@ -977,7 +996,7 @@ class Dashboard extends BaseController
             ]);
         }
 
-        // Atualizar sessão
+        // Atualizar sessÃ£o
         $updated = $users->find($user->id);
         auth()->setUser($updated);
 
@@ -1004,3 +1023,4 @@ class Dashboard extends BaseController
     }
 
 }
+

@@ -19,14 +19,30 @@ use CodeIgniter\Shield\Models\PasswordResetModel;
 
 class Dashboard extends BaseController
 {
+    private function wantsJson(): bool
+    {
+        return $this->request->isAJAX()
+            || $this->request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest';
+    }
+
+    private function jsonMessage(string $message, int $statusCode = 200, array $extra = [])
+    {
+        return $this->response
+            ->setStatusCode($statusCode)
+            ->setJSON(array_merge([
+                'message' => $message,
+                'csrf' => csrf_hash(),
+            ], $extra));
+    }
+
     private function sidebarLinks()
     {
         return [
-            ['label' => 'Início', 'icon' => 'bi-house-door', 'url' => '/instructor/dashboard'],
+            ['label' => 'InÃ­cio', 'icon' => 'bi-house-door', 'url' => '/instructor/dashboard'],
             ['label' => 'Meus Cursos', 'icon' => 'bi-book', 'url' => '/instructor/dashboard/meus_cursos'],
             ['label' => 'Aula ao Vivo', 'icon' => 'bi-camera-reels', 'url' => '/instructor/dashboard/jitsi'],
             ['label' => 'Estudantes', 'icon' => 'bi-people', 'url' => '/instructor/dashboard/meus_estudantes'],
-            ['label' => 'Finanças', 'icon' => 'bi-cash-coin', 'url' => '/instructor/dashboard/financas'],
+            ['label' => 'FinanÃ§as', 'icon' => 'bi-cash-coin', 'url' => '/instructor/dashboard/financas'],
             ['label' => 'Certificados', 'icon' => 'bi-folder', 'url' => '/instructor/dashboard/certificados'],
             ['label' => 'Perfil', 'icon' => 'bi-person-circle', 'url' => '/instructor/dashboard/perfil'],
         ];
@@ -63,14 +79,18 @@ class Dashboard extends BaseController
         $courseModel = new CourseModel();
         $moduleModel = new ModuleModel();
         $lessonModel = new LessonModel();
+        $projectModel = new \App\Models\ProjectModel();
 
-        $draft = $courseModel
+        $savedDraft = $courseModel
             ->where('id_instructor_course', $user->id)
             ->where('status_course', 'Rascunho')
             ->orderBy('updated_at', 'DESC')
             ->first();
+        $loadDraft = $this->request->getGet('load_draft') === '1';
+        $draft = $loadDraft ? $savedDraft : null;
 
         $draftModules = [];
+        $draftProjects = [];
         if ($draft) {
             $draftModules = $moduleModel
                 ->where('id_course_module', $draft->id_course)
@@ -84,12 +104,18 @@ class Dashboard extends BaseController
                     ->findAll();
             }
             unset($m);
+
+            $draftProjects = $projectModel
+                ->where('id_course_project', $draft->id_course)
+                ->findAll();
         }
 
         return view('pages/instructor/add_course', [
             'user' => $user,
             'draft' => $draft,
+            'savedDraft' => $savedDraft,
             'draftModules' => $draftModules,
+            'draftProjects' => $draftProjects,
             'sidebarLinks' => $this->sidebarLinks(),
             'currentUrl' => current_url()
         ]);
@@ -102,17 +128,18 @@ class Dashboard extends BaseController
         $courseModel = new \App\Models\CourseModel();
         $moduleModel = new \App\Models\ModuleModel();
         $lessonModel = new \App\Models\LessonModel();
+        $projectModel = new \App\Models\ProjectModel();
 
         if (!$id) {
             return redirect()->to('instructor/dashboard/meus_cursos')
-                ->with('error', 'ID do curso não fornecido');
+                ->with('error', 'ID do curso nÃƒÂ£o fornecido');
         }
 
         $course = $courseModel->find($id);
 
         if (!$course) {
             return redirect()->to('instructor/dashboard/meus_cursos')
-                ->with('error', 'Curso não encontrado');
+                ->with('error', 'Curso nÃƒÂ£o encontrado');
         }
 
         if ($course->id_instructor_course != auth()->id()) {
@@ -120,7 +147,7 @@ class Dashboard extends BaseController
                 ->with('error', 'Acesso negado');
         }
 
-        // 🔹 Carregar módulos e aulas
+        // Ã°Å¸â€Â¹ Carregar mÃƒÂ³dulos e aulas
         $modules = $moduleModel
             ->where('id_course_module', $id)
             ->orderBy('position_module')
@@ -133,11 +160,23 @@ class Dashboard extends BaseController
                 ->findAll();
         }
 
-        // ✅ APENAS retorna a view
+        $projects = $projectModel
+            ->where('id_course_project', $id)
+            ->findAll();
+
+        $db = db_connect();
+        $enrolledCount = (int) $db->table('enrollments')
+            ->where('id_course_enrollment', (int) $id)
+            ->where('status_enrollment', 'ativa')
+            ->countAllResults();
+
+        // Ã¢Å“â€¦ APENAS retorna a view
         return view('pages/instructor/edit_course', [
             'user'         => $user,
             'course'       => $course,
             'modules'      => $modules,
+            'projects'     => $projects,
+            'enrolledCount' => $enrolledCount,
             'sidebarLinks' => $this->sidebarLinks(),
             'currentUrl'   => current_url()
         ]);
@@ -151,7 +190,7 @@ class Dashboard extends BaseController
         $courseModel = new CourseModel();
 
         // ============================================================
-        // 1) GET → LISTAGEM + VIEW
+        // 1) GET Ã¢â€ â€™ LISTAGEM + VIEW
         // ============================================================
         if ($req->getMethod() === 'GET') {
 
@@ -171,21 +210,21 @@ class Dashboard extends BaseController
         }
 
         // ============================================================
-        // 2) POST → definir se é CRIAR ou EDITAR
+        // 2) POST Ã¢â€ â€™ definir se ÃƒÂ© CRIAR ou EDITAR
         // ============================================================
         $isEdit = !empty($req->getPost('id_jitsi'));
         $editId = $req->getPost('id_jitsi');
 
         // ============================================================
-        // 3) REGRAS DE VALIDAÇÃO
+        // 3) REGRAS DE VALIDAÃƒâ€¡ÃƒÆ’O
         // ============================================================
         $rules = [
             'classTitle' => [
-                'label'  => 'Título da Aula',
+                'label'  => 'TÃƒÂ­tulo da Aula',
                 'rules'  => 'required|min_length[3]|max_length[255]',
             ],
             'classDescription' => [
-                'label'  => 'Descrição',
+                'label'  => 'DescriÃƒÂ§ÃƒÂ£o',
                 'rules'  => 'permit_empty|max_length[65535]',
             ],
             'associatedCourse' => [
@@ -210,7 +249,7 @@ class Dashboard extends BaseController
             ],
         ];
 
-        // Se for AULA AGENDADA → obriga data e horários
+        // Se for AULA AGENDADA Ã¢â€ â€™ obriga data e horÃƒÂ¡rios
         if ($req->getPost('classType') === 'scheduled') {
 
             $rules['classDate'] = [
@@ -219,17 +258,17 @@ class Dashboard extends BaseController
             ];
 
             $rules['startTime'] = [
-                'label' => 'Hora de Início',
+                'label' => 'Hora de InÃƒÂ­cio',
                 'rules' => 'required',
             ];
 
             $rules['endTime'] = [
-                'label' => 'Hora de Término',
+                'label' => 'Hora de TÃƒÂ©rmino',
                 'rules' => 'required',
             ];
         }
 
-        // Se for PRIVACIDADE COM SENHA → obriga senha
+        // Se for PRIVACIDADE COM SENHA Ã¢â€ â€™ obriga senha
         if ($req->getPost('roomPrivacy') === 'password') {
             $rules['roomPassword']['rules'] = 'required|min_length[4]|max_length[100]';
         }
@@ -308,8 +347,8 @@ class Dashboard extends BaseController
         if (!$aula) {
             return redirect()->back()->with('swal', [
                 'icon'  => 'error',
-                'title' => 'Aula não encontrada',
-                'text'  => 'A aula que tentou excluir não existe.'
+                'title' => 'Aula nÃƒÂ£o encontrada',
+                'text'  => 'A aula que tentou excluir nÃƒÂ£o existe.'
             ]);
         }
 
@@ -318,7 +357,7 @@ class Dashboard extends BaseController
             return redirect()->back()->with('swal', [
                 'icon'  => 'error',
                 'title' => 'Acesso negado',
-                'text'  => 'Você não tem permissão para excluir esta aula.'
+                'text'  => 'VocÃƒÂª nÃƒÂ£o tem permissÃƒÂ£o para excluir esta aula.'
             ]);
         }
 
@@ -328,7 +367,7 @@ class Dashboard extends BaseController
                 ->to('/instructor/dashboard/jitsi')
                 ->with('swal', [
                     'icon'  => 'success',
-                    'title' => 'Aula excluída!',
+                    'title' => 'Aula excluÃƒÂ­da!',
                     'text'  => 'A aula foi removida com sucesso.'
                 ]);
         }
@@ -339,7 +378,7 @@ class Dashboard extends BaseController
             ->with('swal', [
                 'icon'  => 'error',
                 'title' => 'Erro ao excluir',
-                'text'  => 'Não foi possível excluir esta aula.'
+                'text'  => 'NÃƒÂ£o foi possÃƒÂ­vel excluir esta aula.'
             ]);
     }
 
@@ -353,8 +392,8 @@ class Dashboard extends BaseController
         if (!$aula) {
             return redirect()->back()->with('swal', [
                 'icon' => 'error',
-                'title' => 'Aula não encontrada',
-                'text' => 'A aula que tentou acessar não existe.'
+                'title' => 'Aula nÃƒÂ£o encontrada',
+                'text' => 'A aula que tentou acessar nÃƒÂ£o existe.'
             ]);
         }
 
@@ -362,8 +401,8 @@ class Dashboard extends BaseController
         if ($aula->id_user_jitsi != $user->id) {
             return redirect()->back()->with('swal', [
                 'icon' => 'error',
-                'title' => 'Sem Permissão',
-                'text' => 'Você não pode acessar esta sala.'
+                'title' => 'Sem PermissÃƒÂ£o',
+                'text' => 'VocÃƒÂª nÃƒÂ£o pode acessar esta sala.'
             ]);
         }
 
@@ -396,6 +435,164 @@ class Dashboard extends BaseController
             'sidebarLinks' => $this->sidebarLinks(),
             'currentUrl' => current_url(),
         ]);
+    }
+
+    public function studentsData()
+    {
+        $user = service('auth')->user();
+        $search = trim((string) $this->request->getGet('q'));
+        $status = strtolower((string) $this->request->getGet('status'));
+        $page = max(1, (int) $this->request->getGet('page'));
+        $perPage = (int) $this->request->getGet('per_page');
+        if ($perPage <= 0) {
+            $perPage = 10;
+        }
+        $perPage = min(max($perPage, 5), 50);
+        $offset = ($page - 1) * $perPage;
+
+        $db = db_connect();
+        $builder = $db->table('enrollments e')
+            ->select([
+                'e.id_enrollment',
+                'e.status_enrollment',
+                'e.progress_enrollment',
+                'e.updated_at AS last_enrollment_update',
+                's.name_student',
+                's.email_student',
+                'c.title_course',
+            ])
+            ->select('(SELECT MAX(COALESCE(p.updated_at, p.created_at, p.completed_at_progress)) FROM progress p WHERE p.id_enrollment_progress = e.id_enrollment) AS last_activity', false)
+            ->join('courses c', 'c.id_course = e.id_course_enrollment')
+            ->join('students s', 's.id_user_student = e.id_student_enrollment')
+            ->where('c.id_instructor_course', $user->id);
+
+        if ($search !== '') {
+            $builder->groupStart()
+                ->like('s.name_student', $search)
+                ->orLike('s.email_student', $search)
+                ->orLike('c.title_course', $search)
+                ->groupEnd();
+        }
+
+        if ($status !== '') {
+            $builder->where('e.status_enrollment', $status);
+        }
+
+        $countBuilder = clone $builder;
+        $total = (int) $countBuilder->countAllResults();
+
+        $rows = $builder
+            ->orderBy('e.updated_at', 'DESC')
+            ->limit($perPage, $offset)
+            ->get()
+            ->getResultArray();
+
+        $totalPages = (int) ceil($total / $perPage);
+
+        return $this->response->setJSON([
+            'items' => $rows,
+            'pagination' => [
+                'page' => $page,
+                'per_page' => $perPage,
+                'total' => $total,
+                'total_pages' => $totalPages,
+            ],
+        ]);
+    }
+
+    public function pendingPaymentsData()
+    {
+        $user = service('auth')->user();
+        $search = trim((string) $this->request->getGet('q'));
+        $page = max(1, (int) $this->request->getGet('page'));
+        $perPage = (int) $this->request->getGet('per_page');
+        if ($perPage <= 0) {
+            $perPage = 10;
+        }
+        $perPage = min(max($perPage, 5), 50);
+        $offset = ($page - 1) * $perPage;
+
+        $db = db_connect();
+        $builder = $db->table('payments p')
+            ->select([
+                'p.id_payment',
+                'p.status_payment',
+                'p.proof_file_payment',
+                'p.created_at',
+                'pu.id AS id_user_payment',
+                'pu.username',
+                'pu.email',
+                'c.id_course',
+                'c.title_course',
+            ])
+            ->join('pending_users pu', 'pu.id = p.id_user_payment')
+            ->join('courses c', 'c.id_course = p.id_course_payment')
+            ->where('c.id_instructor_course', $user->id)
+            ->where('p.status_payment', 'Pendente');
+
+        if ($search !== '') {
+            $builder->groupStart()
+                ->like('pu.username', $search)
+                ->orLike('pu.email', $search)
+                ->orLike('c.title_course', $search)
+                ->groupEnd();
+        }
+
+        $countBuilder = clone $builder;
+        $total = (int) $countBuilder->countAllResults();
+
+        $rows = $builder
+            ->orderBy('p.created_at', 'DESC')
+            ->limit($perPage, $offset)
+            ->get()
+            ->getResultArray();
+
+        $totalPages = (int) ceil($total / $perPage);
+
+        return $this->response->setJSON([
+            'items' => $rows,
+            'pagination' => [
+                'page' => $page,
+                'per_page' => $perPage,
+                'total' => $total,
+                'total_pages' => $totalPages,
+            ],
+        ]);
+    }
+
+    public function toggleEnrollment($enrollmentId)
+    {
+        $user = service('auth')->user();
+        $enrollmentId = (int) $enrollmentId;
+
+        $enrollmentModel = new \App\Models\EnrollmentModel();
+        $row = $enrollmentModel
+            ->select('enrollments.id_enrollment, enrollments.status_enrollment, courses.id_instructor_course')
+            ->join('courses', 'courses.id_course = enrollments.id_course_enrollment')
+            ->where('enrollments.id_enrollment', $enrollmentId)
+            ->get()
+            ->getRow();
+
+        if (! $row || (int) $row->id_instructor_course !== (int) $user->id) {
+            if ($this->wantsJson()) {
+                return $this->jsonMessage('Acesso negado.', 403);
+            }
+            return redirect()->back()->with('error', 'Acesso negado.');
+        }
+
+        $currentStatus = strtolower((string) $row->status_enrollment);
+        $newStatus = $currentStatus === 'ativa' ? 'cancelada' : 'ativa';
+        $enrollmentModel->update($enrollmentId, ['status_enrollment' => $newStatus]);
+
+        $msg = $newStatus === 'ativa'
+            ? 'Acesso do aluno liberado.'
+            : 'Acesso do aluno bloqueado.';
+
+        if ($this->wantsJson()) {
+            return $this->jsonMessage($msg);
+        }
+
+        return redirect()->back()->with('success', $msg);
     }
 
     public function financial()
@@ -456,7 +653,7 @@ class Dashboard extends BaseController
 
         if (! $user) {
             return redirect()->to(site_url('login'))
-                ->with('error', 'Sessão expirada. Faça login novamente.');
+                ->with('error', 'SessÃƒÂ£o expirada. FaÃƒÂ§a login novamente.');
         }
 
         $profileUrl = current_url(false);
@@ -468,7 +665,7 @@ class Dashboard extends BaseController
             ->selectAvg('e.progress_enrollment', 'avg_progress')
             ->join('courses c', 'c.id_course = e.id_course_enrollment')
             ->where('c.id_instructor_course', $user->id)
-            ->where('e.status_enrollment', 'Ativa')
+            ->where('e.status_enrollment', 'ativa')
             ->get()
             ->getRow();
         $avgProgress = (int) round($avgProgressRow->avg_progress ?? 0);
@@ -483,7 +680,7 @@ class Dashboard extends BaseController
             ]);
         }
 
-        // Validação
+        // ValidaÃƒÂ§ÃƒÂ£o
         $rules = [
             'nome'      => 'permit_empty|min_length[2]',
             'email'     => 'permit_empty|valid_email',
@@ -509,11 +706,11 @@ class Dashboard extends BaseController
         if (! empty($userName)) {
             $existingUser = $userModel
                 ->where('username', $userName)
-                ->where('id !=', $user->id)   // ignora o próprio usuário
+                ->where('id !=', $user->id)   // ignora o prÃƒÂ³prio usuÃƒÂ¡rio
                 ->first();
 
             if ($existingUser) {
-                return redirect()->to($profileUrl)->with('error', 'Já existe um usuário com esse nome!');
+                return redirect()->to($profileUrl)->with('error', 'JÃƒÂ¡ existe um usuÃƒÂ¡rio com esse nome!');
             }
         }
 
@@ -642,7 +839,7 @@ class Dashboard extends BaseController
                 ->with('error', implode(', ', $users->errors()));
         }
 
-        // Atualiza usuário logado
+        // Atualiza usuÃƒÂ¡rio logado
         $updated = $users->find($user->id);
         auth()->setUser($updated);
 
@@ -662,23 +859,44 @@ class Dashboard extends BaseController
         $pendingUserModel = new \App\Models\PendingUserModel();
         $users            = new UserModel();
 
+        $isReject = $this->request->getPost('status_payment') === 'Rejeitado';
+        if ($isReject) {
+            $paymentModel
+                ->where('id_user_payment', $pendingId)
+                ->where('id_course_payment', $courseId)
+                ->set([
+                    'status_payment' => 'Rejeitado',
+                    'approved_by_payment' => $actualUser->id,
+                ])
+                ->update();
+
+            if ($this->wantsJson()) {
+                return $this->jsonMessage('Pagamento rejeitado.');
+            }
+
+            return redirect()->back()->with('success', 'Pagamento rejeitado.');
+        }
+
         // 1. Buscar dados do pending_user
         $pendingUser = $pendingUserModel->find($pendingId);
         if (!$pendingUser) {
-            return redirect()->back()->with('error', 'Usuário pendente não encontrado.');
+            if ($this->wantsJson()) {
+                return $this->jsonMessage('Usuario pendente nao encontrado.', 404);
+            }
+            return redirect()->back()->with('error', 'UsuÃƒÂ¡rio pendente nÃƒÂ£o encontrado.');
         }
 
-        // 2. Verificar se já existe um user real com este email
+        // 2. Verificar se jÃƒÂ¡ existe um user real com este email
         $existingUser = $users->findByCredentials(['email' => $pendingUser->email]);
 
         if ($existingUser !== null) {
-            // Usuário já existe → apenas inscrever no curso
+            // UsuÃƒÂ¡rio jÃƒÂ¡ existe Ã¢â€ â€™ apenas inscrever no curso
 
             // Buscar o estudante vinculado a este user
             $student = $studentModel->where('id_user_student', $existingUser->id)->first();
 
             if (!$student) {
-                // Se ainda não existe estudante, cria
+                // Se ainda nÃƒÂ£o existe estudante, cria
                 $studentId = $studentModel->insert([
                     'id_user_student' => $existingUser->id,
                     'name_student'    => $existingUser->username,
@@ -688,21 +906,24 @@ class Dashboard extends BaseController
                 $studentId = $student->id_student;
             }
 
-            // Verifica se já está inscrito no curso
+            // Verifica se jÃƒÂ¡ estÃƒÂ¡ inscrito no curso
             $alreadyEnrolled = $enrollmentModel
                 ->where('id_student_enrollment', $studentId)
                 ->where('id_course_enrollment', $courseId)
                 ->first();
 
             if ($alreadyEnrolled) {
-                return redirect()->back()->with('error', 'Usuário já está inscrito neste curso.');
+                if ($this->wantsJson()) {
+                    return $this->jsonMessage('Usuario ja inscrito neste curso.', 409);
+                }
+                return redirect()->back()->with('error', 'UsuÃƒÂ¡rio jÃƒÂ¡ estÃƒÂ¡ inscrito neste curso.');
             }
 
-            // Criar nova inscrição
+            // Criar nova inscriÃƒÂ§ÃƒÂ£o
             $enrollmentModel->insert([
                 'id_course_enrollment'   => $courseId,
                 'id_student_enrollment'  => $existingUser->id,
-                'status_enrollment'      => 'Ativa',
+                'status_enrollment'      => 'ativa',
                 'progress_enrollment'    => 0.00,
                 'enrolled_at_enrollment' => date('Y-m-d H:i:s'),
             ]);
@@ -721,10 +942,14 @@ class Dashboard extends BaseController
             $pendingUserModel->delete($pendingId);
 
 
-            return redirect()->back()->with('success', 'Inscrição aprovada para usuário já existente!');
+            if ($this->wantsJson()) {
+                return $this->jsonMessage('Inscricao aprovada para usuario existente.');
+            }
+
+            return redirect()->back()->with('success', 'InscriÃƒÂ§ÃƒÂ£o aprovada para usuÃƒÂ¡rio jÃƒÂ¡ existente!');
         }
 
-        // 3. Se o usuário ainda não existe → criar um novo
+        // 3. Se o usuÃƒÂ¡rio ainda nÃƒÂ£o existe Ã¢â€ â€™ criar um novo
         $user = new User([
             'username' => $pendingUser->username,
         ]);
@@ -755,8 +980,8 @@ class Dashboard extends BaseController
         $email->setTo($user->email);
         $email->setSubject('Crie sua senha e acesse o curso');
         $email->setMessage("
-        Olá {$user->username},<br><br>
-        Sua matrícula foi aprovada! Clique no link abaixo para criar sua senha e acessar o curso:<br><br>
+        OlÃƒÂ¡ {$user->username},<br><br>
+        Sua matrÃƒÂ­cula foi aprovada! Clique no link abaixo para criar sua senha e acessar o curso:<br><br>
         <a href='{$link}'>Criar minha senha</a>
         ");
         $email->send();
@@ -768,11 +993,11 @@ class Dashboard extends BaseController
             'email_student'   => $pendingUser->email,
         ]);
 
-        // 5. Criar inscrição
+        // 5. Criar inscriÃƒÂ§ÃƒÂ£o
         $result = $enrollmentModel->insert([
             'id_course_enrollment'   => $courseId,
             'id_student_enrollment'  => $userId,
-            'status_enrollment'      => 'Ativa',
+            'status_enrollment'      => 'ativa',
             'progress_enrollment'    => 0.00,
             'enrolled_at_enrollment' => date('Y-m-d H:i:s'),
         ]);
@@ -790,9 +1015,12 @@ class Dashboard extends BaseController
         // 7. Remover pending_user
         $pendingUserModel->delete($pendingId);
 
-        return redirect()->back()->with('success', 'Inscrição aprovada e usuário criado com sucesso!');
-    }
+        if ($this->wantsJson()) {
+            return $this->jsonMessage('Inscricao aprovada e usuario criado com sucesso.');
+        }
 
+        return redirect()->back()->with('success', 'InscriÃƒÂ§ÃƒÂ£o aprovada e usuÃƒÂ¡rio criado com sucesso!');
+    }
     public function certificate()
     {
         $courseModel = new CourseModel();
@@ -811,3 +1039,9 @@ class Dashboard extends BaseController
         ]);
     }
 }
+
+
+
+
+
+

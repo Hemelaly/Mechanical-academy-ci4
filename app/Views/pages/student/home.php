@@ -170,8 +170,12 @@
                                 $lessonUrl = (!empty($lesson[0]->courseSlug) && !empty($lesson[0]->resumeLessonSlug))
                                     ? site_url('student/dashboard/inscricoes/' . $lesson[0]->courseSlug . '/' . $lesson[0]->resumeLessonSlug)
                                     : site_url('student/dashboard/ver_aulas/' . $lesson[0]->resumeLessonId);
+                                $statusEnrollment = strtolower((string) ($lesson[0]->status_enrollment ?? $lesson[0]->enrollmentStatus ?? ''));
+                                $isBlocked = $statusEnrollment === 'cancelada';
+                                $progressPct = (int) ($lesson[0]->progress ?? 0);
+                                $autoSuffix = (!$isBlocked && $progressPct < 100) ? '?autoplay=1' : '';
                                 ?>
-                                <a href="<?= $lessonUrl ?>?autoplay=1"
+                                <a href="<?= $lessonUrl ?><?= $autoSuffix ?>"
                                     class="group/btn px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-blue-500/25 flex items-center gap-2 whitespace-nowrap">
                                     <i class="bi bi-play-circle group-hover/btn:scale-110 transition-transform"></i>
                                     Continuar

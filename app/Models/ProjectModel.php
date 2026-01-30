@@ -29,8 +29,8 @@ class ProjectModel extends Model
 
     // Validation
     protected $validationRules      = [
-        'id_course_project' => 'required|integer|is_not_unique[course.id_course]',
-        'img_project' => 'string|is_valid',
+        'id_course_project' => 'required|integer|is_not_unique[courses.id_course]',
+        'img_project' => 'permit_empty|string|max_length[255]',
         'title_project' => 'string|required|max_length[100]',
         'description_project' => 'string|required',
     ];
@@ -42,7 +42,7 @@ class ProjectModel extends Model
         ],
          'img_project' => [
             'string'     => 'O campo img_project deve ser do tipo texto.',
-            'is_valid' => 'O img_project deve ser uma imagem valida.',
+            'max_length' => 'O img_project nao pode ter mais do que 255 caracteres.',
         ],
          'title_project' => [
             'string'     => 'O campo title_project deve ser do tipo texto.',

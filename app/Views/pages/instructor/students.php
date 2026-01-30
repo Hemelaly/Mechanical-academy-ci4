@@ -1,412 +1,473 @@
 <?= $this->extend('layouts/master') ?>
 
-<?= $this->section('title') ?>Alunos<?= $this->endSection() ?>
+<?= $this->section('title') ?>Dashboard - Estudantes<?= $this->endSection() ?>
 
 <?= $this->section('students') ?>
-
-<!-- Bootstrap Icons -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-
-<div class="min-h-screen bg-slate-50 dark:bg-slate-900">
-  <div class="container mx-auto">
-
-    <!-- Header -->
-    <div class="mb-8">
-      <h1 class="text-2xl lg:text-3xl font-bold text-slate-800 dark:text-white mb-2">
-        Gestão de Alunos
-      </h1>
-      <p class="text-slate-600 dark:text-slate-400 text-sm">
-        Gerencie seus alunos e acompanhe o progresso dos cursos
-      </p>
+<div class="space-y-6">
+    <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-900 dark:text-white">Estudantes</h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Acompanhe alunos, acessos e pagamentos com dados em tempo real.</p>
+        </div>
     </div>
 
-    <!-- Cards de Estatísticas - Layout Melhorado -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-      <!-- Total de Alunos -->
-      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-        <div class="flex items-center justify-between">
-          <div class="flex-1 min-w-0">
-            <p class="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1 truncate">
-              Total de Alunos
-            </p>
-            <h3 class="text-2xl font-bold text-slate-800 dark:text-white mb-1">
-              4
-            </h3>
-            <div class="flex items-center gap-1">
-              <i class="bi bi-arrow-up-short text-green-500 text-sm flex-shrink-0"></i>
-              <span class="text-green-500 text-sm font-medium truncate">
-                +2 este mês
-              </span>
-            </div>
-          </div>
-          <div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center flex-shrink-0 ml-3">
-            <i class="bi bi-people text-blue-600 dark:text-blue-400 text-base sm:text-lg"></i>
-          </div>
+    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl">
+        <div class="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
+            <h3 class="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white">Pedidos de inscrição</h3>
+            <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Aprove ou rejeite solicitacoes pendentes.</p>
         </div>
-      </div>
-
-      <!-- Certificados Emitidos -->
-      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-        <div class="flex items-center justify-between">
-          <div class="flex-1 min-w-0">
-            <p class="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1 truncate">
-              Certificados Emitidos
-            </p>
-            <h3 class="text-2xl font-bold text-slate-800 dark:text-white mb-1">
-              2
-            </h3>
-            <div class="flex items-center gap-1">
-              <i class="bi bi-award text-amber-500 text-sm flex-shrink-0"></i>
-              <span class="text-amber-500 text-sm font-medium truncate">
-                50% dos alunos
-              </span>
-            </div>
-          </div>
-          <div class="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 dark:bg-green-900 rounded-xl flex items-center justify-center flex-shrink-0 ml-3">
-            <i class="bi bi-file-earmark-check text-green-600 dark:text-green-400 text-base sm:text-lg"></i>
-          </div>
-        </div>
-      </div>
-
-      <!-- Taxa de Conclusão -->
-      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-        <div class="flex items-center justify-between">
-          <div class="flex-1 min-w-0">
-            <p class="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1 truncate">
-              Taxa de Conclusão
-            </p>
-            <h3 class="text-2xl font-bold text-slate-800 dark:text-white mb-1">
-              50%
-            </h3>
-            <div class="flex items-center gap-1">
-              <i class="bi bi-graph-up text-purple-500 text-sm flex-shrink-0"></i>
-              <span class="text-purple-500 text-sm font-medium truncate">
-                Média geral
-              </span>
-            </div>
-          </div>
-          <div class="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 dark:bg-purple-900 rounded-xl flex items-center justify-center flex-shrink-0 ml-3">
-            <i class="bi bi-percent text-purple-600 dark:text-purple-400 text-base sm:text-lg"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Pedidos de Inscrição -->
-    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 mb-8">
-      <div class="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
-        <h3 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-white">Pedidos de Inscrição</h3>
-        <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Aprove ou rejeite solicitações de inscrição pendentes</p>
-      </div>
-
-      <div class="relative overflow-x-auto bg-neutral-primary-soft shadow-xs">
-        <table class="w-full text-sm text-left rtl:text-right text-body">
-          <thead class="text-sm text-body bg-neutral-secondary-medium border-b border-default-medium">
-            <tr>
-              <th scope="col" class="p-4">
-                <div class="flex items-center">
-                  <input type="checkbox" class="w-4 h-4 border border-default-medium rounded-md bg-neutral-secondary-medium focus:ring-2 focus:ring-brand-soft">
+        <div class="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div class="md:col-span-2">
+                    <label for="pending-search" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Buscar</label>
+                    <div class="relative mt-1">
+                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                            <i class="bi bi-search text-slate-400"></i>
+                        </div>
+                        <input id="pending-search" type="text" class="block w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 pl-10 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Aluno, email ou curso">
+                    </div>
                 </div>
-              </th>
-              <th scope="col" class="px-6 py-3">Aluno</th>
-              <th scope="col" class="px-6 py-3">Curso</th>
-              <th scope="col" class="px-6 py-3">Comprovativo</th>
-              <th scope="col" class="px-6 py-3">Status</th>
-              <th scope="col" class="px-6 py-3">Ações</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <?php foreach ($payments as $payment): ?>
-              <?php if ($payment->status_payment === 'Pendente'): ?>
-                <tr class="bg-neutral-primary-soft border-b border-default hover:bg-neutral-secondary-medium">
-                  <td class="w-4 p-4">
-                    <div class="flex items-center">
-                      <input type="checkbox" class="w-4 h-4 border border-default-medium rounded-xs bg-neutral-secondary-medium focus:ring-2 focus:ring-brand-soft">
-                    </div>
-                  </td>
-
-                  <th scope="row" class="px-6 py-4 font-medium text-heading whitespace-nowrap">
-                    <div class="min-w-0">
-                      <div class="truncate"><?= esc($payment->username) ?></div>
-                      <div class="text-xs text-body truncate"><?= esc($payment->email) ?></div>
-                    </div>
-                  </th>
-
-                  <td class="px-6 py-4">
-                    <?= esc($payment->title_course) ?>
-                  </td>
-
-                  <td class="px-6 py-4">
-                    <button type="button"
-                      class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-base text-xs"
-                      data-bs-toggle="modal"
-                      data-bs-target="#comprovativoModal<?= $payment->id_payment ?>">
-                      <i class="bi bi-eye"></i>
-                      Ver
-                    </button>
-                  </td>
-
-                  <td class="px-6 py-4">
-                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-400">
-                      Pendente
-                    </span>
-                  </td>
-
-                  <td class="px-6 py-4">
-                    <div class="flex items-center gap-2 flex-wrap">
-                      <form class="acceptForm"
-                        id="acceptForm<?= $payment->id_payment ?>"
-                        action="/instructor/dashboard/meus_estudantes/<?= $payment->id_course ?>/<?= $payment->id_user_payment ?>"
-                        method="post">
-                        <input type="hidden" name="status_enrollment" value="Ativo">
-                        <input type="hidden" name="status_payment" value="Aprovado">
-                        <button type="submit"
-                          class="inline-flex items-center gap-2 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-base text-xs">
-                          <i class="bi bi-check-lg"></i>
-                          Aceitar
-                        </button>
-                      </form>
-
-                      <form action="/instructor/dashboard/meus_estudantes/<?= $payment->id_course ?>/<?= $payment->id_user_payment ?>" method="post">
-                        <input type="hidden" name="status_payment" value="Rejeitado">
-                        <button type="submit"
-                          class="inline-flex items-center gap-2 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-base text-xs">
-                          <i class="bi bi-x-lg"></i>
-                          Rejeitar
-                        </button>
-                      </form>
-                    </div>
-                  </td>
-                </tr>
-              <?php endif; ?>
-            <?php endforeach; ?>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Estado Vazio -->
-      <?php
-      $hasPendingPayments = false;
-      foreach ($payments as $payment) {
-        if ($payment->status_payment == 'Pendente') {
-          $hasPendingPayments = true;
-          break;
-        }
-      }
-      ?>
-      <?php if (!$hasPendingPayments): ?>
-        <div class="text-center py-8 sm:py-12">
-          <div class="w-12 h-12 sm:w-16 sm:h-16 bg-slate-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
-            <i class="bi bi-check2-circle text-slate-400 text-xl sm:text-2xl"></i>
-          </div>
-          <h4 class="font-bold text-slate-700 dark:text-slate-300 mb-2 text-sm sm:text-base">Nenhum pedido pendente</h4>
-          <p class="text-slate-500 dark:text-slate-500 text-xs sm:text-sm max-w-md mx-auto">
-            Todos os pedidos de inscrição foram processados.
-          </p>
+                <div>
+                    <label for="pending-per-page" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Por página</label>
+                    <select id="pending-per-page" class="mt-1 block w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                        <option value="10" selected>10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="50">50</option>
+                    </select>
+                </div>
+            </div>
         </div>
-      <?php endif; ?>
+        <div class="relative overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-500 dark:text-slate-400">
+                <thead class="text-xs uppercase text-slate-600 bg-slate-50 dark:bg-slate-700 dark:text-slate-300">
+                    <tr>
+                        <th scope="col" class="px-6 py-3">Aluno</th>
+                        <th scope="col" class="px-6 py-3">Curso</th>
+                        <th scope="col" class="px-6 py-3">Comprovativo</th>
+                        <th scope="col" class="px-6 py-3">Status</th>
+                        <th scope="col" class="px-6 py-3 text-right">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="pending-table-body"></tbody>
+            </table>
+        </div>
+        <div class="flex flex-col gap-3 border-t border-slate-200 px-6 py-4 text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400 md:flex-row md:items-center md:justify-between">
+            <div id="pending-summary">Carregando...</div>
+            <div id="pending-pagination" class="flex flex-wrap gap-2"></div>
+        </div>
     </div>
 
-    <!-- Alunos Inscritos -->
-    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700">
-      <div class="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
-        <h3 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-white">Alunos Inscritos</h3>
-        <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Acompanhe o progresso e gerencie alunos ativos</p>
-      </div>
-
-      <div class="bg-neutral-primary-soft shadow-xs rounded-base overflow-hidden">
-        <div class="w-full overflow-x-auto">
-          <table class="w-full min-w-[720px] text-sm text-left rtl:text-right text-body">
-            <thead class="text-sm text-body bg-neutral-secondary-medium border-b border-default-medium">
-              <tr>
-                <th scope="col" class="p-4">
-                  <div class="flex items-center">
-                    <input type="checkbox"
-                      class="w-4 h-4 border border-default-medium rounded-xs bg-neutral-secondary-medium focus:ring-2 focus:ring-brand-soft">
-                  </div>
-                </th>
-
-                <!-- teus THs aqui -->
-                <th scope="col" class="px-6 py-3">Aluno</th>
-                <th scope="col" class="px-6 py-3">Curso</th>
-                <th scope="col" class="px-6 py-3">Progresso</th>
-                <th scope="col" class="px-6 py-3">Último Acesso</th>
-                <th scope="col" class="px-6 py-3">Status</th>
-                <th scope="col" class="px-6 py-3">Ações</th>
-              </tr>
-            </thead>
-
-            <!-- ✅ controla bordas aqui -->
-            <tbody>
-              <?php foreach ($enrollments as $enrollment): ?>
-                <tr class="bg-neutral-primary-soft hover:bg-neutral-secondary-medium">
-                  <td class="w-4 p-4">
-                    <div class="flex items-center">
-                      <input type="checkbox"
-                        class="w-4 h-4 border border-default-medium rounded-xs bg-neutral-secondary-medium focus:ring-2 focus:ring-brand-soft">
-                    </div>
-                  </td>
-
-                  <th scope="row" class="px-6 py-4 font-medium text-heading whitespace-nowrap">
-                    <div class="min-w-0">
-                      <div class="truncate"><?= esc($enrollment->name_student) ?></div>
-                      <div class="text-xs text-body truncate"><?= esc($enrollment->email_student) ?></div>
-                    </div>
-                  </th>
-
-                  <td class="px-6 py-4"><?= esc($enrollment->title_course) ?></td>
-
-                  <td class="px-6 py-4">
-                    <div class="flex items-center gap-3">
-                      <div class="w-16 bg-slate-200 dark:bg-slate-700 rounded-full h-2">
-                        <div class="bg-green-500 h-2 rounded-full" style="width: 35%"></div>
-                      </div>
-                      <span class="text-xs font-medium">35%</span>
-                    </div>
-                  </td>
-
-                  <td class="px-6 py-4">2 horas</td>
-
-                  <td class="px-6 py-4">
-                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400">
-                      Ativo
-                    </span>
-                  </td>
-
-                  <td class="px-6 py-4">
-                    <button class="inline-flex items-center gap-2 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-base text-xs">
-                      <i class="bi bi-lock"></i>
-                      Bloquear
-                    </button>
-                  </td>
-                </tr>
-              <?php endforeach; ?>
-            </tbody>
-          </table>
+    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl">
+        <div class="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
+            <h3 class="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white">Alunos inscritos</h3>
+            <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Acompanhe o progresso e controle o acesso.</p>
         </div>
-
-        <!-- pager dentro do card, com padding -->
-        <div class="flex justify-end p-4">
-          <?= $pager->links('enrollments', 'tailwind_full') ?>
+        <div class="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+                <div class="md:col-span-2">
+                    <label for="enroll-search" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Buscar</label>
+                    <div class="relative mt-1">
+                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                            <i class="bi bi-search text-slate-400"></i>
+                        </div>
+                        <input id="enroll-search" type="text" class="block w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 pl-10 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white" placeholder="Aluno, email ou curso">
+                    </div>
+                </div>
+                <div>
+                    <label for="enroll-status" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Status</label>
+                    <select id="enroll-status" class="mt-1 block w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                        <option value="">Todos</option>
+                        <option value="ativa">Ativo</option>
+                        <option value="cancelada">Bloqueado</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="enroll-per-page" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Por página</label>
+                    <select id="enroll-per-page" class="mt-1 block w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                        <option value="10" selected>10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="50">50</option>
+                    </select>
+                </div>
+            </div>
         </div>
-      </div>
-
-      <!-- Estado Vazio -->
-      <?php
-      $hasActiveEnrollments = false;
-      foreach ($enrollments as $enrollment) {
-        if ($enrollment->status_enrollment == 'Ativa') {
-          $hasActiveEnrollments = true;
-          break;
-        }
-      }
-      ?>
-      <?php if (!$hasActiveEnrollments): ?>
-        <div class="text-center py-8 sm:py-12">
-          <div class="w-12 h-12 sm:w-16 sm:h-16 bg-slate-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
-            <i class="bi bi-people text-slate-400 text-xl sm:text-2xl"></i>
-          </div>
-          <h4 class="font-bold text-slate-700 dark:text-slate-300 mb-2 text-sm sm:text-base">Nenhum aluno inscrito</h4>
-          <p class="text-slate-500 dark:text-slate-500 text-xs sm:text-sm max-w-md mx-auto">
-            Ainda não há alunos inscritos nos seus cursos.
-          </p>
+        <div class="relative overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-500 dark:text-slate-400">
+                <thead class="text-xs uppercase text-slate-600 bg-slate-50 dark:bg-slate-700 dark:text-slate-300">
+                    <tr>
+                        <th scope="col" class="px-6 py-3">Aluno</th>
+                        <th scope="col" class="px-6 py-3">Curso</th>
+                        <th scope="col" class="px-6 py-3">Progresso</th>
+                        <th scope="col" class="px-6 py-3">Último acesso</th>
+                        <th scope="col" class="px-6 py-3">Status</th>
+                        <th scope="col" class="px-6 py-3 text-right">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="enrollments-table-body"></tbody>
+            </table>
         </div>
-      <?php endif; ?>
+        <div class="flex flex-col gap-3 border-t border-slate-200 px-6 py-4 text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400 md:flex-row md:items-center md:justify-between">
+            <div id="enrollments-summary">Carregando...</div>
+            <div id="enrollments-pagination" class="flex flex-wrap gap-2"></div>
+        </div>
     </div>
-  </div>
+</div>
+
+<div id="proofModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-2xl w-full">
+        <div class="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
+            <h4 class="text-sm font-semibold text-slate-800 dark:text-white">Comprovativo</h4>
+            <button type="button" id="proofModalClose" class="text-slate-500 hover:text-slate-700 dark:text-slate-300">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="p-4">
+            <img id="proofModalImg" src="" alt="Comprovativo" class="w-full max-h-[70vh] object-contain rounded-xl bg-slate-100 dark:bg-slate-900">
+            <p id="proofModalEmpty" class="hidden text-sm text-slate-500 dark:text-slate-400 text-center">Comprovativo não disponível.</p>
+        </div>
+    </div>
 </div>
 
 <script>
-  // Confirmação para aceitar aluno
-  document.querySelectorAll('.acceptForm').forEach(function(form) {
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
-      Swal.fire({
-        title: 'Confirmar ação',
-        text: "Deseja realmente aceitar este estudante?",
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Sim, aceitar',
-        cancelButtonText: 'Cancelar',
-        confirmButtonColor: '#10b981',
-        cancelButtonColor: '#6b7280',
-        background: '#1f2937',
-        color: '#f9fafb'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          Swal.fire({
-            title: 'Processando...',
-            text: 'Estamos atualizando o status.',
-            allowOutsideClick: false,
-            didOpen: () => {
-              Swal.showLoading();
-            },
-            background: '#1f2937',
-            color: '#f9fafb'
-          });
-          form.submit();
-        }
-      });
-    });
-  });
+    (function () {
+        const enrollEndpoint = <?= json_encode(site_url('instructor/dashboard/meus_estudantes/data')) ?>;
+        const pendingEndpoint = <?= json_encode(site_url('instructor/dashboard/meus_estudantes/pending')) ?>;
+        const toggleEndpointBase = <?= json_encode(site_url('instructor/dashboard/meus_estudantes/toggle')) ?>;
+        const approveBase = <?= json_encode(site_url('instructor/dashboard/meus_estudantes')) ?>;
+        const csrfName = <?= json_encode(csrf_token()) ?>;
+        let csrfHash = <?= json_encode(csrf_hash()) ?>;
 
-  // Confirmação para rejeitar aluno
-  document.querySelectorAll('form[action*="meus_estudantes"]').forEach(function(form) {
-    if (!form.classList.contains('acceptForm')) {
-      form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        Swal.fire({
-          title: 'Confirmar ação',
-          text: "Deseja realmente rejeitar este estudante?",
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonText: 'Sim, rejeitar',
-          cancelButtonText: 'Cancelar',
-          confirmButtonColor: '#ef4444',
-          cancelButtonColor: '#6b7280',
-          background: '#1f2937',
-          color: '#f9fafb'
-        }).then((result) => {
-          if (result.isConfirmed) {
-            form.submit();
-          }
-        });
-      });
-    }
-  });
+        const enrollBody = document.getElementById('enrollments-table-body');
+        const enrollSummary = document.getElementById('enrollments-summary');
+        const enrollPagination = document.getElementById('enrollments-pagination');
+        const enrollSearch = document.getElementById('enroll-search');
+        const enrollStatus = document.getElementById('enroll-status');
+        const enrollPerPage = document.getElementById('enroll-per-page');
 
-  // Confirmação para bloquear aluno
-  document.querySelectorAll('button.bg-red-600').forEach(function(button) {
-    if (button.closest('td')) {
-      button.addEventListener('click', function(e) {
-        e.preventDefault();
-        Swal.fire({
-          title: 'Bloquear aluno',
-          text: "Deseja realmente bloquear o acesso deste aluno?",
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonText: 'Sim, bloquear',
-          cancelButtonText: 'Cancelar',
-          confirmButtonColor: '#ef4444',
-          cancelButtonColor: '#6b7280',
-          background: '#1f2937',
-          color: '#f9fafb'
-        }).then((result) => {
-          if (result.isConfirmed) {
-            Swal.fire({
-              title: 'Aluno bloqueado',
-              text: 'O acesso do aluno foi bloqueado com sucesso.',
-              icon: 'success',
-              confirmButtonText: 'OK',
-              background: '#1f2937',
-              color: '#f9fafb'
+        const pendingBody = document.getElementById('pending-table-body');
+        const pendingSummary = document.getElementById('pending-summary');
+        const pendingPagination = document.getElementById('pending-pagination');
+        const pendingSearch = document.getElementById('pending-search');
+        const pendingPerPage = document.getElementById('pending-per-page');
+
+        const proofModal = document.getElementById('proofModal');
+        const proofModalImg = document.getElementById('proofModalImg');
+        const proofModalEmpty = document.getElementById('proofModalEmpty');
+        const proofModalClose = document.getElementById('proofModalClose');
+
+        const stateEnroll = { page: 1, per_page: Number(enrollPerPage.value || 10), q: '', status: '' };
+        const statePending = { page: 1, per_page: Number(pendingPerPage.value || 10), q: '' };
+
+        const escapeHtml = (value) => {
+            if (value === null || value === undefined) return '';
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        };
+
+        const formatLastActivity = (value) => {
+            if (!value) return '-';
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return '-';
+            const now = new Date();
+            const diffMs = Math.max(0, now - date);
+            const diffMin = Math.floor(diffMs / 60000);
+            if (diffMin < 60) return `${Math.max(1, diffMin)} min`;
+            const today = now.toISOString().slice(0, 10);
+            const yesterday = new Date(now.getTime() - 86400000).toISOString().slice(0, 10);
+            const day = date.toISOString().slice(0, 10);
+            const time = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            if (day === today) return `Hoje ${time}`;
+            if (day === yesterday) return `Ontem ${time}`;
+            return date.toLocaleString('pt-BR');
+        };
+
+        const statusBadge = (status) => {
+            const normalized = (status || '').toString().toLowerCase();
+            const isActive = normalized === 'ativa';
+            const classes = isActive
+                ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200'
+                : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200';
+            const label = isActive ? 'Ativa' : 'Bloqueada';
+            return `<span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${classes}">${label}</span>`;
+        };
+
+        const postAction = (url, payload) => {
+            payload[csrfName] = csrfHash;
+            return fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: new URLSearchParams(payload).toString()
+            }).then(async (res) => {
+                let data = {};
+                try { data = await res.json(); } catch (e) { data = {}; }
+                if (data.csrf) csrfHash = data.csrf;
+                if (!res.ok) throw data;
+                return data;
             });
-          }
+        };
+
+        const renderPagination = (paginationData, container, onPage) => {
+            const totalPages = paginationData.total_pages || 1;
+            const currentPage = paginationData.page || 1;
+            const pages = [];
+            const maxButtons = 5;
+            let start = Math.max(1, currentPage - 2);
+            let end = Math.min(totalPages, start + maxButtons - 1);
+            if (end - start < maxButtons - 1) start = Math.max(1, end - maxButtons + 1);
+            for (let i = start; i <= end; i += 1) pages.push(i);
+
+            const button = (label, page, disabled, active) => {
+                const base = 'rounded-lg border px-3 py-1.5 text-sm font-medium transition';
+                const activeClass = active
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600';
+                const disabledClass = disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer';
+                return `<button class="${base} ${activeClass} ${disabledClass}" data-page="${page}" ${disabled ? 'disabled' : ''}>${label}</button>`;
+            };
+
+            container.innerHTML = [
+                button('Anterior', currentPage - 1, currentPage === 1, false),
+                ...pages.map(page => button(page, page, false, page === currentPage)),
+                button('Próxima', currentPage + 1, currentPage === totalPages, false)
+            ].join('');
+
+            container.onclick = (event) => {
+                const btn = event.target.closest('button[data-page]');
+                if (!btn) return;
+                const nextPage = Number(btn.dataset.page);
+                if (!Number.isFinite(nextPage) || nextPage < 1) return;
+                onPage(nextPage);
+            };
+        };
+
+        const renderSummary = (paginationData, el, label) => {
+            const total = paginationData.total || 0;
+            const page = paginationData.page || 1;
+            const perPage = paginationData.per_page || 10;
+            const start = total === 0 ? 0 : (page - 1) * perPage + 1;
+            const end = Math.min(total, page * perPage);
+            el.textContent = `Mostrando ${start}-${end} de ${total} ${label}`;
+        };
+
+        const loadEnrollments = () => {
+            enrollBody.innerHTML = '<tr><td colspan="6" class="px-6 py-6 text-center text-slate-500">Carregando...</td></tr>';
+            const url = new URL(enrollEndpoint, window.location.origin);
+            url.searchParams.set('page', stateEnroll.page);
+            url.searchParams.set('per_page', stateEnroll.per_page);
+            if (stateEnroll.q) url.searchParams.set('q', stateEnroll.q);
+            if (stateEnroll.status) url.searchParams.set('status', stateEnroll.status);
+
+            fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(res => res.json())
+                .then(data => {
+                    const items = data.items || [];
+                    if (!items.length) {
+                        enrollBody.innerHTML = '<tr><td colspan="6" class="px-6 py-6 text-center text-slate-500">Nenhum aluno encontrado.</td></tr>';
+                    } else {
+                        enrollBody.innerHTML = items.map(item => {
+                            const progress = Math.max(0, Math.min(100, Number(item.progress_enrollment || 0)));
+                            const status = item.status_enrollment || 'ativa';
+                            const isActive = (status || '').toString().toLowerCase() === 'ativa';
+                            return `
+                                <tr class="border-b border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800">
+                                    <td class="px-6 py-4">
+                                        <div class="min-w-0">
+                                            <div class="font-medium text-slate-900 dark:text-white truncate">${escapeHtml(item.name_student)}</div>
+                                            <div class="text-xs text-slate-500 truncate">${escapeHtml(item.email_student)}</div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">${escapeHtml(item.title_course)}</td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-24 bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                                                <div class="bg-green-500 h-2 rounded-full" style="width: ${progress}%"></div>
+                                            </div>
+                                            <span class="text-xs font-medium">${progress}%</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">${formatLastActivity(item.last_activity || item.last_enrollment_update)}</td>
+                                    <td class="px-6 py-4">${statusBadge(status)}</td>
+                                    <td class="px-6 py-4 text-right">
+                                        <button type="button" class="toggle-access inline-flex items-center gap-2 px-3 py-1.5 ${isActive ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'} text-white font-medium rounded-lg text-xs" data-id="${item.id_enrollment}" data-status="${status}">
+                                            <i class="bi ${isActive ? 'bi-lock' : 'bi-unlock'}"></i>
+                                            ${isActive ? 'Bloquear' : 'Permitir'}
+                                        </button>
+                                    </td>
+                                </tr>`;
+                        }).join('');
+                    }
+                    renderSummary(data.pagination || {}, enrollSummary, 'alunos');
+                    renderPagination(data.pagination || {}, enrollPagination, (next) => { stateEnroll.page = next; loadEnrollments(); });
+                })
+                .catch(() => {
+                    enrollBody.innerHTML = '<tr><td colspan="6" class="px-6 py-6 text-center text-slate-500">Erro ao carregar alunos.</td></tr>';
+                    enrollSummary.textContent = 'Erro ao carregar alunos.';
+                    enrollPagination.innerHTML = '';
+                });
+        };
+
+        const loadPending = () => {
+            pendingBody.innerHTML = '<tr><td colspan="5" class="px-6 py-6 text-center text-slate-500">Carregando...</td></tr>';
+            const url = new URL(pendingEndpoint, window.location.origin);
+            url.searchParams.set('page', statePending.page);
+            url.searchParams.set('per_page', statePending.per_page);
+            if (statePending.q) url.searchParams.set('q', statePending.q);
+
+            fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(res => res.json())
+                .then(data => {
+                    const items = data.items || [];
+                    if (!items.length) {
+                        pendingBody.innerHTML = '<tr><td colspan="5" class="px-6 py-6 text-center text-slate-500">Nenhum pedido pendente.</td></tr>';
+                    } else {
+                        pendingBody.innerHTML = items.map(item => {
+                            return `
+                                <tr class="border-b border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800">
+                                    <td class="px-6 py-4">
+                                        <div class="min-w-0">
+                                            <div class="font-medium text-slate-900 dark:text-white truncate">${escapeHtml(item.username)}</div>
+                                            <div class="text-xs text-slate-500 truncate">${escapeHtml(item.email)}</div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">${escapeHtml(item.title_course)}</td>
+                                    <td class="px-6 py-4">
+                                        <button type="button" class="proof-btn inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-xs" data-proof-src="${escapeHtml(item.proof_file_payment || '')}">
+                                            <i class="bi bi-eye"></i>Ver
+                                        </button>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-400">Pendente</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button type="button" class="approve-payment inline-flex items-center gap-2 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg text-xs" data-course="${item.id_course}" data-user="${item.id_user_payment}">
+                                                <i class="bi bi-check-lg"></i>Aceitar
+                                            </button>
+                                            <button type="button" class="reject-payment inline-flex items-center gap-2 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg text-xs" data-course="${item.id_course}" data-user="${item.id_user_payment}">
+                                                <i class="bi bi-x-lg"></i>Rejeitar
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>`;
+                        }).join('');
+                    }
+                    renderSummary(data.pagination || {}, pendingSummary, 'pedidos');
+                    renderPagination(data.pagination || {}, pendingPagination, (next) => { statePending.page = next; loadPending(); });
+                })
+                .catch(() => {
+                    pendingBody.innerHTML = '<tr><td colspan="5" class="px-6 py-6 text-center text-slate-500">Erro ao carregar pedidos.</td></tr>';
+                    pendingSummary.textContent = 'Erro ao carregar pedidos.';
+                    pendingPagination.innerHTML = '';
+                });
+        };
+
+        enrollBody.addEventListener('click', (event) => {
+            const btn = event.target.closest('.toggle-access');
+            if (!btn) return;
+            const id = btn.dataset.id;
+            if (!id) return;
+            postAction(`${toggleEndpointBase}/${id}`, {})
+                .then(() => loadEnrollments())
+                .catch(() => loadEnrollments());
         });
-      });
-    }
-  });
+
+        pendingBody.addEventListener('click', (event) => {
+            const proofBtn = event.target.closest('.proof-btn');
+            if (proofBtn) {
+                const src = proofBtn.getAttribute('data-proof-src') || '';
+                if (src) {
+                    proofModalImg.src = src.startsWith('/') ? src : `/${src}`;
+                    proofModalImg.classList.remove('hidden');
+                    proofModalEmpty.classList.add('hidden');
+                } else {
+                    proofModalImg.src = '';
+                    proofModalImg.classList.add('hidden');
+                    proofModalEmpty.classList.remove('hidden');
+                }
+                proofModal.classList.remove('hidden');
+                proofModal.classList.add('flex');
+                return;
+            }
+
+            const approveBtn = event.target.closest('.approve-payment');
+            if (approveBtn) {
+                const courseId = approveBtn.dataset.course;
+                const userId = approveBtn.dataset.user;
+                postAction(`${approveBase}/${courseId}/${userId}`, { status_payment: 'Aprovado' })
+                    .then(() => { loadPending(); loadEnrollments(); });
+                return;
+            }
+
+            const rejectBtn = event.target.closest('.reject-payment');
+            if (rejectBtn) {
+                const courseId = rejectBtn.dataset.course;
+                const userId = rejectBtn.dataset.user;
+                postAction(`${approveBase}/${courseId}/${userId}`, { status_payment: 'Rejeitado' })
+                    .then(() => { loadPending(); });
+            }
+        });
+
+        const closeProofModal = () => {
+            proofModal.classList.add('hidden');
+            proofModal.classList.remove('flex');
+            proofModalImg.src = '';
+        };
+
+        proofModalClose?.addEventListener('click', closeProofModal);
+        proofModal?.addEventListener('click', (e) => {
+            if (e.target === proofModal) closeProofModal();
+        });
+
+        let searchTimer = null;
+        enrollSearch.addEventListener('input', () => {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => {
+                stateEnroll.q = enrollSearch.value.trim();
+                stateEnroll.page = 1;
+                loadEnrollments();
+            }, 300);
+        });
+
+        enrollStatus.addEventListener('change', () => {
+            stateEnroll.status = enrollStatus.value;
+            stateEnroll.page = 1;
+            loadEnrollments();
+        });
+
+        enrollPerPage.addEventListener('change', () => {
+            stateEnroll.per_page = Number(enrollPerPage.value || 10);
+            stateEnroll.page = 1;
+            loadEnrollments();
+        });
+
+        let pendingTimer = null;
+        pendingSearch.addEventListener('input', () => {
+            clearTimeout(pendingTimer);
+            pendingTimer = setTimeout(() => {
+                statePending.q = pendingSearch.value.trim();
+                statePending.page = 1;
+                loadPending();
+            }, 300);
+        });
+
+        pendingPerPage.addEventListener('change', () => {
+            statePending.per_page = Number(pendingPerPage.value || 10);
+            statePending.page = 1;
+            loadPending();
+        });
+
+        loadEnrollments();
+        loadPending();
+    })();
 </script>
 
 <?= $this->endSection() ?>

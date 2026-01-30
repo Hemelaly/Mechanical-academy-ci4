@@ -58,6 +58,31 @@ class CourseController extends BaseController
         ];
     }
 
+    private function moveProjectImage($file)
+    {
+        if (! $file || ! $file->isValid() || $file->hasMoved()) {
+            return null;
+        }
+
+        $ext = strtolower($file->getClientExtension());
+        $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        if (! in_array($ext, $allowed, true)) {
+            return null;
+        }
+
+        $targetDir = FCPATH . 'assets/img';
+        if (! is_dir($targetDir)) {
+            @mkdir($targetDir, 0755, true);
+        }
+
+        $newName = $file->getRandomName();
+        if (! $file->move($targetDir, $newName)) {
+            return null;
+        }
+
+        return $newName;
+    }
+
     private function lessonHasQuizQuestions(array $lesson): bool
     {
         $quizQuestions = $lesson['quiz_questions'] ?? ($lesson['quiz'] ?? []);
@@ -100,6 +125,8 @@ class CourseController extends BaseController
         $courseModel = new \App\Models\CourseModel();
         $moduleModel = new \App\Models\ModuleModel();
         $lessonModel = new \App\Models\LessonModel();
+        $projectModel = new \App\Models\ProjectModel();
+        $projectModel = new \App\Models\ProjectModel();
 
         // Receber formData (multipart/form-data)
         $data = $this->request->getPost();
@@ -120,6 +147,14 @@ class CourseController extends BaseController
             $data['tags'] = is_string($tagsRaw) ? json_decode($tagsRaw, true) : $tagsRaw;
         }
 
+        // Processar projetos (se houver)
+        $projects = [];
+        $projectsProvided = $this->request->getPost('projects_present') !== null;
+        $projectsRaw = $this->request->getPost('projects');
+        if ($projectsRaw !== null) {
+            $projects = is_string($projectsRaw) ? json_decode($projectsRaw, true) : $projectsRaw;
+        }
+
         // 1. Preparar dados do curso
         $status = $data['status_course'] ?? 'Rascunho';
         if ($status === 'Publicado') {
@@ -136,6 +171,7 @@ class CourseController extends BaseController
             'id_instructor_course' => auth()->id(),
             'status_course' => $status,
             'price_course' => ($data['courseType'] ?? 'free') === 'paid' ? ($data['price_course'] ?? 0) : 0,
+            'color_course' => $data['color_course'] ?? '#3b82f6',
         ];
 
         // Upload de imagem
@@ -262,12 +298,47 @@ class CourseController extends BaseController
             }
         }
 
+        // 3. Salvar projetos (se enviados)
+        if ($projectsProvided) {
+            if ($draftId) {
+                $projectModel->where('id_course_project', $courseId)->delete();
+            }
+            foreach ($projects as $pIndex => $project) {
+                if (!is_array($project)) {
+                    continue;
+                }
+
+                $title = trim((string) ($project['title'] ?? ''));
+                $description = trim((string) ($project['description'] ?? ''));
+                $file = $this->request->getFile('project_images.' . $pIndex);
+                $imgName = $this->moveProjectImage($file);
+                if (! $imgName && ! empty($project['img_existing'])) {
+                    $imgName = $project['img_existing'];
+                }
+
+                if ($title === '' || $description === '') {
+                    if ($title === '' && $description === '' && ! $imgName) {
+                        continue;
+                    }
+                    continue;
+                }
+
+                $projectModel->insert([
+                    'id_course_project' => $courseId,
+                    'img_project' => $imgName,
+                    'title_project' => $title,
+                    'description_project' => $description,
+                ]);
+            }
+        }
+
         return redirect()->to('instructor/dashboard/meus_cursos')->with('success', 'Curso criado com sucesso!');
     }
 
     public function draftCreate()
     {
         $courseModel = new \App\Models\CourseModel();
+        $projectModel = new \App\Models\ProjectModel();
 
         $data = $this->request->getPost();
 
@@ -278,6 +349,7 @@ class CourseController extends BaseController
             'subtitle_course' => $data['subtitle_course'] ?? '',
             'description_course' => $data['description_course'] ?? '',
             'price_course' => ($data['courseType'] ?? 'free') === 'paid' ? ($data['price_course'] ?? 0) : 0,
+            'color_course' => $data['color_course'] ?? '#3b82f6',
         ];
 
         $file = $this->request->getFile('image_course');
@@ -295,9 +367,48 @@ class CourseController extends BaseController
             ]);
         }
 
+        $courseId = $courseModel->insertID();
+
+        $projects = [];
+        $projectsProvided = $this->request->getPost('projects_present') !== null;
+        $projectsRaw = $this->request->getPost('projects');
+        if ($projectsRaw !== null) {
+            $projects = is_string($projectsRaw) ? json_decode($projectsRaw, true) : $projectsRaw;
+        }
+
+        if ($projectsProvided) {
+            foreach ($projects as $pIndex => $project) {
+                if (!is_array($project)) {
+                    continue;
+                }
+
+                $title = trim((string) ($project['title'] ?? ''));
+                $description = trim((string) ($project['description'] ?? ''));
+                $file = $this->request->getFile('project_images.' . $pIndex);
+                $imgName = $this->moveProjectImage($file);
+                if (! $imgName && ! empty($project['img_existing'])) {
+                    $imgName = $project['img_existing'];
+                }
+
+                if ($title === '' || $description === '') {
+                    if ($title === '' && $description === '' && ! $imgName) {
+                        continue;
+                    }
+                    continue;
+                }
+
+                $projectModel->insert([
+                    'id_course_project' => $courseId,
+                    'img_project' => $imgName,
+                    'title_project' => $title,
+                    'description_project' => $description,
+                ]);
+            }
+        }
+
         return $this->response->setJSON([
             'ok' => true,
-            'id_course' => $courseModel->insertID()
+            'id_course' => $courseId
         ]);
     }
 
@@ -306,6 +417,7 @@ class CourseController extends BaseController
         $courseModel = new \App\Models\CourseModel();
         $moduleModel = new \App\Models\ModuleModel();
         $lessonModel = new \App\Models\LessonModel();
+        $projectModel = new \App\Models\ProjectModel();
 
         $course = $courseModel->find($id);
         if (!$course || $course->id_instructor_course != auth()->id()) {
@@ -333,6 +445,7 @@ class CourseController extends BaseController
             'price_course' => ($data['courseType'] ?? 'free') === 'paid'
                 ? ($data['price_course'] ?? $course->price_course)
                 : 0,
+            'color_course' => $data['color_course'] ?? ($course->color_course ?? '#3b82f6'),
         ];
 
         $file = $this->request->getFile('image_course');
@@ -441,6 +554,45 @@ class CourseController extends BaseController
             }
         }
 
+        // Projetos (se enviados)
+        $projects = [];
+        $projectsProvided = $this->request->getPost('projects_present') !== null;
+        $projectsRaw = $this->request->getPost('projects');
+        if ($projectsRaw !== null) {
+            $projects = is_string($projectsRaw) ? json_decode($projectsRaw, true) : $projectsRaw;
+        }
+
+        if ($projectsProvided) {
+            $projectModel->where('id_course_project', $id)->delete();
+            foreach ($projects as $pIndex => $project) {
+                if (!is_array($project)) {
+                    continue;
+                }
+
+                $title = trim((string) ($project['title'] ?? ''));
+                $description = trim((string) ($project['description'] ?? ''));
+                $file = $this->request->getFile('project_images.' . $pIndex);
+                $imgName = $this->moveProjectImage($file);
+                if (! $imgName && ! empty($project['img_existing'])) {
+                    $imgName = $project['img_existing'];
+                }
+
+                if ($title === '' || $description === '') {
+                    if ($title === '' && $description === '' && ! $imgName) {
+                        continue;
+                    }
+                    continue;
+                }
+
+                $projectModel->insert([
+                    'id_course_project' => $id,
+                    'img_project' => $imgName,
+                    'title_project' => $title,
+                    'description_project' => $description,
+                ]);
+            }
+        }
+
         return $this->response->setJSON([
             'ok' => true,
             'id_course' => (int) $id
@@ -452,6 +604,7 @@ class CourseController extends BaseController
         $courseModel = new \App\Models\CourseModel();
         $moduleModel = new \App\Models\ModuleModel();
         $lessonModel = new \App\Models\LessonModel();
+        $projectModel = new \App\Models\ProjectModel();
         $db = \Config\Database::connect();
 
         if (!$this->request->is('post')) {
@@ -475,15 +628,27 @@ class CourseController extends BaseController
 
         $db->transStart();
 
-        $courseModel->update($id, [
+        $isDraft = $this->request->getPost('draft') ? true : false;
+
+        $updateData = [
             'title_course' => $data['title_course'] ?? $course->title_course,
             'subtitle_course' => $data['subtitle_course'] ?? $course->subtitle_course,
             'description_course' => $data['description_course'] ?? $course->description_course,
-            'status_course' => 'Ativo',
+            'status_course' => $isDraft ? 'Rascunho' : 'Ativo',
             'price_course' => ($data['courseType'] ?? 'free') === 'paid'
                 ? ($data['price_course'] ?? 0)
                 : 0,
-        ]);
+            'color_course' => $data['color_course'] ?? ($course->color_course ?? '#3b82f6'),
+        ];
+
+        $file = $this->request->getFile('image_course');
+        if ($file && $file->isValid() && ! $file->hasMoved()) {
+            $newName = $file->getRandomName();
+            $file->move(FCPATH . 'assets/instructor/img/courses', $newName);
+            $updateData['image_course'] = $newName;
+        }
+
+        $courseModel->update($id, $updateData);
 
         // apagar e recriar
         $oldModules = $moduleModel->where('id_course_module', $id)->findAll();
@@ -512,6 +677,7 @@ class CourseController extends BaseController
             $moduleModel->insert([
                 'id_course_module' => $id,
                 'title_module' => $module['title'] ?? 'Módulo ' . ($mIndex + 1),
+                'description_module' => $module['description'] ?? '',
                 'content_zip_module' => $zipName,
                 'min_score_module' => $minScore,
                 'position_module' => $mIndex + 1,
@@ -572,6 +738,45 @@ class CourseController extends BaseController
             }
         }
 
+        // Projetos (se enviados)
+        $projects = [];
+        $projectsProvided = $this->request->getPost('projects_present') !== null;
+        $projectsRaw = $this->request->getPost('projects');
+        if ($projectsRaw !== null) {
+            $projects = is_string($projectsRaw) ? json_decode($projectsRaw, true) : $projectsRaw;
+        }
+
+        if ($projectsProvided) {
+            $projectModel->where('id_course_project', $id)->delete();
+            foreach ($projects as $pIndex => $project) {
+                if (!is_array($project)) {
+                    continue;
+                }
+
+                $title = trim((string) ($project['title'] ?? ''));
+                $description = trim((string) ($project['description'] ?? ''));
+                $file = $this->request->getFile('project_images.' . $pIndex);
+                $imgName = $this->moveProjectImage($file);
+                if (! $imgName && ! empty($project['img_existing'])) {
+                    $imgName = $project['img_existing'];
+                }
+
+                if ($title === '' || $description === '') {
+                    if ($title === '' && $description === '' && ! $imgName) {
+                        continue;
+                    }
+                    continue;
+                }
+
+                $projectModel->insert([
+                    'id_course_project' => $id,
+                    'img_project' => $imgName,
+                    'title_project' => $title,
+                    'description_project' => $description,
+                ]);
+            }
+        }
+
         $db->transComplete();
 
         return redirect()->to('instructor/dashboard/meus_cursos')
@@ -599,6 +804,9 @@ class CourseController extends BaseController
 
         // Deletar aulas
         $modules = $moduleModel->where('id_course_module', $id)->findAll();
+        if (!empty($modules)) {
+            return redirect()->back()->with('error', 'Antes de eliminar o curso, remova todas as aulas e módulos.');
+        }
         foreach ($modules as $mod) {
             $lessonModel->where('id_module_lesson', $mod->id_module)->delete();
         }

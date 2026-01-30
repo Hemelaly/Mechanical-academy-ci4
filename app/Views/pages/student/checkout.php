@@ -96,7 +96,7 @@
     }
 </style>
 
-<?php if (isset($enrollment) && $enrollment->status_enrollment == 'Pendente'): ?>
+<?php if (isset($enrollment) && strtolower((string) $enrollment->status_enrollment) === 'pendente'): ?>
     <div class="container">
         <div class="row justify-content-center my-5">
             <div class="col-md-8 col-lg-6">

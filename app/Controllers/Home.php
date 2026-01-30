@@ -11,7 +11,7 @@ class Home extends BaseController
     $courseModel = new CourseModel();
     $user = service('auth')->user();
 
-    $course = $courseModel->findAll();
+    $course = $courseModel->where('status_course', 'Ativo')->findAll();
 
     return view('home', [
       'courses' => $course,

@@ -160,8 +160,12 @@
                                             $lessonUrl = (!empty($lesson[$key]->courseSlug) && !empty($lesson[$key]->resumeLessonSlug))
                                                 ? site_url('student/dashboard/inscricoes/' . $lesson[$key]->courseSlug . '/' . $lesson[$key]->resumeLessonSlug)
                                                 : site_url('student/dashboard/ver_aulas/' . ($lesson[$key]->resumeLessonId ?? ''));
+                                            $statusEnrollment = strtolower((string) ($lesson[$key]->status_enrollment ?? $lesson[$key]->enrollmentStatus ?? ''));
+                                            $isBlocked = $statusEnrollment === 'cancelada';
+                                            $progressPct = (int) ($lesson[$key]->progress ?? 0);
+                                            $autoSuffix = (!$isBlocked && $progressPct < 100) ? '?autoplay=1' : '';
                                             ?>
-                                            <a href="<?= $lessonUrl ?>?autoplay=1"
+                                            <a href="<?= $lessonUrl ?><?= $autoSuffix ?>"
                                                 class="group/btn px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-blue-500/25 flex items-center gap-2 whitespace-nowrap">
                                                 <i class="bi bi-play-circle group-hover/btn:scale-110 transition-transform"></i>
                                                 Continuar
@@ -259,7 +263,7 @@
                                     <div class="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-700">
                                         <div class="flex items-center gap-2">
                                             <span class="font-bold text-slate-800 dark:text-white">
-                                                0,00 MZN
+                                                <?= esc(number_format($course->price_course, 2 , ",", ".")) ?> MZN
                                             </span>
                                         </div>
 
@@ -269,8 +273,12 @@
                                                 $lessonUrl = (!empty($lesson[$key]->courseSlug) && !empty($lesson[$key]->resumeLessonSlug))
                                                     ? site_url('student/dashboard/inscricoes/' . $lesson[$key]->courseSlug . '/' . $lesson[$key]->resumeLessonSlug)
                                                     : site_url('student/dashboard/ver_aulas/' . ($lesson[$key]->resumeLessonId ?? ''));
+                                                $statusEnrollment = strtolower((string) ($lesson[$key]->status_enrollment ?? $lesson[$key]->enrollmentStatus ?? ''));
+                                                $isBlocked = $statusEnrollment === 'cancelada';
+                                                $progressPct = (int) ($lesson[$key]->progress ?? 0);
+                                                $autoSuffix = (!$isBlocked && $progressPct < 100) ? '?autoplay=1' : '';
                                                 ?>
-                                                <a href="<?= $lessonUrl ?>?autoplay=1"
+                                                <a href="<?= $lessonUrl ?><?= $autoSuffix ?>"
                                                     class="group/btn inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-green-500/25">
                                                     <i class="bi bi-play-circle group-hover/btn:scale-110 transition-transform"></i>
                                                     Continuar

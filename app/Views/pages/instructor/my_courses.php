@@ -6,7 +6,7 @@
 
 <div class="min-h-screen bg-slate-50 dark:bg-slate-900">
     <div class="container mx-auto">
-        
+
         <!-- Header -->
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
             <div>
@@ -17,9 +17,9 @@
                     Gerencie e acompanhe todos os seus cursos criados
                 </p>
             </div>
-            
-            <a href="/instructor/dashboard/novo_curso" 
-               class="mt-4 lg:mt-0 inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-br from-blue-500 to-blue-900 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-blue-500/25">
+
+            <a href="/instructor/dashboard/novo_curso"
+                class="mt-4 lg:mt-0 inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-br from-blue-500 to-blue-900 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-blue-500/25">
                 <i class="bi bi-plus-circle"></i>
                 Criar Novo Curso
             </a>
@@ -61,17 +61,18 @@
         <!-- Grid de Cursos -->
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="coursesContainer">
             <?php foreach ($courses as $course): ?>
-                <div class="course-card bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-200 dark:border-slate-700 overflow-hidden group"
-                     data-status="<?= esc($course->status_course) ?>" 
-                     data-title="<?= strtolower(esc($course->title_course)) ?>">
-                    
+                <div class="course-card bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-200 dark:border-slate-700 overflow-hidden group flex flex-col h-full"
+                    data-status="<?= esc($course->status_course) ?>"
+                    data-title="<?= strtolower(esc($course->title_course)) ?>">
+
                     <!-- Imagem do Curso -->
                     <div class="relative overflow-hidden">
-                        <img
-                            src="<?= base_url('assets/instructor/img/courses/' . $course->image_course) ?>"
-                            alt="<?= esc($course->title_course) ?>"
-                            class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500" />
-                        
+                        <div class="image" style="height: 30vh; width: 100%;">
+                            <img
+                                src="<?= base_url('assets/instructor/img/courses/' . $course->image_course) ?>"
+                                alt="<?= esc($course->title_course) ?>"
+                                class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        </div>
                         <!-- Badge de Status -->
                         <div class="absolute top-3 right-3">
                             <?php
@@ -89,17 +90,17 @@
                     </div>
 
                     <!-- Conteúdo do Card -->
-                    <div class="p-5">
+                    <div class="p-5 flex flex-col gap-4 flex-1 relative">
                         <h3 class="font-bold text-slate-800 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
                             <?= esc($course->title_course) ?>
                         </h3>
-                        
+
                         <p class="text-slate-600 dark:text-slate-400 text-sm mb-4 line-clamp-2">
                             <?= esc($course->description_course) ?>
                         </p>
 
                         <!-- Estatísticas -->
-                        <div class="flex items-center gap-4 text-slate-500 dark:text-slate-400 text-sm mb-4">
+                        <div class="flex items-center gap-4 text-slate-500 dark:text-slate-400 text-sm">
                             <div class="flex items-center gap-1">
                                 <i class="bi bi-people"></i>
                                 <span>234</span>
@@ -115,16 +116,16 @@
                         </div>
 
                         <!-- Ações -->
-                        <div class="flex gap-2 pt-4 border-t border-slate-200 dark:border-slate-700">
-                            <a href="/instructor/dashboard/meus_cursos/editar/<?= $course->id_course ?>" 
-                               class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 text-sm">
+                        <div class="mt-auto flex gap-2 pt-4 border-t border-slate-200 dark:border-slate-700">
+                            <a href="/instructor/dashboard/meus_cursos/editar/<?= $course->id_course ?>"
+                                class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 text-sm">
                                 <i class="bi bi-pencil"></i>
                                 Editar
                             </a>
-                            
+
                             <form class="deleteForm flex-1" action="/instructor/dashboard/meus_cursos/deletar/<?= $course->id_course ?>" method="POST">
-                                <button type="submit" 
-                                        class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 text-sm">
+                                <button type="submit"
+                                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 text-sm">
                                     <i class="bi bi-trash"></i>
                                     Eliminar
                                 </button>
@@ -147,8 +148,8 @@
                 <p class="text-slate-500 dark:text-slate-500 text-sm mb-8 max-w-md mx-auto">
                     Você ainda não criou nenhum curso. Comece criando seu primeiro curso para compartilhar seu conhecimento.
                 </p>
-                <a href="/instructor/dashboard/novo_curso" 
-                   class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-blue-500/25">
+                <a href="/instructor/dashboard/novo_curso"
+                    class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-blue-500/25">
                     <i class="bi bi-plus-circle"></i>
                     Criar Primeiro Curso
                 </a>
@@ -172,7 +173,7 @@
                     b.classList.remove("bg-blue-600", "text-white", "border-blue-600");
                     b.classList.add("bg-white", "dark:bg-slate-700", "text-slate-700", "dark:text-slate-300", "border-slate-300", "dark:border-slate-600");
                 });
-                
+
                 btn.classList.remove("bg-white", "dark:bg-slate-700", "text-slate-700", "dark:text-slate-300", "border-slate-300", "dark:border-slate-600");
                 btn.classList.add("bg-blue-600", "text-white", "border-blue-600");
 

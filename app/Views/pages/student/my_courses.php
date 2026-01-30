@@ -55,7 +55,7 @@
               <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Em Andamento</p>
               <p class="text-2xl font-bold text-slate-800 dark:text-white mt-1">
                 <?= count(array_filter($courses ?? [], function ($course) use ($progress) {
-                  return $course->status_enrollment == 'Ativa' && $progress->{$course->id_course}->progress > 0 && $progress->{$course->id_course}->progress < 100;
+                  return strtolower((string) $course->status_enrollment) === 'ativa' && $progress->{$course->id_course}->progress > 0 && $progress->{$course->id_course}->progress < 100;
                 })) ?>
               </p>
             </div>
@@ -71,7 +71,7 @@
               <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Concluídos</p>
               <p class="text-2xl font-bold text-slate-800 dark:text-white mt-1">
                 <?= count(array_filter($courses ?? [], function ($course) use ($progress) {
-                  return $course->status_enrollment == 'Ativa' && $progress->{$course->id_course}->progress == 100;
+                  return strtolower((string) $course->status_enrollment) === 'ativa' && $progress->{$course->id_course}->progress == 100;
                 })) ?>
               </p>
             </div>
@@ -89,7 +89,7 @@
                 <?php
                 $totalProgress = 0;
                 $activeCourses = array_filter($courses ?? [], function ($course) {
-                  return $course->status_enrollment == 'Ativa';
+                  return strtolower((string) $course->status_enrollment) === 'ativa';
                 });
                 foreach ($activeCourses as $course) {
                   $totalProgress += $progress->{$course->id_course}->progress;
@@ -132,11 +132,8 @@
 
     <!-- Courses Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-      <?php if ($courses && count(array_filter($courses, function ($course) {
-        return $course->status_enrollment == 'Ativa';
-      })) > 0): ?>
+      <?php if ($courses && count($courses) > 0): ?>
         <?php foreach ($courses as $course): ?>
-          <?php if ($course->status_enrollment == 'Ativa'): ?>
             <div class="course-card bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 group">
 
               <!-- Course Image -->
@@ -216,8 +213,11 @@
                 $lessonUrl = (!empty($course->courseSlug) && !empty($course->resumeLessonSlug))
                     ? site_url('student/dashboard/inscricoes/' . $course->courseSlug . '/' . $course->resumeLessonSlug)
                     : site_url('student/dashboard/ver_aulas/' . $course->resumeLessonId);
+                $enrollmentStatus = strtolower((string) ($course->enrollmentStatus ?? $course->status_enrollment ?? ''));
+                $isBlocked = $enrollmentStatus === 'cancelada';
+                $autoSuffix = (!$isBlocked && (int) $courseProgress < 100) ? '?autoplay=1' : '';
                 ?>
-                <a href="<?= $lessonUrl ?>?autoplay=1"
+                <a href="<?= $lessonUrl ?><?= $autoSuffix ?>"
                   class="group/btn w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-blue-500/25">
                   <?php if (!empty($course->resumeLessonId) && $courseProgress > 0): ?>
                     <i class="fas fa-play-circle group-hover/btn:scale-110 transition-transform"></i>
@@ -229,7 +229,6 @@
                 </a>
               </div>
             </div>
-          <?php endif ?>
         <?php endforeach ?>
       <?php else: ?>
         <!-- Empty State -->
@@ -242,7 +241,7 @@
               Nenhum curso encontrado
             </h3>
             <p class="text-slate-500 dark:text-slate-500 text-sm mb-8 max-w-md mx-auto">
-              Você não está matriculado em nenhum curso ativo no momento.
+              Você não está matriculado em nenhum curso no momento.
             </p>
             <a href="/student/dashboard/cursos/"
               class="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white font-semibold rounded-2xl transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-xl">

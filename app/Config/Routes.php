@@ -52,6 +52,9 @@ $routes->group('instructor', ['namespace' => 'App\Controllers\Instructor', 'filt
     $routes->post('dashboard/editar_curso/(:num)', 'CourseController::editar/$1');
     $routes->post('dashboard/meus_cursos/deletar/(:num)', 'CourseController::deletar/$1');
     $routes->get('dashboard/meus_estudantes', 'Dashboard::students');
+    $routes->get('dashboard/meus_estudantes/data', 'Dashboard::studentsData');
+    $routes->get('dashboard/meus_estudantes/pending', 'Dashboard::pendingPaymentsData');
+    $routes->post('dashboard/meus_estudantes/toggle/(:num)', 'Dashboard::toggleEnrollment/$1');
     $routes->get('dashboard/financas', 'Dashboard::financial');
     $routes->get('dashboard/financas/data', 'Dashboard::financialData');
     $routes->get('dashboard/perfil', 'Dashboard::profile');

@@ -75,8 +75,71 @@ $nextModuleUrl = !empty($nextModuleLessonSlug)
 <meta name="csrf-name" content="<?= csrf_token() ?>">
 <meta name="csrf-hash" content="<?= csrf_hash() ?>">
 
-<div class="min-h-screen text-gray-900 dark:text-gray-100 transition-colors duration-300">
-    <div class="container mx-auto" data-enrollment-id="<?= (int)($enrollment->id_enrollment) ?>">
+<style>
+    .blocked-access #lesson-content,
+    .blocked-access .lesson-row,
+    .blocked-access .module-header,
+    .blocked-access #nextLessonBtn,
+    .blocked-access #drawerToggle,
+    .blocked-access #closeDrawer,
+    .blocked-access #lesson-content a,
+    .blocked-access #lesson-content button,
+    .blocked-access #lesson-content input,
+    .blocked-access #lesson-content select,
+    .blocked-access #lesson-content textarea {
+        pointer-events: none;
+        opacity: 0.65;
+    }
+
+    .blocked-access #lesson-content iframe {
+        pointer-events: none;
+    }
+</style>
+
+<?php
+$enrollmentStatus = strtolower((string) ($enrollment->status_enrollment ?? ''));
+$accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada');
+?>
+<div class="min-h-screen text-gray-900 dark:text-gray-100 transition-colors duration-300 <?= ($accessBlocked || (bool) session('blocked_access')) ? 'blocked-access' : '' ?>">
+    <div class="container mx-auto" data-enrollment-id="<?= (int)($enrollment->id_enrollment) ?>" data-enrollment-status="<?= esc($enrollmentStatus) ?>">
+
+        <?php if ($accessBlocked || (bool) session('blocked_access')) : ?>
+            <div id="blockedAccessModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md mx-4 shadow-xl">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="bi bi-lock-fill text-2xl text-red-600 dark:text-red-400"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Acesso bloqueado</h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+                            Você foi bloqueado pelo instrutor do curso. Entre em contato com o instrutor para mais detalhes.
+                        </p>
+                        <div class="flex justify-center">
+                            <button id="blockedOkBtn" type="button" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm" onclick="window.location.href=document.referrer || '<?= site_url('student/dashboard/meus_cursos') ?>'">
+                                OK
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <script>
+                document.body.style.overflow = 'hidden';
+                const blockedBtn = document.getElementById('blockedOkBtn');
+                const blockedModal = document.getElementById('blockedAccessModal');
+                const fallbackUrl = <?= json_encode(site_url('student/dashboard/meus_cursos')) ?>;
+                const goBack = () => {
+                    if (document.referrer) {
+                        window.location.href = document.referrer;
+                        return;
+                    }
+                    window.location.href = fallbackUrl;
+                };
+                blockedBtn?.addEventListener('click', goBack);
+                blockedModal?.addEventListener('click', (e) => {
+                    if (e.target === blockedModal) goBack();
+                });
+            </script>
+        <?php endif; ?>
 
         <!-- Breadcrumb -->
         <nav class="flex items-center gap-2 text-sm mb-6">
@@ -103,6 +166,10 @@ $nextModuleUrl = !empty($nextModuleLessonSlug)
             }
         }
         $initialProgress = $totalLessons ? round(($completedLessons / $totalLessons) * 100) : 0;
+
+        $autoSuffix = ($accessBlocked || ((int) $initialProgress === 100) || !$autoplayFlag)
+            ? ''
+            : '?autoplay=1';
         ?>
         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-6 shadow-sm">
             <div class="flex justify-between items-center mb-2">
@@ -186,26 +253,31 @@ $nextModuleUrl = !empty($nextModuleLessonSlug)
                                         <div class="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
                                             <i class="bi bi-check-lg text-2xl text-green-600 dark:text-green-400"></i>
                                         </div>
-                                        <h4 class="text-xl font-bold mb-3 text-gray-900 dark:text-white">Aula concluída 🎉</h4>
+                                        <h4 class="text-xl font-bold mb-3 text-gray-900 dark:text-white">Aula concluída</h4>
                                         <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm">Avance para a próxima aula quando quiser.</p>
                                         <div class="flex flex-col sm:flex-row gap-3 justify-center mb-4">
-                                        <?php
-                                        $nextUrl = (!empty($courseSlug) && !empty($nextLessonSlug))
-                                            ? site_url('student/dashboard/inscricoes/' . $courseSlug . '/' . $nextLessonSlug)
-                                            : site_url('student/dashboard/ver_aulas/' . $nextLesson);
-                                        ?>
-                                        <a id="goNextBtn"
-                                            href="<?= $nextUrl ?>?autoplay=1"
-                                            class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
-                                            Próxima Aula
-                                            <i class="bi bi-arrow-right"></i>
-                                        </a>
+                                            <?php
+                                            $nextUrl = (!empty($courseSlug) && !empty($nextLessonSlug))
+                                                ? site_url('student/dashboard/inscricoes/' . $courseSlug . '/' . $nextLessonSlug)
+                                                : site_url('student/dashboard/ver_aulas/' . $nextLesson);
+                                            ?>
+                                            <a id="goNextBtn"
+                                                <?php
+                                                $autoSuffix = ($accessBlocked || ((int)($initialProgress ?? 0) === 100) || !$autoplayFlag)
+                                                    ? ''
+                                                    : '?autoplay=1';
+                                                ?>
+                                                href="<?= $nextUrl ?><?= $autoSuffix ?>"
+                                                class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
+                                                Próxima Aula
+                                                <i class="bi bi-arrow-right"></i>
+                                            </a>
                                             <button id="stayBtn" type="button" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm">
                                                 Ficar aqui
                                             </button>
                                         </div>
                                         <div id="autoNote" class="text-gray-500 dark:text-gray-400 text-xs">
-                                            Indo automaticamente em <span id="countdown" class="font-semibold">5</span>s…
+                                            Indo automaticamente em <span id="countdown" class="font-semibold">5</span>s...
                                         </div>
                                     </div>
                                 </div>
@@ -268,9 +340,9 @@ $nextModuleUrl = !empty($nextModuleLessonSlug)
                                     <?php foreach ($quizQuestions as $qIndex => $question): ?>
                                         <div class="quiz-question-item bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4"
                                             data-correct="<?= (int) ($question['correct'] ?? 0) ?>">
-                                        <p class="font-semibold text-gray-900 dark:text-slate-100 text-sm mb-3">
-                                            <?= esc(($qIndex + 1) . '. ' . ($question['question'] ?? '')) ?>
-                                        </p>
+                                            <p class="font-semibold text-gray-900 dark:text-slate-100 text-sm mb-3">
+                                                <?= esc(($qIndex + 1) . '. ' . ($question['question'] ?? '')) ?>
+                                            </p>
                                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                                 <?php for ($opt = 0; $opt < 4; $opt++): ?>
                                                     <label class="flex items-center gap-2 p-2 rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-sm cursor-pointer hover:border-blue-400 transition-colors">
@@ -308,7 +380,7 @@ $nextModuleUrl = !empty($nextModuleLessonSlug)
                             ? site_url('student/dashboard/inscricoes/' . $courseSlug . '/' . $prevLessonSlug)
                             : site_url('student/dashboard/ver_aulas/' . $prevLesson);
                         ?>
-                        <a href="<?= $prevUrl ?>?autoplay=1"
+                        <a href="<?= $prevUrl ?><?= $autoSuffix ?>"
                             class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-5 rounded-lg transition-colors flex items-center gap-2 text-sm shadow-sm">
                             <i class="bi bi-arrow-left"></i>
                             Aula Anterior
@@ -363,7 +435,7 @@ $nextModuleUrl = !empty($nextModuleLessonSlug)
                                                     <input type="checkbox"
                                                         class="lesson-check w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
                                                         <?= $isDone ? 'checked' : '' ?>
-                                                        aria-label="Marcar aula como concluída">
+                                                        aria-label="Marcar aula como conclu?da">
                                                 </div>
 
                                                 <?php $lessonSlug = url_title($l->title_lesson, '-', true); ?>
@@ -502,13 +574,13 @@ $nextModuleUrl = !empty($nextModuleLessonSlug)
     const enrollmentId = document.querySelector('.container')?.dataset?.enrollmentId;
     const pendingCertificateUrl = "<?= site_url('student/certificates/pending') ?>";
     let certificateInfo = <?= json_encode(array_merge(
-        [
-            'completedAt' => null,
-            'availableAt' => null,
-            'pdfReady' => false,
-        ],
-        $certificateInfo ?? []
-    ), JSON_UNESCAPED_SLASHES) ?>;
+                                [
+                                    'completedAt' => null,
+                                    'availableAt' => null,
+                                    'pdfReady' => false,
+                                ],
+                                $certificateInfo ?? []
+                            ), JSON_UNESCAPED_SLASHES) ?>;
     certificateInfo.downloadUrl = "<?= site_url('certificados/download/' . (int) ($enrollment->id_enrollment ?? 0)) ?>";
 
     // Track video progress
@@ -548,7 +620,7 @@ $nextModuleUrl = !empty($nextModuleLessonSlug)
             // Volta ao normal (percentual)
             ppEl.textContent = pct + '%';
 
-            // Garante gradiente azul quando não está concluído
+            // Garante gradiente azul quando n?o est? conclu?do
             barEl.classList.remove('from-green-500', 'to-green-600');
             barEl.classList.add('from-blue-500', 'to-blue-600');
         }
@@ -601,16 +673,19 @@ $nextModuleUrl = !empty($nextModuleLessonSlug)
 
         document.body.style.overflow = 'hidden';
 
-        certificateInfo = { ...certificateInfo, ...overrides };
+        certificateInfo = {
+            ...certificateInfo,
+            ...overrides
+        };
 
         const availableAt = computeAvailableAt(certificateInfo);
         const isReady = Boolean(certificateInfo.pdfReady) && availableAt && Date.now() >= availableAt.getTime();
-        const message = isReady
-            ? 'O seu certificado em PDF ja foi gerado e esta disponivel.'
-            : `O seu certificado estara disponivel em <b><span id="certCountdown">${formatCountdown(availableAt ? (availableAt.getTime() - Date.now()) : CERT_WAIT_MS)}</span></b>.`;
-        const actionButton = isReady
-            ? `<a href="${certificateInfo.downloadUrl}" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm text-center">Ver PDF</a>`
-            : `<a href="<?= site_url('student/dashboard/meus_certificados') ?>" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm text-center">Ver Certificados</a>`;
+        const message = isReady ?
+            'O seu certificado em PDF j foi gerado e est disponvel.' :
+            `O seu certificado estar disponvel em <b><span id="certCountdown">${formatCountdown(availableAt ? (availableAt.getTime() - Date.now()) : CERT_WAIT_MS)}</span></b>.`;
+        const actionButton = isReady ?
+            `<a href="${certificateInfo.downloadUrl}" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm text-center">Ver PDF</a>` :
+            `<a href="<?= site_url('student/dashboard/meus_certificados') ?>" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm text-center">Ver Certificados</a>`;
 
         const modal = `
             <div id="courseCompletedModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
@@ -622,7 +697,7 @@ $nextModuleUrl = !empty($nextModuleLessonSlug)
                 <h4 class="text-xl font-bold mb-2 text-gray-900 dark:text-white">Parabens!</h4>
 
                 <p class="text-gray-600 dark:text-gray-300 mb-2 text-sm">
-                Voce concluiu 100% do curso.
+                Você concluiu 100% do curso.
                 </p>
 
                 <p class="text-gray-600 dark:text-gray-300 mb-5 text-sm">
@@ -726,8 +801,13 @@ $nextModuleUrl = !empty($nextModuleLessonSlug)
     }
 
     async function toggleLessonComplete(lessonId, isChecked, checkboxEl) {
+        if (accessBlocked) {
+            showBlockedAccessModal();
+            if (checkboxEl) checkboxEl.checked = !isChecked;
+            return;
+        }
         if (!enrollmentId) {
-            alert('Matrícula não identificada. Recarregue a página.');
+            alert('Matr&iacute;cula n&atilde;o identificada. Recarregue a p&aacute;gina.');
             if (checkboxEl) checkboxEl.checked = !isChecked;
             return;
         }
@@ -788,7 +868,7 @@ $nextModuleUrl = !empty($nextModuleLessonSlug)
 
     async function submitQuizScore(score) {
         if (!enrollmentId) {
-            alert('Matrícula não identificada. Recarregue a página.');
+            alert('Matr&iacute;cula n&atilde;o identificada. Recarregue a p&aacute;gina.');
             return null;
         }
 
@@ -826,6 +906,11 @@ $nextModuleUrl = !empty($nextModuleLessonSlug)
     // Initialize lesson checkboxes
     document.querySelectorAll('.lesson-check').forEach(cb => {
         cb.addEventListener('change', (e) => {
+            if (accessBlocked) {
+                showBlockedAccessModal();
+                e.target.checked = !e.target.checked;
+                return;
+            }
             const row = e.target.closest('.lesson-row');
             const id = row?.dataset?.lessonId;
             if (id) toggleLessonComplete(id, e.target.checked, e.target);
@@ -1028,6 +1113,13 @@ $nextModuleUrl = !empty($nextModuleLessonSlug)
     }
 
     function bindLessonContent() {
+        if (accessBlocked) {
+            if (nextLessonBtn) {
+                nextLessonBtn.disabled = true;
+            }
+            return;
+        }
+
         if (stayBtn) {
             stayBtn.addEventListener('click', hideEndOverlay);
         }
@@ -1124,6 +1216,7 @@ $nextModuleUrl = !empty($nextModuleLessonSlug)
 
     function bindVideoPlayer() {
         if (!player) return;
+        if (accessBlocked) return;
 
         player.off('ended');
         player.off('timeupdate');
@@ -1132,7 +1225,7 @@ $nextModuleUrl = !empty($nextModuleLessonSlug)
             try {
                 await markCompletedOnEnd();
             } catch (e) {
-                console.warn('Falha ao marcar concluída no término:', e);
+                console.warn('Falha ao marcar conclu?da no t?rmino:', e);
             }
             if (hasNext && nextUrl) showEndOverlay();
         });
@@ -1159,9 +1252,15 @@ $nextModuleUrl = !empty($nextModuleLessonSlug)
     }
 
     async function loadLesson(url) {
+        if (accessBlocked) {
+            showBlockedAccessModal();
+            return;
+        }
         try {
             const res = await fetch(url, {
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
             });
             if (!res.ok) {
                 window.location.href = url;
@@ -1306,6 +1405,50 @@ $nextModuleUrl = !empty($nextModuleLessonSlug)
         });
     }
 
+    const statusFromDom = document.querySelector('[data-enrollment-status]')?.dataset?.enrollmentStatus || '';
+    const accessBlocked = statusFromDom === 'cancelada';
+
+    function showBlockedAccessModal() {
+        if (!accessBlocked) return;
+        const fallbackUrl = <?= json_encode(site_url('student/dashboard/meus_cursos')) ?>;
+        const blockedModal = `
+            <div id="blockedAccessModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md mx-4 shadow-xl">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="bi bi-lock-fill text-2xl text-red-600 dark:text-red-400"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Acesso bloqueado</h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+                            Você foi bloqueado pelo instrutor do curso. Entre em contato com o instrutor para mais detalhes.
+                        </p>
+                        <div class="flex justify-center">
+                            <button id="blockedOkBtn" type="button" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm">
+                                OK
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', blockedModal);
+        document.body.style.overflow = 'hidden';
+
+        const goBack = () => {
+            if (document.referrer) {
+                window.location.href = document.referrer;
+                return;
+            }
+            window.location.href = fallbackUrl;
+        };
+
+        document.getElementById('blockedOkBtn')?.addEventListener('click', goBack);
+        const modalEl = document.getElementById('blockedAccessModal');
+        modalEl?.addEventListener('click', (e) => {
+            if (e.target === modalEl) goBack();
+        });
+    }
     document.addEventListener('DOMContentLoaded', () => {
         // já pinta a UI com o valor inicial do backend
         setProgressUI(courseProgress);
@@ -1313,6 +1456,8 @@ $nextModuleUrl = !empty($nextModuleLessonSlug)
         if (courseProgress === 100) {
             showCourseCompletedModal();
         }
+
+        showBlockedAccessModal();
 
         readLessonStateFromDom();
         bindLessonContent();
@@ -1323,6 +1468,10 @@ $nextModuleUrl = !empty($nextModuleLessonSlug)
         const link = e.target.closest('.lesson-link');
         if (!link) return;
         e.preventDefault();
+        if (accessBlocked) {
+            showBlockedAccessModal();
+            return;
+        }
         const url = link.getAttribute('href');
         if (url) {
             loadLesson(url);

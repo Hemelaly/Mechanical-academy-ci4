@@ -249,11 +249,11 @@ class Register extends Controller
             $reference = 'PAY-' . date('Y') . '-' . str_pad($idPayment, 6, '0', STR_PAD_LEFT);
             $paymentModel->update($idPayment, ['reference_payment' => $reference]);
 
-            // 4) Enrollment (Ativa)
+            // 4) Enrollment (ativa)
             $enroll = $enrollModel->insert([
                 'id_course_enrollment'   => $idCourse,
                 'id_student_enrollment'  => $userId,
-                'status_enrollment'      => 'Ativa',
+                'status_enrollment'      => 'ativa',
                 'progress_enrollment'    => 0.00,
                 'enrolled_at_enrollment' => date('Y-m-d H:i:s'),
             ]);

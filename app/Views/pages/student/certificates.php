@@ -1,4 +1,4 @@
-﻿<?= $this->extend('layouts/master') ?>
+<?= $this->extend('layouts/master') ?>
 
 <?= $this->section('title') ?>Certificados<?= $this->endSection() ?>
 

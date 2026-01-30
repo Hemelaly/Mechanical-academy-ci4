@@ -32,26 +32,26 @@ class EnrollmentModel extends Model
         'id_student_enrollment'   => 'required|integer|is_not_unique[users.id]',
         'id_course_enrollment'    => 'required|integer|is_not_unique[courses.id_course]',
         'enrolled_at_enrollment'  => 'required|valid_date',
-        'status_enrollment'       => 'required|in_list[Ativa,Pendente,Cancelada]',
+        'status_enrollment'       => 'required|in_list[ativa,pendente,cancelada]',
     ];
     protected $validationMessages   = [
         'id_student_enrollment' => [
-            'required'      => 'O campo ID do estudante é obrigatório.',
-            'integer'       => 'O campo ID do estudante deve ser um número inteiro.',
-            'is_not_unique' => 'O estudante com este ID não existe.',
+            'required'      => 'O campo ID do estudante Ã© obrigatÃ³rio.',
+            'integer'       => 'O campo ID do estudante deve ser um nÃºmero inteiro.',
+            'is_not_unique' => 'O estudante com este ID nÃ£o existe.',
         ],
         'id_course_enrollment' => [
-            'required'      => 'O campo ID do curso é obrigatório.',
-            'integer'       => 'O campo ID do curso deve ser um número inteiro.',
-            'is_not_unique' => 'O curso com este ID não existe.',
+            'required'      => 'O campo ID do curso Ã© obrigatÃ³rio.',
+            'integer'       => 'O campo ID do curso deve ser um nÃºmero inteiro.',
+            'is_not_unique' => 'O curso com este ID nÃ£o existe.',
         ],
         'enrolled_at_enrollment' => [
-            'required'   => 'O campo data de inscrição é obrigatório.',
-            'valid_date' => 'Por favor, insira uma data válida.',
+            'required'   => 'O campo data de inscriÃ§Ã£o Ã© obrigatÃ³rio.',
+            'valid_date' => 'Por favor, insira uma data vÃ¡lida.',
         ],
         'status_enrollment' => [
-            'required'   => 'O campo status da inscrição é obrigatório.',
-            'in_list'   => 'O status da inscrição deve ser um dos seguintes: Ativa, Pendente, Cancelada.',
+            'required'   => 'O campo status da inscriÃ§Ã£o Ã© obrigatÃ³rio.',
+            'in_list'   => 'O status da inscriÃ§Ã£o deve ser um dos seguintes: ativa, pendente, cancelada.',
         ],
     ];
     protected $skipValidation       = false;
@@ -98,10 +98,12 @@ class EnrollmentModel extends Model
 
     public function getInstructorEnrollments($instructorId)
     {
-            return $this->select([
+        return $this->select([
             'enrollments.id_enrollment',
             'enrollments.enrolled_at_enrollment',
             'enrollments.status_enrollment',
+            'enrollments.progress_enrollment',
+            'enrollments.updated_at AS last_enrollment_update',
 
             'students.id_student AS student_id',
             'students.name_student AS name_student',
@@ -114,11 +116,11 @@ class EnrollmentModel extends Model
             'payments.status_payment AS status_payment',
             'payments.proof_file_payment AS proof_file_payment',
         ])
+        ->select('(SELECT MAX(COALESCE(p.updated_at, p.created_at, p.completed_at_progress)) FROM progress p WHERE p.id_enrollment_progress = enrollments.id_enrollment) AS last_activity', false)
         ->join('courses', 'courses.id_course = enrollments.id_course_enrollment')
         ->join('students', 'students.id_user_student = enrollments.id_student_enrollment')
         ->join('payments', 'payments.id_enrollment_payment = enrollments.id_enrollment', 'left')
-        ->where('courses.id_instructor_course', $instructorId)
-        ->where('enrollments.status_enrollment', 'Ativa');
-
+        ->where('courses.id_instructor_course', $instructorId);
     }
 }
+

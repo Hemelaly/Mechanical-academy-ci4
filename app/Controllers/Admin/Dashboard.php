@@ -53,12 +53,12 @@ class Dashboard extends BaseController
             ->join('modules m', 'm.id_module = lessons.id_module_lesson')
             ->countAllResults();
 
-        // CONTAGEM DE INSCRITOS POR CURSO (considerando status_enrollment = 'Ativa')
+        // CONTAGEM DE INSCRITOS POR CURSO (considerando status_enrollment = 'ativa')
         $rows = $db->table('courses c')
             ->select('c.id_course, COUNT(DISTINCT e.id_student_enrollment) AS inscritos', false)
             ->join(
                 'enrollments e',
-                'e.id_course_enrollment = c.id_course AND e.status_enrollment = "Ativa"',
+                'e.id_course_enrollment = c.id_course AND e.status_enrollment = "ativa"',
                 'left'
             )
             ->groupBy('c.id_course')
@@ -202,7 +202,7 @@ class Dashboard extends BaseController
         $courseCount = (int) $courseModel->builder()->countAllResults();
         $avgProgressRow = $db->table('enrollments')
             ->selectAvg('progress_enrollment', 'avg_progress')
-            ->where('status_enrollment', 'Ativa')
+            ->where('status_enrollment', 'ativa')
             ->get()
             ->getRow();
         $avgProgress = (int) round($avgProgressRow->avg_progress ?? 0);

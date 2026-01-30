@@ -20,7 +20,7 @@ class CourseController extends BaseController
 
         // Busca o curso
         $course = $courseModel->find($idCourse);
-        if (!$course) {
+        if (!$course || $course->status_course !== 'Ativo') {
             return redirect()->back()->with('error', 'Curso não encontrado.');
         }
 

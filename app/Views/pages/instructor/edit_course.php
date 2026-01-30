@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $user = service('auth')->user();
 ?>
 
@@ -9,6 +9,46 @@ $user = service('auth')->user();
 
 <!-- Bootstrap Icons -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+    .lesson-placeholder {
+        border: 2px dashed #94a3b8;
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+        color: #64748b;
+        font-size: 12px;
+        background: rgba(148, 163, 184, 0.08);
+    }
+
+    .lessons-container.drag-active .lesson-item {
+        opacity: 0.5;
+        filter: blur(0.2px);
+        transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+
+    .lessons-container.drag-active .lesson-placeholder {
+        opacity: 1;
+        filter: none;
+    }
+
+    .lesson-placeholder {
+        transition: background 0.35s ease, border-color 0.35s ease;
+    }
+
+    .lesson-item.dragging {
+        opacity: 0 !important;
+    }
+
+    .lessons-container.drag-active {
+        transition: box-shadow 0.35s ease, border-color 0.35s ease;
+    }
+
+    .lessons-container.drag-over {
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.45);
+        border-radius: 12px;
+    }
+</style>
 
 <div class="min-h-screen bg-slate-50 dark:bg-slate-900 py-8">
     <div class="container mx-auto px-4">
@@ -71,6 +111,7 @@ $user = service('auth')->user();
             <input type="hidden" name="id_instructor_course" value="<?= $user->id ?>">
             <input type="hidden" id="modules-json" name="modules">
             <input type="hidden" id="modules-json-alt" name="modules_json">
+            <input type="hidden" name="projects_present" value="1">
 
             <!-- Step 1: Basic Info -->
             <div id="basic-info" class="tab-content active bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
@@ -222,7 +263,7 @@ $user = service('auth')->user();
                                 <!-- Lessons Container -->
                                 <div class="lessons-container space-y-3 mb-3">
                                     <?php foreach ($module->lessons as $lIndex => $lesson): ?>
-                                        <div class="lesson-item border border-slate-200 dark:border-slate-700 rounded-xl p-3 bg-white dark:bg-slate-800" data-index="<?= $lIndex ?>">
+                                        <div class="lesson-item border border-slate-200 dark:border-slate-700 rounded-xl p-3 bg-white dark:bg-slate-800" data-index="<?= $lIndex ?>" draggable="true">
                                             <?php
                                             $quizQuestions = [];
                                             if (($lesson->type_lesson ?? '') === 'quiz' && !empty($lesson->content_lesson)) {
@@ -249,6 +290,9 @@ $user = service('auth')->user();
                                             }
                                             ?>
                                             <div class="flex items-center justify-between mb-2">
+                                                <span class="drag-handle text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-grab select-none px-1" title="Arraste para ordenar" draggable="true">
+                                                    <i class="bi bi-grip-vertical"></i>
+                                                </span>
                                                 <input type="text"
                                                     name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][title]"
                                                     placeholder="Título da Aula"
@@ -411,6 +455,81 @@ $user = service('auth')->user();
                                 value="<?= esc($course->price_course) ?>"
                                 class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm">
                         </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                Cor primária do curso
+                            </label>
+                            <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-center">
+                                <input type="text"
+                                    id="courseColorText"
+                                    name="color_course"
+                                    value="<?= esc($course->color_course ?? '#3b82f6') ?>"
+                                    class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
+                                    placeholder="#3b82f6">
+                                <input type="color"
+                                    id="courseColorPicker"
+                                    value="<?= esc($course->color_course ?? '#3b82f6') ?>"
+                                    class="h-12 w-16 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">
+                                Cole um código HEX ou selecione no color picker.
+                            </p>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between gap-3">
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                    Projetos relacionados
+                                </label>
+                                <button type="button"
+                                    id="add-project"
+                                    class="inline-flex items-center gap-2 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-xl transition-all duration-200">
+                                    <i class="bi bi-plus-circle"></i>
+                                    Adicionar projeto
+                                </button>
+                            </div>
+                            <div id="projects-container" class="space-y-4">
+                                <?php foreach (($projects ?? []) as $pIndex => $project): ?>
+                                    <div class="project-card border border-slate-200 dark:border-slate-700 rounded-2xl p-4 bg-slate-50 dark:bg-slate-900" data-index="<?= $pIndex ?>">
+                                        <div class="flex items-center justify-between gap-2 mb-2">
+                                            <input type="text"
+                                                name="projects[<?= $pIndex ?>][title]"
+                                                value="<?= esc($project->title_project ?? '') ?>"
+                                                class="flex-1 px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <button type="button"
+                                                class="remove-project text-red-500 hover:text-red-600 text-lg"
+                                                title="Remover projeto">
+                                                <i class="bi bi-x-circle"></i>
+                                            </button>
+                                        </div>
+                                        <textarea name="projects[<?= $pIndex ?>][description]"
+                                            class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            placeholder="Descrição do projeto"><?= esc($project->description_project ?? '') ?></textarea>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                                                Imagem do projeto (opcional)
+                                            </label>
+                                            <input type="file"
+                                                name="project_images[<?= $pIndex ?>]"
+                                                accept="image/*"
+                                                class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                            <input type="hidden"
+                                                name="projects[<?= $pIndex ?>][img_existing]"
+                                                value="<?= esc($project->img_project ?? '') ?>">
+                                            <?php if (!empty($project->img_project)): ?>
+                                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                                    Atual: <?= esc($project->img_project) ?>
+                                                </p>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">
+                                Adicione projetos práticos relacionados ao curso.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -432,7 +551,47 @@ $user = service('auth')->user();
 
                 <!-- Content -->
                 <div class="p-6">
-                    <div class="space-y-3">
+                    <div class="space-y-6">
+                        <div class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 sm:p-6 space-y-3">
+                            <h4 class="text-sm font-semibold text-slate-800 dark:text-white flex items-center gap-2">
+                                <i class="bi bi-people text-blue-600"></i>
+                                Estudantes inscritos
+                            </h4>
+                            <div class="text-2xl font-bold text-slate-800 dark:text-white">
+                                <?= number_format((int) ($enrolledCount ?? 0), 0, '', '.') ?>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 sm:p-6 space-y-3">
+                            <h4 class="text-sm font-semibold text-slate-800 dark:text-white flex items-center gap-2">
+                                <i class="bi bi-bar-chart text-blue-600"></i>
+                                Resumo do curso
+                            </h4>
+                            <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
+                                <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3">
+                                    <div class="text-[11px] text-slate-500 dark:text-slate-400">Horas do curso</div>
+                                    <div id="stats-course-hours" class="text-lg font-semibold text-slate-800 dark:text-white">0h</div>
+                                </div>
+                                <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3">
+                                    <div class="text-[11px] text-slate-500 dark:text-slate-400">Minutos das aulas</div>
+                                    <div id="stats-lesson-minutes" class="text-lg font-semibold text-slate-800 dark:text-white">0</div>
+                                </div>
+                                <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3">
+                                    <div class="text-[11px] text-slate-500 dark:text-slate-400">Total de aulas</div>
+                                    <div id="stats-lessons" class="text-lg font-semibold text-slate-800 dark:text-white">0</div>
+                                </div>
+                                <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3">
+                                    <div class="text-[11px] text-slate-500 dark:text-slate-400">Total de módulos</div>
+                                    <div id="stats-modules" class="text-lg font-semibold text-slate-800 dark:text-white">0</div>
+                                </div>
+                                <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3">
+                                    <div class="text-[11px] text-slate-500 dark:text-slate-400">Arquivos do curso</div>
+                                    <div id="stats-files" class="text-lg font-semibold text-slate-800 dark:text-white">0</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
                         <button type="submit" id="publish-course"
                             class="w-full px-6 py-3.5 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-xl transition-all duration-200 transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl">
                             <i class="bi bi-rocket mr-2"></i>
@@ -444,6 +603,7 @@ $user = service('auth')->user();
                             <i class="bi bi-save mr-2"></i>
                             Salvar como Rascunho
                         </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -488,6 +648,15 @@ $user = service('auth')->user();
         const priceSettings = document.getElementById("price-settings");
         const priceInput = document.getElementById("coursePrice");
         const courseTypeRadios = document.querySelectorAll('input[name="courseType"]');
+
+        // Projetos
+        const projectsContainer = document.getElementById("projects-container");
+        const addProjectButton = document.getElementById("add-project");
+        let projectIndex = projectsContainer ? projectsContainer.querySelectorAll(".project-card").length : 0;
+
+        // Cor primÃ¡ria
+        const colorTextInput = document.getElementById("courseColorText");
+        const colorPickerInput = document.getElementById("courseColorPicker");
 
         // ======================
         // Step Navigation
@@ -869,11 +1038,19 @@ $user = service('auth')->user();
             const type = lessonData.type || "text";
             const duration = lessonData.duration || 0;
             const video_url = lessonData.video_url || "";
+            const fileExisting = lessonData.file_existing || lessonData.attachment_path || "";
+            const fileExistingName = lessonData.file_existing_name || lessonData.attachment_name || "";
+            const fileLabel = fileExisting
+                ? `<p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Atual: ${fileExistingName || fileExisting}</p>`
+                : "";
 
             return `
-            <div class="lesson-item border border-slate-200 dark:border-slate-700 rounded-xl p-3 bg-white dark:bg-slate-800" data-index="${lIndex}">
+            <div class="lesson-item border border-slate-200 dark:border-slate-700 rounded-xl p-3 bg-white dark:bg-slate-800" data-index="${lIndex}" draggable="true">
                 <input type="hidden" name="modules[${mIndex}][lessons][${lIndex}][id_lesson]" value="${lessonId}">
                 <div class="flex items-center justify-between mb-2">
+                    <span class="drag-handle text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-grab select-none px-1" title="Arraste para ordenar" draggable="true">
+                        <i class="bi bi-grip-vertical"></i>
+                    </span>
                     <input type="text" 
                            name="modules[${mIndex}][lessons][${lIndex}][title]" 
                            placeholder="Título da Aula" 
@@ -911,10 +1088,11 @@ $user = service('auth')->user();
                                class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
                         <input type="hidden"
                                name="modules[${mIndex}][lessons][${lIndex}][file_existing]"
-                               value="">
+                               value="${fileExisting}">
                         <input type="hidden"
                                name="modules[${mIndex}][lessons][${lIndex}][file_existing_name]"
-                               value="">
+                               value="${fileExistingName}">
+                        ${fileLabel}
                     </div>
                 </div>
                 <div class="quiz-fields hidden mt-3 bg-slate-100/60 dark:bg-slate-900/60 border border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-3">
@@ -979,10 +1157,242 @@ $user = service('auth')->user();
             }
         });
 
+        function updateCourseStats() {
+            if (!modulesContainer) return;
+            const lessonItems = modulesContainer.querySelectorAll(".lesson-item");
+            const moduleItems = modulesContainer.querySelectorAll(".module-card");
+            let totalMinutes = 0;
+            let filesCount = 0;
+
+            lessonItems.forEach((lessonEl) => {
+                const durationInput = lessonEl.querySelector('input[name$="[duration]"]');
+                const durationVal = parseFloat(durationInput?.value || "0");
+                if (Number.isFinite(durationVal) && durationVal > 0) {
+                    totalMinutes += durationVal;
+                }
+
+                const fileInput = lessonEl.querySelector('input[type="file"][name^="lesson_files"]');
+                const existingFile = lessonEl.querySelector('input[name$="[file_existing]"]')?.value || "";
+                if ((fileInput && fileInput.files && fileInput.files.length > 0) || existingFile) {
+                    filesCount += 1;
+                }
+            });
+
+            const hours = totalMinutes / 60;
+            const statsCourseHours = document.getElementById("stats-course-hours");
+            const statsLessonMinutes = document.getElementById("stats-lesson-minutes");
+            const statsLessons = document.getElementById("stats-lessons");
+            const statsModules = document.getElementById("stats-modules");
+            const statsFiles = document.getElementById("stats-files");
+
+            if (statsCourseHours) statsCourseHours.textContent = `${hours.toFixed(1)}h`;
+            if (statsLessonMinutes) statsLessonMinutes.textContent = `${Math.round(totalMinutes)}`;
+            if (statsLessons) statsLessons.textContent = `${lessonItems.length}`;
+            if (statsModules) statsModules.textContent = `${moduleItems.length}`;
+            if (statsFiles) statsFiles.textContent = `${filesCount}`;
+        }
+
+        modulesContainer?.addEventListener("input", updateCourseStats);
+        modulesContainer?.addEventListener("change", updateCourseStats);
+
+        let draggedLesson = null;
+        let dragPlaceholder = null;
+
+        modulesContainer?.addEventListener("dragstart", (e) => {
+            const handle = e.target.closest(".drag-handle");
+            if (!handle) {
+                e.preventDefault();
+                return;
+            }
+            const lessonEl = handle.closest(".lesson-item");
+            if (!lessonEl) return;
+            draggedLesson = lessonEl;
+            draggedLesson.classList.add("dragging");
+
+            modulesContainer.querySelectorAll(".lessons-container")
+                .forEach((c) => c.classList.add("drag-active"));
+
+            const lessonWidth = lessonEl.offsetWidth;
+            const lessonHeight = lessonEl.offsetHeight;
+            dragPlaceholder = document.createElement("div");
+            dragPlaceholder.className = "lesson-placeholder";
+            dragPlaceholder.innerHTML = "<span>Soltar aqui</span>";
+            dragPlaceholder.style.height = `${lessonHeight}px`;
+            lessonEl.parentElement.insertBefore(dragPlaceholder, lessonEl.nextSibling);
+
+            if (e.dataTransfer) {
+                e.dataTransfer.effectAllowed = "move";
+                e.dataTransfer.setData("text/plain", "");
+                const ghost = lessonEl.cloneNode(true);
+                ghost.style.width = `${lessonWidth}px`;
+                ghost.style.opacity = "0.9";
+                ghost.style.transform = "rotate(1deg)";
+                ghost.style.position = "absolute";
+                ghost.style.top = "-1000px";
+                document.body.appendChild(ghost);
+                e.dataTransfer.setDragImage(ghost, 20, 20);
+                setTimeout(() => ghost.remove(), 0);
+            }
+            setTimeout(() => {
+                if (draggedLesson) {
+                    draggedLesson.style.display = "none";
+                }
+            }, 0);
+        });
+
+        modulesContainer?.addEventListener("dragend", () => {
+            if (draggedLesson) {
+                draggedLesson.classList.remove("dragging");
+                draggedLesson.style.display = "";
+            }
+            modulesContainer.querySelectorAll(".lessons-container")
+                .forEach((c) => c.classList.remove("drag-active"));
+            if (dragPlaceholder && draggedLesson) {
+                dragPlaceholder.parentElement?.insertBefore(draggedLesson, dragPlaceholder);
+                dragPlaceholder.remove();
+            }
+            draggedLesson = null;
+            dragPlaceholder = null;
+            updateCourseStats();
+        });
+
+        modulesContainer?.addEventListener("dragover", (e) => {
+            if (!draggedLesson || !dragPlaceholder) return;
+            const targetContainer = e.target.closest(".lessons-container");
+            if (!targetContainer) return;
+            e.preventDefault();
+
+            const targetLesson = e.target.closest(".lesson-item");
+            if (!targetLesson || targetLesson === draggedLesson) {
+                if (dragPlaceholder.parentElement !== targetContainer || dragPlaceholder.nextSibling !== null) {
+                    targetContainer.appendChild(dragPlaceholder);
+                }
+                return;
+            }
+            if (targetLesson === dragPlaceholder) return;
+            const rect = targetLesson.getBoundingClientRect();
+            const after = (e.clientY - rect.top) > rect.height / 2;
+            if (after) {
+                if (dragPlaceholder.previousSibling !== targetLesson) {
+                    targetContainer.insertBefore(dragPlaceholder, targetLesson.nextSibling);
+                }
+            } else {
+                if (dragPlaceholder.nextSibling !== targetLesson) {
+                    targetContainer.insertBefore(dragPlaceholder, targetLesson);
+                }
+            }
+        });
+
+        modulesContainer?.addEventListener("dragenter", (e) => {
+            if (!draggedLesson) return;
+            const targetContainer = e.target.closest(".lessons-container");
+            if (targetContainer) {
+                targetContainer.classList.add("drag-over");
+            }
+        });
+
+        modulesContainer?.addEventListener("dragleave", (e) => {
+            const targetContainer = e.target.closest(".lessons-container");
+            if (!targetContainer) return;
+            if (!targetContainer.contains(e.relatedTarget)) {
+                targetContainer.classList.remove("drag-over");
+            }
+        });
+
+        modulesContainer?.addEventListener("drop", (e) => {
+            const targetContainer = e.target.closest(".lessons-container");
+            if (targetContainer) {
+                targetContainer.classList.remove("drag-over");
+            }
+        });
+
+        updateCourseStats();
+
         document.querySelectorAll(".lesson-item").forEach((lessonEl) => {
             syncQuizFields(lessonEl);
             syncVideoFields(lessonEl);
         });
+
+        // ======================
+        // Cor primÃ¡ria
+        // ======================
+        const hexPattern = /^#([0-9a-f]{6})$/i;
+        if (colorTextInput && colorPickerInput) {
+            if (!hexPattern.test(colorTextInput.value)) {
+                colorTextInput.value = "#3b82f6";
+            }
+            colorPickerInput.value = colorTextInput.value;
+
+            colorTextInput.addEventListener("input", () => {
+                const value = colorTextInput.value.trim();
+                if (hexPattern.test(value)) {
+                    colorPickerInput.value = value;
+                }
+            });
+
+            colorPickerInput.addEventListener("input", () => {
+                colorTextInput.value = colorPickerInput.value;
+            });
+        }
+
+        // ======================
+        // Projetos
+        // ======================
+        function buildProjectCard(index, project = {}) {
+            const title = project.title || "";
+            const description = project.description || "";
+            const imgExisting = project.img_existing || "";
+            const imgLabel = imgExisting ? `
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    Atual: ${imgExisting}
+                </p>` : "";
+
+            return `
+                <div class="project-card border border-slate-200 dark:border-slate-700 rounded-2xl p-4 bg-slate-50 dark:bg-slate-900" data-index="${index}">
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <input type="text"
+                               name="projects[${index}][title]"
+                               value="${title}"
+                               class="flex-1 px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="Título do projeto">
+                        <button type="button"
+                                class="remove-project text-red-500 hover:text-red-600 text-lg"
+                                title="Remover projeto">
+                            <i class="bi bi-x-circle"></i>
+                        </button>
+                    </div>
+                    <textarea name="projects[${index}][description]"
+                              class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              placeholder="Descrição do projeto">${description}</textarea>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                            Imagem do projeto (opcional)
+                        </label>
+                        <input type="file"
+                               name="project_images[${index}]"
+                               accept="image/*"
+                               class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        <input type="hidden"
+                               name="projects[${index}][img_existing]"
+                               value="${imgExisting}">
+                        ${imgLabel}
+                    </div>
+                </div>
+            `;
+        }
+
+        if (addProjectButton && projectsContainer) {
+            addProjectButton.addEventListener("click", () => {
+                projectsContainer.insertAdjacentHTML("beforeend", buildProjectCard(projectIndex));
+                projectIndex++;
+            });
+
+            projectsContainer.addEventListener("click", (e) => {
+                if (e.target.closest(".remove-project")) {
+                    e.target.closest(".project-card")?.remove();
+                }
+            });
+        }
 
         // ======================
         // Course Type and Price Toggle
