@@ -12,7 +12,7 @@ class CourseModel extends Model
     protected $returnType       = 'object';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['title_course', 'subtitle_course', 'id_instructor_course', 'description_course', 'learning_course', 'url_video_course', 'image_course', 'icon_course', 'status_course', 'price_course', 'color_course', 'created_at', 'updated_at'];
+    protected $allowedFields    = ['title_course', 'subtitle_course', 'id_instructor_course', 'description_course', 'long_description_course', 'learning_course', 'what_learn_course', 'url_video_course', 'image_course', 'icon_course', 'status_course', 'price_course', 'color_course', 'created_at', 'updated_at'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;

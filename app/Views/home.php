@@ -342,7 +342,12 @@ $isLoggedIn   = auth()->loggedIn();
                                             Curso</a>
                                     </div>
                                 </div>
-                                <div><img src="<?= base_url('./assets/img/' . $course->icon_course) ?>" style="width: 50px;" alt=""></div>
+                                <?php
+                                $iconPath = !empty($course->icon_course)
+                                    ? base_url('assets/img/' . $course->icon_course)
+                                    : base_url('assets/instructor/img/courses/' . ($course->image_course ?? ''));
+                                ?>
+                                <div><img src="<?= $iconPath ?>" style="width: 50px;" alt=""></div>
                             </div>
                         </div>
                     </div>

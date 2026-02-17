@@ -6,6 +6,75 @@ use App\Controllers\BaseController;
 
 class CourseController extends BaseController
 {
+    private ?array $courseColumnsCache = null;
+
+    private function getCourseColumns(): array
+    {
+        if ($this->courseColumnsCache !== null) {
+            return $this->courseColumnsCache;
+        }
+
+        $db = \Config\Database::connect();
+        $this->courseColumnsCache = array_map('strtolower', $db->getFieldNames('courses'));
+
+        return $this->courseColumnsCache;
+    }
+
+    private function courseColumnExists(string $column): bool
+    {
+        return in_array(strtolower($column), $this->getCourseColumns(), true);
+    }
+
+    private function normalizeCoursePayload(array $payload): array
+    {
+        if (array_key_exists('learning_course', $payload)) {
+            $learning = $payload['learning_course'];
+            if ($this->courseColumnExists('learning_course')) {
+                $payload['learning_course'] = $learning;
+            } elseif ($this->courseColumnExists('what_learn_course')) {
+                $payload['what_learn_course'] = $learning;
+                unset($payload['learning_course']);
+            } else {
+                unset($payload['learning_course']);
+            }
+        }
+
+        if (
+            array_key_exists('description_course', $payload)
+            && ! $this->courseColumnExists('description_course')
+            && $this->courseColumnExists('long_description_course')
+        ) {
+            $payload['long_description_course'] = $payload['description_course'];
+            unset($payload['description_course']);
+        }
+
+        $availableColumns = $this->getCourseColumns();
+        foreach (array_keys($payload) as $field) {
+            if (! in_array(strtolower($field), $availableColumns, true)) {
+                unset($payload[$field]);
+            }
+        }
+
+        return $payload;
+    }
+
+    private function modelErrorMessage($model, string $fallback): string
+    {
+        $errors = method_exists($model, 'errors') ? (array) $model->errors() : [];
+        if (! empty($errors)) {
+            return $fallback . ' ' . implode(' ', array_values($errors));
+        }
+
+        if (isset($model->db)) {
+            $dbError = (array) $model->db->error();
+            if (! empty($dbError['message'])) {
+                return $fallback . ' ' . $dbError['message'];
+            }
+        }
+
+        return $fallback;
+    }
+
     private function moveModuleZip($zipFile)
     {
         if (! $zipFile || ! $zipFile->isValid() || $zipFile->hasMoved()) {
@@ -151,7 +220,6 @@ class CourseController extends BaseController
         $moduleModel = new \App\Models\ModuleModel();
         $lessonModel = new \App\Models\LessonModel();
         $projectModel = new \App\Models\ProjectModel();
-        $projectModel = new \App\Models\ProjectModel();
 
         // Receber formData (multipart/form-data)
         $data = $this->request->getPost();
@@ -200,6 +268,7 @@ class CourseController extends BaseController
             'price_course' => ($data['courseType'] ?? 'free') === 'paid' ? ($data['price_course'] ?? 0) : 0,
             'color_course' => $data['color_course'] ?? '#3b82f6',
         ];
+        $courseData = $this->normalizeCoursePayload($courseData);
 
         // Upload de imagem
         $file = $this->request->getFile('image_course');
@@ -221,23 +290,48 @@ class CourseController extends BaseController
                     ->with('error', 'Acesso inválido');
             }
 
-            if (!$courseModel->validate($courseData)) {
-                dd('Erros de validação:', $courseModel->errors());
+            if (! $courseModel->validate($courseData)) {
+                return redirect()->back()->withInput()
+                    ->with('error', $this->modelErrorMessage($courseModel, 'Falha de validacao ao atualizar curso.'));
             }
 
-            if (!$courseModel->update($draftId, $courseData)) {
-                dd('Erro ao atualizar curso:', $courseModel->errors(), $courseModel->db->error());
+            try {
+                $updated = $courseModel->update($draftId, $courseData);
+            } catch (\Throwable $e) {
+                log_message('error', '[CourseController::criar] Falha ao atualizar curso #{id}: {msg}', [
+                    'id' => $draftId,
+                    'msg' => $e->getMessage(),
+                ]);
+                return redirect()->back()->withInput()
+                    ->with('error', 'Erro ao atualizar curso. Verifique os dados e tente novamente.');
+            }
+
+            if (! $updated) {
+                return redirect()->back()->withInput()
+                    ->with('error', $this->modelErrorMessage($courseModel, 'Erro ao atualizar curso.'));
             }
 
             $courseId = $draftId;
         } else {
             // Validar e inserir curso
-            if (!$courseModel->validate($courseData)) {
-                dd('Erros de validação:', $courseModel->errors());
+            if (! $courseModel->validate($courseData)) {
+                return redirect()->back()->withInput()
+                    ->with('error', $this->modelErrorMessage($courseModel, 'Falha de validacao ao criar curso.'));
             }
 
-            if (!$courseModel->insert($courseData)) {
-                dd('Erro ao inserir curso:', $courseModel->errors(), $courseModel->db->error());
+            try {
+                $inserted = $courseModel->insert($courseData);
+            } catch (\Throwable $e) {
+                log_message('error', '[CourseController::criar] Falha ao inserir curso: {msg}', [
+                    'msg' => $e->getMessage(),
+                ]);
+                return redirect()->back()->withInput()
+                    ->with('error', 'Erro ao criar curso. Verifique os dados e tente novamente.');
+            }
+
+            if (! $inserted) {
+                return redirect()->back()->withInput()
+                    ->with('error', $this->modelErrorMessage($courseModel, 'Erro ao inserir curso.'));
             }
 
             $courseId = $courseModel->insertID();
@@ -385,6 +479,7 @@ class CourseController extends BaseController
             'price_course' => ($data['courseType'] ?? 'free') === 'paid' ? ($data['price_course'] ?? 0) : 0,
             'color_course' => $data['color_course'] ?? '#3b82f6',
         ];
+        $courseData = $this->normalizeCoursePayload($courseData);
 
         $file = $this->request->getFile('image_course');
         if ($file && $file->isValid() && !$file->hasMoved()) {
@@ -488,6 +583,7 @@ class CourseController extends BaseController
                 : 0,
             'color_course' => $data['color_course'] ?? ($course->color_course ?? '#3b82f6'),
         ];
+        $updateData = $this->normalizeCoursePayload($updateData);
 
         $file = $this->request->getFile('image_course');
         if ($file && $file->isValid() && !$file->hasMoved()) {
@@ -688,6 +784,7 @@ class CourseController extends BaseController
                 : 0,
             'color_course' => $data['color_course'] ?? ($course->color_course ?? '#3b82f6'),
         ];
+        $updateData = $this->normalizeCoursePayload($updateData);
 
         $file = $this->request->getFile('image_course');
         if ($file && $file->isValid() && ! $file->hasMoved()) {
@@ -701,7 +798,23 @@ class CourseController extends BaseController
             $updateData['icon_course'] = $iconName;
         }
 
-        $courseModel->update($id, $updateData);
+        try {
+            $updated = $courseModel->update($id, $updateData);
+        } catch (\Throwable $e) {
+            $db->transRollback();
+            log_message('error', '[CourseController::editar] Falha ao atualizar curso #{id}: {msg}', [
+                'id' => $id,
+                'msg' => $e->getMessage(),
+            ]);
+            return redirect()->back()->withInput()
+                ->with('error', 'Falha ao atualizar curso. Verifique os dados e as colunas da tabela courses.');
+        }
+
+        if (! $updated) {
+            $db->transRollback();
+            return redirect()->back()->withInput()
+                ->with('error', $this->modelErrorMessage($courseModel, 'Falha ao atualizar curso.'));
+        }
 
         // apagar e recriar
         $oldModules = $moduleModel->where('id_course_module', $id)->findAll();
@@ -727,7 +840,7 @@ class CourseController extends BaseController
             }
             $minScore = (int) ($module['min_score'] ?? ($oldModule->min_score_module ?? 75));
 
-            $moduleModel->insert([
+            $moduleInserted = $moduleModel->insert([
                 'id_course_module' => $id,
                 'title_module' => $module['title'] ?? 'Módulo ' . ($mIndex + 1),
                 'description_module' => $module['description'] ?? '',
@@ -735,6 +848,11 @@ class CourseController extends BaseController
                 'min_score_module' => $minScore,
                 'position_module' => $mIndex + 1,
             ]);
+            if (! $moduleInserted) {
+                $db->transRollback();
+                return redirect()->back()->withInput()
+                    ->with('error', $this->modelErrorMessage($moduleModel, 'Falha ao salvar modulo do curso.'));
+            }
 
             $moduleId = $moduleModel->insertID();
 
@@ -777,7 +895,7 @@ class CourseController extends BaseController
                 $attachmentPath = $attachment['path'] ?? ($lesson['file_existing'] ?? null);
                 $attachmentName = $attachment['name'] ?? ($lesson['file_existing_name'] ?? null);
 
-                $lessonModel->insert([
+                $lessonInserted = $lessonModel->insert([
                     'id_module_lesson' => $moduleId,
                     'title_lesson' => $lesson['title'] ?? 'Aula',
                     'type_lesson' => $lesson['type'] ?? 'text',
@@ -788,6 +906,11 @@ class CourseController extends BaseController
                     'video_url_lesson' => $lesson['video_url'] ?? null,
                     'position_lesson' => $lIndex + 1,
                 ]);
+                if (! $lessonInserted) {
+                    $db->transRollback();
+                    return redirect()->back()->withInput()
+                        ->with('error', $this->modelErrorMessage($lessonModel, 'Falha ao salvar aula do curso.'));
+                }
             }
         }
 
@@ -821,16 +944,25 @@ class CourseController extends BaseController
                     continue;
                 }
 
-                $projectModel->insert([
+                $projectInserted = $projectModel->insert([
                     'id_course_project' => $id,
                     'img_project' => $imgName,
                     'title_project' => $title,
                     'description_project' => $description,
                 ]);
+                if (! $projectInserted) {
+                    $db->transRollback();
+                    return redirect()->back()->withInput()
+                        ->with('error', $this->modelErrorMessage($projectModel, 'Falha ao salvar projeto do curso.'));
+                }
             }
         }
 
         $db->transComplete();
+        if (! $db->transStatus()) {
+            return redirect()->back()->withInput()
+                ->with('error', 'Falha ao persistir alteracoes do curso. Nenhuma alteracao foi salva.');
+        }
 
         return redirect()->to('instructor/dashboard/meus_cursos')
             ->with('success', 'Curso atualizado com sucesso!');

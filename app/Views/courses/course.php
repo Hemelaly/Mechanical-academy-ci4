@@ -6,7 +6,7 @@ $user = service('auth')->user();
 
 // dd($projects)
 
-$learningHtml = trim($course->learning_course ?? '');
+$learningHtml = trim($course->learning_course ?? ($course->what_learn_course ?? ''));
 $defaultLearningList = <<<'HTML'
 <li>Introdução ao Excel: interface, células, planilhas e menus</li>
 <li>Formatação de dados: estilos, formatação condicional e tabelas</li>

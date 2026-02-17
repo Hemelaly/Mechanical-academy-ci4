@@ -19,6 +19,21 @@ use CodeIgniter\Shield\Models\PasswordResetModel;
 
 class Dashboard extends BaseController
 {
+    private function normalizeCourseCompat(?object $course): ?object
+    {
+        if (! $course) {
+            return null;
+        }
+
+        $learning = trim((string) ($course->learning_course ?? ''));
+        $legacyLearning = trim((string) ($course->what_learn_course ?? ''));
+        if ($learning === '' && $legacyLearning !== '') {
+            $course->learning_course = $legacyLearning;
+        }
+
+        return $course;
+    }
+
     private function wantsJson(): bool
     {
         return $this->request->isAJAX()
@@ -88,6 +103,8 @@ class Dashboard extends BaseController
             ->first();
         $loadDraft = $this->request->getGet('load_draft') === '1';
         $draft = $loadDraft ? $savedDraft : null;
+        $savedDraft = $this->normalizeCourseCompat($savedDraft);
+        $draft = $this->normalizeCourseCompat($draft);
 
         $draftModules = [];
         $draftProjects = [];
@@ -136,6 +153,7 @@ class Dashboard extends BaseController
         }
 
         $course = $courseModel->find($id);
+        $course = $this->normalizeCourseCompat($course);
 
         if (!$course) {
             return redirect()->to('instructor/dashboard/meus_cursos')
