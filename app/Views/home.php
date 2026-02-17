@@ -332,7 +332,7 @@ $isLoggedIn   = auth()->loggedIn();
                         <div class="card card-bg text-light W-100 h-100 p-1 card-border">
                             <div class="card-body d-flex justify-content-between ">
                                 <div>
-                                    <h5 class="fs-6"><i class="fa fa-clock"></i> 25 Horas</h5>
+                                    <h5 class="fs-6"><i class="fa fa-clock"></i> <?= esc($course->total_hours_label ?? '0 Horas') ?></h5>
                                     <div class="mt-4 p-3" w-100>
                                         <h6 class="card-subtitle mb-2 text-primary fw-light text-uppercase fs-6">Todos os
                                             níveis</h6>

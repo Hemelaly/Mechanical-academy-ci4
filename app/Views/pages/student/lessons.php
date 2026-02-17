@@ -91,8 +91,58 @@ $nextModuleUrl = !empty($nextModuleLessonSlug)
         opacity: 0.65;
     }
 
-    .blocked-access #lesson-content iframe {
+  .blocked-access #lesson-content iframe {
         pointer-events: none;
+    }
+    .quiz-option.selected {
+        background-color: #dbf4ff;
+        border-color: #3b82f6;
+        color: #1d4ed8;
+    }
+    .dark .quiz-option.selected {
+        background-color: #1d3557;
+        border-color: #3b82f6;
+        color: #bfdbfe;
+    }
+
+    .quiz-failure-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 60;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(15, 23, 42, 0.75);
+    }
+
+    .quiz-failure-card {
+        background: #0f172a;
+        border-radius: 24px;
+        padding: 2rem;
+        color: #fff;
+        max-width: 480px;
+        width: min(95vw, 480px);
+        text-align: center;
+        box-shadow: 0 20px 45px rgba(8, 10, 20, 0.65);
+    }
+
+    .quiz-failure-overlay.hidden {
+        display: none;
+    }
+
+    .quiz-failure-card button {
+        background: #2563eb;
+        color: #fff;
+        border: none;
+        padding: 0.85rem 1.5rem;
+        border-radius: 999px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+
+    .quiz-failure-card button:hover {
+        background: #1d4ed8;
     }
 </style>
 
@@ -212,6 +262,7 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
                 data-is-quiz="<?= $isQuiz ? '1' : '0' ?>"
                 data-quiz-attempted="<?= $quizAttempted ? '1' : '0' ?>"
                 data-quiz-passed="<?= $quizPassed ? '1' : '0' ?>"
+                data-quiz-score="<?= $quizScore !== null ? esc($quizScore) : '' ?>"
                 data-is-last-module="<?= $isLastInModule ? '1' : '0' ?>"
                 data-next-module-url="<?= esc($nextModuleUrl) ?>"
                 class="lg:col-span-2 space-y-6">
@@ -276,9 +327,6 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
                                                 Ficar aqui
                                             </button>
                                         </div>
-                                        <div id="autoNote" class="text-gray-500 dark:text-gray-400 text-xs">
-                                            Indo automaticamente em <span id="countdown" class="font-semibold">5</span>s...
-                                        </div>
                                     </div>
                                 </div>
                             <?php endif; ?>
@@ -336,37 +384,61 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
                                     Este quiz ainda não tem perguntas cadastradas.
                                 </p>
                             <?php else: ?>
-                                <form id="quizForm" class="space-y-4">
-                                    <?php foreach ($quizQuestions as $qIndex => $question): ?>
-                                        <div class="quiz-question-item bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4"
-                                            data-correct="<?= (int) ($question['correct'] ?? 0) ?>">
-                                            <p class="font-semibold text-gray-900 dark:text-slate-100 text-sm mb-3">
-                                                <?= esc(($qIndex + 1) . '. ' . ($question['question'] ?? '')) ?>
-                                            </p>
-                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                <?php for ($opt = 0; $opt < 4; $opt++): ?>
-                                                    <label class="flex items-center gap-2 p-2 rounded-lg border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-sm cursor-pointer hover:border-blue-400 transition-colors">
-                                                        <input type="radio"
-                                                            name="quiz_q_<?= $qIndex ?>"
-                                                            value="<?= $opt ?>"
-                                                            class="text-blue-600 focus:ring-blue-500">
-                                                        <span class="text-gray-800 dark:text-slate-100">
-                                                            <?= esc($question['options'][$opt] ?? '') ?>
-                                                        </span>
-                                                    </label>
-                                                <?php endfor; ?>
+                                <div id="quizStepper" class="space-y-4">
+                                    <div class="bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 shadow-sm space-y-4">
+                                            <div class="flex flex-wrap items-center justify-between gap-2 text-xs uppercase tracking-wider text-slate-500">
+                                                <span id="quizStepLabel">Pergunta 1 de <?= count($quizQuestions) ?></span>
+                                                <span id="quizProgressPercent">0%</span>
                                             </div>
+                                        <div class="h-1 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                                            <div id="quizProgressBar" class="h-full bg-blue-600 rounded-full w-0 transition-all duration-300"></div>
                                         </div>
-                                    <?php endforeach; ?>
-
-                                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                                        <button type="submit"
-                                            class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-5 rounded-lg transition-colors text-sm">
-                                            Enviar respostas
-                                        </button>
-                                        <div id="quizResult" class="text-sm text-gray-600 dark:text-gray-300"></div>
+                                        <div id="quizOptions" class="space-y-3">
+                                            <?php foreach ($quizQuestions as $qIndex => $question): ?>
+                                                <div class="quiz-question-block hidden space-y-3" data-question-index="<?= $qIndex ?>">
+                                                    <p class="text-lg font-semibold text-slate-900 dark:text-white">
+                                                        <?= esc($question['question'] ?? '') ?>
+                                                    </p>
+                                                    <div class="grid gap-3">
+                                                        <?php for ($opt = 0; $opt < 4; $opt++): ?>
+                                                            <button type="button"
+                                                                class="quiz-option w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-left text-sm font-medium text-slate-900 dark:text-slate-100 hover:border-blue-500 transition-colors"
+                                                                data-option-index="<?= $opt ?>">
+                                                                <?= esc($question['options'][$opt] ?? '') ?>
+                                                            </button>
+                                                        <?php endfor; ?>
+                                                    </div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                        <div class="text-sm text-slate-500 dark:text-slate-400" id="quizHint">Selecione uma resposta para continuar.</div>
+                                        <div class="flex gap-3">
+                                            <button id="quizPrevBtn" type="button" class="flex-1 px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-600 dark:text-slate-200 disabled:opacity-50 disabled:cursor-not-allowed" disabled>Anterior</button>
+                                            <button id="quizNextBtn" type="button" class="flex-1 px-4 py-3 rounded-lg text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed" disabled>Próxima pergunta</button>
+                                        </div>
                                     </div>
-                                </form>
+                                    <div id="quizSummary" class="hidden bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 shadow-sm space-y-3">
+                                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Resultado do quiz</h3>
+                                        <p id="quizSummaryScore" class="text-3xl font-extrabold text-blue-600"></p>
+                                        <p id="quizSummaryNote" class="text-sm text-slate-500 dark:text-slate-400"></p>
+                                        <div id="quizSummaryWrongList" class="space-y-3"></div>
+                                        <div class="flex justify-end">
+                                            <button id="quizRetryBtn" type="button" class="hidden text-sm font-semibold text-blue-600 hover:text-blue-700">Refazer quiz</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="quizFailDialog" class="hidden quiz-failure-overlay">
+                                    <div class="quiz-failure-card space-y-4">
+                                        <p class="text-xs uppercase tracking-wider text-slate-300">Quiz Finalizado</p>
+                                        <p id="quizFailScore" class="text-5xl font-extrabold text-red-400">0%</p>
+                                        <p id="quizFailDetail" class="text-sm text-slate-300">Você acertou 0 de 0 questões</p>
+                                        <p class="text-sm text-red-200">
+                                            Você não alcançou a nota mínima de <strong id="quizFailMinScore">0%</strong>.
+                                            Estude um pouco mais e tente novamente.
+                                        </p>
+                                        <button id="quizFailRetryBtn" type="button">Voltar para a primeira pergunta</button>
+                                    </div>
+                                </div>
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>
@@ -427,15 +499,18 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
                                     <?php foreach ($m->lessons as $l): ?>
                                         <?php $isCurrent = ($l->id_lesson == $lesson->id_lesson); ?>
                                         <?php $isDone = in_array($l->id_lesson, $completedLessonIds ?? [], true); ?>
+                                        <?php $isQuizLessonRow = ($l->type_lesson === 'quiz'); ?>
                                         <div class="lesson-row flex items-center justify-between p-3 border-t border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors <?= $isCurrent ? 'bg-blue-50 dark:bg-blue-900/30 border-l-2 border-blue-500' : '' ?>"
-                                            data-lesson-id="<?= (int)$l->id_lesson ?>">
+                                            data-lesson-id="<?= (int)$l->id_lesson ?>"
+                                            data-lesson-type="<?= esc($l->type_lesson) ?>">
 
                                             <div class="flex items-center gap-3 flex-1 min-w-0">
                                                 <div class="relative">
                                                     <input type="checkbox"
                                                         class="lesson-check w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
                                                         <?= $isDone ? 'checked' : '' ?>
-                                                        aria-label="Marcar aula como conclu?da">
+                                                        aria-label="Marcar aula como conclu?da"
+                                                        <?= $isQuizLessonRow ? 'disabled title="A conclusão deste quiz é controlada pelas respostas."' : '' ?>>
                                                 </div>
 
                                                 <?php $lessonSlug = url_title($l->title_lesson, '-', true); ?>
@@ -511,15 +586,18 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
                                     <?php foreach ($m->lessons as $l): ?>
                                         <?php $isCurrent = ($l->id_lesson == $lesson->id_lesson); ?>
                                         <?php $isDone = in_array($l->id_lesson, $completedLessonIds ?? [], true); ?>
+                                        <?php $isQuizLessonRow = ($l->type_lesson === 'quiz'); ?>
                                         <div class="lesson-row flex items-center justify-between p-3 border-t border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors <?= $isCurrent ? 'bg-blue-50 dark:bg-blue-900/30 border-l-2 border-blue-500' : '' ?>"
-                                            data-lesson-id="<?= (int)$l->id_lesson ?>">
+                                            data-lesson-id="<?= (int)$l->id_lesson ?>"
+                                            data-lesson-type="<?= esc($l->type_lesson) ?>">
 
                                             <div class="flex items-center gap-3 flex-1 min-w-0">
                                                 <div class="relative">
                                                     <input type="checkbox"
                                                         class="lesson-check w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
                                                         <?= $isDone ? 'checked' : '' ?>
-                                                        aria-label="Marcar aula como concluída">
+                                                        aria-label="Marcar aula como concluída"
+                                                        <?= $isQuizLessonRow ? 'disabled title="A conclusão deste quiz é controlada pelas respostas."' : '' ?>>
                                                 </div>
 
                                                 <?php
@@ -626,45 +704,10 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
         }
     }
 
-    const CERT_WAIT_MS = 48 * 60 * 60 * 1000;
-
     function parseIsoDate(value) {
         if (!value) return null;
         const d = new Date(value);
         return Number.isNaN(d.getTime()) ? null : d;
-    }
-
-    function computeAvailableAt(info) {
-        const available = parseIsoDate(info.availableAt);
-        if (available) return available;
-        const completed = parseIsoDate(info.completedAt);
-        if (!completed) return null;
-        return new Date(completed.getTime() + CERT_WAIT_MS);
-    }
-
-    function formatCountdown(ms) {
-        if (!ms || ms <= 0) return 'agora';
-        const totalSeconds = Math.ceil(ms / 1000);
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
-        return `${hours}h ${minutes}m ${seconds}s`;
-    }
-
-    function startCertificateCountdown(availableAt) {
-        const counter = document.getElementById('certCountdown');
-        if (!counter || !availableAt) return;
-
-        const tick = () => {
-            const remaining = availableAt.getTime() - Date.now();
-            counter.textContent = formatCountdown(remaining);
-            if (remaining <= 0) {
-                clearInterval(timer);
-            }
-        };
-
-        tick();
-        const timer = setInterval(tick, 1000);
     }
 
     function showCourseCompletedModal(overrides = {}) {
@@ -678,14 +721,13 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
             ...overrides
         };
 
-        const availableAt = computeAvailableAt(certificateInfo);
-        const isReady = Boolean(certificateInfo.pdfReady) && availableAt && Date.now() >= availableAt.getTime();
+        const isReady = Boolean(certificateInfo.pdfReady);
         const message = isReady ?
-            'O seu certificado em PDF j foi gerado e est disponvel.' :
-            `O seu certificado estar disponvel em <b><span id="certCountdown">${formatCountdown(availableAt ? (availableAt.getTime() - Date.now()) : CERT_WAIT_MS)}</span></b>.`;
-        const actionButton = isReady ?
-            `<a href="${certificateInfo.downloadUrl}" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm text-center">Ver PDF</a>` :
-            `<a href="<?= site_url('student/dashboard/meus_certificados') ?>" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm text-center">Ver Certificados</a>`;
+            'O seu certificado em PDF já foi gerado e está disponível.' :
+            'Seu certificado foi registrado e aparecerá em Meus Certificados em instantes.';
+        const actionHref = isReady ? certificateInfo.downloadUrl : "<?= site_url('student/dashboard/certificados') ?>";
+        const actionLabel = isReady ? 'Ver PDF' : 'Ver Certificados';
+        const actionColorClass = isReady ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-600 hover:bg-gray-700';
 
         const modal = `
             <div id="courseCompletedModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
@@ -694,13 +736,13 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
                 <i class="bi bi-trophy text-3xl text-green-600 dark:text-green-400"></i>
                 </div>
 
-                <h4 class="text-xl font-bold mb-2 text-gray-900 dark:text-white">Parabens!</h4>
+                <h4 class="text-xl font-bold mb-2 text-gray-900 dark:text-white">Parabéns!</h4>
 
                 <p class="text-gray-600 dark:text-gray-300 mb-2 text-sm">
                 Você concluiu 100% do curso.
                 </p>
 
-                <p class="text-gray-600 dark:text-gray-300 mb-5 text-sm">
+                <p id="courseCompletedMessage" class="text-gray-600 dark:text-gray-300 mb-5 text-sm">
                 ${message}
                 </p>
 
@@ -710,23 +752,68 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
                     OK
                 </button>
 
-                ${actionButton}
+                <a id="courseCompletedAction" href="${actionHref}" class="${actionColorClass} text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm text-center">
+                    ${actionLabel}
+                </a>
                 </div>
             </div>
             </div>
         `;
 
         document.body.insertAdjacentHTML('beforeend', modal);
-        if (!isReady) {
-            startCertificateCountdown(availableAt);
-        }
-
         document.getElementById('certOkBtn').addEventListener('click', () => {
-            requestPendingCertificate();
             const m = document.getElementById('courseCompletedModal');
             if (m) m.remove();
             document.body.style.overflow = '';
         });
+        refreshCourseCompletedModal();
+    }
+
+    function refreshCourseCompletedModal() {
+        const modal = document.getElementById('courseCompletedModal');
+        if (!modal) return;
+
+        const messageEl = modal.querySelector('#courseCompletedMessage');
+        const actionLink = modal.querySelector('#courseCompletedAction');
+        const isReady = Boolean(certificateInfo.pdfReady);
+        if (messageEl) {
+            const newMessage = isReady ?
+                'O seu certificado em PDF já foi gerado e está disponível.' :
+                'Seu certificado foi registrado e aparecerá em Meus Certificados em instantes.';
+            if (messageEl.textContent !== newMessage) {
+                messageEl.textContent = newMessage;
+            }
+        }
+
+        if (actionLink) {
+            const readyHref = certificateInfo.downloadUrl;
+            const pendingHref = "<?= site_url('student/dashboard/certificados') ?>";
+            actionLink.href = isReady ? readyHref : pendingHref;
+            actionLink.textContent = isReady ? 'Ver PDF' : 'Ver Certificados';
+            if (isReady) {
+                actionLink.classList.remove('bg-gray-600', 'hover:bg-gray-700');
+                actionLink.classList.add('bg-green-600', 'hover:bg-green-700');
+            } else {
+                actionLink.classList.remove('bg-green-600', 'hover:bg-green-700');
+                actionLink.classList.add('bg-gray-600', 'hover:bg-gray-700');
+            }
+        }
+    }
+
+    function handleCourseCompletion(meta = {}) {
+        certificateInfo = {
+            ...certificateInfo,
+            completedAt: meta.completedAt ?? certificateInfo.completedAt,
+            availableAt: meta.availableAt ?? certificateInfo.availableAt,
+            pdfReady: typeof meta.pdfReady !== 'undefined' ? meta.pdfReady : certificateInfo.pdfReady,
+        };
+
+        requestPendingCertificate();
+        showCourseCompletedModal({
+            completedAt: certificateInfo.completedAt,
+            availableAt: certificateInfo.availableAt,
+        });
+        refreshCourseCompletedModal();
     }
 
 
@@ -755,6 +842,10 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
             if (data?.completed_at) {
                 certificateInfo.completedAt = data.completed_at;
             }
+            if (typeof data?.pdf_ready !== 'undefined') {
+                certificateInfo.pdfReady = Boolean(data.pdf_ready);
+            }
+            refreshCourseCompletedModal();
         } catch (e) {
             pendingCertificateRequested = false;
             console.warn('Falha ao emitir o certificado pendente:', e);
@@ -812,6 +903,17 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
             return;
         }
 
+        const lessonRow = checkboxEl?.closest('.lesson-row');
+        const lessonType = lessonRow?.dataset?.lessonType;
+        if (lessonType === 'quiz') {
+            if (checkboxEl) {
+                checkboxEl.checked = false;
+                checkboxEl.disabled = true;
+            }
+            alert('Este quiz só é marcado como concluído quando você alcançar a nota mínima respondendo às perguntas.');
+            return;
+        }
+
         if (checkboxEl) checkboxEl.disabled = true;
 
         try {
@@ -843,15 +945,9 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
             const pct = recomputeFromCounters();
 
             if (pct === 100) {
-                if (data?.completed_at) {
-                    certificateInfo.completedAt = data.completed_at;
-                }
-                if (data?.available_at) {
-                    certificateInfo.availableAt = data.available_at;
-                }
-                showCourseCompletedModal({
-                    completedAt: data?.completed_at || null,
-                    availableAt: data?.available_at || null,
+                handleCourseCompletion({
+                    completedAt: data?.completed_at ?? null,
+                    availableAt: data?.available_at ?? null,
                 });
             }
 
@@ -873,6 +969,7 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
         }
 
         const checkbox = document.querySelector(`.lesson-row[data-lesson-id="${currentLessonId}"] .lesson-check`);
+        const passed = score >= quizMinScoreValue;
 
         try {
             const data = await fetchJSON('<?= site_url('student/lessons/complete') ?>', {
@@ -889,11 +986,23 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
                 return null;
             }
 
-            if (checkbox && !checkbox.checked) {
-                checkbox.checked = true;
-                completedLessons = Math.min(totalLessons, completedLessons + 1);
-                recomputeFromCounters();
-                computeProgress();
+            if (checkbox) {
+                const wasChecked = checkbox.checked;
+                checkbox.checked = passed;
+                if (passed && !wasChecked) {
+                    completedLessons = Math.min(totalLessons, completedLessons + 1);
+                } else if (!passed && wasChecked) {
+                    completedLessons = Math.max(0, completedLessons - 1);
+                }
+            }
+
+            const pct = recomputeFromCounters();
+            computeProgress();
+            if (pct === 100) {
+                handleCourseCompletion({
+                    completedAt: data?.completed_at ?? null,
+                    availableAt: data?.available_at ?? null,
+                });
             }
 
             return data;
@@ -901,6 +1010,242 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
             alert('Erro de rede ao salvar o quiz.');
             return null;
         }
+    }
+
+    function escapeHtml(value) {
+        if (typeof value !== 'string') return '';
+        return value
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function initQuizStepper() {
+        const quizStepper = document.getElementById('quizStepper');
+        if (!quizStepper || !quizQuestionsData.length) return;
+
+        const optionsContainer = document.getElementById('quizOptions');
+        if (optionsContainer) {
+            quizQuestionBlocks = Array.from(optionsContainer.querySelectorAll('.quiz-question-block'));
+            optionsContainer.addEventListener('click', (event) => {
+                const button = event.target.closest('.quiz-option');
+                if (!button) return;
+                const optionIndex = Number(button.dataset.optionIndex);
+                quizSelections[currentQuizIndex] = optionIndex;
+                renderQuizStep();
+            });
+        }
+
+        renderQuizStep();
+
+        document.getElementById('quizPrevBtn')?.addEventListener('click', () => {
+            if (currentQuizIndex === 0) return;
+            currentQuizIndex--;
+            renderQuizStep();
+        });
+
+        document.getElementById('quizNextBtn')?.addEventListener('click', async () => {
+            if (quizSelections[currentQuizIndex] === null) return;
+            if (currentQuizIndex < quizQuestionsData.length - 1) {
+                currentQuizIndex++;
+                renderQuizStep();
+                return;
+            }
+            await finishQuiz();
+        });
+    }
+
+    function renderQuizStep() {
+        const total = quizQuestionsData.length;
+        const stepLabel = document.getElementById('quizStepLabel');
+        const progressPercent = document.getElementById('quizProgressPercent');
+        const progressBar = document.getElementById('quizProgressBar');
+        const hint = document.getElementById('quizHint');
+        const prevBtn = document.getElementById('quizPrevBtn');
+        const nextBtn = document.getElementById('quizNextBtn');
+
+        if (!stepLabel || !progressPercent || !progressBar || !hint || !prevBtn || !nextBtn) return;
+
+        const currentBlock = quizQuestionBlocks[currentQuizIndex];
+        if (!currentBlock) return;
+
+        stepLabel.textContent = `Pergunta ${currentQuizIndex + 1} de ${total}`;
+        const pct = total ? Math.round((currentQuizIndex / total) * 100) : 0;
+        progressPercent.textContent = `${pct}%`;
+        progressBar.style.width = `${pct}%`;
+
+        quizQuestionBlocks.forEach((block, idx) => {
+            block.classList.toggle('hidden', idx !== currentQuizIndex);
+        });
+
+        const selectedOption = quizSelections[currentQuizIndex];
+        currentBlock.querySelectorAll('.quiz-option').forEach(button => {
+            const optionIndex = Number(button.dataset.optionIndex);
+            button.classList.toggle('selected', selectedOption === optionIndex);
+        });
+
+        hint.textContent = quizSelections[currentQuizIndex] === null ? 'Selecione uma resposta para continuar.' : 'Resposta registrada. Clique em próxima pergunta.';
+        prevBtn.disabled = currentQuizIndex === 0;
+        nextBtn.disabled = quizSelections[currentQuizIndex] === null;
+        nextBtn.textContent = currentQuizIndex === total - 1 ? 'Enviar respostas' : 'Próxima pergunta';
+    }
+
+    async function finishQuiz() {
+        const total = quizQuestionsData.length;
+        const wrongAnswers = [];
+        let correct = 0;
+
+        quizQuestionsData.forEach((question, idx) => {
+            const selected = quizSelections[idx];
+            if (selected === null) return;
+            const correctIndex = parseInt(question.correct ?? 0, 10);
+            if (parseInt(selected, 10) === correctIndex) {
+                correct++;
+                return;
+            }
+            wrongAnswers.push({
+                index: idx + 1,
+                question: question.question ?? '',
+                selected: question.options?.[selected] ?? 'Resposta inválida'
+            });
+        });
+
+        const score = Math.round((correct / total) * 100);
+        const data = await submitQuizScore(score);
+        if (!data) return;
+
+        quizAttempted = true;
+        quizPassed = score >= quizMinScoreValue;
+        if (nextLessonBtn) {
+            nextLessonBtn.disabled = !quizPassed;
+            if (quizPassed) {
+                const label = nextLessonBtn.querySelector('.next-lesson-label');
+                if (label) {
+                    label.textContent = isLastInModule ? 'Próximo Módulo' : 'Próxima Aula';
+                }
+            }
+        }
+
+        if (window.Swal && quizPassed) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Parabéns!',
+                html: `
+                    <p class="text-lg font-semibold">${score}%</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-200">
+                        Você acertou ${correct} de ${total} questões e alcançou os ${quizMinScoreValue}% mínimos.
+                    </p>
+                `,
+                confirmButtonText: 'Fechar'
+            }).then(() => {
+                const target = nextModuleUrl || withAutoplay(nextUrl);
+                if (target) {
+                    window.location.href = target;
+                }
+            });
+        }
+
+        if (quizPassed) {
+            hideQuizFailPopup();
+            showQuizSummary(score, wrongAnswers, correct);
+        } else {
+            openQuizFailPopup(score, correct);
+        }
+    }
+
+    function showQuizSummary(score, wrongAnswers, correctCount = 0) {
+        const summary = document.getElementById('quizSummary');
+        const stepper = document.getElementById('quizStepper');
+        const scoreEl = document.getElementById('quizSummaryScore');
+        const noteEl = document.getElementById('quizSummaryNote');
+        const wrongList = document.getElementById('quizSummaryWrongList');
+        const retryBtn = document.getElementById('quizRetryBtn');
+
+        if (quizPassed) {
+            stepper?.classList.add('hidden');
+        } else {
+            stepper?.classList.remove('hidden');
+        }
+        if (!summary || !scoreEl || !noteEl || !wrongList) return;
+
+        const titleColor = quizPassed ? 'text-emerald-600' : 'text-red-600';
+        scoreEl.innerHTML = `
+            <div class="text-center space-y-2">
+                <p class="text-xs uppercase tracking-wider text-slate-500">Quiz Finalizado</p>
+                <p class="text-5xl font-extrabold ${quizPassed ? 'text-emerald-600' : 'text-blue-600'}">${score}%</p>
+                <p class="text-sm text-slate-600 dark:text-slate-400">Você acertou ${correctCount} de ${quizQuestionsData.length} questões</p>
+                <p class="font-semibold ${titleColor}">
+                    ${quizPassed ? `Nota mínima alcançada (${quizMinScoreValue}%) — siga para a próxima aula!` : `Estude um pouco mais e tente novamente para atingir ${quizMinScoreValue}%.`}
+                </p>
+            </div>
+        `;
+        noteEl.textContent = '';
+        if (wrongAnswers.length === 0) {
+            wrongList.innerHTML = `<div class="text-sm text-emerald-600 dark:text-emerald-300">Nenhuma resposta incorreta registrada.</div>`;
+        } else {
+            wrongList.innerHTML = wrongAnswers.map(item => `
+                <div class="rounded-xl border border-red-100 dark:border-red-600 bg-red-50 dark:bg-red-900/30 p-3 text-sm text-red-800 dark:text-red-200">
+                    <p class="font-semibold mb-1">Questão ${item.index}</p>
+                    <p>${escapeHtml(item.question)}</p>
+                    <p class="text-xs mt-2 text-red-600 dark:text-red-300">Você escolheu: ${escapeHtml(item.selected)}</p>
+                </div>
+            `).join('');
+        }
+
+        summary.classList.remove('hidden');
+        if (retryBtn) {
+            retryBtn.classList.remove('hidden');
+            retryBtn.onclick = resetQuizState;
+        }
+    }
+
+    const quizFailDialog = document.getElementById('quizFailDialog');
+    const quizFailScoreEl = document.getElementById('quizFailScore');
+    const quizFailDetailEl = document.getElementById('quizFailDetail');
+    const quizFailMinScoreEl = document.getElementById('quizFailMinScore');
+    const quizFailRetryBtn = document.getElementById('quizFailRetryBtn');
+
+        if (quizFailRetryBtn) {
+            quizFailRetryBtn.addEventListener('click', () => {
+                hideQuizFailPopup();
+                resetQuizState();
+            });
+        }
+
+    quizFailDialog?.addEventListener('click', (event) => {
+        if (event.target === quizFailDialog) {
+            hideQuizFailPopup();
+        }
+    });
+
+    function openQuizFailPopup(score, correctCount) {
+        if (!quizFailDialog) return;
+        quizFailScoreEl && (quizFailScoreEl.textContent = `${score}%`);
+        quizFailDetailEl && (quizFailDetailEl.textContent = `Você acertou ${correctCount} de ${quizQuestionsData.length} questões`);
+        quizFailMinScoreEl && (quizFailMinScoreEl.textContent = `${quizMinScoreValue}%`);
+        quizFailDialog.classList.remove('hidden');
+    }
+
+    function hideQuizFailPopup() {
+        quizFailDialog?.classList.add('hidden');
+    }
+
+    function resetQuizState() {
+        const summary = document.getElementById('quizSummary');
+        const stepper = document.getElementById('quizStepper');
+        summary?.classList.add('hidden');
+        stepper?.classList.remove('hidden');
+        quizSelections.fill(null);
+        currentQuizIndex = 0;
+        quizAttempted = false;
+        quizPassed = false;
+        if (nextLessonBtn) {
+            nextLessonBtn.disabled = true;
+        }
+        renderQuizStep();
+        hideQuizFailPopup();
     }
 
     // Initialize lesson checkboxes
@@ -1050,12 +1395,21 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
     let quizPassed = <?= ($isQuiz && $quizPassed) ? 'true' : 'false' ?>;
     let isLastInModule = <?= $isLastInModule ? 'true' : 'false' ?>;
     let nextModuleUrl = "<?= $nextModuleUrl ?>";
+    <?php
+    $quizQuestionsJson = json_encode($quizQuestions, JSON_UNESCAPED_UNICODE);
+    if ($quizQuestionsJson === false) {
+        $quizQuestionsJson = '[]';
+    }
+    ?>
+    const quizQuestionsData = <?= $quizQuestionsJson ?>;
+    const quizMinScoreValue = <?= (int) $quizMinScore ?>;
+    const quizSelections = Array(quizQuestionsData.length).fill(null);
+    let currentQuizIndex = 0;
+    let quizQuestionBlocks = [];
 
     let endOverlay = document.getElementById('endOverlay');
     let goNextBtn = document.getElementById('goNextBtn');
     let stayBtn = document.getElementById('stayBtn');
-    let countdownEl = document.getElementById('countdown');
-    let autoNote = document.getElementById('autoNote');
     let nextLessonBtn = document.getElementById('nextLessonBtn');
 
     function withAutoplay(url) {
@@ -1082,8 +1436,6 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
         endOverlay = document.getElementById('endOverlay');
         goNextBtn = document.getElementById('goNextBtn');
         stayBtn = document.getElementById('stayBtn');
-        countdownEl = document.getElementById('countdown');
-        autoNote = document.getElementById('autoNote');
         nextLessonBtn = document.getElementById('nextLessonBtn');
 
         vimeoIframe = document.getElementById('vimeoPlayer');
@@ -1125,6 +1477,7 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
         }
 
         if (nextLessonBtn) {
+            nextLessonBtn.disabled = isQuizLesson && !quizPassed;
             nextLessonBtn.addEventListener('click', () => {
                 if (canProceedToNextLesson()) {
                     window.location.href = withAutoplay(nextUrl);
@@ -1134,82 +1487,7 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
             });
         }
 
-        const quizForm = document.getElementById('quizForm');
-        if (quizForm && !quizForm.dataset.bound) {
-            quizForm.dataset.bound = '1';
-            quizForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const questions = document.querySelectorAll('.quiz-question-item');
-                const total = questions.length;
-                if (!total) return;
-
-                let correct = 0;
-                let answered = 0;
-
-                questions.forEach((qEl, idx) => {
-                    const selected = qEl.querySelector(`input[name="quiz_q_${idx}"]:checked`);
-                    if (!selected) return;
-                    answered++;
-                    const correctIndex = parseInt(qEl.dataset.correct || '0', 10);
-                    if (parseInt(selected.value, 10) === correctIndex) {
-                        correct++;
-                    }
-                });
-
-                const resultEl = document.getElementById('quizResult');
-                if (answered < total) {
-                    if (resultEl) {
-                        resultEl.textContent = 'Responda todas as perguntas antes de enviar.';
-                        resultEl.className = 'text-sm text-yellow-600 dark:text-yellow-400';
-                    }
-                    return;
-                }
-
-                const score = Math.round((correct / total) * 100);
-                const data = await submitQuizScore(score);
-                if (!data) return;
-
-                if (resultEl) {
-                    const minScore = <?= (int) $quizMinScore ?>;
-                    if (score >= minScore) {
-                        resultEl.textContent = `Parabéns! Você fez ${score}% e atingiu a nota mínima.`;
-                        resultEl.className = 'text-sm text-green-600 dark:text-green-400';
-                        quizAttempted = true;
-                        quizPassed = true;
-                        if (nextLessonBtn) {
-                            nextLessonBtn.disabled = false;
-                            const label = nextLessonBtn.querySelector('.next-lesson-label');
-                            if (label) {
-                                label.textContent = isLastInModule ? 'Próximo Módulo' : 'Próxima Aula';
-                            }
-                        }
-                        if (window.Swal) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Parabéns!',
-                                text: `Você alcançou ${score}% e já pode avançar para a próxima fase.`,
-                                confirmButtonText: 'Continuar'
-                            }).then(() => {
-                                if (nextModuleUrl) {
-                                    window.location.href = nextModuleUrl;
-                                }
-                            });
-                            return;
-                        }
-                        if (nextModuleUrl) {
-                            window.location.href = nextModuleUrl;
-                        }
-                    } else {
-                        resultEl.textContent = `Você fez ${score}%. Tente novamente para alcançar ${minScore}%.`;
-                        resultEl.className = 'text-sm text-red-600 dark:text-red-400';
-                        quizAttempted = true;
-                        if (nextLessonBtn) {
-                            nextLessonBtn.disabled = false;
-                        }
-                    }
-                }
-            });
-        }
+        initQuizStepper();
 
         bindVideoPlayer();
     }
@@ -1286,29 +1564,14 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
         }
     }
 
-    let autoTimer = null;
-    let seconds = 5;
-
     function showEndOverlay() {
         if (!endOverlay) return;
+        if (isQuizLesson && !canProceedToNextLesson()) return;
         endOverlay.classList.remove('hidden');
         endOverlay.classList.add('flex');
 
         if (goNextBtn && nextUrl) {
             goNextBtn.href = withAutoplay(nextUrl);
-        }
-
-        if (autoNote && countdownEl) {
-            seconds = 5;
-            countdownEl.textContent = seconds;
-            autoTimer = setInterval(() => {
-                seconds--;
-                countdownEl.textContent = seconds;
-                if (seconds <= 0) {
-                    clearInterval(autoTimer);
-                    if (nextUrl) window.location.href = withAutoplay(nextUrl);
-                }
-            }, 1000);
         }
     }
 
@@ -1316,16 +1579,12 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
         if (!endOverlay) return;
         endOverlay.classList.add('hidden');
         endOverlay.classList.remove('flex');
-        if (autoTimer) {
-            clearInterval(autoTimer);
-            autoTimer = null;
-        }
     }
 
     // Check if user can proceed to next lesson
     function canProceedToNextLesson() {
         if (isQuizLesson) {
-            return quizAttempted || !nextLessonBtn?.disabled;
+            return quizPassed;
         }
         const currentCheckbox = document.querySelector(`.lesson-row[data-lesson-id="${currentLessonId}"] .lesson-check`);
         return currentCheckbox?.checked || hasReached95Percent;
@@ -1333,6 +1592,13 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
 
     // Show warning if user hasn't completed 95% of current lesson
     function showCompletionWarning() {
+        const isQuizWarning = isQuizLesson;
+        const warningMessage = isQuizWarning
+            ? `Você precisa atingir pelo menos ${quizMinScoreValue}% neste quiz antes de avançar.`
+            : 'Você precisa assistir pelo menos 95% desta aula antes de prosseguir para a próxima.';
+        const primaryLabel = isQuizWarning ? 'Refazer quiz' : 'Continuar Assistindo';
+        const secondaryLabel = isQuizWarning ? 'Cancelar' : 'Ir Mesmo Assim';
+
         const warningModal = `
             <div id="completionWarning" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md mx-4 shadow-xl">
@@ -1342,14 +1608,14 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
                         </div>
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Atenção</h3>
                         <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm">
-                            Você precisa assistir pelo menos 95% desta aula antes de prosseguir para a próxima.
+                            ${warningMessage}
                         </p>
                         <div class="flex flex-col sm:flex-row gap-3 justify-center">
                             <button id="continueWatching" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm flex-1">
-                                Continuar Assistindo
+                                ${primaryLabel}
                             </button>
                             <button id="forceNext" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm flex-1">
-                                Ir Mesmo Assim
+                                ${secondaryLabel}
                             </button>
                         </div>
                     </div>
@@ -1363,17 +1629,31 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
         const continueWatching = document.getElementById('continueWatching');
         const forceNext = document.getElementById('forceNext');
 
+        if (isQuizWarning && forceNext) {
+            forceNext.classList.add('hidden');
+        }
+
         continueWatching.addEventListener('click', () => {
             warning.remove();
-            if (player) {
+            if (isQuizWarning) {
+                resetQuizState();
+            } else if (player) {
                 player.play().catch(() => {});
             }
         });
 
-        forceNext.addEventListener('click', () => {
-            warning.remove();
-            window.location.href = withAutoplay(nextUrl);
-        });
+        if (forceNext) {
+            if (isQuizWarning) {
+                forceNext.addEventListener('click', () => {
+                    warning.remove();
+                });
+            } else {
+                forceNext.addEventListener('click', () => {
+                    warning.remove();
+                    window.location.href = withAutoplay(nextUrl);
+                });
+            }
+        }
 
         // Close on backdrop click
         warning.addEventListener('click', (e) => {
@@ -1454,7 +1734,7 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
         setProgressUI(courseProgress);
 
         if (courseProgress === 100) {
-            showCourseCompletedModal();
+            handleCourseCompletion();
         }
 
         showBlockedAccessModal();

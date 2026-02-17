@@ -4,9 +4,17 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use App\Models\CertificateModel;
+use App\Services\CertificateService;
 
 class Certificates extends BaseController
 {
+    private CertificateService $certificateService;
+
+    public function __construct()
+    {
+        $this->certificateService = new CertificateService();
+    }
+
     /**
      * Emitir certificado (exemplo: depois do curso concluÃ­do)
      * Rota sugerida: POST /certificados/emitir/(:num)
@@ -18,9 +26,8 @@ class Certificates extends BaseController
 
     public function createPending()
     {
-        $db = \Config\Database::connect();
-        $certificateModel = new CertificateModel();
         $user = auth()->user();
+        helper('url');
 
         $respond = function (array $data, int $code = 200) {
             return $this->response
@@ -40,70 +47,22 @@ class Certificates extends BaseController
             return $respond(['ok' => false, 'message' => 'Matrícula inválida.'], 400);
         }
 
-        $row = $db->table('enrollments')
-            ->select('id_enrollment, id_student_enrollment, id_course_enrollment, progress_enrollment, completed_enrollment')
-            ->where('id_enrollment', $enrollmentId)
-            ->get()
-            ->getRowArray();
-
-        if (! $row || (int) $row['id_student_enrollment'] !== (int) $user->id) {
-            return $respond(['ok' => false, 'message' => 'Sem permissão para emitir este certificado.'], 403);
-        }
-
-        if ((int) ($row['progress_enrollment'] ?? 0) < 100) {
-            return $respond(['ok' => false, 'message' => 'Curso ainda não concluído.'], 400);
-        }
-
-        $completedAt = $row['completed_enrollment'] ?? null;
-        if (empty($completedAt)) {
-            $completedAt = date('Y-m-d H:i:s');
-            $db->table('enrollments')
-                ->where('id_enrollment', $enrollmentId)
-                ->update(['completed_enrollment' => $completedAt]);
-        }
-        $availableAt = date('Y-m-d H:i:s', strtotime($completedAt . ' +48 hours'));
-
-        $existing = $certificateModel
-            ->where('id_user_certificate', $row['id_student_enrollment'])
-            ->where('id_course_certificate', $row['id_course_enrollment'])
-            ->first();
-
-        if ($existing) {
-            if (empty($existing['avaiable_at_certificate'])) {
-                $certificateModel->update((int) $existing['id_certificate'], [
-                    'avaiable_at_certificate' => $availableAt,
-                    'updated_at'              => date('Y-m-d H:i:s'),
-                ]);
-            }
+        $result = $this->certificateService->ensureForEnrollment($enrollmentId, (int) $user->id);
+        if (! $result['ok']) {
             return $respond([
-                'ok'             => true,
-                'created'        => false,
-                'id_certificate' => (int) $existing['id_certificate'],
-                'available_at'   => date('c', strtotime($availableAt)),
-                'completed_at'   => date('c', strtotime($completedAt)),
-            ]);
+                'ok'      => false,
+                'message' => $result['message'] ?? 'Não foi possível emitir o certificado.',
+                'code'    => $result['code'] ?? null,
+            ], $result['status'] ?? 400);
         }
-
-        $uuid = bin2hex(random_bytes(16));
-        $hash = hash('sha256', $uuid . '|' . $row['id_student_enrollment'] . '|' . $row['id_course_enrollment']);
-        $now = date('Y-m-d H:i:s');
-
-        $newId = $certificateModel->insert([
-            'id_user_certificate'   => (int) $row['id_student_enrollment'],
-            'id_course_certificate' => (int) $row['id_course_enrollment'],
-            'uuid_certificate'      => $uuid,
-            'hash_certificate'      => $hash,
-            'avaiable_at_certificate' => $availableAt,
-            'created_at'            => $now,
-            'updated_at'            => $now,
-        ]);
 
         return $respond([
             'ok'             => true,
-            'created'        => true,
-            'id_certificate' => (int) $newId,
-            'available_at'   => date('c', strtotime($availableAt)),
-            'completed_at'   => date('c', strtotime($completedAt)),
+            'created'        => $result['created'] ?? false,
+            'certificate_id' => $result['certificate_id'] ?? null,
+            'available_at'   => $result['available_at'] ?? null,
+            'completed_at'   => $result['completed_at'] ?? null,
+            'pdf_ready'      => $result['pdf_ready'] ?? false,
         ]);
     }
 
@@ -305,11 +264,7 @@ class Certificates extends BaseController
             }
         }
 
-        $certificateModel->update($id, [
-            'pdf_path_certificate'    => null,
-            'uploaded_by_certificate' => null,
-            'updated_at'              => date('Y-m-d H:i:s'),
-        ]);
+        $certificateModel->delete($id);
 
         if ($this->request->isAJAX()) {
             return $this->response

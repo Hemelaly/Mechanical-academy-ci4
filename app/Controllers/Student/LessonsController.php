@@ -4,6 +4,7 @@
 namespace App\Controllers\Student;
 
 use App\Controllers\BaseController;
+use App\Services\CertificateService;
 use App\Services\ProgressService;
 
 class LessonsController extends BaseController
@@ -19,39 +20,41 @@ class LessonsController extends BaseController
         }
 
         $db = db_connect();
+
+        $lessonMinScoreQuery = $db->table('lessons l')
+            ->select('l.id_module_lesson, m.min_score_module')
+            ->join('modules m', 'm.id_module = l.id_module_lesson', 'left')
+            ->where('l.id_lesson', $idLesson)
+            ->get()
+            ->getRowArray();
+
+        $minScore = 75;
+        if (!empty($lessonMinScoreQuery['min_score_module'])) {
+            $minScore = (int) $lessonMinScoreQuery['min_score_module'];
+        }
+
+        $shouldMarkComplete = ($score === null) || ($score >= $minScore);
+        $completedAtValue = $shouldMarkComplete ? date('Y-m-d H:i:s') : null;
+
         // upsert progresso
         $db->query(
             'INSERT INTO progress (id_enrollment_progress, id_lesson_progress, completed_at_progress, score_progress, created_at, updated_at)
-         VALUES (?, ?, NOW(), ?, NOW(), NOW())
+         VALUES (?, ?, ?, ?, NOW(), NOW())
          ON DUPLICATE KEY UPDATE completed_at_progress = VALUES(completed_at_progress), score_progress = IFNULL(VALUES(score_progress), score_progress), updated_at = NOW()',
-            [$idEnrollment, $idLesson, $score]
+            [$idEnrollment, $idLesson, $completedAtValue, $score]
         );
 
         $percent = (new \App\Services\ProgressService($db))->recalcAndSave($idEnrollment);
 
-        $completedAt = null;
-        $availableAt = null;
+        $completedAtIso = null;
+        $availableAtIso = null;
 
         if ($percent >= 100) {
-            $row = $db->table('enrollments')
-                ->select('completed_enrollment')
-                ->where('id_enrollment', $idEnrollment)
-                ->get()
-                ->getRowArray();
-
-            $completedAt = $row['completed_enrollment'] ?? null;
-            if (empty($completedAt)) {
-                $completedAt = date('Y-m-d H:i:s');
-                $db->table('enrollments')
-                    ->where('id_enrollment', $idEnrollment)
-                    ->update(['completed_enrollment' => $completedAt]);
-            }
-
-            $availableAt = date('Y-m-d H:i:s', strtotime($completedAt . ' +48 hours'));
+            $certificateService = new CertificateService($db);
+            $result = $certificateService->ensureForEnrollment($idEnrollment, (int) auth()->id());
+            $completedAtIso = $result['completed_at'] ?? null;
+            $availableAtIso = $result['available_at'] ?? null;
         }
-
-        $completedAtIso = $completedAt ? date('c', strtotime($completedAt)) : null;
-        $availableAtIso = $availableAt ? date('c', strtotime($availableAt)) : null;
 
         return $this->response->setHeader('X-CSRF-Hash', csrf_hash())
             ->setJSON([

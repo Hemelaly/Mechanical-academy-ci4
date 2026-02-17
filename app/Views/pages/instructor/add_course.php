@@ -1,5 +1,7 @@
 <?php
 $user = service('auth')->user();
+$draftDescription = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->description_course ?? '');
+$draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learning_course ?? '');
 ?>
 
 <?= $this->extend('layouts/master') ?>
@@ -48,7 +50,44 @@ $user = service('auth')->user();
         box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.45);
         border-radius: 12px;
     }
+    .note-editor.note-frame {
+        border: 1px solid #cbd5f5;
+        border-radius: 1rem;
+        background-color: #fff;
+    }
+
+    .note-editor .note-toolbar,
+    .note-editor .note-statusbar {
+        background-color: #f8fafc;
+    }
+
+    .note-editor .note-editable {
+        background-color: #fff;
+        min-height: 220px;
+        color: #0f172a;
+    }
+
+    .dark .note-editor.note-frame {
+        border-color: #475569;
+        background-color: #0f172a;
+    }
+
+    .dark .note-editor .note-toolbar,
+    .dark .note-editor .note-statusbar,
+    .dark .note-editor .note-editable {
+        background-color: #0f172a;
+        color: #e2e8f0;
+    }
+
+    .note-editor.note-dark-mode .note-editable,
+    .note-editor.note-dark-mode .note-toolbar,
+    .note-editor.note-dark-mode .note-statusbar {
+        background-color: #0f172a;
+        color: #e2e8f0 !important;
+    }
 </style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.css">
 
 <div class="min-h-screen bg-slate-50 dark:bg-slate-900 py-6">
     <div class="container mx-auto px-4">
@@ -200,9 +239,40 @@ $user = service('auth')->user();
                                     name="description_course"
                                     rows="8"
                                     class="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
-                                    placeholder="Descreva detalhadamente o conteúdo, objetivos e benefícios do seu curso..."><?= esc($draft->description_course ?? '') ?></textarea>
+                                    placeholder="Descreva detalhadamente o conteúdo, objetivos e benefícios do seu curso..."><?= $draftDescription ?></textarea>
                                         <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">
                                             Recomendado: mínimo 200 caracteres
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <label for="courseLearning" class="block text-sm font-semibold text-slate-800 dark:text-white mb-2 flex items-center gap-2">
+                                            <i class="bi bi-list-check text-blue-600"></i>
+                                            O que você aprenderá *
+                                        </label>
+                                        <textarea id="courseLearning"
+                                            name="learning_course"
+                                            rows="6"
+                                            class="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
+                                            placeholder="Liste os principais tópicos ou habilidades que os alunos vão dominar..."><?= $draftLearning ?></textarea>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                                            Use o editor para criar listas, negritos e links personalizados
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <label for="courseVideo" class="block text-sm font-semibold text-slate-800 dark:text-white mb-2 flex items-center gap-2">
+                                            <i class="bi bi-play-btn text-blue-600"></i>
+                                            Vídeo de visão geral
+                                        </label>
+                                        <input type="url"
+                                            id="courseVideo"
+                                            name="url_video_course"
+                                            value="<?= esc($draft->url_video_course ?? '') ?>"
+                                            class="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
+                                            placeholder="https://vimeo.com/xxxxx ou https://www.youtube.com/watch?v=...">
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                                            URL exibida na página pública dentro do bloco de vídeo.
                                         </p>
                                     </div>
                                 </div>
@@ -255,6 +325,30 @@ $user = service('auth')->user();
                                             <p class="text-xs text-green-600 dark:text-green-400 mt-2 text-center">
                                                 <i class="bi bi-check-circle"></i> Imagem selecionada com sucesso
                                             </p>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label for="courseIcon" class="block text-sm font-semibold text-slate-800 dark:text-white mb-2 flex items-center gap-2">
+                                            <i class="bi bi-grid-1x2-fill text-blue-600"></i>
+                                            Ícone do Curso
+                                        </label>
+                                        <input type="file"
+                                            id="courseIcon"
+                                            name="icon_course"
+                                            accept=".png,.jpg,.jpeg,.gif,.webp,.avif"
+                                            class="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700" />
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                                            Ícone usado nos cards da home. Recomendado: 64x64px (PNG/WebP).
+                                        </p>
+                                        <div id="icon-preview" class="mt-3 inline-flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2 bg-slate-50 dark:bg-slate-700/40 <?= !empty($draft->icon_course) ? '' : 'hidden' ?>">
+                                            <img id="icon-preview-img"
+                                                src="<?= !empty($draft->icon_course) ? base_url('assets/img/' . $draft->icon_course) : '' ?>"
+                                                alt="Ícone do curso"
+                                                class="w-10 h-10 object-contain rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600">
+                                            <span id="icon-preview-label" class="text-xs text-slate-600 dark:text-slate-300">
+                                                <?= !empty($draft->icon_course) ? 'Ícone atual do curso' : 'Pré-visualização do ícone' ?>
+                                            </span>
                                         </div>
                                     </div>
 
@@ -759,7 +853,51 @@ $user = service('auth')->user();
         </div>
     </div>
 </div>
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.js"></script>
+<script>
+    $(function () {
+        if (typeof $.fn.summernote !== "function") {
+            return;
+        }
 
+        const baseSummernoteConfig = {
+            placeholder: "Descreva detalhadamente o conteúdo, objetivos e benefícios do seu curso...",
+            height: 220,
+            toolbar: [
+                ["style", ["bold", "italic", "underline", "clear"]],
+                ["font", ["superscript", "subscript"]],
+                ["para", ["paragraph"]],
+                ["insert", ["link"]],
+                ["view", ["fullscreen", "codeview"]],
+            ],
+        };
+
+        const descriptionEditor = $("#courseDescription");
+        const learningEditor = $("#courseLearning");
+
+        const applyEditorTheme = () => {
+            const isDark = document.documentElement.classList.contains("dark");
+            $(".note-editor.note-frame").toggleClass("note-dark-mode", isDark);
+        };
+
+        if (descriptionEditor.length) {
+            descriptionEditor.summernote(baseSummernoteConfig);
+        }
+
+        if (learningEditor.length) {
+            learningEditor.summernote(
+                $.extend(true, {}, baseSummernoteConfig, {
+                    placeholder: "Liste os principais tópicos que os alunos dominarão com este curso...",
+                })
+            );
+        }
+
+        applyEditorTheme();
+        const themeObserver = new MutationObserver(applyEditorTheme);
+        themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    });
+</script>
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         // ======================
@@ -790,6 +928,10 @@ $user = service('auth')->user();
         const previewImg = document.getElementById("preview-img");
         const removeBtn = document.getElementById("remove-image");
         const uploadArea = document.getElementById("upload-area");
+        const iconInput = document.getElementById("courseIcon");
+        const iconPreview = document.getElementById("icon-preview");
+        const iconPreviewImg = document.getElementById("icon-preview-img");
+        const iconPreviewLabel = document.getElementById("icon-preview-label");
 
         // Módulos
         const modulesContainer = document.getElementById("modules-container");
@@ -1183,6 +1325,35 @@ $user = service('auth')->user();
                 } else {
                     alert("Por favor arraste apenas arquivos de imagem válidos (JPG, PNG, etc.).");
                 }
+            });
+        }
+
+        if (iconInput) {
+            iconInput.addEventListener("change", (event) => {
+                const file = event.target.files?.[0];
+                if (!file) {
+                    return;
+                }
+
+                if (!file.type.startsWith("image/")) {
+                    alert("Por favor selecione um arquivo de imagem válido para o ícone.");
+                    iconInput.value = "";
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    if (iconPreviewImg) {
+                        iconPreviewImg.src = e.target.result;
+                    }
+                    if (iconPreviewLabel) {
+                        iconPreviewLabel.textContent = "Pré-visualização do novo ícone";
+                    }
+                    if (iconPreview) {
+                        iconPreview.classList.remove("hidden");
+                    }
+                };
+                reader.readAsDataURL(file);
             });
         }
 

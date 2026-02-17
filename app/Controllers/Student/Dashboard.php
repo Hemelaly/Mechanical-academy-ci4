@@ -451,11 +451,16 @@ class Dashboard extends BaseController
                 $score = $scoreRow['score_progress'] ?? null;
                 $minScore = (int) ($prevModule->min_score_module ?? 75);
 
-                if ($score === null) {
+                $warningMessage = 'Faça o quiz do módulo anterior e obtenha no mínimo ' . $minScore . '% para avançar.';
+                if ($score !== null && (float) $score < $minScore) {
+                    $warningMessage = 'Você precisa refazer o quiz anterior e atingir ao menos ' . $minScore . '% para continuar.';
+                }
+
+                if ($score === null || (float) $score < $minScore) {
                     $courseSlug = $this->makeSlug((string) $course->title_course);
                     $lessonSlug = $this->makeSlug((string) $quizLesson->title_lesson);
                     return redirect()->to('/student/dashboard/inscricoes/' . $courseSlug . '/' . $lessonSlug)
-                        ->with('warning', 'FaÃ§a o quiz do mÃ³dulo anterior e obtenha no mÃ­nimo ' . $minScore . '% para avanÃ§ar.');
+                        ->with('warning', $warningMessage);
                 }
             }
         }

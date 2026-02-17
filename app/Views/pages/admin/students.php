@@ -112,7 +112,7 @@
 </aside>
 
 <div id="student-create-backdrop" class="fixed inset-0 z-40 hidden bg-slate-900/50"></div>
-<aside id="student-create-drawer" class="fixed right-0 top-0 z-50 h-full w-[96%] max-w-3xl translate-x-full overflow-y-auto bg-white shadow-xl transition-transform sm:w-[92%] md:w-[85%] lg:w-[720px] dark:bg-slate-900">
+<aside id="student-create-drawer" class="fixed right-0 top-0 z-50 h-full w-[76%] max-w-3xl translate-x-full overflow-y-auto bg-white shadow-xl transition-transform sm:w-[72%] md:w-[65%] lg:w-[680px] dark:bg-slate-900">
     <div class="flex items-center justify-between border-b border-slate-200 p-5 dark:border-slate-800">
         <div>
             <p class="text-sm text-slate-500 dark:text-slate-400">Novo usuario</p>
@@ -124,7 +124,11 @@
     </div>
     <div class="space-y-4 p-5">
         <div id="student-create-feedback" class="hidden rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700"></div>
-        <?php if (session('error') !== null) : ?>
+        <?php
+
+     use CodeIgniter\CLI\Console;
+
+ if (session('error') !== null) : ?>
             <div class="rounded-lg bg-rose-50 p-3 text-sm text-rose-700"><?= esc(session('error')) ?></div>
         <?php elseif (session('errors') !== null) : ?>
             <div class="rounded-lg bg-rose-50 p-3 text-sm text-rose-700">

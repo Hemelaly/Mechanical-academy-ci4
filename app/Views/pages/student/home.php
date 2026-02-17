@@ -235,7 +235,7 @@
         class="p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-300 group text-center">
         <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
             <i class="bi bi-person text-purple-600 dark:text-purple-400 text-xl"></i>
-        </div>
+        </div> 
         <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Perfil</span>
     </a>
     

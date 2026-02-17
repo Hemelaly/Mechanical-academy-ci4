@@ -6,7 +6,55 @@ $user = service('auth')->user();
 
 // dd($projects)
 
+$learningHtml = trim($course->learning_course ?? '');
+$defaultLearningList = <<<'HTML'
+<li>Introdução ao Excel: interface, células, planilhas e menus</li>
+<li>Formatação de dados: estilos, formatação condicional e tabelas</li>
+<li>Fórmulas básicas: SOMA, MÉDIA, MÍNIMO, MÁXIMO, CONT.SE</li>
+<li>Funções avançadas: PROCV, ÍNDICE, CORRESP, SE, SOMASE</li>
+<li>Gráficos: criação e personalização de gráficos profissionais</li>
+<li>Tabelas dinâmicas: criação, segmentação e análise de dados</li>
+<li>Validação de dados e proteção de planilhas</li>
+<li><span class="feature-bold">Bônus:</span> Automatização com Macros e introdução ao VBA</li>
+HTML;
 
+if ($learningHtml === '') {
+    $learningHtml = $defaultLearningList;
+}
+
+if (!str_contains($learningHtml, 'fa-check')) {
+    $learningHtml = preg_replace(
+        '/(<li\b[^>]*>)/i',
+        '$1<i class="fa-solid fa-check text-primary me-3"></i>',
+        $learningHtml
+    );
+}
+
+$descriptionHtml = trim($course->description_course ?? '');
+if ($descriptionHtml === '') {
+    $descriptionHtml = <<<'HTML'
+<p class="fs-5 mb-4">
+  Este é um curso aprofundado de 40+ horas que o levará desde o início absoluto do Excel, aprendendo desde
+  fórmulas básicas até recursos avançados como tabelas dinâmicas, gráficos e automação com macros.
+  Você aprenderá a criar planilhas profissionais, organizar e analisar grandes volumes de dados e aplicar
+  técnicas de produtividade para o uso no ambiente corporativo.
+</p>
+<p class="fs-5 mb-4">
+  Também exploraremos o uso de funções complexas como PROCX, SOMASES, ÍNDICE e CORRESP, além de recursos
+  de validação de dados, proteção de planilhas e dashboards interativos.
+  No final, você dominará as ferramentas para transformar dados brutos em insights claros e visuais
+  profissionais.
+</p>
+HTML;
+}
+
+$courseTitleEsc = esc($course->title_course);
+$heroSubtitleRaw = trim($course->subtitle_course ?? '');
+if ($heroSubtitleRaw === '') {
+    $heroSubtitle = "Aprenda {$courseTitleEsc} moderno desde o início";
+} else {
+    $heroSubtitle = esc($heroSubtitleRaw);
+}
 ?>
 
 <!doctype html>
@@ -60,6 +108,17 @@ $user = service('auth')->user();
 
     .feature-bold {
       font-weight: 700;
+    }
+
+    .feature-text li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .feature-text li:last-child {
+      margin-bottom: 0;
     }
 
     .title {
@@ -243,10 +302,10 @@ $user = service('auth')->user();
             <p class="title fs-1 fw-bold text-white">Curso de <?= esc($course->title_course) ?></p>
           </div>
           <div class="course-image d-flex justify-content-center">
-            <img src="<?= base_url('assets/img/' . $course->image_course) ?>" class="img-fluid rounded h-auto" width="500px" alt="">
+            <img src="<?= base_url('assets/instructor/img/courses/' . $course->image_course) ?>" class="img-fluid rounded h-auto" width="500px" alt="">
           </div>
           <div class="description text-center mt-3">
-            <p class="title fs-2 fw-bold text-white">Aprenda <?= esc($course->title_course) ?> moderno desde o início</p>
+            <p class="title fs-2 fw-bold text-white"><?= $heroSubtitle ?></p>
             <p class="text-white" style="margin-top: -0.8rem;"><?= esc($course->description_course) ?></p>
             <a href="<?= base_url('/checkout/' . $course->id_course) ?>" class="title btn btn-primary py-3 px-5 fw-bold">Compre Agora</a>
           </div>
@@ -264,35 +323,35 @@ $user = service('auth')->user();
               <div class="icon">
                 <i class="fa-solid fa-user-graduate text-primary" style="font-size: 3rem;"></i>
               </div>
-              <p class="title fs-3 my-2 fw-bold text-white">100,000+</p>
+              <p class="title fs-3 my-2 fw-bold text-white"><?= number_format($studentCount) ?></p>
               <p class="text-white">Alunos matriculados</p>
             </div>
           </div>
           <div class="col-md-3">
             <div class="info-box text-center">
               <div class="icon">
-                <i class="fa-solid fa-star-half-stroke text-primary" style="font-size: 3rem;"></i>
+                <i class="fa-solid fa-clock text-primary" style="font-size: 3rem;"></i>
               </div>
-              <p class="title fs-3 my-2 fw-bold text-white">4.7+</p>
-              <p class="text-white">Avaliado</p>
+              <p class="title fs-3 my-2 fw-bold text-white"><?= number_format($courseHours ?? 0, 1, ',', '.') ?>h</p>
+              <p class="text-white">Horas do curso</p>
             </div>
           </div>
           <div class="col-md-3">
             <div class="info-box text-center">
               <div class="icon">
-                <i class="fa-solid fa-language text-primary" style="font-size: 3rem;"></i>
+                <i class="fa-solid fa-book text-primary" style="font-size: 3rem;"></i>
               </div>
-              <p class="title fs-3 my-2 fw-bold text-white">Português</p>
-              <p class="text-white">Idioma do Curso</p>
+              <p class="title fs-3 my-2 fw-bold text-white"><?= $lessonCount ?> </p>
+              <p class="text-white">Total de aulas</p>
             </div>
           </div>
           <div class="col-md-3">
             <div class="info-box text-center">
               <div class="icon">
-                <i class="fa-solid fa-arrows-rotate text-primary" style="font-size: 3rem;"></i>
+                <i class="fa-solid fa-diagram-project text-primary" style="font-size: 3rem;"></i>
               </div>
-              <p class="title fs-3 my-2 fw-bold text-white">Ultima atualização</p>
-              <p class="text-white">10/2025</p>
+              <p class="title fs-3 my-2 fw-bold text-white"><?= $projectCount ?> </p>
+              <p class="text-white">Projetos</p>
             </div>
           </div>
         </div>
@@ -320,7 +379,7 @@ $user = service('auth')->user();
               <div class="icon">
                 <i class="fa-solid fa-photo-film text-primary" style="font-size: 3rem;"></i>
               </div>
-              <p class="text-white mt-4">40+ horas de vídeo sob demanda</p>
+              <p class="text-white mt-4"><?= $lessonCount ?> aulas sob demanda</p>
             </div>
           </div>
           <div class="col">
@@ -328,7 +387,7 @@ $user = service('auth')->user();
               <div class="icon">
                 <i class="fa-solid fa-download text-primary" style="font-size: 3rem;"></i>
               </div>
-              <p class="text-white mt-4">20+ recursos e documentos para download</p>
+              <p class="text-white mt-4"><?= $projectCount ?> recursos e arquivos para download</p>
             </div>
           </div>
           <div class="col">
@@ -336,7 +395,7 @@ $user = service('auth')->user();
               <div class="icon">
                 <i class="fa-solid fa-calendar-days text-primary" style="font-size: 3rem;"></i>
               </div>
-              <p class="text-white mt-4">Acesso vitalício completo</p>
+              <p class="text-white mt-4"><?= $moduleCount ?> módulos com acesso vitalício</p>
             </div>
           </div>
           <div class="col">
@@ -361,23 +420,7 @@ $user = service('auth')->user();
           <div class="bg-white shadow rounded-3 p-4 p-md-5 h-100">
             <h2 class="title fw-bold text-primary mb-4 text-center">O que você aprenderá</h2>
             <ul class="list-unstyled feature-text">
-              <li class="d-flex mb-3"><i class="bi bi-check-lg check-icon me-3"></i>Introdução ao Excel:
-                interface, células, planilhas e menus</li>
-              <li class="d-flex mb-3"><i class="bi bi-check-lg check-icon me-3"></i>Formatação de dados:
-                estilos, formatação condicional e tabelas</li>
-              <li class="d-flex mb-3"><i class="bi bi-check-lg check-icon me-3"></i>Fórmulas básicas:
-                SOMA, MÉDIA, MÍNIMO, MÁXIMO, CONT.SE</li>
-              <li class="d-flex mb-3"><i class="bi bi-check-lg check-icon me-3"></i>Funções avançadas:
-                PROCV, ÍNDICE, CORRESP, SE, SOMASE</li>
-              <li class="d-flex mb-3"><i class="bi bi-check-lg check-icon me-3"></i>Gráficos: criação e
-                personalização de gráficos profissionais</li>
-              <li class="d-flex mb-3"><i class="bi bi-check-lg check-icon me-3"></i>Tabelas dinâmicas:
-                criação, segmentação e análise de dados</li>
-              <li class="d-flex mb-3"><i class="bi bi-check-lg check-icon me-3"></i>Validação de dados e
-                proteção de planilhas</li>
-              <li class="d-flex"><i class="bi bi-check-lg check-icon me-3"></i><span><span
-                    class="feature-bold">Bônus:</span> Automatização com Macros e introdução ao
-                  VBA</span></li>
+              <?= $learningHtml ?>
             </ul>
           </div>
         </div>
@@ -385,7 +428,7 @@ $user = service('auth')->user();
         <!-- Card de compra -->
         <div class="col-lg-4">
           <div class="bg-white shadow rounded-3 p-4 text-center">
-            <h4 class="title fw-bold text-primary mb-3">Excel Básico</h4>
+            <h4 class="title fw-bold text-primary mb-3"><?= esc($course->title_course) ?></h4>
             <span class="title fw-bold display-6 mb-2"><?= number_format(esc($course->price_course), 2, ",", ".") ?></span><sub class="fw-bold">MZN</sub>
             <p class="text-muted mb-4">Compra única</p>
             <a href="<?= base_url('/checkout/' . $course->id_course) ?>" class="title btn btn-primary btn-lg fw-bold px-4">Compre Agora</a>
@@ -398,18 +441,7 @@ $user = service('auth')->user();
   <section id="description" class="py-5 text-white bg-darkblue">
     <div class="container text-center">
       <h2 class="title fw-bold mb-4">Descrição do Curso</h2>
-      <p class="fs-5 mb-4">
-        Este é um curso aprofundado de 40+ horas que o levará desde o início absoluto do Excel, aprendendo desde
-        fórmulas básicas até recursos avançados como tabelas dinâmicas, gráficos e automação com macros.
-        Você aprenderá a criar planilhas profissionais, organizar e analisar grandes volumes de dados e aplicar
-        técnicas de produtividade para o uso no ambiente corporativo.
-      </p>
-      <p class="fs-5 mb-4">
-        Também exploraremos o uso de funções complexas como PROCX, SOMASES, ÍNDICE e CORRESP, além de recursos
-        de validação de dados, proteção de planilhas e dashboards interativos.
-        No final, você dominará as ferramentas para transformar dados brutos em insights claros e visuais
-        profissionais.
-      </p>
+      <?= $descriptionHtml ?>
       <p class="fw-bold fs-5">Confira o currículo abaixo!</p>
 
       <div class="bg-blue text-white rounded p-4 mt-5 mx-auto" style="max-width: 1000px;">

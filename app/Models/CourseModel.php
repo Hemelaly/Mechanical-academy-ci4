@@ -12,7 +12,7 @@ class CourseModel extends Model
     protected $returnType       = 'object';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['title_course', 'subtitle_course', 'id_instructor_course', 'description_course', 'image_course', 'icon_course', 'status_course', 'price_course', 'color_course', 'created_at', 'updated_at'];
+    protected $allowedFields    = ['title_course', 'subtitle_course', 'id_instructor_course', 'description_course', 'learning_course', 'url_video_course', 'image_course', 'icon_course', 'status_course', 'price_course', 'color_course', 'created_at', 'updated_at'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -32,6 +32,8 @@ class CourseModel extends Model
         'title_course'       => 'required|string|max_length[150]',
         'id_instructor_course' => 'required|integer|is_not_unique[users.id]',
         'description_course' => 'required|string',
+        'learning_course' => 'permit_empty|string',
+        'url_video_course' => 'permit_empty|valid_url',
         'price_course'       => 'required|decimal',
         'status_course'      => 'required|in_list[Ativo,Rascunho,Arquivado]',
     ];
@@ -49,6 +51,9 @@ class CourseModel extends Model
         'description_course' => [
             'required'   => 'O campo descrição é obrigatório.',
             'string'     => 'O campo descrição deve ser texto.',
+        ],
+        'url_video_course' => [
+            'valid_url' => 'Informe uma URL válida para o vídeo de visão geral.',
         ],
         'price_course' => [
             'required'   => 'O campo preço é obrigatório.',

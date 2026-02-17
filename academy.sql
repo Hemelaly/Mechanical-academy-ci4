@@ -192,6 +192,8 @@ CREATE TABLE `courses` (
   `title_course` varchar(150) NOT NULL,
   `subtitle_course` varchar(100) NOT NULL,
   `description_course` text,
+  `learning_course` text,
+  `url_video_course` varchar(255) DEFAULT NULL,
   `image_course` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `price_course` decimal(10,2) DEFAULT '0.00',
   `id_instructor_course` int UNSIGNED NOT NULL,
@@ -205,8 +207,8 @@ CREATE TABLE `courses` (
 -- Dumping data for table `courses`
 --
 
-INSERT INTO `courses` (`id_course`, `title_course`, `subtitle_course`, `description_course`, `image_course`, `price_course`, `id_instructor_course`, `level_course`, `status_course`, `created_at`, `updated_at`) VALUES
-(18, 'Excel Básico', 'Curso completo de excel', 'Curso completo de excel para todos', '1760110282_8db971107af0fef49902.png', 1580.00, 1, 'beginner', 'Rascunho', '2025-10-10 15:31:22', '2025-10-13 12:29:10');
+INSERT INTO `courses` (`id_course`, `title_course`, `subtitle_course`, `description_course`, `learning_course`, `url_video_course`, `image_course`, `price_course`, `id_instructor_course`, `level_course`, `status_course`, `created_at`, `updated_at`) VALUES
+  (18, 'Excel Básico', 'Curso completo de excel', 'Curso completo de excel para todos', NULL, NULL, '1760110282_8db971107af0fef49902.png', 1580.00, 1, 'beginner', 'Rascunho', '2025-10-10 15:31:22', '2025-10-13 12:29:10');
 
 -- --------------------------------------------------------
 

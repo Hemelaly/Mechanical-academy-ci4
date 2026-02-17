@@ -83,6 +83,31 @@ class CourseController extends BaseController
         return $newName;
     }
 
+    private function moveCourseIcon($file)
+    {
+        if (! $file || ! $file->isValid() || $file->hasMoved()) {
+            return null;
+        }
+
+        $ext = strtolower($file->getClientExtension());
+        $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'];
+        if (! in_array($ext, $allowed, true)) {
+            return null;
+        }
+
+        $targetDir = FCPATH . 'assets/img';
+        if (! is_dir($targetDir)) {
+            @mkdir($targetDir, 0755, true);
+        }
+
+        $newName = $file->getRandomName();
+        if (! $file->move($targetDir, $newName)) {
+            return null;
+        }
+
+        return $newName;
+    }
+
     private function lessonHasQuizQuestions(array $lesson): bool
     {
         $quizQuestions = $lesson['quiz_questions'] ?? ($lesson['quiz'] ?? []);
@@ -168,6 +193,8 @@ class CourseController extends BaseController
             'title_course' => $data['title_course'] ?? '',
             'subtitle_course' => $data['subtitle_course'] ?? '',
             'description_course' => $data['description_course'] ?? '',
+            'learning_course' => $data['learning_course'] ?? '',
+            'url_video_course' => $data['url_video_course'] ?? '',
             'id_instructor_course' => auth()->id(),
             'status_course' => $status,
             'price_course' => ($data['courseType'] ?? 'free') === 'paid' ? ($data['price_course'] ?? 0) : 0,
@@ -180,6 +207,11 @@ class CourseController extends BaseController
             $newName = $file->getRandomName();
             $file->move(FCPATH . 'assets/instructor/img/courses', $newName);
             $courseData['image_course'] = $newName;
+        }
+
+        $iconName = $this->moveCourseIcon($this->request->getFile('icon_course'));
+        if ($iconName) {
+            $courseData['icon_course'] = $iconName;
         }
 
         if ($draftId) {
@@ -348,6 +380,8 @@ class CourseController extends BaseController
             'title_course' => $data['title_course'] ?? '',
             'subtitle_course' => $data['subtitle_course'] ?? '',
             'description_course' => $data['description_course'] ?? '',
+            'learning_course' => $data['learning_course'] ?? '',
+            'url_video_course' => $data['url_video_course'] ?? '',
             'price_course' => ($data['courseType'] ?? 'free') === 'paid' ? ($data['price_course'] ?? 0) : 0,
             'color_course' => $data['color_course'] ?? '#3b82f6',
         ];
@@ -357,6 +391,11 @@ class CourseController extends BaseController
             $newName = $file->getRandomName();
             $file->move(FCPATH . 'assets/instructor/img/courses', $newName);
             $courseData['image_course'] = $newName;
+        }
+
+        $iconName = $this->moveCourseIcon($this->request->getFile('icon_course'));
+        if ($iconName) {
+            $courseData['icon_course'] = $iconName;
         }
 
         $courseModel->skipValidation(true);
@@ -441,6 +480,8 @@ class CourseController extends BaseController
             'title_course' => $data['title_course'] ?? $course->title_course,
             'subtitle_course' => $data['subtitle_course'] ?? $course->subtitle_course,
             'description_course' => $data['description_course'] ?? $course->description_course,
+            'learning_course' => $data['learning_course'] ?? $course->learning_course,
+            'url_video_course' => $data['url_video_course'] ?? $course->url_video_course,
             'status_course' => $status,
             'price_course' => ($data['courseType'] ?? 'free') === 'paid'
                 ? ($data['price_course'] ?? $course->price_course)
@@ -453,6 +494,11 @@ class CourseController extends BaseController
             $newName = $file->getRandomName();
             $file->move(FCPATH . 'assets/instructor/img/courses', $newName);
             $updateData['image_course'] = $newName;
+        }
+
+        $iconName = $this->moveCourseIcon($this->request->getFile('icon_course'));
+        if ($iconName) {
+            $updateData['icon_course'] = $iconName;
         }
 
         $courseModel->skipValidation(true);
@@ -634,6 +680,8 @@ class CourseController extends BaseController
             'title_course' => $data['title_course'] ?? $course->title_course,
             'subtitle_course' => $data['subtitle_course'] ?? $course->subtitle_course,
             'description_course' => $data['description_course'] ?? $course->description_course,
+            'learning_course' => $data['learning_course'] ?? $course->learning_course,
+            'url_video_course' => $data['url_video_course'] ?? $course->url_video_course,
             'status_course' => $isDraft ? 'Rascunho' : 'Ativo',
             'price_course' => ($data['courseType'] ?? 'free') === 'paid'
                 ? ($data['price_course'] ?? 0)
@@ -646,6 +694,11 @@ class CourseController extends BaseController
             $newName = $file->getRandomName();
             $file->move(FCPATH . 'assets/instructor/img/courses', $newName);
             $updateData['image_course'] = $newName;
+        }
+
+        $iconName = $this->moveCourseIcon($this->request->getFile('icon_course'));
+        if ($iconName) {
+            $updateData['icon_course'] = $iconName;
         }
 
         $courseModel->update($id, $updateData);

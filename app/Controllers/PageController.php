@@ -68,6 +68,21 @@ class PageController extends BaseController
             ->orderBy('position_module', 'ASC')
             ->findAll();
 
+        $moduleCount = count($module);
+        $lessonCount = $lessonModel
+            ->join('modules m', 'm.id_module = lessons.id_module_lesson', 'inner')
+            ->where('m.id_course_module', $id_course)
+            ->countAllResults();
+
+        $totalMinutesRow = $lessonModel
+            ->select('COALESCE(SUM(duration_lesson), 0) AS total_minutes')
+            ->join('modules m', 'm.id_module = lessons.id_module_lesson', 'inner')
+            ->where('m.id_course_module', $id_course)
+            ->get()
+            ->getRow();
+        $totalMinutes = (int) ($totalMinutesRow->total_minutes ?? 0);
+        $courseHours = $totalMinutes / 60;
+
         $isEnrolled = false;
         if ($userId) {
             $isEnrolled = $enrollmentModel
@@ -78,11 +93,21 @@ class PageController extends BaseController
         }
 
         $projects = $projectModel->where('id_course_project', $id_course)->findAll();
+        $projectCount = count($projects);
+        $studentCount = $enrollmentModel
+            ->where('id_course_enrollment', $course->id_course)
+            ->where('status_enrollment !=', 'Cancelada')
+            ->countAllResults();
 
         return view('courses/course', [
             'course' => $course,
             'modules' => $module,
             'projects' => $projects,
+            'moduleCount' => $moduleCount,
+            'lessonCount' => $lessonCount,
+            'projectCount' => $projectCount,
+            'studentCount' => $studentCount,
+            'courseHours' => $courseHours,
         ]);
     }
 }
