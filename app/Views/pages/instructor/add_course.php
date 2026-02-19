@@ -179,6 +179,7 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                 <input type="hidden" id="modules-json" name="modules">
                 <input type="hidden" id="modules-json-alt" name="modules_json">
                 <input type="hidden" id="tags-json" name="tags">
+                <input type="hidden" id="projects-json" name="projects_json">
                 <input type="hidden" name="projects_present" value="1">
 
                 <div class="p-4 sm:p-6 lg:p-8">
@@ -953,6 +954,7 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
         // Hidden inputs
         const modulesHidden = document.getElementById("modules-json");
         const tagsHidden = document.getElementById("tags-json");
+        const projectsHidden = document.getElementById("projects-json");
 
         // ======================
         // Funções auxiliares
@@ -1151,6 +1153,44 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
             const modulesHiddenAlt = document.getElementById("modules-json-alt");
             if (modulesHiddenAlt) modulesHiddenAlt.value = modulesJson;
             if (tagsHidden) tagsHidden.value = JSON.stringify(tags);
+
+            if (projectsHidden) {
+                const projects = [];
+                document.querySelectorAll(".project-card").forEach((projectCard) => {
+                    const title = projectCard.querySelector('input[name$="[title]"]')?.value || "";
+                    const description = projectCard.querySelector('textarea[name$="[description]"]')?.value || "";
+                    const imgExisting = projectCard.querySelector('input[name$="[img_existing]"]')?.value || "";
+                    projects.push({
+                        title,
+                        description,
+                        img_existing: imgExisting,
+                    });
+                });
+                projectsHidden.value = JSON.stringify(projects);
+            }
+        }
+
+        function stripRedundantDynamicFieldNames() {
+            const touched = [];
+            const fields = document.querySelectorAll(".module-card [name], .project-card [name]");
+            fields.forEach((field) => {
+                const name = field.getAttribute("name");
+                if (!name) return;
+                if (field.type === "file") return;
+                field.dataset.compactOriginalName = name;
+                field.removeAttribute("name");
+                touched.push(field);
+            });
+            return touched;
+        }
+
+        function restoreDynamicFieldNames(fields) {
+            fields.forEach((field) => {
+                const originalName = field.dataset.compactOriginalName;
+                if (!originalName) return;
+                field.setAttribute("name", originalName);
+                delete field.dataset.compactOriginalName;
+            });
         }
 
         async function saveDraft({ validate = false, silent = false } = {}) {
@@ -1161,7 +1201,9 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
 
             const currentDraftId = draftIdInput?.value?.trim();
             const endpoint = currentDraftId ? `${draftSaveBaseUrl}/${currentDraftId}` : draftCreateUrl;
+            const compactedFields = stripRedundantDynamicFieldNames();
             const formData = new FormData(form);
+            restoreDynamicFieldNames(compactedFields);
 
             try {
                 const response = await fetch(endpoint, {
@@ -1217,9 +1259,21 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                     updateStepperUI();
                 } else {
                     // último passo -> serializa módulos/tags e envia o form
-                    serializeModulesAndTags();
-                    form.submit();
+                    if (typeof form.requestSubmit === "function") {
+                        form.requestSubmit();
+                    } else {
+                        serializeModulesAndTags();
+                        stripRedundantDynamicFieldNames();
+                        form.submit();
+                    }
                 }
+            });
+        }
+
+        if (form) {
+            form.addEventListener("submit", () => {
+                serializeModulesAndTags();
+                stripRedundantDynamicFieldNames();
             });
         }
 

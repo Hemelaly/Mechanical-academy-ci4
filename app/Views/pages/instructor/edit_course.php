@@ -150,6 +150,7 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
             <input type="hidden" name="id_instructor_course" value="<?= $user->id ?>">
             <input type="hidden" id="modules-json" name="modules">
             <input type="hidden" id="modules-json-alt" name="modules_json">
+            <input type="hidden" id="projects-json" name="projects_json">
             <input type="hidden" name="projects_present" value="1">
 
             <!-- Step 1: Basic Info -->
@@ -1077,6 +1078,40 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
             if (modulesHiddenAlt) modulesHiddenAlt.value = modulesJson;
         }
 
+        function serializeProjects() {
+            const projectsHidden = document.getElementById("projects-json");
+            if (!projectsHidden) return;
+
+            const projects = [];
+            document.querySelectorAll(".project-card").forEach((projectCard) => {
+                const title = projectCard.querySelector('input[name$="[title]"]')?.value || "";
+                const description = projectCard.querySelector('textarea[name$="[description]"]')?.value || "";
+                const imgExisting = projectCard.querySelector('input[name$="[img_existing]"]')?.value || "";
+
+                projects.push({
+                    title,
+                    description,
+                    img_existing: imgExisting,
+                });
+            });
+
+            projectsHidden.value = JSON.stringify(projects);
+        }
+
+        function stripRedundantDynamicFieldNames() {
+            const touched = [];
+            const fields = document.querySelectorAll(".module-card [name], .project-card [name]");
+            fields.forEach((field) => {
+                const name = field.getAttribute("name");
+                if (!name) return;
+                if (field.type === "file") return;
+                field.dataset.compactOriginalName = name;
+                field.removeAttribute("name");
+                touched.push(field);
+            });
+            return touched;
+        }
+
         function syncQuizFields(lessonEl) {
             const typeSelect = lessonEl.querySelector(".lesson-type");
             const quizFields = lessonEl.querySelector(".quiz-fields");
@@ -1590,6 +1625,8 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
             }
 
             serializeModules();
+            serializeProjects();
+            stripRedundantDynamicFieldNames();
             // You can add more validation here as needed
         });
     });

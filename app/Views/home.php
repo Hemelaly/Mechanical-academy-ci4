@@ -1,6 +1,17 @@
 <?php
 
 $isLoggedIn   = auth()->loggedIn();
+$user = service('auth')->user();
+$defaultAvatarUrl = base_url('assets/img/user-default.png');
+$userAvatarUrl = $defaultAvatarUrl;
+if ($isLoggedIn && $user && !empty($user->img)) {
+    $rawAvatar = trim((string) $user->img);
+    if (preg_match('#^https?://#i', $rawAvatar) === 1) {
+        $userAvatarUrl = $rawAvatar;
+    } else {
+        $userAvatarUrl = base_url(ltrim($rawAvatar, '/'));
+    }
+}
 
 // dd(base_url('./assets/img/logo.png'))
 
@@ -39,6 +50,18 @@ $isLoggedIn   = auth()->loggedIn();
 
         body {
             font-family: 'Poppins', sans-serif !important;
+        }
+
+        .nav-avatar {
+            width: 35px;
+            height: 35px;
+            min-width: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+            object-position: center;
+            display: block;
+            background: #111827;
+            border: 1px solid rgba(255, 255, 255, 0.24);
         }
 
         #banner {
@@ -246,15 +269,21 @@ $isLoggedIn   = auth()->loggedIn();
                         <li class="nav-item me-3">
                             <a class="nav-link active" href="<?= base_url($user->role . '/dashboard/meus_cursos') ?>">Meus Cursos</a>
                         </li>
+                        <li class="nav-item me-3">
+                            <a class="nav-link active" href="https://www.youtube.com/@MechanicalTecnologia" target="_blank" rel="noopener noreferrer">Youtube</a>
+                        </li>
                         <li class="nav-item d-flex align-items-center">
                             <a href="<?= base_url($user->role . '/dashboard/perfil') ?>" class="d-flex align-items-center text-decoration-none">
-                                <img src="<?= base_url('assets/img/user-default.png') ?>" alt="User" class="rounded-circle me-2" width="35" height="35">
+                                <img src="<?= esc($userAvatarUrl) ?>" alt="User" class="nav-avatar me-2" onerror="this.onerror=null;this.src='<?= esc($defaultAvatarUrl) ?>';">
                                 <span class="text-white fw-semibold text-nowrap"><?= $user->username ?></span>
                             </a>
                         </li>
                     <?php else: ?>
                         <li class="nav-item me-3">
                             <a class="nav-link active" href="#cursos">Cursos</a>
+                        </li>
+                        <li class="nav-item me-3">
+                            <a class="nav-link active" href="https://www.youtube.com/@MechanicalTecnologia" target="_blank" rel="noopener noreferrer">Youtube</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link active" href="<?= base_url('login') ?>">Entrar</a>

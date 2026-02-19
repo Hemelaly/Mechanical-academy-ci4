@@ -68,6 +68,29 @@ class PageController extends BaseController
             ->orderBy('position_module', 'ASC')
             ->findAll();
 
+        $moduleIds = array_map(static fn($m) => (int) $m->id_module, $module);
+        $lessonsByModule = [];
+        if (!empty($moduleIds)) {
+            $lessons = $lessonModel
+                ->select('id_module_lesson, title_lesson, position_lesson')
+                ->whereIn('id_module_lesson', $moduleIds)
+                ->orderBy('id_module_lesson', 'ASC')
+                ->orderBy('position_lesson', 'ASC')
+                ->findAll();
+
+            foreach ($lessons as $lesson) {
+                $modId = (int) $lesson->id_module_lesson;
+                if (!isset($lessonsByModule[$modId])) {
+                    $lessonsByModule[$modId] = [];
+                }
+                $lessonsByModule[$modId][] = $lesson;
+            }
+        }
+
+        foreach ($module as $m) {
+            $m->lessons = $lessonsByModule[(int) $m->id_module] ?? [];
+        }
+
         $moduleCount = count($module);
         $lessonCount = $lessonModel
             ->join('modules m', 'm.id_module = lessons.id_module_lesson', 'inner')

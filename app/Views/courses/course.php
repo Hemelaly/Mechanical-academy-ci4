@@ -3,6 +3,16 @@
 $isLoggedIn   = auth()->loggedIn();
 
 $user = service('auth')->user();
+$defaultAvatarUrl = base_url('assets/img/user-default.png');
+$userAvatarUrl = $defaultAvatarUrl;
+if ($isLoggedIn && $user && !empty($user->img)) {
+    $rawAvatar = trim((string) $user->img);
+    if (preg_match('#^https?://#i', $rawAvatar) === 1) {
+        $userAvatarUrl = $rawAvatar;
+    } else {
+        $userAvatarUrl = base_url(ltrim($rawAvatar, '/'));
+    }
+}
 
 // dd($projects)
 
@@ -30,6 +40,47 @@ if (!str_contains($learningHtml, 'fa-check')) {
     );
 }
 
+// Force learning section to render only clean <li> rows.
+$normalizedLearningItems = [];
+if (preg_match_all('/<li\b[^>]*>(.*?)<\/li>/is', (string) $learningHtml, $learningMatches)) {
+    foreach (($learningMatches[1] ?? []) as $itemHtml) {
+        $itemText = trim(preg_replace('/\s+/u', ' ', strip_tags((string) $itemHtml)));
+        if ($itemText !== '') {
+            $normalizedLearningItems[] = $itemText;
+        }
+    }
+}
+
+if (empty($normalizedLearningItems)) {
+    $plainLearningSource = preg_replace('/<\/(p|h[1-6]|li|div|br)\s*>/i', "\n", (string) $learningHtml);
+    $plainLearning = strip_tags((string) $plainLearningSource);
+    $chunks = preg_split('/(?:\r\n|\r|\n|;|\|)+/u', (string) $plainLearning) ?: [];
+    foreach ($chunks as $chunk) {
+        $itemText = trim(preg_replace('/\s+/u', ' ', (string) $chunk), " \t\n\r\0\x0B-");
+        if ($itemText !== '') {
+            $normalizedLearningItems[] = $itemText;
+        }
+    }
+}
+
+if (empty($normalizedLearningItems)) {
+    $normalizedLearningItems = [
+        'Introducao ao Excel: interface, celulas, planilhas e menus',
+        'Formatacao de dados: estilos, formatacao condicional e tabelas',
+        'Formulas basicas: SOMA, MEDIA, MINIMO, MAXIMO, CONT.SE',
+        'Funcoes avancadas: PROCV, INDICE, CORRESP, SE, SOMASE',
+        'Graficos: criacao e personalizacao de graficos profissionais',
+        'Tabelas dinamicas: criacao, segmentacao e analise de dados',
+        'Validacao de dados e protecao de planilhas',
+        'Bonus: Automatizacao com Macros e introducao ao VBA',
+    ];
+}
+
+$learningHtml = '';
+foreach ($normalizedLearningItems as $itemText) {
+    $learningHtml .= '<li><i class="fa-solid fa-check text-primary me-3"></i><span>' . esc($itemText) . '</span></li>';
+}
+
 $descriptionHtml = trim($course->description_course ?? '');
 if ($descriptionHtml === '') {
     $descriptionHtml = <<<'HTML'
@@ -55,6 +106,20 @@ if ($heroSubtitleRaw === '') {
 } else {
     $heroSubtitle = esc($heroSubtitleRaw);
 }
+
+$overviewVideoUrlRaw = trim((string) ($course->url_video_course ?? ''));
+$overviewVideoId = null;
+
+if (!function_exists('getVimeoId')) {
+    function getVimeoId($url)
+    {
+        preg_match('/vimeo\.com\/(?:video\/)?([0-9]+)/', (string) $url, $m);
+        return $m[1] ?? null;
+    }
+}
+
+$overviewVideoId = getVimeoId($overviewVideoUrlRaw);
+$overviewPlayerId = (int) ($course->id_course ?? 0);
 ?>
 
 <!doctype html>
@@ -119,6 +184,126 @@ if ($heroSubtitleRaw === '') {
 
     .feature-text li:last-child {
       margin-bottom: 0;
+    }
+
+    .feature-text li span {
+      display: block;
+      line-height: 1.55;
+    }
+
+    .nav-avatar {
+      width: 35px;
+      height: 35px;
+      min-width: 35px;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+      background: #111827;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+    }
+
+    .purchase-box-sticky {
+      position: sticky;
+      top: 96px;
+      z-index: 20;
+    }
+
+    .video-area {
+      width: 100%;
+      max-width: 980px;
+      aspect-ratio: 16 / 9;
+    }
+
+    .video-area iframe,
+    .video-area .video-fallback {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .modules-accordion {
+      width: 100%;
+      max-width: 980px;
+    }
+
+    .modules-accordion .accordion-item {
+      background: #d4d4d8;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .modules-accordion .accordion-button {
+      background: #d4d4d8;
+      font-size: 1.2rem;
+      color: #111827;
+      box-shadow: none;
+    }
+
+    .modules-accordion .accordion-button:not(.collapsed) {
+      color: #111827;
+      background: #d4d4d8;
+    }
+
+    .modules-accordion .accordion-body {
+      background: #d4d4d8;
+      padding-top: 0.35rem;
+    }
+
+    .modules-accordion .module-lesson-item {
+      background: #c5c5c8;
+      color: #1f2937;
+      padding: 0.9rem 1rem;
+      margin-bottom: 0.35rem;
+      border-radius: 0;
+      line-height: 1.35;
+      font-size: 1.2rem;
+    }
+
+    .modules-accordion .module-lesson-item:last-child {
+      margin-bottom: 0;
+    }
+
+    @media (min-width: 992px) {
+      .video-area {
+        width: 65%;
+      }
+
+      .modules-accordion {
+        width: 75%;
+      }
+    }
+
+    @media (max-width: 991.98px) {
+      .purchase-box-sticky {
+        position: static;
+        top: auto;
+      }
+    }
+
+    @media (max-width: 767.98px) {
+      #video .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+
+      #video .title {
+        font-size: 1.75rem !important;
+      }
+
+      .video-area {
+        max-width: 100%;
+      }
+
+      .modules-accordion .accordion-button {
+        font-size: 1rem;
+        line-height: 1.35;
+      }
+
+      .modules-accordion .module-lesson-item {
+        font-size: 1rem;
+        padding: 0.8rem 0.85rem;
+      }
     }
 
     .title {
@@ -271,15 +456,21 @@ if ($heroSubtitleRaw === '') {
             <li class="nav-item me-3">
               <a class="nav-link active" href="<?= base_url($user->role . '/dashboard/meus_cursos') ?>">Meus Cursos</a>
             </li>
+            <li class="nav-item me-3">
+              <a class="nav-link active" href="https://www.youtube.com/@MechanicalTecnologia" target="_blank" rel="noopener noreferrer">Youtube</a>
+            </li>
             <li class="nav-item d-flex align-items-center">
               <a href="<?= base_url($user->role . '/dashboard/perfil') ?>" class="d-flex align-items-center text-decoration-none">
-                <img src="<?= base_url('assets/img/user-default.png') ?>" alt="User" class="rounded-circle me-2" width="35" height="35">
+                <img src="<?= esc($userAvatarUrl) ?>" alt="User" class="nav-avatar me-2" onerror="this.onerror=null;this.src='<?= esc($defaultAvatarUrl) ?>';">
                 <span class="text-white fw-semibold text-nowrap"><?= $user->username ?></span>
               </a>
             </li>
           <?php else: ?>
             <li class="nav-item me-3">
               <a class="nav-link active" href="<?= base_url('/') ?>#cursos">Cursos</a>
+            </li>
+            <li class="nav-item me-3">
+              <a class="nav-link active" href="https://www.youtube.com/@MechanicalTecnologia" target="_blank" rel="noopener noreferrer">Youtube</a>
             </li>
             <li class="nav-item">
               <a class="nav-link active" href="<?= base_url('login') ?>">Entrar</a>
@@ -364,8 +555,30 @@ if ($heroSubtitleRaw === '') {
       <div class="content py-lg-4 py-0">
         <p class="title fs-2 fw-bold text-center text-white">Vídeo de visão geral do curso</p>
 
-        <div class="video-area mx-auto mt-lg-3 mt-0" style="width: 65%; height: 500px;">
-          <iframe title="vimeo-player" class="rounded mt-lg-3 mt-0" src="<?= esc($course->url_video_course) ?>" width="100%" height="100%" frameborder="0" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" allowfullscreen></iframe>
+        <div class="video-area mx-auto mt-lg-3 mt-0">
+          <?php if ($overviewVideoId): ?>
+            <iframe id="vimeoPlayerOverview"
+              title="Vimeo player"
+              class="rounded mt-lg-3 mt-0"
+              src="https://player.vimeo.com/video/<?= esc($overviewVideoId) ?>?badge=0&autopause=0&player_id=<?= esc($overviewPlayerId) ?>&app_id=58479&title=0&byline=0&portrait=0&autoplay=0"
+              width="100%"
+              height="100%"
+              frameborder="0"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowfullscreen
+              referrerpolicy="no-referrer"
+              loading="lazy"
+              sandbox="allow-same-origin allow-scripts allow-presentation"
+              oncontextmenu="return false"></iframe>
+          <?php else: ?>
+            <div class="video-fallback rounded mt-lg-3 mt-0 d-flex align-items-center justify-content-center text-white text-center px-4" style="background:#111827;">
+              <div>
+                <i class="bi bi-exclamation-triangle fs-1 text-warning"></i>
+                <p class="mb-1 fw-semibold">Link de vídeo inválido.</p>
+                <small class="text-light opacity-75">Use um link do Vimeo suportado.</small>
+              </div>
+            </div>
+          <?php endif; ?>
         </div>
       </div>
   </section>
@@ -427,7 +640,7 @@ if ($heroSubtitleRaw === '') {
 
         <!-- Card de compra -->
         <div class="col-lg-4">
-          <div class="bg-white shadow rounded-3 p-4 text-center">
+          <div class="bg-white shadow rounded-3 p-4 text-center purchase-box-sticky">
             <h4 class="title fw-bold text-primary mb-3"><?= esc($course->title_course) ?></h4>
             <span class="title fw-bold display-6 mb-2"><?= number_format(esc($course->price_course), 2, ",", ".") ?></span><sub class="fw-bold">MZN</sub>
             <p class="text-muted mb-4">Compra única</p>
@@ -456,19 +669,33 @@ if ($heroSubtitleRaw === '') {
 
   <section id="modules" class="bg-blue py-5">
     <div class="container">
-      <div class="accordion mx-auto w-75" id="excelAccordion">
+      <div class="accordion modules-accordion mx-auto" id="excelAccordion">
 
         <?php foreach ($modules as $key => $module): ?>
-          <div class="accordion-item mb-3 border-0 shadow-sm p-2">
-            <h2 class="accordion-header">
-              <button class="title accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse"
+          <?php $isFirstModule = $key === 0; ?>
+          <div class="accordion-item mb-3 bg-white border-0 shadow-sm p-2">
+            <p class="accordion-header fs-sm">
+              <button class="title accordion-button bg-white fw-semibold <?= $isFirstModule ? '' : 'collapsed' ?>" type="button" data-bs-toggle="collapse"
+                aria-expanded="<?= $isFirstModule ? 'true' : 'false' ?>"
                 data-bs-target="#mod<?= $module->id_module ?>">
-                <?= esc($module->title_module) ?>
+                <?= 'Modulo ' . ($key + 1) . ': ' . esc($module->title_module) ?>
               </button>
-            </h2>
-            <div id="mod<?= $module->id_module ?>" class="accordion-collapse collapse" data-bs-parent="#excelAccordion">
-              <div class="accordion-body">
-                <?= esc($module->description_module) ?>
+            </p>
+            <div id="mod<?= $module->id_module ?>" class="accordion-collapse collapse <?= $isFirstModule ? 'show' : '' ?>" data-bs-parent="#excelAccordion">
+              <div class="accordion-body bg-white">
+                <?php if (!empty($module->lessons)): ?>
+                  <ul class="list-unstyled mb-0">
+                    <?php foreach ($module->lessons as $lessonIndex => $lesson): ?>
+                      <li class="module-lesson-item">
+                        <?= esc($lesson->title_lesson ?? 'Aula sem titulo') ?>
+                      </li>
+                    <?php endforeach; ?>
+                  </ul>
+                <?php else: ?>
+                  <p class="mb-0 text-dark">
+                    <?= esc($module->description_module ?: 'Sem aulas adicionadas neste modulo.') ?>
+                  </p>
+                <?php endif; ?>
               </div>
             </div>
           </div>
@@ -489,92 +716,33 @@ if ($heroSubtitleRaw === '') {
       <div class="container pb-3">
         <div class="row g-4">
 
-          <?php foreach ($projects as $key => $project): ?>
-            <div class="col-md-4">
+          <?php if (!empty($projects)): ?>
+            <?php foreach ($projects as $key => $project): ?>
+              <div class="col-md-4">
+                <div class="bg-white text-dark px-4 py-4 rounded h-100">
+                  <img src="<?= base_url('assets/img/' . $project->img_project) ?>" alt="<?= esc($project->title_project) ?>" class="img-fluid rounded mb-3">
+                  <h5 class="fw-bold fs-4"><?= esc($project->title_project) ?></h5>
+                  <p class="mb-0 text-muted">
+                    <?= esc($project->description_project) ?>
+                  </p>
+                </div>
+              </div>
+            <?php endforeach ?>
+          <?php else: ?>
+            <div class="col-md-4 mx-auto">
               <div class="bg-white text-dark px-4 py-4 rounded h-100">
-                <img src="<?= base_url('assets/img/' . $project->img_project) ?>" alt="<?= esc($project->title_project) ?>" class="img-fluid rounded mb-3">
-                <h5 class="fw-bold fs-4"><?= esc($project->title_project) ?></h5>
+                <h5 class="fw-bold fs-4">Sem projetos</h5>
                 <p class="mb-0 text-muted">
-                  <?= esc($project->description_project) ?>
+                  Nao foram adicionados projectos a este curso.
                 </p>
               </div>
             </div>
-          <?php endforeach ?>
+          <?php endif; ?>
 
         </div>
       </div>
     </div>
   </section>
-
-  <!-- <section id="rating" class="text-white">
-    <div class="title bg-darkblue py-5">
-      <div class="container text-center">
-        <h2 class="fw-bold mb-2">Classificações do Curso</h2>
-        <p class="text-secondary mb-5">Algumas das últimas avaliações dos nossos alunos</p>
-      </div>
-    </div>
-
-    <div class="bg-blue">
-      <div class="container text-center">
-        <div class="row g-5 pb-3">
-          <div class="col-md-4">
-            <div class="d-flex flex-column align-items-center">
-              <div class="rounded-circle border border-primary d-flex align-items-center justify-content-center mb-3"
-                style="width:60px; height:60px;">
-                <span class="fw-bold text-primary">MS</span>
-              </div>
-              <div class="text-warning mb-2">
-                ★★★★★
-              </div>
-              <h5 class="fw-bold text-white">Mariana S.</h5>
-              <p class="text-light">
-                O curso de Excel é excelente! As explicações são diretas e os exemplos práticos ajudam
-                muito.
-                Aprendi a criar dashboards e automatizar planilhas em poucas semanas. Recomendo para
-                todos!
-              </p>
-            </div>
-          </div>
-
-          <div class="col-md-4">
-            <div class="d-flex flex-column align-items-center">
-              <div class="rounded-circle border border-primary d-flex align-items-center justify-content-center mb-3"
-                style="width:60px; height:60px;">
-                <span class="fw-bold text-primary">RC</span>
-              </div>
-              <div class="text-warning mb-2">
-                ★★★★★
-              </div>
-              <h5 class="fw-bold text-white">Ricardo C.</h5>
-              <p class="text-light">
-                Gostei muito da didática e da clareza dos exemplos.
-                As aulas de tabelas dinâmicas e fórmulas avançadas foram incríveis.
-                Agora uso o Excel de forma muito mais profissional no trabalho.
-              </p>
-            </div>
-          </div>
-
-          <div class="col-md-4">
-            <div class="d-flex flex-column align-items-center">
-              <div class="rounded-circle border border-primary d-flex align-items-center justify-content-center mb-3"
-                style="width:60px; height:60px;">
-                <span class="fw-bold text-primary">TP</span>
-              </div>
-              <div class="text-warning mb-2">
-                ★★★★★
-              </div>
-              <h5 class="fw-bold text-white">Tatiane P.</h5>
-              <p class="text-light">
-                O curso superou minhas expectativas. As explicações sobre VBA e automação foram
-                fantásticas.
-                Já consegui criar relatórios automáticos e economizar horas de trabalho!
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section> -->
 
   <footer class="py-3 text-white" style="background-color:#111827;">
     <div

@@ -243,7 +243,7 @@ class CourseController extends BaseController
         // Processar projetos (se houver)
         $projects = [];
         $projectsProvided = $this->request->getPost('projects_present') !== null;
-        $projectsRaw = $this->request->getPost('projects');
+        $projectsRaw = $this->request->getPost('projects_json') ?? $this->request->getPost('projects');
         if ($projectsRaw !== null) {
             $projects = is_string($projectsRaw) ? json_decode($projectsRaw, true) : $projectsRaw;
         }
@@ -505,7 +505,7 @@ class CourseController extends BaseController
 
         $projects = [];
         $projectsProvided = $this->request->getPost('projects_present') !== null;
-        $projectsRaw = $this->request->getPost('projects');
+        $projectsRaw = $this->request->getPost('projects_json') ?? $this->request->getPost('projects');
         if ($projectsRaw !== null) {
             $projects = is_string($projectsRaw) ? json_decode($projectsRaw, true) : $projectsRaw;
         }
@@ -699,7 +699,7 @@ class CourseController extends BaseController
         // Projetos (se enviados)
         $projects = [];
         $projectsProvided = $this->request->getPost('projects_present') !== null;
-        $projectsRaw = $this->request->getPost('projects');
+        $projectsRaw = $this->request->getPost('projects_json') ?? $this->request->getPost('projects');
         if ($projectsRaw !== null) {
             $projects = is_string($projectsRaw) ? json_decode($projectsRaw, true) : $projectsRaw;
         }
