@@ -184,7 +184,11 @@ $quickActions = $quickActions ?? [
                 <a href="<?= site_url('/admin/dashboard/cursos') ?>" class="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400">Ver todos</a>
             </div>
             <div class="mt-4 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
-                <table class="w-full text-left text-sm text-slate-500 dark:text-slate-400">
+                <table
+                    id="admin-home-popular-courses-table"
+                    data-flowbite-datatable
+                    data-datatable-per-page="5"
+                    class="w-full text-left text-sm text-slate-500 dark:text-slate-400">
                     <thead class="bg-slate-50 text-xs uppercase text-slate-600 dark:bg-slate-900 dark:text-slate-300">
                         <tr>
                             <th class="px-4 py-3">Curso</th>

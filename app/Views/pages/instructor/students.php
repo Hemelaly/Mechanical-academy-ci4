@@ -3,7 +3,7 @@
 <?= $this->section('title') ?>Dashboard - Estudantes<?= $this->endSection() ?>
 
 <?= $this->section('students') ?>
-<div class="space-y-6">
+<div class="min-w-0 space-y-6">
     <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
             <h1 class="text-2xl font-semibold text-slate-900 dark:text-white">Estudantes</h1>
@@ -11,7 +11,7 @@
         </div>
     </div>
 
-    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl">
+    <div class="min-w-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl">
         <div class="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
             <h3 class="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white">Pedidos de inscrição</h3>
             <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Aprove ou rejeite solicitacoes pendentes.</p>
@@ -38,8 +38,15 @@
                 </div>
             </div>
         </div>
-        <div class="relative overflow-x-auto">
-            <table class="w-full text-left text-sm text-slate-500 dark:text-slate-400">
+        <div class="relative w-full max-w-full overflow-x-auto">
+            <table
+                id="instructor-pending-students-table"
+                data-flowbite-datatable
+                data-datatable-searchable="false"
+                data-datatable-paging="false"
+                data-datatable-sortable="false"
+                data-datatable-per-page-select="false"
+                class="w-full min-w-full text-left text-sm text-slate-500 dark:text-slate-400">
                 <thead class="text-xs uppercase text-slate-600 bg-slate-50 dark:bg-slate-700 dark:text-slate-300">
                     <tr>
                         <th scope="col" class="px-6 py-3">Aluno</th>
@@ -58,7 +65,7 @@
         </div>
     </div>
 
-    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl">
+    <div class="min-w-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl">
         <div class="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700">
             <h3 class="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white">Alunos inscritos</h3>
             <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Acompanhe o progresso e controle o acesso.</p>
@@ -93,8 +100,15 @@
                 </div>
             </div>
         </div>
-        <div class="relative overflow-x-auto">
-            <table class="w-full text-left text-sm text-slate-500 dark:text-slate-400">
+        <div class="relative w-full max-w-full overflow-x-auto">
+            <table
+                id="instructor-enrollments-table"
+                data-flowbite-datatable
+                data-datatable-searchable="false"
+                data-datatable-paging="false"
+                data-datatable-sortable="false"
+                data-datatable-per-page-select="false"
+                class="w-full min-w-full text-left text-sm text-slate-500 dark:text-slate-400">
                 <thead class="text-xs uppercase text-slate-600 bg-slate-50 dark:bg-slate-700 dark:text-slate-300">
                     <tr>
                         <th scope="col" class="px-6 py-3">Aluno</th>
@@ -139,14 +153,16 @@
         const csrfName = <?= json_encode(csrf_token()) ?>;
         let csrfHash = <?= json_encode(csrf_hash()) ?>;
 
-        const enrollBody = document.getElementById('enrollments-table-body');
+        const enrollTable = document.getElementById('instructor-enrollments-table');
+        const getEnrollBody = () => enrollTable?.querySelector('tbody');
         const enrollSummary = document.getElementById('enrollments-summary');
         const enrollPagination = document.getElementById('enrollments-pagination');
         const enrollSearch = document.getElementById('enroll-search');
         const enrollStatus = document.getElementById('enroll-status');
         const enrollPerPage = document.getElementById('enroll-per-page');
 
-        const pendingBody = document.getElementById('pending-table-body');
+        const pendingTable = document.getElementById('instructor-pending-students-table');
+        const getPendingBody = () => pendingTable?.querySelector('tbody');
         const pendingSummary = document.getElementById('pending-summary');
         const pendingPagination = document.getElementById('pending-pagination');
         const pendingSearch = document.getElementById('pending-search');
@@ -259,7 +275,10 @@
         };
 
         const loadEnrollments = () => {
+            const enrollBody = getEnrollBody();
+            if (!enrollBody) return;
             enrollBody.innerHTML = '<tr><td colspan="6" class="px-6 py-6 text-center text-slate-500">Carregando...</td></tr>';
+            window.FlowbiteDashboardTables?.refreshTable(enrollTable);
             const url = new URL(enrollEndpoint, window.location.origin);
             url.searchParams.set('page', stateEnroll.page);
             url.searchParams.set('per_page', stateEnroll.per_page);
@@ -305,18 +324,26 @@
                                 </tr>`;
                         }).join('');
                     }
+                    window.FlowbiteDashboardTables?.refreshTable(enrollTable);
                     renderSummary(data.pagination || {}, enrollSummary, 'alunos');
                     renderPagination(data.pagination || {}, enrollPagination, (next) => { stateEnroll.page = next; loadEnrollments(); });
                 })
                 .catch(() => {
-                    enrollBody.innerHTML = '<tr><td colspan="6" class="px-6 py-6 text-center text-slate-500">Erro ao carregar alunos.</td></tr>';
+                    const errorBody = getEnrollBody();
+                    if (errorBody) {
+                        errorBody.innerHTML = '<tr><td colspan="6" class="px-6 py-6 text-center text-slate-500">Erro ao carregar alunos.</td></tr>';
+                    }
                     enrollSummary.textContent = 'Erro ao carregar alunos.';
                     enrollPagination.innerHTML = '';
+                    window.FlowbiteDashboardTables?.refreshTable(enrollTable);
                 });
         };
 
         const loadPending = () => {
+            const pendingBody = getPendingBody();
+            if (!pendingBody) return;
             pendingBody.innerHTML = '<tr><td colspan="5" class="px-6 py-6 text-center text-slate-500">Carregando...</td></tr>';
+            window.FlowbiteDashboardTables?.refreshTable(pendingTable);
             const url = new URL(pendingEndpoint, window.location.origin);
             url.searchParams.set('page', statePending.page);
             url.searchParams.set('per_page', statePending.per_page);
@@ -360,17 +387,22 @@
                                 </tr>`;
                         }).join('');
                     }
+                    window.FlowbiteDashboardTables?.refreshTable(pendingTable);
                     renderSummary(data.pagination || {}, pendingSummary, 'pedidos');
                     renderPagination(data.pagination || {}, pendingPagination, (next) => { statePending.page = next; loadPending(); });
                 })
                 .catch(() => {
-                    pendingBody.innerHTML = '<tr><td colspan="5" class="px-6 py-6 text-center text-slate-500">Erro ao carregar pedidos.</td></tr>';
+                    const errorBody = getPendingBody();
+                    if (errorBody) {
+                        errorBody.innerHTML = '<tr><td colspan="5" class="px-6 py-6 text-center text-slate-500">Erro ao carregar pedidos.</td></tr>';
+                    }
                     pendingSummary.textContent = 'Erro ao carregar pedidos.';
                     pendingPagination.innerHTML = '';
+                    window.FlowbiteDashboardTables?.refreshTable(pendingTable);
                 });
         };
 
-        enrollBody.addEventListener('click', (event) => {
+        enrollTable?.addEventListener('click', (event) => {
             const btn = event.target.closest('.toggle-access');
             if (!btn) return;
             const id = btn.dataset.id;
@@ -380,7 +412,7 @@
                 .catch(() => loadEnrollments());
         });
 
-        pendingBody.addEventListener('click', (event) => {
+        pendingTable?.addEventListener('click', (event) => {
             const proofBtn = event.target.closest('.proof-btn');
             if (proofBtn) {
                 const src = proofBtn.getAttribute('data-proof-src') || '';

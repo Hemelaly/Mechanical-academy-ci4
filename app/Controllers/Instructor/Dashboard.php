@@ -53,11 +53,11 @@ class Dashboard extends BaseController
     private function sidebarLinks()
     {
         return [
-            ['label' => 'InÃ­cio', 'icon' => 'bi-house-door', 'url' => '/instructor/dashboard'],
+            ['label' => 'Iní­cio', 'icon' => 'bi-house-door', 'url' => '/instructor/dashboard'],
             ['label' => 'Meus Cursos', 'icon' => 'bi-book', 'url' => '/instructor/dashboard/meus_cursos'],
             ['label' => 'Aula ao Vivo', 'icon' => 'bi-camera-reels', 'url' => '/instructor/dashboard/jitsi'],
             ['label' => 'Estudantes', 'icon' => 'bi-people', 'url' => '/instructor/dashboard/meus_estudantes'],
-            ['label' => 'FinanÃ§as', 'icon' => 'bi-cash-coin', 'url' => '/instructor/dashboard/financas'],
+            ['label' => 'Finanças', 'icon' => 'bi-cash-coin', 'url' => '/instructor/dashboard/financas'],
             ['label' => 'Certificados', 'icon' => 'bi-folder', 'url' => '/instructor/dashboard/certificados'],
             ['label' => 'Perfil', 'icon' => 'bi-person-circle', 'url' => '/instructor/dashboard/perfil'],
         ];

@@ -675,13 +675,12 @@ $overviewPlayerId = (int) ($course->id_course ?? 0);
           <?php $isFirstModule = $key === 0; ?>
           <div class="accordion-item mb-3 bg-white border-0 shadow-sm p-2">
             <p class="accordion-header fs-sm">
-              <button class="title accordion-button bg-white fw-semibold <?= $isFirstModule ? '' : 'collapsed' ?>" type="button" data-bs-toggle="collapse"
-                aria-expanded="<?= $isFirstModule ? 'true' : 'false' ?>"
+              <button class="title accordion-button bg-white fw-semibold" type="button" data-bs-toggle="collapse"
                 data-bs-target="#mod<?= $module->id_module ?>">
                 <?= 'Modulo ' . ($key + 1) . ': ' . esc($module->title_module) ?>
               </button>
             </p>
-            <div id="mod<?= $module->id_module ?>" class="accordion-collapse collapse <?= $isFirstModule ? 'show' : '' ?>" data-bs-parent="#excelAccordion">
+            <div id="mod<?= $module->id_module ?>" class="accordion-collapse collapse" data-bs-parent="#excelAccordion">
               <div class="accordion-body bg-white">
                 <?php if (!empty($module->lessons)): ?>
                   <ul class="list-unstyled mb-0">

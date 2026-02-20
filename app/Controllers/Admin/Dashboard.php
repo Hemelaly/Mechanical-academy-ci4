@@ -475,8 +475,13 @@ class Dashboard extends BaseController
             ]);
         }
 
-        $users = new ExtendedUserModel();
-        $user = $users->find($id);
+        $db = db_connect();
+        $user = $db->table('users')
+            ->select('id, role')
+            ->where('id', $id)
+            ->get()
+            ->getRow();
+
         if (! $user || $user->role !== $role) {
             return $this->response->setStatusCode(404)->setJSON([
                 'message' => 'Usuario nao encontrado.',
@@ -484,7 +489,40 @@ class Dashboard extends BaseController
             ]);
         }
 
-        $users->delete($id);
+        $tables = config('Auth')->tables;
+        $usersTable = $tables['users'] ?? 'users';
+        $identitiesTable = $tables['identities'] ?? 'auth_identities';
+        $groupsUsersTable = $tables['groups_users'] ?? 'auth_groups_users';
+        $permissionsUsersTable = $tables['permissions_users'] ?? 'auth_permissions_users';
+        $rememberTable = $tables['remember_tokens'] ?? 'auth_remember_tokens';
+        $loginsTable = $tables['logins'] ?? 'auth_logins';
+        $tokenLoginsTable = $tables['token_logins'] ?? 'auth_token_logins';
+
+        $db->transStart();
+        $db->table('students')->where('id_user_student', $id)->delete();
+        $db->table('instructors')->where('id_user_instructor', $id)->delete();
+        $db->table($rememberTable)->where('user_id', $id)->delete();
+        $db->table($permissionsUsersTable)->where('user_id', $id)->delete();
+        $db->table($groupsUsersTable)->where('user_id', $id)->delete();
+        $db->table($loginsTable)->where('user_id', $id)->delete();
+        $db->table($tokenLoginsTable)->where('user_id', $id)->delete();
+        $db->table($identitiesTable)->where('user_id', $id)->delete();
+        $db->table($usersTable)->where('id', $id)->where('role', $role)->delete();
+        $deletedUsers = $db->affectedRows();
+        $db->transComplete();
+
+        if (! $db->transStatus() || $deletedUsers < 1) {
+            $error = $db->error();
+            log_message('error', 'Falha ao excluir usuario #{id}: {msg}', [
+                'id' => $id,
+                'msg' => $error['message'] ?? 'erro desconhecido',
+            ]);
+
+            return $this->response->setStatusCode(500)->setJSON([
+                'message' => 'Nao foi possivel excluir o usuario.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
 
         return $this->response->setJSON([
             'message' => 'Usuario excluido.',
@@ -562,41 +600,64 @@ class Dashboard extends BaseController
         }
 
         $users = new UserModel();
+        $identityTable = config('Auth')->tables['identities'] ?? 'auth_identities';
+        $existingEmail = db_connect()
+            ->table($identityTable)
+            ->where('type', 'email_password')
+            ->where('secret', $email)
+            ->get()
+            ->getRow();
 
-        $existing = $users->findByCredentials(['email' => $email]);
-        if ($existing) {
+        if ($existingEmail) {
             return $this->response->setStatusCode(409)->setJSON([
                 'message' => 'Email ja registrado.',
                 'csrf' => csrf_hash(),
             ]);
         }
 
-        $existingUsername = $users->where('username', $username)->first();
-        if ($existingUsername) {
-            return $this->response->setStatusCode(409)->setJSON([
-                'message' => 'Nome de usuario ja registrado.',
-                'csrf' => csrf_hash(),
-            ]);
-        }
-
         $user = new User([
             'username' => $username,
+            'active' => 1,
         ]);
         $user->email = $email;
         $user->password = $password;
 
-        if (! $users->save($user)) {
-            return $this->response->setStatusCode(500)->setJSON([
-                'message' => 'Nao foi possivel criar o usuario.',
+        try {
+            if (! $users->save($user)) {
+                return $this->response->setStatusCode(422)->setJSON([
+                    'message' => implode(', ', $users->errors() ?: ['Nao foi possivel criar o usuario.']),
+                    'csrf' => csrf_hash(),
+                ]);
+            }
+
+            $userId = (int) $users->getInsertID();
+            $created = $users->find($userId);
+            if (! $created) {
+                return $this->response->setStatusCode(500)->setJSON([
+                    'message' => 'Nao foi possivel carregar o usuario criado.',
+                    'csrf' => csrf_hash(),
+                ]);
+            }
+
+            $users->addToDefaultGroup($created);
+
+            // Trigger existing register hook to set role and related records.
+            Events::trigger('register', $created);
+        } catch (\Throwable $e) {
+            log_message('error', 'Falha ao criar usuario no admin: {error}', ['error' => $e->getMessage()]);
+
+            $message = 'Nao foi possivel criar o usuario.';
+            $statusCode = 500;
+            if (stripos($e->getMessage(), 'users.username') !== false || stripos($e->getMessage(), 'Duplicate entry') !== false) {
+                $message = 'A base de dados ainda esta bloqueando nomes repetidos. Execute as migracoes.';
+                $statusCode = 409;
+            }
+
+            return $this->response->setStatusCode($statusCode)->setJSON([
+                'message' => $message,
                 'csrf' => csrf_hash(),
             ]);
         }
-
-        $userId = (int) $users->getInsertID();
-        $created = $users->find($userId);
-
-        // Trigger existing register hook to set role and related records.
-        Events::trigger('register', $created);
 
         return $this->response->setJSON([
             'message' => 'Usuario criado com sucesso.',

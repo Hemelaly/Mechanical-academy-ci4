@@ -6,6 +6,8 @@ use App\Controllers\BaseController;
 
 class CourseController extends BaseController
 {
+    private const DEFAULT_MIN_SCORE = 80;
+
     private ?array $courseColumnsCache = null;
 
     private function getCourseColumns(): array
@@ -249,13 +251,9 @@ class CourseController extends BaseController
         }
 
         // 1. Preparar dados do curso
-        $status = $data['status_course'] ?? 'Rascunho';
-        if ($status === 'Publicado') {
-            $status = 'Ativo';
-        }
-        if (!in_array($status, ['Ativo', 'Rascunho', 'Arquivado'], true)) {
-            $status = 'Rascunho';
-        }
+        // Publica apenas quando o botao "Publicar Curso" for usado.
+        $isPublish = ((string) $this->request->getPost('publish') === '1');
+        $status = $isPublish ? 'Ativo' : 'Rascunho';
 
         $courseData = [
             'title_course' => $data['title_course'] ?? '',
@@ -360,7 +358,7 @@ class CourseController extends BaseController
                     'title_module' => $module['title'] ?? 'Módulo ' . ($mIndex + 1),
                     'description_module' => $module['description'] ?? '',
                     'content_zip_module' => $zipName,
-                    'min_score_module' => (int) ($module['min_score'] ?? 75),
+                    'min_score_module' => (int) ($module['min_score'] ?? self::DEFAULT_MIN_SCORE),
                     'position_module' => $mIndex + 1,
                 ];
 
@@ -563,13 +561,8 @@ class CourseController extends BaseController
 
         $data = $this->request->getPost();
 
-        $status = $data['status_course'] ?? $course->status_course;
-        if ($status === 'Publicado') {
-            $status = 'Ativo';
-        }
-        if (!in_array($status, ['Ativo', 'Rascunho', 'Arquivado'], true)) {
-            $status = $course->status_course;
-        }
+        // Auto-save deve sempre permanecer como rascunho.
+        $status = 'Rascunho';
 
         $updateData = [
             'title_course' => $data['title_course'] ?? $course->title_course,
@@ -635,7 +628,7 @@ class CourseController extends BaseController
                         'title_module' => $module['title'] ?? 'Módulo ' . ($mIndex + 1),
                         'description_module' => $module['description'] ?? '',
                         'content_zip_module' => $zipName,
-                        'min_score_module' => (int) ($module['min_score'] ?? 75),
+                        'min_score_module' => (int) ($module['min_score'] ?? self::DEFAULT_MIN_SCORE),
                         'position_module' => $mIndex + 1,
                     ]);
 
@@ -838,7 +831,7 @@ class CourseController extends BaseController
             if (! $zipName && $oldModule) {
                 $zipName = $oldModule->content_zip_module ?? null;
             }
-            $minScore = (int) ($module['min_score'] ?? ($oldModule->min_score_module ?? 75));
+            $minScore = (int) ($module['min_score'] ?? ($oldModule->min_score_module ?? self::DEFAULT_MIN_SCORE));
 
             $moduleInserted = $moduleModel->insert([
                 'id_course_module' => $id,

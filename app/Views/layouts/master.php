@@ -36,12 +36,12 @@
                 <?= $this->include('pages/student/partials/sidebar') ?>
 
                 <!-- CONTEÚDO PRINCIPAL -->
-                <div id="main-content" class="flex flex-1 flex-col transition-all duration-200 prevent-overflow">
+                <div id="main-content" class="flex min-w-0 flex-1 flex-col transition-all duration-200 prevent-overflow">
 
                     <?= $this->include('pages/student/partials/navbar') ?>
 
                     <!-- CONTEÚDO -->
-                    <main class="flex-1 overflow-y-auto p-6 md:p-10 space-y-6 w-full max-w-full overflow-x-hidden">
+                    <main class="flex min-w-0 flex-1 flex-col overflow-y-auto p-6 md:p-10 space-y-6 w-full max-w-full overflow-x-hidden">
 
                         <?= $this->renderSection('home_admin') ?>
 
@@ -68,12 +68,12 @@
                 <?= $this->include('pages/instructor/partials/sidebar') ?>
 
                 <!-- CONTEÚDO PRINCIPAL -->
-                <div id="main-content" class="flex flex-1 flex-col transition-all duration-200 prevent-overflow">
+                <div id="main-content" class="flex min-w-0 flex-1 flex-col transition-all duration-200 prevent-overflow">
 
                     <?= $this->include('pages/instructor/partials/navbar') ?>
 
                     <!-- CONTEÚDO -->
-                    <main class="flex-1 overflow-y-auto p-6 md:p-10 space-y-6 w-full max-w-full overflow-x-hidden">
+                    <main class="flex min-w-0 flex-1 flex-col overflow-y-auto p-6 md:p-10 space-y-6 w-full max-w-full overflow-x-hidden">
 
                         <?= $this->renderSection('home_instructor') ?>
 
@@ -101,12 +101,12 @@
                 <?= $this->include('pages/admin/partials/sidebar') ?>
 
                 <!-- CONTEÚDO PRINCIPAL -->
-                <div id="main-content" class="flex flex-1 flex-col transition-all duration-200 prevent-overflow">
+                <div id="main-content" class="flex min-w-0 flex-1 flex-col transition-all duration-200 prevent-overflow">
 
                     <?= $this->include('pages/admin/partials/navbar') ?>
 
                     <!-- CONTEÚDO -->
-                    <main class="flex-1 overflow-y-auto p-6 md:p-10 space-y-6 w-full max-w-full overflow-x-hidden">
+                    <main class="flex min-w-0 flex-1 flex-col overflow-y-auto p-6 md:p-10 space-y-6 w-full max-w-full overflow-x-hidden">
 
                         <?= $this->renderSection('home_admin') ?>
 
@@ -138,6 +138,8 @@
 
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3" defer></script>
+    <script src="<?= base_url('assets/js/flowbite-datatables.js') ?>" defer></script>
     <script src="<?= base_url('assets/js/main.js') ?>"></script>
 
     <?php $swalPayload = session()->getFlashdata('swal') ?? session('swal'); ?>

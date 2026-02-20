@@ -49,7 +49,14 @@
 
     <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl">
         <div class="relative overflow-x-auto">
-            <table class="w-full text-left text-sm text-slate-500 dark:text-slate-400">
+            <table
+                id="admin-instructors-table"
+                data-flowbite-datatable
+                data-datatable-searchable="false"
+                data-datatable-paging="false"
+                data-datatable-sortable="false"
+                data-datatable-per-page-select="false"
+                class="w-full text-left text-sm text-slate-500 dark:text-slate-400">
                 <thead class="text-xs uppercase text-slate-600 bg-slate-50 dark:bg-slate-700 dark:text-slate-300">
                     <tr>
                         <th scope="col" class="px-6 py-3">Instrutor</th>
@@ -170,7 +177,8 @@
 <script>
     (function () {
         const endpoint = <?= json_encode(site_url('admin/dashboard/instrutores/data')) ?>;
-        const tableBody = document.getElementById('instructors-table-body');
+        const instructorsTable = document.getElementById('admin-instructors-table');
+        const getTableBody = () => instructorsTable?.querySelector('tbody');
         const summary = document.getElementById('instructors-summary');
         const pagination = document.getElementById('instructors-pagination');
         const searchInput = document.getElementById('instructors-search');
@@ -245,8 +253,12 @@
         };
 
         const renderRows = (items) => {
+            const tableBody = getTableBody();
+            if (!tableBody) return;
+
             if (!items.length) {
                 tableBody.innerHTML = `<tr><td colspan="6" class="px-6 py-6 text-center text-slate-500">Nenhum instrutor encontrado.</td></tr>`;
+                window.FlowbiteDashboardTables?.refreshTable(instructorsTable);
                 return;
             }
             tableBody.innerHTML = items.map(item => {
@@ -292,6 +304,7 @@
                 </tr>
             `;
             }).join('');
+            window.FlowbiteDashboardTables?.refreshTable(instructorsTable);
         };
 
         const renderPagination = (paginationData) => {
@@ -339,6 +352,11 @@
         const loadData = () => {
             if (state.loading) return;
             state.loading = true;
+            const tableBody = getTableBody();
+            if (!tableBody) {
+                state.loading = false;
+                return;
+            }
             tableBody.innerHTML = `<tr><td colspan="6" class="px-6 py-6 text-center text-slate-500">Carregando...</td></tr>`;
 
             const url = new URL(endpoint, window.location.origin);
@@ -355,9 +373,13 @@
                     renderPagination(data.pagination || {});
                 })
                 .catch(() => {
-                    tableBody.innerHTML = `<tr><td colspan="6" class="px-6 py-6 text-center text-slate-500">Erro ao carregar dados.</td></tr>`;
+                    const errorBody = getTableBody();
+                    if (errorBody) {
+                        errorBody.innerHTML = `<tr><td colspan="6" class="px-6 py-6 text-center text-slate-500">Erro ao carregar dados.</td></tr>`;
+                    }
                     summary.textContent = 'Erro ao carregar instrutores.';
                     pagination.innerHTML = '';
+                    window.FlowbiteDashboardTables?.refreshTable(instructorsTable);
                 })
                 .finally(() => {
                     state.loading = false;
@@ -435,7 +457,7 @@
             }
         });
 
-        tableBody.addEventListener('click', (event) => {
+        instructorsTable?.addEventListener('click', (event) => {
             const viewButton = event.target.closest('.instructor-view');
             if (viewButton) {
                 const item = JSON.parse(decodeURIComponent(viewButton.getAttribute('data-user')));
@@ -479,6 +501,11 @@
                                 Swal.fire({ icon: 'success', title: 'Excluido', text: data.message });
                             }
                             loadData();
+                        })
+                        .catch((error) => {
+                            if (window.Swal) {
+                                Swal.fire({ icon: 'error', title: 'Erro', text: error?.message || 'Nao foi possivel excluir o usuario.' });
+                            }
                         });
 
                     if (window.Swal) {

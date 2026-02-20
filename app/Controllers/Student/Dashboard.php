@@ -449,7 +449,7 @@ class Dashboard extends BaseController
                     ->getRowArray();
 
                 $score = $scoreRow['score_progress'] ?? null;
-                $minScore = (int) ($prevModule->min_score_module ?? 75);
+                $minScore = (int) ($prevModule->min_score_module ?? 80);
 
                 $warningMessage = 'Faça o quiz do módulo anterior e obtenha no mínimo ' . $minScore . '% para avançar.';
                 if ($score !== null && (float) $score < $minScore) {

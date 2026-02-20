@@ -343,9 +343,9 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
                                             name="modules[<?= $mIndex ?>][min_score]"
                                             min="0"
                                             max="100"
-                                            value="<?= esc($module->min_score_module ?? 75) ?>"
+                                            value="<?= esc($module->min_score_module ?? 80) ?>"
                                             class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                            placeholder="Ex: 75">
+                                            placeholder="Ex: 80">
                                     </div>
                                 </div>
 
@@ -681,7 +681,7 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
                         </div>
 
                         <div class="space-y-3">
-                        <button type="submit" id="publish-course"
+                        <button type="submit" id="publish-course" name="publish" value="1"
                             class="w-full px-6 py-3.5 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-xl transition-all duration-200 transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl">
                             <i class="bi bi-rocket mr-2"></i>
                             Publicar Curso
@@ -730,6 +730,17 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
                 ["insert", ["link"]],
                 ["view", ["fullscreen", "codeview"]],
             ],
+            callbacks: {
+                onChange: function () {
+                    window.dispatchEvent(new Event("course-editor-input"));
+                },
+                onKeyup: function () {
+                    window.dispatchEvent(new Event("course-editor-input"));
+                },
+                onPaste: function () {
+                    window.dispatchEvent(new Event("course-editor-input"));
+                }
+            }
         };
 
         const descriptionEditor = $("#courseDescription");
@@ -785,6 +796,8 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
         const priceSettings = document.getElementById("price-settings");
         const priceInput = document.getElementById("coursePrice");
         const courseTypeRadios = document.querySelectorAll('input[name="courseType"]');
+        const form = document.getElementById("courseForm");
+        const draftSaveUrl = "<?= base_url('instructor/dashboard/novo_curso/rascunho/' . $course->id_course) ?>";
 
         // Projetos
         const projectsContainer = document.getElementById("projects-container");
@@ -794,6 +807,46 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
         // Cor primÃ¡ria
         const colorTextInput = document.getElementById("courseColorText");
         const colorPickerInput = document.getElementById("courseColorPicker");
+
+        let saveToastElement = null;
+        let saveToastTimer = null;
+        let lastSaveToastKey = "";
+        let lastSaveToastAt = 0;
+
+        function showSaveToast(message, type = "success") {
+            const now = Date.now();
+            const toastKey = `${type}:${message}`;
+            const cooldown = type === "error" ? 4000 : 1200;
+
+            if (toastKey === lastSaveToastKey && now - lastSaveToastAt < cooldown) {
+                return;
+            }
+
+            lastSaveToastKey = toastKey;
+            lastSaveToastAt = now;
+
+            if (!saveToastElement) {
+                saveToastElement = document.createElement("div");
+                saveToastElement.className = "fixed bottom-4 right-4 z-[9999] px-4 py-2 rounded-lg shadow-lg text-sm font-medium transition-all duration-200 opacity-0 translate-y-2 pointer-events-none";
+                document.body.appendChild(saveToastElement);
+            }
+
+            const toneClasses = type === "error"
+                ? "bg-red-600 text-white"
+                : "bg-emerald-600 text-white";
+
+            saveToastElement.className = `fixed bottom-4 right-4 z-[9999] px-4 py-2 rounded-lg shadow-lg text-sm font-medium transition-all duration-200 pointer-events-none ${toneClasses}`;
+            saveToastElement.textContent = message;
+            saveToastElement.classList.remove("opacity-0", "translate-y-2");
+            saveToastElement.classList.add("opacity-100", "translate-y-0");
+
+            clearTimeout(saveToastTimer);
+            saveToastTimer = setTimeout(() => {
+                if (!saveToastElement) return;
+                saveToastElement.classList.remove("opacity-100", "translate-y-0");
+                saveToastElement.classList.add("opacity-0", "translate-y-2");
+            }, 1800);
+        }
 
         // ======================
         // Step Navigation
@@ -961,6 +1014,7 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
             fileInput.value = "";
             if (previewContainer) previewContainer.classList.add("hidden");
             if (uploadArea) uploadArea.classList.remove("hidden");
+            scheduleAutoSave();
         }
 
         // Attach remove image event
@@ -1010,7 +1064,7 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
                 const moduleDescription =
                     modCard.querySelector('textarea[name$="[description]"]')?.value || "";
                 const moduleMinScore =
-                    modCard.querySelector('input[name$="[min_score]"]')?.value || 75;
+                    modCard.querySelector('input[name$="[min_score]"]')?.value || 80;
                 const lessons = [];
 
                 modCard.querySelectorAll(".lesson-item").forEach((lessonEl, j) => {
@@ -1066,7 +1120,7 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
                 modules.push({
                     title: moduleTitle,
                     description: moduleDescription,
-                    min_score: Number.isFinite(minScoreValue) ? minScoreValue : 75,
+                    min_score: Number.isFinite(minScoreValue) ? minScoreValue : 80,
                     lessons,
                 });
             });
@@ -1110,6 +1164,79 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
                 touched.push(field);
             });
             return touched;
+        }
+
+        function restoreDynamicFieldNames(fields) {
+            fields.forEach((field) => {
+                const originalName = field.dataset.compactOriginalName;
+                if (!originalName) return;
+                field.setAttribute("name", originalName);
+                delete field.dataset.compactOriginalName;
+            });
+        }
+
+        function syncRichTextEditors() {
+            if (typeof window.jQuery !== "function" || typeof window.jQuery.fn?.summernote !== "function") {
+                return;
+            }
+
+            const descriptionEditor = window.jQuery("#courseDescription");
+            if (descriptionEditor.length && descriptionEditor.next(".note-editor").length) {
+                const descriptionField = document.getElementById("courseDescription");
+                if (descriptionField) {
+                    descriptionField.value = descriptionEditor.summernote("code");
+                }
+            }
+
+            const learningEditor = window.jQuery("#courseLearning");
+            if (learningEditor.length && learningEditor.next(".note-editor").length) {
+                const learningField = document.getElementById("courseLearning");
+                if (learningField) {
+                    learningField.value = learningEditor.summernote("code");
+                }
+            }
+        }
+
+        async function saveDraftSilently() {
+            if (!form) return false;
+
+            syncRichTextEditors();
+            serializeModules();
+            serializeProjects();
+
+            const compactedFields = stripRedundantDynamicFieldNames();
+            const formData = new FormData(form);
+            restoreDynamicFieldNames(compactedFields);
+
+            try {
+                const response = await fetch(draftSaveUrl, {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                });
+
+                let payload = {};
+                try {
+                    payload = await response.json();
+                } catch (error) {
+                    payload = {};
+                }
+
+                if (!response.ok || !payload.ok) {
+                    console.warn(payload.message || "Falha ao salvar rascunho automaticamente.");
+                    showSaveToast(payload.message || "Falha ao salvar rascunho automaticamente.", "error");
+                    return false;
+                }
+
+                showSaveToast("Configuracao salva.");
+                return true;
+            } catch (error) {
+                console.warn("Falha ao salvar rascunho automaticamente.", error);
+                showSaveToast("Falha ao salvar rascunho automaticamente.", "error");
+                return false;
+            }
         }
 
         function syncQuizFields(lessonEl) {
@@ -1186,7 +1313,7 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
             const moduleId = moduleData?.id_module || "";
             const moduleTitle = moduleData?.title || "";
             const moduleDescription = moduleData?.description || "";
-            const moduleMinScore = moduleData?.min_score ?? 75;
+            const moduleMinScore = moduleData?.min_score ?? 80;
             let lessonsHtml = "";
 
             if (moduleData?.lessons) {
@@ -1219,7 +1346,7 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
                                max="100"
                                value="${moduleMinScore}"
                                class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                               placeholder="Ex: 75">
+                               placeholder="Ex: 80">
                     </div>
                 </div>
                 <div class="lessons-container space-y-3 mb-3">${lessonsHtml}</div>
@@ -1313,26 +1440,33 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
         }
 
         // Add Module Button
-        document.getElementById("add-module")?.addEventListener("click", () => addModule());
+        document.getElementById("add-module")?.addEventListener("click", () => {
+            addModule();
+            scheduleAutoSave();
+        });
 
         // Event Delegation for Modules Container
         modulesContainer?.addEventListener("click", (e) => {
             // Remove module
             if (e.target.classList.contains("remove-module")) {
                 e.target.closest(".module-card").remove();
+                scheduleAutoSave();
             }
             // Remove lesson
             if (e.target.classList.contains("remove-lesson")) {
                 e.target.closest(".lesson-item").remove();
+                scheduleAutoSave();
             }
             // Add quiz question
             if (e.target.closest(".btn-add-quiz-question")) {
                 const lessonEl = e.target.closest(".lesson-item");
                 addQuizQuestion(lessonEl);
+                scheduleAutoSave();
             }
             // Remove quiz question
             if (e.target.closest(".remove-quiz-question")) {
                 e.target.closest(".quiz-question")?.remove();
+                scheduleAutoSave();
             }
             // Add lesson
             const addLessonBtn = e.target.closest('.add-lesson');
@@ -1345,6 +1479,7 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
                     "beforeend",
                     createLessonHTML(moduleId, lessonCount)
                 );
+                scheduleAutoSave();
             }
 
         });
@@ -1354,6 +1489,7 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
                 const lessonEl = e.target.closest(".lesson-item");
                 syncQuizFields(lessonEl);
                 syncVideoFields(lessonEl);
+                scheduleAutoSave();
             }
         });
 
@@ -1454,6 +1590,7 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
             draggedLesson = null;
             dragPlaceholder = null;
             updateCourseStats();
+            scheduleAutoSave();
         });
 
         modulesContainer?.addEventListener("dragover", (e) => {
@@ -1585,11 +1722,13 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
             addProjectButton.addEventListener("click", () => {
                 projectsContainer.insertAdjacentHTML("beforeend", buildProjectCard(projectIndex));
                 projectIndex++;
+                scheduleAutoSave();
             });
 
             projectsContainer.addEventListener("click", (e) => {
                 if (e.target.closest(".remove-project")) {
                     e.target.closest(".project-card")?.remove();
+                    scheduleAutoSave();
                 }
             });
         }
@@ -1609,9 +1748,40 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
         });
 
         // ======================
+        // Auto-save
+        // ======================
+        let autoSaveTimer = null;
+        let autoSaveInFlight = false;
+        let autoSaveQueued = false;
+
+        function scheduleAutoSave() {
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(async () => {
+                if (autoSaveInFlight) {
+                    autoSaveQueued = true;
+                    return;
+                }
+
+                autoSaveInFlight = true;
+                await saveDraftSilently();
+                autoSaveInFlight = false;
+
+                if (autoSaveQueued) {
+                    autoSaveQueued = false;
+                    scheduleAutoSave();
+                }
+            }, 900);
+        }
+
+        document.addEventListener("input", scheduleAutoSave);
+        document.addEventListener("change", scheduleAutoSave);
+        window.addEventListener("course-editor-input", scheduleAutoSave);
+
+        // ======================
         // Form Validation (Basic)
         // ======================
         document.getElementById('courseForm')?.addEventListener('submit', function(e) {
+            syncRichTextEditors();
             const title = document.getElementById('title_course').value.trim();
             const subtitle = document.getElementById('courseSubtitle').value.trim();
             const description = document.getElementById('courseDescription').value.trim();

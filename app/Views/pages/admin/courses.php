@@ -302,7 +302,14 @@ $categories = $categories ?? ['Programação', 'Design', 'Dados', 'Marketing', '
         </div>
     <?php else: ?>
         <div class="overflow-x-auto">
-            <table class="w-full">
+            <table
+                id="admin-courses-table"
+                data-flowbite-datatable
+                data-datatable-searchable="false"
+                data-datatable-paging="false"
+                data-datatable-sortable="false"
+                data-datatable-per-page-select="false"
+                class="w-full">
                 <thead class="bg-gray-900/80 border-b border-gray-800">
                     <tr>
                         <th class="py-4 px-6 text-left">
@@ -685,10 +692,22 @@ $categories = $categories ?? ['Programação', 'Design', 'Dados', 'Marketing', '
     // Check all
     const checkAll = document.getElementById('checkAll');
     const tableCheckAll = document.getElementById('tableCheckAll');
-    const rowChecks = document.querySelectorAll('.row-check');
-    
+    const coursesTable = document.getElementById('admin-courses-table');
+
+    function getRowChecks() {
+        return Array.from(document.querySelectorAll('#admin-courses-table .row-check'));
+    }
+
+    function syncMasterChecks() {
+        const rowChecks = getRowChecks();
+        const allChecked = rowChecks.length > 0 && rowChecks.every(c => c.checked);
+        if (checkAll) checkAll.checked = allChecked;
+        if (tableCheckAll) tableCheckAll.checked = allChecked;
+    }
+
     function handleCheckAll(checkbox) {
         const isChecked = checkbox.checked;
+        const rowChecks = getRowChecks();
         rowChecks.forEach(check => {
             check.checked = isChecked;
             if (isChecked) {
@@ -709,39 +728,37 @@ $categories = $categories ?? ['Programação', 'Design', 'Dados', 'Marketing', '
     }
     
     // Check individual
-    rowChecks.forEach(check => {
-        check.addEventListener('change', function() {
-            if (this.checked) {
-                selectedCourses.add(this.value);
-            } else {
-                selectedCourses.delete(this.value);
-            }
-            
-            // Atualizar check all
-            const allChecked = Array.from(rowChecks).every(c => c.checked);
-            const someChecked = Array.from(rowChecks).some(c => c.checked);
-            
-            if (checkAll) checkAll.checked = allChecked;
-            if (tableCheckAll) tableCheckAll.checked = allChecked;
-            
-            updateBulkButtons();
-        });
+    coursesTable?.addEventListener('change', function(event) {
+        const target = event.target;
+        if (!(target instanceof HTMLInputElement) || !target.classList.contains('row-check')) {
+            return;
+        }
+
+        if (target.checked) {
+            selectedCourses.add(target.value);
+        } else {
+            selectedCourses.delete(target.value);
+        }
+
+        syncMasterChecks();
+        updateBulkButtons();
     });
 
     // Modal de exclusão
     let deleteCourseId = null;
     let deleteCourseTitle = '';
     
-    document.querySelectorAll('.btn-delete').forEach(btn => {
-        btn.addEventListener('click', function() {
-            deleteCourseId = this.getAttribute('data-id');
-            deleteCourseTitle = this.getAttribute('data-title');
-            
-            document.getElementById('deleteCourseTitle').textContent = deleteCourseTitle;
-            document.getElementById('deleteCourseId').value = deleteCourseId;
-            
-            document.getElementById('deleteModal').classList.remove('hidden');
-        });
+    document.addEventListener('click', function(event) {
+        const deleteButton = event.target.closest('.btn-delete');
+        if (!deleteButton) return;
+
+        deleteCourseId = deleteButton.getAttribute('data-id');
+        deleteCourseTitle = deleteButton.getAttribute('data-title');
+
+        document.getElementById('deleteCourseTitle').textContent = deleteCourseTitle;
+        document.getElementById('deleteCourseId').value = deleteCourseId;
+
+        document.getElementById('deleteModal').classList.remove('hidden');
     });
     
     function closeDeleteModal() {
@@ -851,16 +868,6 @@ $categories = $categories ?? ['Programação', 'Design', 'Dados', 'Marketing', '
         }
     });
 
-    // Animações de hover nas linhas
-    document.querySelectorAll('tbody tr').forEach(row => {
-        row.addEventListener('mouseenter', function() {
-            this.style.backgroundColor = 'rgba(255, 255, 255, 0.02)';
-        });
-        
-        row.addEventListener('mouseleave', function() {
-            this.style.backgroundColor = '';
-        });
-    });
 </script>
 
 <?= $this->endSection() ?>

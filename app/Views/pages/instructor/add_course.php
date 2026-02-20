@@ -437,9 +437,9 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                                                         name="modules[<?= $mIndex ?>][min_score]"
                                                         min="0"
                                                         max="100"
-                                                        value="<?= esc($module->min_score_module ?? 75) ?>"
+                                                        value="<?= esc($module->min_score_module ?? 80) ?>"
                                                         class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
-                                                        placeholder="Ex: 75">
+                                                        placeholder="Ex: 80">
                                                 </div>
                                             </div>
 
@@ -816,7 +816,7 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                                 <p class="text-slate-500 dark:text-slate-400 text-sm">
                                     Revise todas as informações e publique seu curso
                                 </p>
-                                <button type="submit" class="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition-all duration-300">
+                                <button type="submit" name="publish" value="1" class="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition-all duration-300">
                                     <i class="bi bi-rocket"></i>
                                     Publicar Curso
                                 </button>
@@ -872,6 +872,17 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                 ["insert", ["link"]],
                 ["view", ["fullscreen", "codeview"]],
             ],
+            callbacks: {
+                onChange: function () {
+                    window.dispatchEvent(new Event("course-editor-input"));
+                },
+                onKeyup: function () {
+                    window.dispatchEvent(new Event("course-editor-input"));
+                },
+                onPaste: function () {
+                    window.dispatchEvent(new Event("course-editor-input"));
+                }
+            }
         };
 
         const descriptionEditor = $("#courseDescription");
@@ -959,6 +970,46 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
         // ======================
         // Funções auxiliares
         // ======================
+        let saveToastElement = null;
+        let saveToastTimer = null;
+        let lastSaveToastKey = "";
+        let lastSaveToastAt = 0;
+
+        function showSaveToast(message, type = "success") {
+            const now = Date.now();
+            const toastKey = `${type}:${message}`;
+            const cooldown = type === "error" ? 4000 : 1200;
+
+            if (toastKey === lastSaveToastKey && now - lastSaveToastAt < cooldown) {
+                return;
+            }
+
+            lastSaveToastKey = toastKey;
+            lastSaveToastAt = now;
+
+            if (!saveToastElement) {
+                saveToastElement = document.createElement("div");
+                saveToastElement.className = "fixed bottom-4 right-4 z-[9999] px-4 py-2 rounded-lg shadow-lg text-sm font-medium transition-all duration-200 opacity-0 translate-y-2 pointer-events-none";
+                document.body.appendChild(saveToastElement);
+            }
+
+            const toneClasses = type === "error"
+                ? "bg-red-600 text-white"
+                : "bg-emerald-600 text-white";
+
+            saveToastElement.className = `fixed bottom-4 right-4 z-[9999] px-4 py-2 rounded-lg shadow-lg text-sm font-medium transition-all duration-200 pointer-events-none ${toneClasses}`;
+            saveToastElement.textContent = message;
+            saveToastElement.classList.remove("opacity-0", "translate-y-2");
+            saveToastElement.classList.add("opacity-100", "translate-y-0");
+
+            clearTimeout(saveToastTimer);
+            saveToastTimer = setTimeout(() => {
+                if (!saveToastElement) return;
+                saveToastElement.classList.remove("opacity-100", "translate-y-0");
+                saveToastElement.classList.add("opacity-0", "translate-y-2");
+            }, 1800);
+        }
+
         const tabsByStep = ["basic-info", "content-structure", "advanced-settings", "review-publish"];
 
         function getTabForStep(step) {
@@ -1086,7 +1137,7 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                 const moduleDescription =
                     modCard.querySelector('textarea[name$="[description]"]')?.value || "";
                 const moduleMinScore =
-                    modCard.querySelector('input[name$="[min_score]"]')?.value || 75;
+                    modCard.querySelector('input[name$="[min_score]"]')?.value || 80;
                 const lessons = [];
 
                 modCard.querySelectorAll(".lesson-item").forEach((lessonEl, j) => {
@@ -1143,7 +1194,7 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                 modules.push({
                     title: moduleTitle,
                     description: moduleDescription,
-                    min_score: Number.isFinite(minScoreValue) ? minScoreValue : 75,
+                    min_score: Number.isFinite(minScoreValue) ? minScoreValue : 80,
                     lessons,
                 });
             });
@@ -1193,10 +1244,33 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
             });
         }
 
+        function syncRichTextEditors() {
+            if (typeof window.jQuery !== "function" || typeof window.jQuery.fn?.summernote !== "function") {
+                return;
+            }
+
+            const descriptionEditor = window.jQuery("#courseDescription");
+            if (descriptionEditor.length && descriptionEditor.next(".note-editor").length) {
+                const descriptionField = document.getElementById("courseDescription");
+                if (descriptionField) {
+                    descriptionField.value = descriptionEditor.summernote("code");
+                }
+            }
+
+            const learningEditor = window.jQuery("#courseLearning");
+            if (learningEditor.length && learningEditor.next(".note-editor").length) {
+                const learningField = document.getElementById("courseLearning");
+                if (learningField) {
+                    learningField.value = learningEditor.summernote("code");
+                }
+            }
+        }
+
         async function saveDraft({ validate = false, silent = false } = {}) {
             if (!form) return false;
             if (validate && !validateCurrentStep()) return false;
 
+            syncRichTextEditors();
             serializeModulesAndTags();
 
             const currentDraftId = draftIdInput?.value?.trim();
@@ -1222,9 +1296,7 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                 }
 
                 if (!response.ok || !payload.ok) {
-                    if (!silent) {
-                        alert(payload.message || "Falha ao salvar rascunho.");
-                    }
+                    showSaveToast(payload.message || "Falha ao salvar rascunho.", "error");
                     return false;
                 }
 
@@ -1232,15 +1304,11 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                     draftIdInput.value = payload.id_course;
                 }
 
-                if (!silent) {
-                    alert("Rascunho salvo com sucesso.");
-                }
+                showSaveToast("Configuracao salva.");
 
                 return true;
             } catch (error) {
-                if (!silent) {
-                    alert("Falha ao salvar rascunho. Tente novamente.");
-                }
+                showSaveToast("Falha ao salvar rascunho. Tente novamente.", "error");
                 return false;
             }
         }
@@ -1272,6 +1340,7 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
 
         if (form) {
             form.addEventListener("submit", () => {
+                syncRichTextEditors();
                 serializeModulesAndTags();
                 stripRedundantDynamicFieldNames();
             });
@@ -1341,6 +1410,7 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                 previewImg.src = "";
                 previewContainer.classList.add("hidden");
                 uploadArea.classList.remove("hidden");
+                scheduleAutoSave();
             });
         }
 
@@ -1511,9 +1581,9 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                                    name="modules[${moduleIndex}][min_score]"
                                    min="0"
                                    max="100"
-                                   value="75"
+                                   value="80"
                                    class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
-                                   placeholder="Ex: 75">
+                                   placeholder="Ex: 80">
                         </div>
                     </div>
 
@@ -1529,6 +1599,7 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
             `;
                 modulesContainer.insertAdjacentHTML("beforeend", moduleHtml);
                 moduleIndex++;
+                scheduleAutoSave();
             });
 
             modulesContainer.addEventListener("click", (e) => {
@@ -1537,6 +1608,7 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                 // remover módulo
                 if (target.closest(".remove-module")) {
                     target.closest(".module-card").remove();
+                    scheduleAutoSave();
                     return;
                 }
 
@@ -1616,6 +1688,7 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                 `;
 
                     lessonsContainer.insertAdjacentHTML("beforeend", lessonHtml);
+                    scheduleAutoSave();
                     return;
                 }
 
@@ -1623,18 +1696,21 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                 if (target.closest(".btn-add-quiz-question")) {
                     const lessonEl = target.closest(".lesson-item");
                     addQuizQuestion(lessonEl);
+                    scheduleAutoSave();
                     return;
                 }
 
                 // remover pergunta de quiz
                 if (target.closest(".remove-quiz-question")) {
                     target.closest(".quiz-question")?.remove();
+                    scheduleAutoSave();
                     return;
                 }
 
                 // remover aula
                 if (target.closest(".remove-lesson")) {
                     target.closest(".lesson-item").remove();
+                    scheduleAutoSave();
                 }
             });
 
@@ -1643,6 +1719,7 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                     const lessonEl = e.target.closest(".lesson-item");
                     syncQuizFields(lessonEl);
                     syncVideoFields(lessonEl);
+                    scheduleAutoSave();
                 }
             });
 
@@ -1742,6 +1819,7 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                 draggedLesson = null;
                 dragPlaceholder = null;
                 updateCourseStats();
+                scheduleAutoSave();
             });
 
         modulesContainer.addEventListener("dragover", (e) => {
@@ -1874,11 +1952,13 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
             addProjectButton.addEventListener("click", () => {
                 projectsContainer.insertAdjacentHTML("beforeend", buildProjectCard(projectIndex));
                 projectIndex++;
+                scheduleAutoSave();
             });
 
             projectsContainer.addEventListener("click", (e) => {
                 if (e.target.closest(".remove-project")) {
                     e.target.closest(".project-card")?.remove();
+                    scheduleAutoSave();
                 }
             });
         }
@@ -1916,6 +1996,7 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                         tags.push(tag);
                         renderTags();
                         tagsInput.value = "";
+                        scheduleAutoSave();
                     }
                 }
             });
@@ -1928,6 +2009,7 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                 const tagToRemove = btn.dataset.tag;
                 tags = tags.filter((t) => t !== tagToRemove);
                 renderTags();
+                scheduleAutoSave();
             });
         }
 
@@ -1947,13 +2029,32 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
         // ======================
         // Auto-save
         // ======================
-        let autoSaveTimer;
-        document.addEventListener("input", () => {
+        let autoSaveTimer = null;
+        let autoSaveInFlight = false;
+        let autoSaveQueued = false;
+
+        const scheduleAutoSave = () => {
             clearTimeout(autoSaveTimer);
-            autoSaveTimer = setTimeout(() => {
-                saveDraft({ silent: true });
-            }, 2000);
-        });
+            autoSaveTimer = setTimeout(async () => {
+                if (autoSaveInFlight) {
+                    autoSaveQueued = true;
+                    return;
+                }
+
+                autoSaveInFlight = true;
+                await saveDraft({ silent: true });
+                autoSaveInFlight = false;
+
+                if (autoSaveQueued) {
+                    autoSaveQueued = false;
+                    scheduleAutoSave();
+                }
+            }, 900);
+        };
+
+        document.addEventListener("input", scheduleAutoSave);
+        document.addEventListener("change", scheduleAutoSave);
+        window.addEventListener("course-editor-input", scheduleAutoSave);
 
         if (saveDraftButton) {
             saveDraftButton.addEventListener("click", async () => {

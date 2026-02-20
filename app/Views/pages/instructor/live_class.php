@@ -69,7 +69,11 @@ $aulas  = $aulas ?? []; // lista de aulas vindas do controller
                     </div>
 
                     <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left">
+                        <table
+                            id="instructor-live-classes-table"
+                            data-flowbite-datatable
+                            data-datatable-per-page="8"
+                            class="w-full text-sm text-left">
                             <thead class="bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-white">
                                 <tr>
                                     <th class="px-6 py-3 whitespace-nowrap">Título</th>
@@ -654,32 +658,33 @@ $aulas  = $aulas ?? []; // lista de aulas vindas do controller
 
     // Atualiza preview quando clicar na linha
     document.addEventListener('DOMContentLoaded', function() {
-        const rows = document.querySelectorAll('tbody tr[data-id]');
+        const liveClassesTable = document.getElementById('instructor-live-classes-table');
 
-        rows.forEach(row => {
-            row.addEventListener('click', function(e) {
-                // evita conflito quando clicar nos botões de ação
-                if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.closest('button') || e.target.closest('a')) {
-                    return;
-                }
+        liveClassesTable?.addEventListener('click', function(e) {
+            // evita conflito quando clicar nos botões de ação
+            if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.closest('button') || e.target.closest('a')) {
+                return;
+            }
 
-                const title = row.dataset.title || '-';
-                const type = row.dataset.classType === 'instant' ? 'Instantânea' : 'Agendada';
-                const date = row.dataset.date || '-';
-                let time = '-';
-                if (row.dataset.start && row.dataset.end) {
-                    time = row.dataset.start + ' - ' + row.dataset.end;
-                } else if (row.dataset.start) {
-                    time = row.dataset.start + ' - --:--';
-                }
-                const status = row.dataset.status || '-';
+            const row = e.target.closest('tr[data-id]');
+            if (!row) return;
 
-                document.getElementById('previewTitle').textContent = title;
-                document.getElementById('previewType').textContent = type;
-                document.getElementById('previewDate').textContent = date || '-';
-                document.getElementById('previewTime').textContent = time;
-                document.getElementById('previewStatus').textContent = status;
-            });
+            const title = row.dataset.title || '-';
+            const type = row.dataset.classType === 'instant' ? 'Instantânea' : 'Agendada';
+            const date = row.dataset.date || '-';
+            let time = '-';
+            if (row.dataset.start && row.dataset.end) {
+                time = row.dataset.start + ' - ' + row.dataset.end;
+            } else if (row.dataset.start) {
+                time = row.dataset.start + ' - --:--';
+            }
+            const status = row.dataset.status || '-';
+
+            document.getElementById('previewTitle').textContent = title;
+            document.getElementById('previewType').textContent = type;
+            document.getElementById('previewDate').textContent = date || '-';
+            document.getElementById('previewTime').textContent = time;
+            document.getElementById('previewStatus').textContent = status;
         });
 
         // Mostrar/ocultar campo de senha conforme privacidade
