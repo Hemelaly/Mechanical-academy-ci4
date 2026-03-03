@@ -105,7 +105,7 @@ $aulas  = $aulas ?? []; // lista de aulas vindas do controller
                                         data-end="<?= esc($aula->end_time_jitsi ?? '', 'attr') ?>"
                                         data-status="<?= esc($aula->status_jitsi, 'attr') ?>"
                                         data-privacy="<?= esc($aula->privacy_jitsi, 'attr') ?>"
-                                        data-password="<?= esc($aula->password_jitsi ?? '', 'attr') ?>"
+
                                         data-recording="<?= esc($aula->recording_jitsi, 'attr') ?>"
                                         data-chat="<?= esc($aula->chat_jitsi, 'attr') ?>"
                                         data-screenshare="<?= esc($aula->screenshare_jitsi, 'attr') ?>">
@@ -253,7 +253,7 @@ $aulas  = $aulas ?? []; // lista de aulas vindas do controller
                                         text-slate-800 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200">
                                     <option value="">Selecione um curso</option>
                                     <?php foreach ($courses as $course): ?>
-                                        <option value="<?= $course->id_course ?>" <?= old('associatedCourse') == '2' ? 'selected' : '' ?>><?= $course->title_course ?></option>
+                                        <option value="<?= $course->id_course ?>" <?= old('associatedCourse') == (string) $course->id_course ? 'selected' : '' ?>><?= $course->title_course ?></option>
                                     <?php endforeach ?>
                                 </select>
                                 <?php if (isset($errors['associatedCourse'])): ?>
@@ -610,7 +610,7 @@ $aulas  = $aulas ?? []; // lista de aulas vindas do controller
 
         document.getElementById('roomStatus').value = row.dataset.status || '';
         document.getElementById('roomPrivacy').value = row.dataset.privacy || '';
-        document.getElementById('roomPassword').value = row.dataset.password || '';
+        document.getElementById('roomPassword').value = ''; // senha nunca volta do servidor
 
         document.getElementById('enableRecording').checked = row.dataset.recording === '1';
         document.getElementById('enableChat').checked = row.dataset.chat === '1';
@@ -651,7 +651,18 @@ $aulas  = $aulas ?? []; // lista de aulas vindas do controller
             cancelButtonText: 'Cancelar'
         }).then(result => {
             if (result.isConfirmed) {
-                window.location.href = "<?= site_url('instructor/dashboard/jitsi/deletar') ?>/" + id;
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = "<?= site_url('instructor/dashboard/jitsi/deletar') ?>/" + id;
+
+                const csrf = document.createElement('input');
+                csrf.type = 'hidden';
+                csrf.name = "<?= csrf_token() ?>";
+                csrf.value = "<?= csrf_hash() ?>";
+
+                form.appendChild(csrf);
+                document.body.appendChild(form);
+                form.submit();
             }
         });
     }
@@ -703,3 +714,6 @@ $aulas  = $aulas ?? []; // lista de aulas vindas do controller
 </script>
 
 <?= $this->endSection() ?>
+
+
+

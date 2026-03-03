@@ -391,6 +391,18 @@ class Dashboard extends BaseController
             ->get()
             ->getResultArray();
 
+        foreach ($rows as &$row) {
+            $row += [
+                'img' => null,
+                'country' => null,
+                'province' => null,
+                'city' => null,
+                'phone' => null,
+                'force_pass_reset' => 0,
+            ];
+        }
+        unset($row);
+
         $totalPages = (int) ceil($total / $perPage);
 
         return $this->response->setJSON([
@@ -407,12 +419,48 @@ class Dashboard extends BaseController
     private function baseUsersQuery(string $role)
     {
         $db = db_connect();
+        $tables = config('Auth')->tables;
+        $usersTable = $tables['users'] ?? 'users';
+        $identitiesTable = $tables['identities'] ?? 'auth_identities';
 
-        return $db->table('users u')
-            ->select('u.id, u.username, u.active, u.last_active, u.created_at, u.img, u.role, ai.secret as email')
-            ->join('auth_identities ai', 'ai.user_id = u.id AND ai.type = "email_password"', 'left')
-            ->where('u.role', $role)
-            ->where('u.deleted_at', null);
+        $select = [
+            'u.id',
+            'u.username',
+            'u.active',
+            'u.last_active',
+            'u.created_at',
+            'u.role',
+            'ai.secret as email',
+        ];
+
+        foreach ($this->usersOptionalColumns($db, $usersTable) as $column) {
+            $select[] = "u.{$column}";
+        }
+
+        $builder = $db->table("{$usersTable} u")
+            ->select(implode(', ', $select))
+            ->join("{$identitiesTable} ai", 'ai.user_id = u.id AND ai.type = "email_password"', 'left')
+            ->where('u.role', $role);
+
+        if ($db->fieldExists('deleted_at', $usersTable)) {
+            $builder->where('u.deleted_at', null);
+        }
+
+        return $builder;
+    }
+
+    private function usersOptionalColumns($db, string $usersTable): array
+    {
+        $candidates = ['img', 'country', 'province', 'city', 'phone', 'force_pass_reset'];
+        $existing = [];
+
+        foreach ($candidates as $column) {
+            if ($db->fieldExists($column, $usersTable)) {
+                $existing[] = $column;
+            }
+        }
+
+        return $existing;
     }
 
     private function applyUserFilters($builder, string $search, string $status): void
@@ -429,6 +477,370 @@ class Dashboard extends BaseController
             $builder->where('u.active', 1);
         } elseif ($status === 'inativo') {
             $builder->where('u.active', 0);
+        }
+    }
+
+    public function updateUser()
+    {
+        $id = (int) $this->request->getPost('id');
+        $username = trim((string) $this->request->getPost('username'));
+        $email = trim((string) $this->request->getPost('email'));
+        $role = strtolower(trim((string) $this->request->getPost('role')));
+        $active = (int) $this->request->getPost('active');
+        $password = (string) $this->request->getPost('password');
+        $passwordConfirm = (string) $this->request->getPost('password_confirm');
+        $country = trim((string) $this->request->getPost('country'));
+        $province = trim((string) $this->request->getPost('province'));
+        $city = trim((string) $this->request->getPost('city'));
+        $phone = trim((string) $this->request->getPost('phone'));
+        $img = trim((string) $this->request->getPost('img'));
+        $imageFile = $this->request->getFile('image_file');
+        $forcePassResetRaw = $this->request->getPost('force_pass_reset');
+        $forcePassReset = $forcePassResetRaw === null ? null : (int) $forcePassResetRaw;
+
+        if ($id <= 0) {
+            return $this->response->setStatusCode(400)->setJSON([
+                'message' => 'ID invalido.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        if (! in_array($role, ['student', 'instructor', 'admin'], true)) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'message' => 'Role invalido.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        if ($username === '' || strlen($username) < 3 || strlen($username) > 30) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'message' => 'Username invalido. Use entre 3 e 30 caracteres.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'message' => 'Email invalido.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        if (! in_array($active, [0, 1], true)) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'message' => 'Status invalido.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        if ($password !== '') {
+            if (strlen($password) < 8) {
+                return $this->response->setStatusCode(422)->setJSON([
+                    'message' => 'A nova senha deve ter no minimo 8 caracteres.',
+                    'csrf' => csrf_hash(),
+                ]);
+            }
+
+            if ($password !== $passwordConfirm) {
+                return $this->response->setStatusCode(422)->setJSON([
+                    'message' => 'A confirmacao da senha nao confere.',
+                    'csrf' => csrf_hash(),
+                ]);
+            }
+        }
+
+        $len = static function (string $value): int {
+            return function_exists('mb_strlen') ? mb_strlen($value) : strlen($value);
+        };
+
+        if ($country !== '' && $len($country) > 100) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'message' => 'Pais muito longo (maximo 100).',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        if ($province !== '' && $len($province) > 100) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'message' => 'Provincia muito longa (maximo 100).',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        if ($city !== '' && $len($city) > 100) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'message' => 'Cidade muito longa (maximo 100).',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        if ($phone !== '' && $len($phone) > 20) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'message' => 'Telefone muito longo (maximo 20).',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        if ($img !== '' && $len($img) > 255) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'message' => 'Campo de imagem muito longo (maximo 255).',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        if ($imageFile && $imageFile->isValid() && $imageFile->getError() === UPLOAD_ERR_OK) {
+            $maxBytes = 4 * 1024 * 1024;
+            if ($imageFile->getSize() > $maxBytes) {
+                return $this->response->setStatusCode(422)->setJSON([
+                    'message' => 'A imagem deve ter no maximo 4MB.',
+                    'csrf' => csrf_hash(),
+                ]);
+            }
+
+            $allowedMime = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+            if (! in_array(strtolower((string) $imageFile->getMimeType()), $allowedMime, true)) {
+                return $this->response->setStatusCode(422)->setJSON([
+                    'message' => 'Formato de imagem invalido.',
+                    'csrf' => csrf_hash(),
+                ]);
+            }
+        }
+
+        $db = db_connect();
+        $tables = config('Auth')->tables;
+        $usersTable = $tables['users'] ?? 'users';
+        $identitiesTable = $tables['identities'] ?? 'auth_identities';
+        $optionalColumns = $this->usersOptionalColumns($db, $usersTable);
+        $hasForcePassReset = in_array('force_pass_reset', $optionalColumns, true);
+
+        if ($hasForcePassReset && $forcePassReset !== null && ! in_array($forcePassReset, [0, 1], true)) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'message' => 'Valor de reset de senha invalido.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        $existingSelect = ['id', 'role'];
+        if (in_array('img', $optionalColumns, true)) {
+            $existingSelect[] = 'img';
+        }
+
+        $existingUser = $db->table($usersTable)
+            ->select(implode(', ', $existingSelect))
+            ->where('id', $id)
+            ->get()
+            ->getRowArray();
+
+        if (! $existingUser) {
+            return $this->response->setStatusCode(404)->setJSON([
+                'message' => 'Usuario nao encontrado.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        $sameUsername = $db->table($usersTable)
+            ->select('id')
+            ->where('username', $username)
+            ->where('id !=', $id)
+            ->get()
+            ->getRowArray();
+
+        if ($sameUsername) {
+            return $this->response->setStatusCode(409)->setJSON([
+                'message' => 'Username ja esta em uso.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        $sameEmail = $db->table($identitiesTable)
+            ->select('id')
+            ->where('type', 'email_password')
+            ->where('secret', $email)
+            ->where('user_id !=', $id)
+            ->get()
+            ->getRowArray();
+
+        if ($sameEmail) {
+            return $this->response->setStatusCode(409)->setJSON([
+                'message' => 'Email ja esta em uso.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        $identity = $db->table($identitiesTable)
+            ->select('id')
+            ->where('user_id', $id)
+            ->where('type', 'email_password')
+            ->get()
+            ->getRowArray();
+
+        if (! $identity) {
+            return $this->response->setStatusCode(500)->setJSON([
+                'message' => 'Identidade de login nao encontrada.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        $uploadedImagePath = null;
+        if ($imageFile && $imageFile->isValid() && $imageFile->getError() === UPLOAD_ERR_OK && in_array('img', $optionalColumns, true)) {
+            $targetDir = FCPATH . 'assets/img/';
+            if (! is_dir($targetDir) && ! @mkdir($targetDir, 0755, true)) {
+                return $this->response->setStatusCode(500)->setJSON([
+                    'message' => 'Nao foi possivel preparar a pasta de imagem.',
+                    'csrf' => csrf_hash(),
+                ]);
+            }
+
+            $newName = $imageFile->getRandomName();
+            if (! $imageFile->move($targetDir, $newName)) {
+                return $this->response->setStatusCode(500)->setJSON([
+                    'message' => 'Falha ao guardar a imagem enviada.',
+                    'csrf' => csrf_hash(),
+                ]);
+            }
+
+            $uploadedImagePath = 'assets/img/' . $newName;
+        }
+
+        $userData = [
+            'username' => $username,
+            'role' => $role,
+            'active' => $active,
+            'updated_at' => date('Y-m-d H:i:s'),
+        ];
+
+        if (in_array('country', $optionalColumns, true)) {
+            $userData['country'] = $country !== '' ? $country : null;
+        }
+
+        if (in_array('province', $optionalColumns, true)) {
+            $userData['province'] = $province !== '' ? $province : null;
+        }
+
+        if (in_array('city', $optionalColumns, true)) {
+            $userData['city'] = $city !== '' ? $city : null;
+        }
+
+        if (in_array('phone', $optionalColumns, true)) {
+            $userData['phone'] = $phone !== '' ? $phone : null;
+        }
+
+        if (in_array('img', $optionalColumns, true)) {
+            if ($uploadedImagePath !== null) {
+                $userData['img'] = $uploadedImagePath;
+            } elseif ($img !== '') {
+                $userData['img'] = $img;
+            }
+        }
+
+        if ($hasForcePassReset && $forcePassReset !== null) {
+            $userData['force_pass_reset'] = $forcePassReset;
+        }
+
+        $identityData = [
+            'secret' => $email,
+            'updated_at' => date('Y-m-d H:i:s'),
+        ];
+
+        if ($password !== '') {
+            $identityData['secret2'] = password_hash($password, PASSWORD_DEFAULT);
+        }
+
+        if ($uploadedImagePath !== null && in_array('img', $optionalColumns, true)) {
+            $oldImg = (string) ($existingUser['img'] ?? '');
+            if ($oldImg !== '' && $oldImg !== $uploadedImagePath) {
+                $normalized = str_replace('\\', '/', $oldImg);
+                if (str_starts_with($normalized, 'assets/img/')) {
+                    $oldPath = FCPATH . ltrim($oldImg, '/\\');
+                    if (is_file($oldPath)) {
+                        @unlink($oldPath);
+                    }
+                }
+            }
+        }
+
+        $db->transStart();
+        $db->table($usersTable)->where('id', $id)->update($userData);
+        $db->table($identitiesTable)->where('id', $identity['id'])->update($identityData);
+        $this->syncRoleTableData($db, $id, $role, $username, $email);
+        $db->transComplete();
+
+        if (! $db->transStatus()) {
+            $error = $db->error();
+            log_message('error', 'Falha ao atualizar usuario #{id}: {msg}', [
+                'id' => $id,
+                'msg' => $error['message'] ?? 'erro desconhecido',
+            ]);
+
+            return $this->response->setStatusCode(500)->setJSON([
+                'message' => 'Nao foi possivel atualizar o usuario.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'message' => 'Usuario atualizado com sucesso.',
+            'csrf' => csrf_hash(),
+        ]);
+    }
+
+    private function syncRoleTableData($db, int $userId, string $role, string $username, string $email): void
+    {
+        $student = $db->table('students')
+            ->select('id_student')
+            ->where('id_user_student', $userId)
+            ->get()
+            ->getRowArray();
+
+        if ($student) {
+            $db->table('students')
+                ->where('id_student', $student['id_student'])
+                ->update([
+                    'name_student' => $username,
+                    'email_student' => $email,
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ]);
+        }
+
+        $instructor = $db->table('instructors')
+            ->select('id_instructor')
+            ->where('id_user_instructor', $userId)
+            ->get()
+            ->getRowArray();
+
+        if ($instructor) {
+            $db->table('instructors')
+                ->where('id_instructor', $instructor['id_instructor'])
+                ->update([
+                    'name_instructor' => $username,
+                    'email_instructor' => $email,
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ]);
+        }
+
+        if ($role === 'student') {
+            if (! $student) {
+                $db->table('students')->insert([
+                    'id_user_student' => $userId,
+                    'name_student' => $username,
+                    'email_student' => $email,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ]);
+            }
+            return;
+        }
+
+        if ($role === 'instructor') {
+            if (! $instructor) {
+                $db->table('instructors')->insert([
+                    'id_user_instructor' => $userId,
+                    'name_instructor' => $username,
+                    'email_instructor' => $email,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ]);
+            }
         }
     }
 
@@ -577,6 +989,7 @@ class Dashboard extends BaseController
         $username = trim((string) $this->request->getPost('username'));
         $password = (string) $this->request->getPost('password');
         $confirm = (string) $this->request->getPost('password_confirm');
+        $imageFile = $this->request->getFile('image_file');
 
         if (! in_array($role, ['student', 'instructor'], true)) {
             return $this->response->setStatusCode(400)->setJSON([
@@ -599,9 +1012,40 @@ class Dashboard extends BaseController
             ]);
         }
 
+        $db = db_connect();
+        $tables = config('Auth')->tables;
+        $usersTable = $tables['users'] ?? 'users';
+        $identityTable = $tables['identities'] ?? 'auth_identities';
+        $optionalColumns = $this->usersOptionalColumns($db, $usersTable);
+        $hasImg = in_array('img', $optionalColumns, true);
+
+        if ($imageFile && $imageFile->isValid() && $imageFile->getError() === UPLOAD_ERR_OK) {
+            if (! $hasImg) {
+                return $this->response->setStatusCode(422)->setJSON([
+                    'message' => 'A base de dados nao suporta campo de imagem para usuarios.',
+                    'csrf' => csrf_hash(),
+                ]);
+            }
+
+            $maxBytes = 4 * 1024 * 1024;
+            if ($imageFile->getSize() > $maxBytes) {
+                return $this->response->setStatusCode(422)->setJSON([
+                    'message' => 'A imagem deve ter no maximo 4MB.',
+                    'csrf' => csrf_hash(),
+                ]);
+            }
+
+            $allowedMime = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+            if (! in_array(strtolower((string) $imageFile->getMimeType()), $allowedMime, true)) {
+                return $this->response->setStatusCode(422)->setJSON([
+                    'message' => 'Formato de imagem invalido.',
+                    'csrf' => csrf_hash(),
+                ]);
+            }
+        }
+
         $users = new UserModel();
-        $identityTable = config('Auth')->tables['identities'] ?? 'auth_identities';
-        $existingEmail = db_connect()
+        $existingEmail = $db
             ->table($identityTable)
             ->where('type', 'email_password')
             ->where('secret', $email)
@@ -622,6 +1066,7 @@ class Dashboard extends BaseController
         $user->email = $email;
         $user->password = $password;
 
+        $uploadedImagePath = null;
         try {
             if (! $users->save($user)) {
                 return $this->response->setStatusCode(422)->setJSON([
@@ -631,6 +1076,27 @@ class Dashboard extends BaseController
             }
 
             $userId = (int) $users->getInsertID();
+
+            if ($hasImg && $imageFile && $imageFile->isValid() && $imageFile->getError() === UPLOAD_ERR_OK) {
+                $targetDir = FCPATH . 'assets/img/';
+                if (! is_dir($targetDir) && ! @mkdir($targetDir, 0755, true)) {
+                    throw new \RuntimeException('Nao foi possivel preparar a pasta de imagem.');
+                }
+
+                $newName = $imageFile->getRandomName();
+                if (! $imageFile->move($targetDir, $newName)) {
+                    throw new \RuntimeException('Falha ao guardar a imagem enviada.');
+                }
+
+                $uploadedImagePath = 'assets/img/' . $newName;
+                $db->table($usersTable)
+                    ->where('id', $userId)
+                    ->update([
+                        'img' => $uploadedImagePath,
+                        'updated_at' => date('Y-m-d H:i:s'),
+                    ]);
+            }
+
             $created = $users->find($userId);
             if (! $created) {
                 return $this->response->setStatusCode(500)->setJSON([
@@ -644,6 +1110,12 @@ class Dashboard extends BaseController
             // Trigger existing register hook to set role and related records.
             Events::trigger('register', $created);
         } catch (\Throwable $e) {
+            if ($uploadedImagePath) {
+                $fullPath = FCPATH . ltrim($uploadedImagePath, '/\\');
+                if (is_file($fullPath)) {
+                    @unlink($fullPath);
+                }
+            }
             log_message('error', 'Falha ao criar usuario no admin: {error}', ['error' => $e->getMessage()]);
 
             $message = 'Nao foi possivel criar o usuario.';

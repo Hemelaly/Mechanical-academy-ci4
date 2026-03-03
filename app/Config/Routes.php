@@ -29,6 +29,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ro
     $routes->post('dashboard/usuarios/delete', 'Dashboard::deleteUser');
     $routes->post('dashboard/usuarios/message', 'Dashboard::sendUserMessage');
     $routes->post('dashboard/usuarios/create', 'Dashboard::createUser');
+    $routes->post('dashboard/usuarios/update', 'Dashboard::updateUser');
     $routes->get('dashboard/financas', 'Dashboard::financial');
     $routes->get('dashboard/financas/data', 'Dashboard::financialData');
     $routes->get('dashboard/perfil', 'Dashboard::profile');
@@ -45,6 +46,10 @@ $routes->group('instructor', ['namespace' => 'App\Controllers\Instructor', 'filt
     $routes->post('dashboard/jitsi/editar/(:num)', 'Dashboard::live/$1');   // se quiser reaproveitar o mesmo método
     $routes->get('dashboard/jitsi/deletar/(:num)', 'Dashboard::deleteJitsi/$1'); // ou outro método pra deletar
     $routes->get('dashboard/jitsi/stream/(:num)', 'Dashboard::stream/$1');
+    $routes->post('dashboard/jitsi/deletar/(:num)', 'Dashboard::deleteJitsi/$1');
+    $routes->post('dashboard/jitsi/stream/(:num)/end', 'Dashboard::endStream/$1');
+    $routes->post('dashboard/jitsi/stream/(:num)/recording', 'Dashboard::storeRecording/$1');
+    $routes->post('dashboard/jitsi/recordings/(:num)/publish', 'Dashboard::toggleRecordingPublish/$1');
     $routes->post('dashboard/novo_curso/criar', 'CourseController::criar');
     $routes->post('dashboard/novo_curso/rascunho', 'CourseController::draftCreate');
     $routes->post('dashboard/novo_curso/rascunho/(:num)', 'CourseController::draftSave/$1');
@@ -57,6 +62,9 @@ $routes->group('instructor', ['namespace' => 'App\Controllers\Instructor', 'filt
     $routes->post('dashboard/meus_estudantes/toggle/(:num)', 'Dashboard::toggleEnrollment/$1');
     $routes->get('dashboard/financas', 'Dashboard::financial');
     $routes->get('dashboard/financas/data', 'Dashboard::financialData');
+    $routes->get('dashboard/logs', 'Dashboard::logs');
+    $routes->get('dashboard/logs/data', 'Dashboard::logsData');
+    $routes->get('dashboard/logs/export', 'Dashboard::logsExportCsv');
     $routes->get('dashboard/perfil', 'Dashboard::profile');
     $routes->post('dashboard/perfil', 'Dashboard::profile');
     $routes->get('dashboard/certificados', 'Dashboard::certificate');
@@ -71,6 +79,8 @@ $routes->group('student', ['namespace' => 'App\Controllers\Student', 'filter' =>
     $routes->get('dashboard/inscricoes', 'Dashboard::my_courses');
     $routes->get('dashboard/inscricoes/(:segment)/(:segment)', 'Dashboard::lessonsBySlug/$1/$2');
     $routes->get('dashboard/cursos', 'Dashboard::courses');
+    $routes->get('dashboard/aulas_ao_vivo', 'Dashboard::liveClasses');
+    $routes->get('dashboard/aulas_ao_vivo/stream/(:num)', 'Dashboard::liveStream/$1');
     $routes->get('dashboard/ver_aulas/(:num)', 'Dashboard::lessons/$1');
     $routes->get('dashboard/checkout/(:num)', 'Dashboard::checkout/$1');
     $routes->get('dashboard/perfil', 'Dashboard::profile');
@@ -104,3 +114,5 @@ $routes->post('certificados/emitir/(:num)', 'Certificates::emitir/$1');
 // $routes->get('certificados/gerar/(:segment)', 'Certificates::gerarPdf/$1');
 $routes->get('certificados/download/(:num)', 'Certificates::download/$1');
 $routes->get('certificados/verificar/(:num)', 'Certificates::verificar/$1');
+
+

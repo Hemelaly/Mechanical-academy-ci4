@@ -51,11 +51,6 @@
         <div class="relative overflow-x-auto">
             <table
                 id="admin-instructors-table"
-                data-flowbite-datatable
-                data-datatable-searchable="false"
-                data-datatable-paging="false"
-                data-datatable-sortable="false"
-                data-datatable-per-page-select="false"
                 class="w-full text-left text-sm text-slate-500 dark:text-slate-400">
                 <thead class="text-xs uppercase text-slate-600 bg-slate-50 dark:bg-slate-700 dark:text-slate-300">
                     <tr>
@@ -82,42 +77,109 @@
 <aside id="instructor-drawer" class="fixed right-0 top-0 z-50 h-full w-[95%] max-w-lg translate-x-full overflow-y-auto bg-white shadow-xl transition-transform sm:w-[90%] md:w-[70%] lg:w-[520px] dark:bg-slate-900">
     <div class="flex items-center justify-between border-b border-slate-200 p-5 dark:border-slate-800">
         <div>
-            <p class="text-sm text-slate-500 dark:text-slate-400">Detalhes do instrutor</p>
-            <h2 id="instructor-drawer-name" class="text-lg font-semibold text-slate-900 dark:text-white">—</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Editar usuario</p>
+            <h2 id="instructor-drawer-name" class="text-lg font-semibold text-slate-900 dark:text-white">-</h2>
         </div>
         <button id="instructor-drawer-close" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
             <i class="bi bi-x-lg"></i>
         </button>
     </div>
     <div class="space-y-4 p-5">
-        <div class="flex items-center gap-4">
-            <img id="instructor-drawer-avatar" class="h-16 w-16 rounded-full object-cover" src="<?= base_url('assets/img/user-default.png') ?>" alt="Avatar">
-            <div>
-                <p id="instructor-drawer-email" class="text-sm text-slate-500 dark:text-slate-400">—</p>
-                <p id="instructor-drawer-status" class="text-sm font-medium text-slate-900 dark:text-white">—</p>
+        <div id="instructor-edit-feedback" class="hidden rounded-lg p-3 text-sm"></div>
+        <form id="instructor-edit-form" class="space-y-4">
+            <input type="hidden" id="instructor-edit-id" name="id">
+            <div class="flex items-center gap-4">
+                <img id="instructor-drawer-avatar" class="h-16 w-16 rounded-full object-cover" src="<?= base_url('assets/img/user-default.png') ?>" alt="Avatar">
+                <div class="w-full">
+                    <label for="instructor-edit-image-file" class="block text-xs uppercase text-slate-500">Imagem (ficheiro)</label>
+                    <input id="instructor-edit-image-file" name="image_file" type="file" accept="image/*" class="mt-1 block w-full rounded-lg border border-slate-300 bg-slate-50 p-2 text-sm text-slate-900 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-600 file:px-3 file:py-1.5 file:text-white hover:file:bg-blue-700 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                </div>
             </div>
-        </div>
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-                <p class="text-xs uppercase text-slate-500">ID</p>
-                <p id="instructor-drawer-id" class="text-sm font-medium text-slate-900 dark:text-white">—</p>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                    <p class="text-xs uppercase text-slate-500">ID</p>
+                    <p id="instructor-drawer-id" class="text-sm font-medium text-slate-900 dark:text-white">-</p>
+                </div>
+                <div>
+                    <p class="text-xs uppercase text-slate-500">Ultimo acesso</p>
+                    <p id="instructor-drawer-last" class="text-sm font-medium text-slate-900 dark:text-white">-</p>
+                </div>
+                <div>
+                    <p class="text-xs uppercase text-slate-500">Criado em</p>
+                    <p id="instructor-drawer-created" class="text-sm font-medium text-slate-900 dark:text-white">-</p>
+                </div>
+                <div>
+                    <p class="text-xs uppercase text-slate-500">Status atual</p>
+                    <p id="instructor-drawer-status" class="text-sm font-medium text-slate-900 dark:text-white">-</p>
+                </div>
             </div>
-            <div>
-                <p class="text-xs uppercase text-slate-500">Ultimo acesso</p>
-                <p id="instructor-drawer-last" class="text-sm font-medium text-slate-900 dark:text-white">—</p>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                    <label for="instructor-edit-username" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Username</label>
+                    <input id="instructor-edit-username" name="username" required type="text" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                </div>
+                <div>
+                    <label for="instructor-edit-email" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Email</label>
+                    <input id="instructor-edit-email" name="email" required type="email" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                </div>
+                <div>
+                    <label for="instructor-edit-role" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Role</label>
+                    <select id="instructor-edit-role" name="role" class="mt-1 block w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                        <option value="student">student</option>
+                        <option value="instructor">instructor</option>
+                        <option value="admin">admin</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="instructor-edit-active" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Status</label>
+                    <select id="instructor-edit-active" name="active" class="mt-1 block w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                        <option value="1">Ativo</option>
+                        <option value="0">Inativo</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="instructor-edit-force-pass-reset" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Forcar reset senha</label>
+                    <select id="instructor-edit-force-pass-reset" name="force_pass_reset" class="mt-1 block w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                        <option value="0">Nao</option>
+                        <option value="1">Sim</option>
+                    </select>
+                </div>
             </div>
-            <div>
-                <p class="text-xs uppercase text-slate-500">Criado em</p>
-                <p id="instructor-drawer-created" class="text-sm font-medium text-slate-900 dark:text-white">—</p>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                    <label for="instructor-edit-country" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Pais</label>
+                    <input id="instructor-edit-country" name="country" type="text" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                </div>
+                <div>
+                    <label for="instructor-edit-province" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Provincia</label>
+                    <input id="instructor-edit-province" name="province" type="text" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                </div>
+                <div>
+                    <label for="instructor-edit-city" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Cidade</label>
+                    <input id="instructor-edit-city" name="city" type="text" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                </div>
+                <div>
+                    <label for="instructor-edit-phone" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Telefone</label>
+                    <input id="instructor-edit-phone" name="phone" type="text" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                </div>
             </div>
-            <div>
-                <p class="text-xs uppercase text-slate-500">Role</p>
-                <p id="instructor-drawer-role" class="text-sm font-medium text-slate-900 dark:text-white">—</p>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                    <label for="instructor-edit-password" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Nova senha</label>
+                    <input id="instructor-edit-password" name="password" type="password" placeholder="Opcional" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                </div>
+                <div>
+                    <label for="instructor-edit-password-confirm" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Confirmar senha</label>
+                    <input id="instructor-edit-password-confirm" name="password_confirm" type="password" placeholder="Opcional" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                </div>
             </div>
-        </div>
+            <div class="flex justify-end gap-2 pt-1">
+                <button type="button" id="instructor-edit-cancel" class="rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">Cancelar</button>
+                <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Guardar alteracoes</button>
+            </div>
+        </form>
     </div>
 </aside>
-
 <div id="instructor-create-backdrop" class="fixed inset-0 z-40 hidden bg-slate-900/50"></div>
 <aside id="instructor-create-drawer" class="fixed right-0 top-0 z-50 h-full w-[96%] max-w-3xl translate-x-full overflow-y-auto bg-white shadow-xl transition-transform sm:w-[92%] md:w-[85%] lg:w-[720px] dark:bg-slate-900">
     <div class="flex items-center justify-between border-b border-slate-200 p-5 dark:border-slate-800">
@@ -149,6 +211,14 @@
             <?= csrf_field() ?>
             <input type="hidden" name="role" value="instructor">
 
+            <div class="flex items-center gap-4">
+                <img id="instructor-create-avatar-preview" class="h-14 w-14 rounded-full object-cover" src="<?= base_url('assets/img/user-default.png') ?>" alt="Preview">
+                <div class="w-full">
+                    <label for="instructor-create-image-file" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Imagem (ficheiro)</label>
+                    <input id="instructor-create-image-file" name="image_file" type="file" accept="image/*" class="mt-1 block w-full rounded-lg border border-slate-300 bg-slate-50 p-2 text-sm text-slate-900 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-600 file:px-3 file:py-1.5 file:text-white hover:file:bg-blue-700 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                </div>
+            </div>
+
             <div>
                 <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Email</label>
                 <input type="email" name="email" required class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
@@ -177,6 +247,7 @@
 <script>
     (function () {
         const endpoint = <?= json_encode(site_url('admin/dashboard/instrutores/data')) ?>;
+        const updateEndpoint = <?= json_encode(site_url('admin/dashboard/usuarios/update')) ?>;
         const instructorsTable = document.getElementById('admin-instructors-table');
         const getTableBody = () => instructorsTable?.querySelector('tbody');
         const summary = document.getElementById('instructors-summary');
@@ -194,6 +265,25 @@
         const createCancel = document.getElementById('instructor-create-cancel');
         const createForm = document.getElementById('instructor-create-form');
         const createFeedback = document.getElementById('instructor-create-feedback');
+        const createImageFile = document.getElementById('instructor-create-image-file');
+        const createAvatarPreview = document.getElementById('instructor-create-avatar-preview');
+        const editForm = document.getElementById('instructor-edit-form');
+        const editFeedback = document.getElementById('instructor-edit-feedback');
+        const editCancel = document.getElementById('instructor-edit-cancel');
+        const editId = document.getElementById('instructor-edit-id');
+        const editImageFile = document.getElementById('instructor-edit-image-file');
+        const editUsername = document.getElementById('instructor-edit-username');
+        const editEmail = document.getElementById('instructor-edit-email');
+        const editRole = document.getElementById('instructor-edit-role');
+        const editActive = document.getElementById('instructor-edit-active');
+        const editForcePassReset = document.getElementById('instructor-edit-force-pass-reset');
+        const editCountry = document.getElementById('instructor-edit-country');
+        const editProvince = document.getElementById('instructor-edit-province');
+        const editCity = document.getElementById('instructor-edit-city');
+        const editPhone = document.getElementById('instructor-edit-phone');
+        const editPassword = document.getElementById('instructor-edit-password');
+        const editPasswordConfirm = document.getElementById('instructor-edit-password-confirm');
+        const instructorAvatarFallback = <?= json_encode(base_url('assets/img/user-default.png')) ?>;
         const csrfName = <?= json_encode(csrf_token()) ?>;
         let csrfHash = <?= json_encode(csrf_hash()) ?>;
 
@@ -252,13 +342,32 @@
                 });
         };
 
+        const postActionFormData = (url, formData) => {
+            formData.append(csrfName, csrfHash);
+            return fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            }).then(async (res) => {
+                const data = await res.json();
+                if (data.csrf) {
+                    csrfHash = data.csrf;
+                }
+                if (!res.ok) {
+                    throw data;
+                }
+                return data;
+            });
+        };
+
         const renderRows = (items) => {
             const tableBody = getTableBody();
             if (!tableBody) return;
 
             if (!items.length) {
                 tableBody.innerHTML = `<tr><td colspan="6" class="px-6 py-6 text-center text-slate-500">Nenhum instrutor encontrado.</td></tr>`;
-                window.FlowbiteDashboardTables?.refreshTable(instructorsTable);
                 return;
             }
             tableBody.innerHTML = items.map(item => {
@@ -304,7 +413,6 @@
                 </tr>
             `;
             }).join('');
-            window.FlowbiteDashboardTables?.refreshTable(instructorsTable);
         };
 
         const renderPagination = (paginationData) => {
@@ -379,29 +487,45 @@
                     }
                     summary.textContent = 'Erro ao carregar instrutores.';
                     pagination.innerHTML = '';
-                    window.FlowbiteDashboardTables?.refreshTable(instructorsTable);
                 })
                 .finally(() => {
                     state.loading = false;
                 });
         };
-
         const openDrawer = (item) => {
             drawer.classList.remove('translate-x-full');
             drawerBackdrop.classList.remove('hidden');
-            document.getElementById('instructor-drawer-name').textContent = item.username || '—';
-            document.getElementById('instructor-drawer-email').textContent = item.email || '—';
+            document.getElementById('instructor-drawer-name').textContent = item.username || '-';
             document.getElementById('instructor-drawer-status').textContent = Number(item.active) === 1 ? 'Ativo' : 'Inativo';
-            document.getElementById('instructor-drawer-id').textContent = item.id || '—';
+            document.getElementById('instructor-drawer-id').textContent = item.id || '-';
             document.getElementById('instructor-drawer-last').textContent = formatDate(item.last_active);
             document.getElementById('instructor-drawer-created').textContent = formatDate(item.created_at);
-            document.getElementById('instructor-drawer-role').textContent = item.role || 'instructor';
-            document.getElementById('instructor-drawer-avatar').src = item.img || <?= json_encode(base_url('assets/img/user-default.png')) ?>;
+            document.getElementById('instructor-drawer-avatar').src = item.img || instructorAvatarFallback;
+
+            editFeedback.classList.add('hidden');
+            editFeedback.textContent = '';
+
+            editId.value = item.id || '';
+            editUsername.value = item.username || '';
+            editEmail.value = item.email || '';
+            editRole.value = item.role || 'instructor';
+            editActive.value = Number(item.active) === 1 ? '1' : '0';
+            editForcePassReset.value = Number(item.force_pass_reset) === 1 ? '1' : '0';
+            editCountry.value = item.country || '';
+            editProvince.value = item.province || '';
+            editCity.value = item.city || '';
+            editPhone.value = item.phone || '';
+            editImageFile.value = '';
+            editPassword.value = '';
+            editPasswordConfirm.value = '';
         };
 
         const closeDrawer = () => {
             drawer.classList.add('translate-x-full');
             drawerBackdrop.classList.add('hidden');
+            editFeedback.classList.add('hidden');
+            editPassword.value = '';
+            editPasswordConfirm.value = '';
         };
 
         drawerBackdrop.addEventListener('click', closeDrawer);
@@ -415,6 +539,8 @@
         const closeCreateDrawer = () => {
             createDrawer.classList.add('translate-x-full');
             createBackdrop.classList.add('hidden');
+            if (createImageFile) createImageFile.value = '';
+            if (createAvatarPreview) createAvatarPreview.src = instructorAvatarFallback;
         };
 
         createButton.addEventListener('click', openCreateDrawer);
@@ -422,17 +548,30 @@
         createClose.addEventListener('click', closeCreateDrawer);
         createCancel.addEventListener('click', closeCreateDrawer);
 
+        createImageFile?.addEventListener('change', () => {
+            const file = createImageFile.files && createImageFile.files[0];
+            if (!file || !file.type.startsWith('image/')) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const result = e.target?.result;
+                if (typeof result === 'string' && createAvatarPreview) {
+                    createAvatarPreview.src = result;
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+
         createForm.addEventListener('submit', (event) => {
             event.preventDefault();
             createFeedback.classList.add('hidden');
             const formData = new FormData(createForm);
-            const payload = Object.fromEntries(formData.entries());
-            postAction(<?= json_encode(site_url('admin/dashboard/usuarios/create')) ?>, payload)
+            postActionFormData(<?= json_encode(site_url('admin/dashboard/usuarios/create')) ?>, formData)
                 .then(data => {
                     if (window.Swal) {
                         Swal.fire({ icon: 'success', title: 'Sucesso', text: data.message || 'Usuario criado.' });
                     }
                     createForm.reset();
+                    if (createAvatarPreview) createAvatarPreview.src = instructorAvatarFallback;
                     loadData();
                     setTimeout(closeCreateDrawer, 600);
                 })
@@ -444,6 +583,46 @@
                     createFeedback.classList.remove('hidden');
                     createFeedback.classList.remove('bg-emerald-50', 'text-emerald-700');
                     createFeedback.classList.add('bg-rose-50', 'text-rose-700');
+                });
+        });
+
+        editCancel?.addEventListener('click', closeDrawer);
+
+        editImageFile?.addEventListener('change', () => {
+            const file = editImageFile.files && editImageFile.files[0];
+            if (!file) return;
+            if (!file.type.startsWith('image/')) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const result = e.target?.result;
+                if (typeof result === 'string') {
+                    document.getElementById('instructor-drawer-avatar').src = result;
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+
+        editForm?.addEventListener('submit', (event) => {
+            event.preventDefault();
+            editFeedback.classList.add('hidden');
+
+            const formData = new FormData(editForm);
+            postActionFormData(updateEndpoint, formData)
+                .then((data) => {
+                    if (window.Swal) {
+                        Swal.fire({ icon: 'success', title: 'Sucesso', text: data.message || 'Usuario atualizado.' });
+                    }
+                    closeDrawer();
+                    loadData();
+                })
+                .catch((error) => {
+                    const message = error?.message || 'Nao foi possivel atualizar o usuario.';
+                    if (window.Swal) {
+                        Swal.fire({ icon: 'error', title: 'Erro', text: message });
+                    }
+                    editFeedback.textContent = message;
+                    editFeedback.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-700');
+                    editFeedback.classList.add('bg-rose-50', 'text-rose-700');
                 });
         });
 
@@ -589,3 +768,5 @@
     })();
 </script>
 <?= $this->endSection() ?>
+
+

@@ -41,11 +41,6 @@
         <div class="relative w-full max-w-full overflow-x-auto">
             <table
                 id="instructor-pending-students-table"
-                data-flowbite-datatable
-                data-datatable-searchable="false"
-                data-datatable-paging="false"
-                data-datatable-sortable="false"
-                data-datatable-per-page-select="false"
                 class="w-full min-w-full text-left text-sm text-slate-500 dark:text-slate-400">
                 <thead class="text-xs uppercase text-slate-600 bg-slate-50 dark:bg-slate-700 dark:text-slate-300">
                     <tr>
@@ -103,11 +98,6 @@
         <div class="relative w-full max-w-full overflow-x-auto">
             <table
                 id="instructor-enrollments-table"
-                data-flowbite-datatable
-                data-datatable-searchable="false"
-                data-datatable-paging="false"
-                data-datatable-sortable="false"
-                data-datatable-per-page-select="false"
                 class="w-full min-w-full text-left text-sm text-slate-500 dark:text-slate-400">
                 <thead class="text-xs uppercase text-slate-600 bg-slate-50 dark:bg-slate-700 dark:text-slate-300">
                     <tr>
@@ -278,7 +268,6 @@
             const enrollBody = getEnrollBody();
             if (!enrollBody) return;
             enrollBody.innerHTML = '<tr><td colspan="6" class="px-6 py-6 text-center text-slate-500">Carregando...</td></tr>';
-            window.FlowbiteDashboardTables?.refreshTable(enrollTable);
             const url = new URL(enrollEndpoint, window.location.origin);
             url.searchParams.set('page', stateEnroll.page);
             url.searchParams.set('per_page', stateEnroll.per_page);
@@ -324,7 +313,6 @@
                                 </tr>`;
                         }).join('');
                     }
-                    window.FlowbiteDashboardTables?.refreshTable(enrollTable);
                     renderSummary(data.pagination || {}, enrollSummary, 'alunos');
                     renderPagination(data.pagination || {}, enrollPagination, (next) => { stateEnroll.page = next; loadEnrollments(); });
                 })
@@ -335,7 +323,6 @@
                     }
                     enrollSummary.textContent = 'Erro ao carregar alunos.';
                     enrollPagination.innerHTML = '';
-                    window.FlowbiteDashboardTables?.refreshTable(enrollTable);
                 });
         };
 
@@ -343,7 +330,6 @@
             const pendingBody = getPendingBody();
             if (!pendingBody) return;
             pendingBody.innerHTML = '<tr><td colspan="5" class="px-6 py-6 text-center text-slate-500">Carregando...</td></tr>';
-            window.FlowbiteDashboardTables?.refreshTable(pendingTable);
             const url = new URL(pendingEndpoint, window.location.origin);
             url.searchParams.set('page', statePending.page);
             url.searchParams.set('per_page', statePending.per_page);
@@ -387,7 +373,6 @@
                                 </tr>`;
                         }).join('');
                     }
-                    window.FlowbiteDashboardTables?.refreshTable(pendingTable);
                     renderSummary(data.pagination || {}, pendingSummary, 'pedidos');
                     renderPagination(data.pagination || {}, pendingPagination, (next) => { statePending.page = next; loadPending(); });
                 })
@@ -398,7 +383,6 @@
                     }
                     pendingSummary.textContent = 'Erro ao carregar pedidos.';
                     pendingPagination.innerHTML = '';
-                    window.FlowbiteDashboardTables?.refreshTable(pendingTable);
                 });
         };
 

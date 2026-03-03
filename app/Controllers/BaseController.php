@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Libraries\AuditLogger;
 use CodeIgniter\Controller;
 use CodeIgniter\HTTP\CLIRequest;
 use CodeIgniter\HTTP\IncomingRequest;
@@ -42,6 +43,7 @@ abstract class BaseController extends Controller
      * The creation of dynamic property is deprecated in PHP 8.2.
      */
     // protected $session;
+    protected AuditLogger $auditLogger;
 
     /**
      * @return void
@@ -52,6 +54,7 @@ abstract class BaseController extends Controller
         parent::initController($request, $response, $logger);
 
         // Preload any models, libraries, etc, here.
+        $this->auditLogger = service('auditLogger');
 
         // E.g.: $this->session = service('session');
     }

@@ -1,0 +1,388 @@
+DEBUG - 2026-02-25 08:19:23 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 08:19:30 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 08:19:44 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 08:19:44 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 08:19:53 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 08:19:54 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 08:20:04 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 08:20:04 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 08:22:01 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 08:22:11 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 08:22:11 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 13:28:30 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 13:48:51 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 13:49:58 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 13:49:58 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 13:50:19 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 13:50:20 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 13:50:21 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 13:50:28 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 13:50:39 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 13:50:40 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 13:50:40 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 13:51:00 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 13:51:01 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 13:51:01 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 14:05:16 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 14:05:23 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 14:05:55 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 14:05:56 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 14:10:37 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 14:10:38 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 14:11:13 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 14:11:13 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 14:11:17 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 14:11:29 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 14:16:50 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 14:16:52 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 14:17:20 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 14:30:43 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 14:30:45 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-02-25 14:30:45 --> mysqli_sql_exception: Unknown column 'u.force_pass_reset' in 'field list' in C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `u`.`id`...', 0)
+#1 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `u`.`id`...')
+#2 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `u`.`id`...')
+#3 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `u`.`id`...', Array, false)
+#4 C:\laragon\www\academy-ci4\app\Controllers\Admin\Dashboard.php(391): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\laragon\www\academy-ci4\app\Controllers\Admin\Dashboard.php(139): App\Controllers\Admin\Dashboard->usersDataResponse('instructor')
+#6 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(933): App\Controllers\Admin\Dashboard->instructorsData()
+#7 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Admin\Dashboard))
+#8 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#9 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#10 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#11 C:\laragon\www\academy-ci4\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#12 {main}
+CRITICAL - 2026-02-25 14:30:45 --> CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'u.force_pass_reset' in 'field list'
+[Method: GET, Route: admin/dashboard/instrutores/data]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `u`.`id`, `u`.`username`, `u`.`active`, `u`.`last_active`, `u`.`created_at`, `u`.`img`, `u`.`role`, `u`.`country`, `u`.`province`, `u`.`city`, `u`.`phone`, `u`.`force_pass_reset`, `ai`.`secret` as `email`
+FROM `users` `u`
+LEFT JOIN `auth_identities` `ai` ON `ai`.`user_id` = `u`.`id` AND `ai`.`type` = "email_password"
+WHERE `u`.`role` = :u.role:
+AND `u`.`deleted_at` IS NULL
+ORDER BY `u`.`id` DESC
+ LIMIT 10', [...], false)
+ 2 APPPATH\Controllers\Admin\Dashboard.php(391): CodeIgniter\Database\BaseBuilder->get()
+ 3 APPPATH\Controllers\Admin\Dashboard.php(139): App\Controllers\Admin\Dashboard->usersDataResponse('instructor')
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Admin\Dashboard->instructorsData()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Admin\Dashboard))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-02-25 14:30:45 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'u.force_pass_reset' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `u`.`id`, `u`.`username`, `u`.`active`, `u`.`last_active`, `u`.`created_at`, `u`.`img`, `u`.`role`, `u`.`country`, `u`.`province`, `u`.`city`, `u`.`phone`, `u`.`force_pass_reset`, `ai`.`secret` as `email`
+FROM `users` `u`
+LEFT JOIN `auth_identities` `ai` ON `ai`.`user_id` = `u`.`id` AND `ai`.`type` = "email_password"
+WHERE `u`.`role` = \'instructor\'
+AND `u`.`deleted_at` IS NULL
+ORDER BY `u`.`id` DESC
+ LIMIT 10')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `u`.`id`, `u`.`username`, `u`.`active`, `u`.`last_active`, `u`.`created_at`, `u`.`img`, `u`.`role`, `u`.`country`, `u`.`province`, `u`.`city`, `u`.`phone`, `u`.`force_pass_reset`, `ai`.`secret` as `email`
+FROM `users` `u`
+LEFT JOIN `auth_identities` `ai` ON `ai`.`user_id` = `u`.`id` AND `ai`.`type` = "email_password"
+WHERE `u`.`role` = \'instructor\'
+AND `u`.`deleted_at` IS NULL
+ORDER BY `u`.`id` DESC
+ LIMIT 10')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `u`.`id`, `u`.`username`, `u`.`active`, `u`.`last_active`, `u`.`created_at`, `u`.`img`, `u`.`role`, `u`.`country`, `u`.`province`, `u`.`city`, `u`.`phone`, `u`.`force_pass_reset`, `ai`.`secret` as `email`
+FROM `users` `u`
+LEFT JOIN `auth_identities` `ai` ON `ai`.`user_id` = `u`.`id` AND `ai`.`type` = "email_password"
+WHERE `u`.`role` = :u.role:
+AND `u`.`deleted_at` IS NULL
+ORDER BY `u`.`id` DESC
+ LIMIT 10', [...], false)
+ 4 APPPATH\Controllers\Admin\Dashboard.php(391): CodeIgniter\Database\BaseBuilder->get()
+ 5 APPPATH\Controllers\Admin\Dashboard.php(139): App\Controllers\Admin\Dashboard->usersDataResponse('instructor')
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Admin\Dashboard->instructorsData()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Admin\Dashboard))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-02-25 14:30:45 --> [Caused by] mysqli_sql_exception: Unknown column 'u.force_pass_reset' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `u`.`id`, `u`.`username`, `u`.`active`, `u`.`last_active`, `u`.`created_at`, `u`.`img`, `u`.`role`, `u`.`country`, `u`.`province`, `u`.`city`, `u`.`phone`, `u`.`force_pass_reset`, `ai`.`secret` as `email`
+FROM `users` `u`
+LEFT JOIN `auth_identities` `ai` ON `ai`.`user_id` = `u`.`id` AND `ai`.`type` = "email_password"
+WHERE `u`.`role` = \'instructor\'
+AND `u`.`deleted_at` IS NULL
+ORDER BY `u`.`id` DESC
+ LIMIT 10', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `u`.`id`, `u`.`username`, `u`.`active`, `u`.`last_active`, `u`.`created_at`, `u`.`img`, `u`.`role`, `u`.`country`, `u`.`province`, `u`.`city`, `u`.`phone`, `u`.`force_pass_reset`, `ai`.`secret` as `email`
+FROM `users` `u`
+LEFT JOIN `auth_identities` `ai` ON `ai`.`user_id` = `u`.`id` AND `ai`.`type` = "email_password"
+WHERE `u`.`role` = \'instructor\'
+AND `u`.`deleted_at` IS NULL
+ORDER BY `u`.`id` DESC
+ LIMIT 10')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `u`.`id`, `u`.`username`, `u`.`active`, `u`.`last_active`, `u`.`created_at`, `u`.`img`, `u`.`role`, `u`.`country`, `u`.`province`, `u`.`city`, `u`.`phone`, `u`.`force_pass_reset`, `ai`.`secret` as `email`
+FROM `users` `u`
+LEFT JOIN `auth_identities` `ai` ON `ai`.`user_id` = `u`.`id` AND `ai`.`type` = "email_password"
+WHERE `u`.`role` = \'instructor\'
+AND `u`.`deleted_at` IS NULL
+ORDER BY `u`.`id` DESC
+ LIMIT 10')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `u`.`id`, `u`.`username`, `u`.`active`, `u`.`last_active`, `u`.`created_at`, `u`.`img`, `u`.`role`, `u`.`country`, `u`.`province`, `u`.`city`, `u`.`phone`, `u`.`force_pass_reset`, `ai`.`secret` as `email`
+FROM `users` `u`
+LEFT JOIN `auth_identities` `ai` ON `ai`.`user_id` = `u`.`id` AND `ai`.`type` = "email_password"
+WHERE `u`.`role` = :u.role:
+AND `u`.`deleted_at` IS NULL
+ORDER BY `u`.`id` DESC
+ LIMIT 10', [...], false)
+ 5 APPPATH\Controllers\Admin\Dashboard.php(391): CodeIgniter\Database\BaseBuilder->get()
+ 6 APPPATH\Controllers\Admin\Dashboard.php(139): App\Controllers\Admin\Dashboard->usersDataResponse('instructor')
+ 7 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Admin\Dashboard->instructorsData()
+ 8 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Admin\Dashboard))
+ 9 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-02-25 14:30:50 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 14:30:52 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-02-25 14:30:52 --> mysqli_sql_exception: Unknown column 'u.force_pass_reset' in 'field list' in C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `u`.`id`...', 0)
+#1 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `u`.`id`...')
+#2 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `u`.`id`...')
+#3 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `u`.`id`...', Array, false)
+#4 C:\laragon\www\academy-ci4\app\Controllers\Admin\Dashboard.php(391): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\laragon\www\academy-ci4\app\Controllers\Admin\Dashboard.php(123): App\Controllers\Admin\Dashboard->usersDataResponse('student')
+#6 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(933): App\Controllers\Admin\Dashboard->studentsData()
+#7 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Admin\Dashboard))
+#8 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#9 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#10 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#11 C:\laragon\www\academy-ci4\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#12 {main}
+CRITICAL - 2026-02-25 14:30:52 --> CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'u.force_pass_reset' in 'field list'
+[Method: GET, Route: admin/dashboard/estudantes/data]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `u`.`id`, `u`.`username`, `u`.`active`, `u`.`last_active`, `u`.`created_at`, `u`.`img`, `u`.`role`, `u`.`country`, `u`.`province`, `u`.`city`, `u`.`phone`, `u`.`force_pass_reset`, `ai`.`secret` as `email`
+FROM `users` `u`
+LEFT JOIN `auth_identities` `ai` ON `ai`.`user_id` = `u`.`id` AND `ai`.`type` = "email_password"
+WHERE `u`.`role` = :u.role:
+AND `u`.`deleted_at` IS NULL
+ORDER BY `u`.`id` DESC
+ LIMIT 10', [...], false)
+ 2 APPPATH\Controllers\Admin\Dashboard.php(391): CodeIgniter\Database\BaseBuilder->get()
+ 3 APPPATH\Controllers\Admin\Dashboard.php(123): App\Controllers\Admin\Dashboard->usersDataResponse('student')
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Admin\Dashboard->studentsData()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Admin\Dashboard))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-02-25 14:30:52 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'u.force_pass_reset' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `u`.`id`, `u`.`username`, `u`.`active`, `u`.`last_active`, `u`.`created_at`, `u`.`img`, `u`.`role`, `u`.`country`, `u`.`province`, `u`.`city`, `u`.`phone`, `u`.`force_pass_reset`, `ai`.`secret` as `email`
+FROM `users` `u`
+LEFT JOIN `auth_identities` `ai` ON `ai`.`user_id` = `u`.`id` AND `ai`.`type` = "email_password"
+WHERE `u`.`role` = \'student\'
+AND `u`.`deleted_at` IS NULL
+ORDER BY `u`.`id` DESC
+ LIMIT 10')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `u`.`id`, `u`.`username`, `u`.`active`, `u`.`last_active`, `u`.`created_at`, `u`.`img`, `u`.`role`, `u`.`country`, `u`.`province`, `u`.`city`, `u`.`phone`, `u`.`force_pass_reset`, `ai`.`secret` as `email`
+FROM `users` `u`
+LEFT JOIN `auth_identities` `ai` ON `ai`.`user_id` = `u`.`id` AND `ai`.`type` = "email_password"
+WHERE `u`.`role` = \'student\'
+AND `u`.`deleted_at` IS NULL
+ORDER BY `u`.`id` DESC
+ LIMIT 10')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `u`.`id`, `u`.`username`, `u`.`active`, `u`.`last_active`, `u`.`created_at`, `u`.`img`, `u`.`role`, `u`.`country`, `u`.`province`, `u`.`city`, `u`.`phone`, `u`.`force_pass_reset`, `ai`.`secret` as `email`
+FROM `users` `u`
+LEFT JOIN `auth_identities` `ai` ON `ai`.`user_id` = `u`.`id` AND `ai`.`type` = "email_password"
+WHERE `u`.`role` = :u.role:
+AND `u`.`deleted_at` IS NULL
+ORDER BY `u`.`id` DESC
+ LIMIT 10', [...], false)
+ 4 APPPATH\Controllers\Admin\Dashboard.php(391): CodeIgniter\Database\BaseBuilder->get()
+ 5 APPPATH\Controllers\Admin\Dashboard.php(123): App\Controllers\Admin\Dashboard->usersDataResponse('student')
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Admin\Dashboard->studentsData()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Admin\Dashboard))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-02-25 14:30:52 --> [Caused by] mysqli_sql_exception: Unknown column 'u.force_pass_reset' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `u`.`id`, `u`.`username`, `u`.`active`, `u`.`last_active`, `u`.`created_at`, `u`.`img`, `u`.`role`, `u`.`country`, `u`.`province`, `u`.`city`, `u`.`phone`, `u`.`force_pass_reset`, `ai`.`secret` as `email`
+FROM `users` `u`
+LEFT JOIN `auth_identities` `ai` ON `ai`.`user_id` = `u`.`id` AND `ai`.`type` = "email_password"
+WHERE `u`.`role` = \'student\'
+AND `u`.`deleted_at` IS NULL
+ORDER BY `u`.`id` DESC
+ LIMIT 10', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `u`.`id`, `u`.`username`, `u`.`active`, `u`.`last_active`, `u`.`created_at`, `u`.`img`, `u`.`role`, `u`.`country`, `u`.`province`, `u`.`city`, `u`.`phone`, `u`.`force_pass_reset`, `ai`.`secret` as `email`
+FROM `users` `u`
+LEFT JOIN `auth_identities` `ai` ON `ai`.`user_id` = `u`.`id` AND `ai`.`type` = "email_password"
+WHERE `u`.`role` = \'student\'
+AND `u`.`deleted_at` IS NULL
+ORDER BY `u`.`id` DESC
+ LIMIT 10')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `u`.`id`, `u`.`username`, `u`.`active`, `u`.`last_active`, `u`.`created_at`, `u`.`img`, `u`.`role`, `u`.`country`, `u`.`province`, `u`.`city`, `u`.`phone`, `u`.`force_pass_reset`, `ai`.`secret` as `email`
+FROM `users` `u`
+LEFT JOIN `auth_identities` `ai` ON `ai`.`user_id` = `u`.`id` AND `ai`.`type` = "email_password"
+WHERE `u`.`role` = \'student\'
+AND `u`.`deleted_at` IS NULL
+ORDER BY `u`.`id` DESC
+ LIMIT 10')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `u`.`id`, `u`.`username`, `u`.`active`, `u`.`last_active`, `u`.`created_at`, `u`.`img`, `u`.`role`, `u`.`country`, `u`.`province`, `u`.`city`, `u`.`phone`, `u`.`force_pass_reset`, `ai`.`secret` as `email`
+FROM `users` `u`
+LEFT JOIN `auth_identities` `ai` ON `ai`.`user_id` = `u`.`id` AND `ai`.`type` = "email_password"
+WHERE `u`.`role` = :u.role:
+AND `u`.`deleted_at` IS NULL
+ORDER BY `u`.`id` DESC
+ LIMIT 10', [...], false)
+ 5 APPPATH\Controllers\Admin\Dashboard.php(391): CodeIgniter\Database\BaseBuilder->get()
+ 6 APPPATH\Controllers\Admin\Dashboard.php(123): App\Controllers\Admin\Dashboard->usersDataResponse('student')
+ 7 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Admin\Dashboard->studentsData()
+ 8 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Admin\Dashboard))
+ 9 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-02-25 14:41:24 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 14:41:26 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-02-25 14:41:26 --> mysqli_sql_exception: Unknown column 'u.force_pass_reset' in 'field list' in C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `u`.`id`...', 0)
+#1 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `u`.`id`...')
+#2 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `u`.`id`...')
+#3 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `u`.`id`...', Array, false)
+#4 C:\laragon\www\academy-ci4\app\Controllers\Admin\Dashboard.php(391): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\laragon\www\academy-ci4\app\Controllers\Admin\Dashboard.php(123): App\Controllers\Admin\Dashboard->usersDataResponse('student')
+#6 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(933): App\Controllers\Admin\Dashboard->studentsData()
+#7 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Admin\Dashboard))
+#8 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#9 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Boot.php(363): CodeIgniter\CodeIgniter->run()
+#10 C:\laragon\www\academy-ci4\vendor\codeigniter4\framework\system\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#11 C:\laragon\www\academy-ci4\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#12 {main}
+CRITICAL - 2026-02-25 14:41:26 --> CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'u.force_pass_reset' in 'field list'
+[Method: GET, Route: admin/dashboard/estudantes/data]
+in SYSTEMPATH\Database\BaseConnection.php on line 684.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `u`.`id`, `u`.`username`, `u`.`active`, `u`.`last_active`, `u`.`created_at`, `u`.`img`, `u`.`role`, `u`.`country`, `u`.`province`, `u`.`city`, `u`.`phone`, `u`.`force_pass_reset`, `ai`.`secret` as `email`
+FROM `users` `u`
+LEFT JOIN `auth_identities` `ai` ON `ai`.`user_id` = `u`.`id` AND `ai`.`type` = "email_password"
+WHERE `u`.`role` = :u.role:
+AND `u`.`deleted_at` IS NULL
+ORDER BY `u`.`id` DESC
+ LIMIT 10', [...], false)
+ 2 APPPATH\Controllers\Admin\Dashboard.php(391): CodeIgniter\Database\BaseBuilder->get()
+ 3 APPPATH\Controllers\Admin\Dashboard.php(123): App\Controllers\Admin\Dashboard->usersDataResponse('student')
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Admin\Dashboard->studentsData()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Admin\Dashboard))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-02-25 14:41:26 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'u.force_pass_reset' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `u`.`id`, `u`.`username`, `u`.`active`, `u`.`last_active`, `u`.`created_at`, `u`.`img`, `u`.`role`, `u`.`country`, `u`.`province`, `u`.`city`, `u`.`phone`, `u`.`force_pass_reset`, `ai`.`secret` as `email`
+FROM `users` `u`
+LEFT JOIN `auth_identities` `ai` ON `ai`.`user_id` = `u`.`id` AND `ai`.`type` = "email_password"
+WHERE `u`.`role` = \'student\'
+AND `u`.`deleted_at` IS NULL
+ORDER BY `u`.`id` DESC
+ LIMIT 10')
+ 2 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `u`.`id`, `u`.`username`, `u`.`active`, `u`.`last_active`, `u`.`created_at`, `u`.`img`, `u`.`role`, `u`.`country`, `u`.`province`, `u`.`city`, `u`.`phone`, `u`.`force_pass_reset`, `ai`.`secret` as `email`
+FROM `users` `u`
+LEFT JOIN `auth_identities` `ai` ON `ai`.`user_id` = `u`.`id` AND `ai`.`type` = "email_password"
+WHERE `u`.`role` = \'student\'
+AND `u`.`deleted_at` IS NULL
+ORDER BY `u`.`id` DESC
+ LIMIT 10')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `u`.`id`, `u`.`username`, `u`.`active`, `u`.`last_active`, `u`.`created_at`, `u`.`img`, `u`.`role`, `u`.`country`, `u`.`province`, `u`.`city`, `u`.`phone`, `u`.`force_pass_reset`, `ai`.`secret` as `email`
+FROM `users` `u`
+LEFT JOIN `auth_identities` `ai` ON `ai`.`user_id` = `u`.`id` AND `ai`.`type` = "email_password"
+WHERE `u`.`role` = :u.role:
+AND `u`.`deleted_at` IS NULL
+ORDER BY `u`.`id` DESC
+ LIMIT 10', [...], false)
+ 4 APPPATH\Controllers\Admin\Dashboard.php(391): CodeIgniter\Database\BaseBuilder->get()
+ 5 APPPATH\Controllers\Admin\Dashboard.php(123): App\Controllers\Admin\Dashboard->usersDataResponse('student')
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Admin\Dashboard->studentsData()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Admin\Dashboard))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-02-25 14:41:26 --> [Caused by] mysqli_sql_exception: Unknown column 'u.force_pass_reset' in 'field list'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('SELECT `u`.`id`, `u`.`username`, `u`.`active`, `u`.`last_active`, `u`.`created_at`, `u`.`img`, `u`.`role`, `u`.`country`, `u`.`province`, `u`.`city`, `u`.`phone`, `u`.`force_pass_reset`, `ai`.`secret` as `email`
+FROM `users` `u`
+LEFT JOIN `auth_identities` `ai` ON `ai`.`user_id` = `u`.`id` AND `ai`.`type` = "email_password"
+WHERE `u`.`role` = \'student\'
+AND `u`.`deleted_at` IS NULL
+ORDER BY `u`.`id` DESC
+ LIMIT 10', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(729): CodeIgniter\Database\MySQLi\Connection->execute('SELECT `u`.`id`, `u`.`username`, `u`.`active`, `u`.`last_active`, `u`.`created_at`, `u`.`img`, `u`.`role`, `u`.`country`, `u`.`province`, `u`.`city`, `u`.`phone`, `u`.`force_pass_reset`, `ai`.`secret` as `email`
+FROM `users` `u`
+LEFT JOIN `auth_identities` `ai` ON `ai`.`user_id` = `u`.`id` AND `ai`.`type` = "email_password"
+WHERE `u`.`role` = \'student\'
+AND `u`.`deleted_at` IS NULL
+ORDER BY `u`.`id` DESC
+ LIMIT 10')
+ 3 SYSTEMPATH\Database\BaseConnection.php(646): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT `u`.`id`, `u`.`username`, `u`.`active`, `u`.`last_active`, `u`.`created_at`, `u`.`img`, `u`.`role`, `u`.`country`, `u`.`province`, `u`.`city`, `u`.`phone`, `u`.`force_pass_reset`, `ai`.`secret` as `email`
+FROM `users` `u`
+LEFT JOIN `auth_identities` `ai` ON `ai`.`user_id` = `u`.`id` AND `ai`.`type` = "email_password"
+WHERE `u`.`role` = \'student\'
+AND `u`.`deleted_at` IS NULL
+ORDER BY `u`.`id` DESC
+ LIMIT 10')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT `u`.`id`, `u`.`username`, `u`.`active`, `u`.`last_active`, `u`.`created_at`, `u`.`img`, `u`.`role`, `u`.`country`, `u`.`province`, `u`.`city`, `u`.`phone`, `u`.`force_pass_reset`, `ai`.`secret` as `email`
+FROM `users` `u`
+LEFT JOIN `auth_identities` `ai` ON `ai`.`user_id` = `u`.`id` AND `ai`.`type` = "email_password"
+WHERE `u`.`role` = :u.role:
+AND `u`.`deleted_at` IS NULL
+ORDER BY `u`.`id` DESC
+ LIMIT 10', [...], false)
+ 5 APPPATH\Controllers\Admin\Dashboard.php(391): CodeIgniter\Database\BaseBuilder->get()
+ 6 APPPATH\Controllers\Admin\Dashboard.php(123): App\Controllers\Admin\Dashboard->usersDataResponse('student')
+ 7 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Admin\Dashboard->studentsData()
+ 8 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Admin\Dashboard))
+ 9 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+10 SYSTEMPATH\Boot.php(363): CodeIgniter\CodeIgniter->run()
+11 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+12 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-02-25 15:00:47 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:00:49 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:00:56 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:00:58 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:01:01 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:01:22 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:01:23 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:02:40 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:02:58 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:02:59 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:03:06 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:03:07 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:03:26 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:03:27 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:03:31 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:03:35 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:03:35 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:03:45 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:16:17 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:16:37 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:16:37 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:16:40 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:16:41 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:16:41 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:16:50 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:16:50 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:17:04 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:17:04 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:17:07 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:17:08 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:17:16 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:17:17 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:17:19 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:17:19 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:18:07 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:18:18 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:18:22 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-02-25 15:18:25 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.

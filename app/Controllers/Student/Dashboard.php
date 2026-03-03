@@ -7,8 +7,11 @@ use App\Models\CourseModel;
 use App\Models\CertificateModel;
 use App\Models\EnrollmentModel;
 use App\Models\ExtendedUserModel;
+use App\Models\JitsiModel;
+use App\Models\JitsiRecordingModel;
 use App\Models\ModuleModel;
 use App\Models\LessonModel;
+use App\Libraries\JitsiJwtService;
 use CodeIgniter\Shield\Models\UserModel;
 
 class Dashboard extends BaseController
@@ -45,6 +48,12 @@ class Dashboard extends BaseController
                 'icon' => 'bi-book',
                 'url' => '/student/dashboard/inscricoes',
                 'pattern' => '/student/dashboard/inscricoes*' // Com * para subpÃ¡ginas
+            ],
+            [
+                'label' => 'Aulas ao Vivo',
+                'icon' => 'bi-camera-video',
+                'url' => '/student/dashboard/aulas_ao_vivo',
+                'pattern' => '/student/dashboard/aulas_ao_vivo*'
             ],
             [
                 'label' => 'Todos Cursos',
@@ -768,6 +777,143 @@ class Dashboard extends BaseController
         ]);
     }
 
+    public function liveClasses()
+    {
+        $user = service('auth')->user();
+        $db = db_connect();
+
+        $classes = $db->table('jitsi j')
+            ->select([
+                'j.id_jitsi',
+                'j.title_jitsi',
+                'j.description_jitsi',
+                'j.id_course_jitsi',
+                'j.class_type_jitsi',
+                'j.meeting_date_jitsi',
+                'j.start_time_jitsi',
+                'j.end_time_jitsi',
+                'j.status_jitsi',
+                'j.recording_jitsi',
+                'j.room_jitsi',
+                'c.title_course',
+                'u.username as instructor_name',
+            ])
+            ->join('courses c', 'c.id_course = j.id_course_jitsi')
+            ->join('users u', 'u.id = j.id_user_jitsi')
+            ->join('enrollments e', 'e.id_course_enrollment = j.id_course_jitsi')
+            ->where('e.id_student_enrollment', (int) $user->id)
+            ->where('e.status_enrollment', 'ativa')
+            ->orderBy('j.id_jitsi', 'DESC')
+            ->get()
+            ->getResult();
+
+        $recordingsByClass = [];
+        $classIds = array_map(static fn ($row) => (int) $row->id_jitsi, $classes);
+        if (! empty($classIds)) {
+            $recordingModel = new JitsiRecordingModel();
+            $published = $recordingModel
+                ->whereIn('id_jitsi_session', $classIds)
+                ->where('is_published', 1)
+                ->where('status_recording', 'ready')
+                ->orderBy('id_jitsi_recording', 'DESC')
+                ->findAll();
+
+            foreach ($published as $rec) {
+                $sessionId = (int) $rec->id_jitsi_session;
+                if (! isset($recordingsByClass[$sessionId])) {
+                    $recordingsByClass[$sessionId] = [];
+                }
+                $recordingsByClass[$sessionId][] = $rec;
+            }
+        }
+
+        return view('pages/student/live_classes', [
+            'user' => $user,
+            'classes' => $classes,
+            'recordingsByClass' => $recordingsByClass,
+            'sidebarLinks' => $this->sidebarLinks(),
+            'currentUrl' => current_url(),
+        ]);
+    }
+
+    public function liveStream($id)
+    {
+        $user = service('auth')->user();
+        $jitsiModel = new JitsiModel();
+        $recordingModel = new JitsiRecordingModel();
+        /** @var JitsiJwtService $jitsiJwt */
+        $jitsiJwt = service('jitsiJwt');
+
+        $aula = $jitsiModel->find((int) $id);
+        if (! $aula) {
+            return redirect()->to('/student/dashboard/aulas_ao_vivo')->with('error', 'Aula ao vivo nao encontrada.');
+        }
+
+        if (empty($aula->id_course_jitsi)) {
+            return redirect()->to('/student/dashboard/aulas_ao_vivo')->with('error', 'Aula sem curso associado.');
+        }
+
+        $isEnrolled = db_connect()->table('enrollments')
+            ->where('id_course_enrollment', (int) $aula->id_course_jitsi)
+            ->where('id_student_enrollment', (int) $user->id)
+            ->where('status_enrollment', 'ativa')
+            ->countAllResults() > 0;
+
+        if (! $isEnrolled) {
+            return redirect()->to('/student/dashboard/aulas_ao_vivo')->with('error', 'Sem permissao para esta aula.');
+        }
+
+        $displayName = trim((string) ($user->username ?? ('Aluno ' . $user->id)));
+        $email = trim((string) ($user->email ?? ''));
+        $avatar = ! empty($user->img) ? base_url((string) $user->img) : '';
+
+        $token = null;
+        try {
+            $token = $jitsiJwt->buildToken(
+                (string) $aula->room_jitsi,
+                [
+                    'id' => (string) $user->id,
+                    'name' => $displayName,
+                    'email' => $email,
+                    'avatar' => $avatar,
+                ],
+                false,
+                [
+                    'recording' => false,
+                    'screen-sharing' => (bool) $aula->screenshare_jitsi,
+                ]
+            );
+        } catch (\Throwable $e) {
+            log_message('warning', 'Falha ao gerar token Jitsi para aluno: {message}', ['message' => $e->getMessage()]);
+        }
+
+        $recordings = $recordingModel
+            ->where('id_jitsi_session', (int) $aula->id_jitsi)
+            ->where('is_published', 1)
+            ->where('status_recording', 'ready')
+            ->orderBy('id_jitsi_recording', 'DESC')
+            ->findAll();
+
+        return view('pages/instructor/live_stream', [
+            'aula' => $aula,
+            'user' => $user,
+            'sidebarLinks' => $this->sidebarLinks(),
+            'currentUrl' => current_url(),
+            'jitsiDomain' => $jitsiJwt->getDomain(),
+            'jitsiExternalApiScript' => $jitsiJwt->getExternalApiScriptUrl(),
+            'jitsiRoomName' => $jitsiJwt->buildRoomName((string) $aula->room_jitsi),
+            'jitsiToken' => $token,
+            'jitsiRecordingMode' => $jitsiJwt->getDefaultRecordingMode(),
+            'canModerate' => false,
+            'canManageRecordings' => false,
+            'backUrl' => site_url('student/dashboard/aulas_ao_vivo'),
+            'endStreamUrl' => '',
+            'saveRecordingUrl' => '',
+            'publishToggleBaseUrl' => '',
+            'recordings' => $recordings,
+        ]);
+    }
+
     public function profile()
     {
         $users = new ExtendedUserModel();
@@ -1028,4 +1174,5 @@ class Dashboard extends BaseController
     }
 
 }
+
 

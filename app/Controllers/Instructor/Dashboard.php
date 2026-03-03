@@ -11,7 +11,9 @@ use App\Models\LessonModel;
 use App\Models\CourseSettingModel;
 use App\Models\ExtendedUserModel;
 use App\Models\JitsiModel;
+use App\Models\JitsiRecordingModel;
 use App\Models\PendingUserModel;
+use App\Libraries\JitsiJwtService;
 use CodeIgniter\Shield\Entities\User;
 use CodeIgniter\Shield\Models\UserModel;
 use CodeIgniter\Shield\Authentication\Passwords;
@@ -57,10 +59,30 @@ class Dashboard extends BaseController
             ['label' => 'Meus Cursos', 'icon' => 'bi-book', 'url' => '/instructor/dashboard/meus_cursos'],
             ['label' => 'Aula ao Vivo', 'icon' => 'bi-camera-reels', 'url' => '/instructor/dashboard/jitsi'],
             ['label' => 'Estudantes', 'icon' => 'bi-people', 'url' => '/instructor/dashboard/meus_estudantes'],
-            ['label' => 'Finanças', 'icon' => 'bi-cash-coin', 'url' => '/instructor/dashboard/financas'],
+            ['label' => 'Financas', 'icon' => 'bi-cash-coin', 'url' => '/instructor/dashboard/financas'],
+            ['label' => 'Logs', 'icon' => 'bi-journal-text', 'url' => '/instructor/dashboard/logs'],
             ['label' => 'Certificados', 'icon' => 'bi-folder', 'url' => '/instructor/dashboard/certificados'],
             ['label' => 'Perfil', 'icon' => 'bi-person-circle', 'url' => '/instructor/dashboard/perfil'],
         ];
+    }
+
+    private function makeJitsiRoom(string $title): string
+    {
+        $cfg = config('Jitsi');
+        $prefix = trim((string) ($cfg->roomPrefix ?? 'academy'));
+        $prefix = $prefix !== '' ? $prefix : 'academy';
+
+        $slug = preg_replace('/[^a-z0-9]+/i', '-', strtolower(trim($title)));
+        $slug = trim((string) $slug, '-');
+        $slug = $slug !== '' ? substr($slug, 0, 32) : 'live';
+
+        try {
+            $suffix = substr(bin2hex(random_bytes(6)), 0, 10);
+        } catch (\Throwable $e) {
+            $suffix = substr(sha1(uniqid('', true)), 0, 10);
+        }
+
+        return $prefix . '-' . $slug . '-' . $suffix;
     }
 
     public function index()
@@ -93,7 +115,7 @@ class Dashboard extends BaseController
         $user = service('auth')->user();
         $courseModel = new CourseModel();
         $moduleModel = new ModuleModel();
-        $lessonModel = new LessonModel();
+        $lessonModel = new LessonModel ();
         $projectModel = new \App\Models\ProjectModel();
 
         $savedDraft = $courseModel
@@ -206,43 +228,52 @@ class Dashboard extends BaseController
         $req   = $this->request;
         $model = new JitsiModel();
         $courseModel = new CourseModel();
-
-        // ============================================================
-        // 1) GET Ã¢â€ â€™ LISTAGEM + VIEW
-        // ============================================================
+        $recordingModel = new JitsiRecordingModel();
         if ($req->getMethod() === 'GET') {
-
             $aulas = $model->where('id_user_jitsi', $user->id)
                 ->orderBy('id_jitsi', 'DESC')
                 ->findAll();
-
+            $recordingStats = [];
+            $aulaIds = array_map(static fn ($a) => (int) $a->id_jitsi, $aulas);
+            if (! empty($aulaIds)) {
+                $stats = $recordingModel
+                    ->select('id_jitsi_session, COUNT(*) as total_recordings, SUM(CASE WHEN is_published = 1 THEN 1 ELSE 0 END) as published_recordings', false)
+                    ->whereIn('id_jitsi_session', $aulaIds)
+                    ->groupBy('id_jitsi_session')
+                    ->findAll();
+                foreach ($stats as $s) {
+                    $recordingStats[(int) $s->id_jitsi_session] = [
+                        'total' => (int) ($s->total_recordings ?? 0),
+                        'published' => (int) ($s->published_recordings ?? 0),
+                    ];
+                }
+            }
             $courses = $courseModel->getCoursesByInstructor($user->id);
-
             return view('pages/instructor/live_class', [
                 'user'         => $user,
                 'sidebarLinks' => $this->sidebarLinks(),
                 'currentUrl'   => current_url(),
                 'aulas'        => $aulas,
-                'courses'      => $courses
+                'courses'      => $courses,
+                'recordingStats' => $recordingStats,
             ]);
         }
-
-        // ============================================================
-        // 2) POST Ã¢â€ â€™ definir se ÃƒÂ© CRIAR ou EDITAR
-        // ============================================================
-        $isEdit = !empty($req->getPost('id_jitsi'));
-        $editId = $req->getPost('id_jitsi');
-
-        // ============================================================
-        // 3) REGRAS DE VALIDAÃƒâ€¡ÃƒÆ’O
-        // ============================================================
+        $editId = (int) ($req->getPost('id_jitsi') ?: $id ?: 0);
+        $isEdit = $editId > 0;
+        $existingAula = null;
+        if ($isEdit) {
+            $existingAula = $model->find($editId);
+            if (! $existingAula || (int) $existingAula->id_user_jitsi !== (int) $user->id) {
+                return redirect()->to('/instructor/dashboard/jitsi')->with('error', 'Aula nao encontrada ou sem permissao.');
+            }
+        }
         $rules = [
             'classTitle' => [
-                'label'  => 'TÃƒÂ­tulo da Aula',
+                'label'  => 'Titulo da Aula',
                 'rules'  => 'required|min_length[3]|max_length[255]',
             ],
             'classDescription' => [
-                'label'  => 'DescriÃƒÂ§ÃƒÂ£o',
+                'label'  => 'Descricao',
                 'rules'  => 'permit_empty|max_length[65535]',
             ],
             'associatedCourse' => [
@@ -266,73 +297,69 @@ class Dashboard extends BaseController
                 'rules' => 'permit_empty|min_length[4]|max_length[100]',
             ],
         ];
-
-        // Se for AULA AGENDADA Ã¢â€ â€™ obriga data e horÃƒÂ¡rios
         if ($req->getPost('classType') === 'scheduled') {
-
             $rules['classDate'] = [
                 'label' => 'Data da Aula',
                 'rules' => 'required|valid_date[Y-m-d]',
             ];
-
             $rules['startTime'] = [
-                'label' => 'Hora de InÃƒÂ­cio',
+                'label' => 'Hora de Inicio',
                 'rules' => 'required',
             ];
-
             $rules['endTime'] = [
-                'label' => 'Hora de TÃƒÂ©rmino',
+                'label' => 'Hora de Termino',
                 'rules' => 'required',
             ];
         }
-
-        // Se for PRIVACIDADE COM SENHA Ã¢â€ â€™ obriga senha
-        if ($req->getPost('roomPrivacy') === 'password') {
+        $roomPassword = trim((string) $req->getPost('roomPassword'));
+        if ($req->getPost('roomPrivacy') === 'password' && (! $isEdit || $roomPassword !== '')) {
             $rules['roomPassword']['rules'] = 'required|min_length[4]|max_length[100]';
         }
-
-        // ============================================================
-        // 4) VALIDAR
-        // ============================================================
-        if (!$this->validate($rules)) {
+        if (! $this->validate($rules)) {
             return redirect()
                 ->back()
                 ->withInput()
                 ->with('errors', $this->validator->getErrors());
         }
-
-        // ============================================================
-        // 5) PREPARAR OS DADOS PARA SALVAR
-        // ============================================================
+        $courseId = (int) ($req->getPost('associatedCourse') ?: 0);
+        if ($courseId > 0) {
+            $ownedCourse = $courseModel
+                ->where('id_course', $courseId)
+                ->where('id_instructor_course', $user->id)
+                ->first();
+            if (! $ownedCourse) {
+                return redirect()->back()->withInput()->with('error', 'Curso associado invalido.');
+            }
+        }
         $data = [
-            'title_jitsi'        => $req->getPost('classTitle'),
-            'description_jitsi'  => $req->getPost('classDescription'),
-            'id_course_jitsi'    => $req->getPost('associatedCourse') ?: null,
-            'class_type_jitsi'   => $req->getPost('classType'),
+            'title_jitsi'        => trim((string) $req->getPost('classTitle')),
+            'description_jitsi'  => trim((string) $req->getPost('classDescription')),
+            'id_course_jitsi'    => $courseId > 0 ? $courseId : null,
+            'class_type_jitsi'   => (string) $req->getPost('classType'),
             'meeting_date_jitsi' => $req->getPost('classDate') ?: null,
             'start_time_jitsi'   => $req->getPost('startTime') ?: null,
             'end_time_jitsi'     => $req->getPost('endTime') ?: null,
-            'status_jitsi'       => $req->getPost('roomStatus'),
-            'privacy_jitsi'      => $req->getPost('roomPrivacy'),
-            'password_jitsi'     => $req->getPost('roomPassword') ?: null,
+            'status_jitsi'       => (string) $req->getPost('roomStatus'),
+            'privacy_jitsi'      => (string) $req->getPost('roomPrivacy'),
             'recording_jitsi'    => $req->getPost('enableRecording') ? 1 : 0,
             'chat_jitsi'         => $req->getPost('enableChat') ? 1 : 0,
             'screenshare_jitsi'  => $req->getPost('enableScreenShare') ? 1 : 0,
             'id_user_jitsi'      => $user->id,
         ];
-
-        // Novo room_jitsi apenas ao criar
-        if (!$isEdit) {
-            $data['room_jitsi'] = "room_" . uniqid();
+        if ((string) $req->getPost('roomPrivacy') === 'password') {
+            if ($roomPassword !== '') {
+                $data['password_jitsi'] = password_hash($roomPassword, PASSWORD_DEFAULT);
+            } elseif (! $isEdit) {
+                $data['password_jitsi'] = null;
+            }
+        } else {
+            $data['password_jitsi'] = null;
         }
-
-        // ============================================================
-        // 6) SALVAR (CRIAR OU EDITAR)
-        // ============================================================
+        if (! $isEdit) {
+            $data['room_jitsi'] = $this->makeJitsiRoom((string) $req->getPost('classTitle'));
+        }
         if ($isEdit) {
-            // Atualizar
             $model->update($editId, $data);
-
             return redirect()
                 ->to('/instructor/dashboard/jitsi')
                 ->with('swal', [
@@ -340,98 +367,277 @@ class Dashboard extends BaseController
                     'title' => 'Aula atualizada!',
                     'text'  => 'A aula foi editada com sucesso.'
                 ]);
-        } else {
-            // Criar
-            $model->insert($data);
-
-            return redirect()
-                ->to('/instructor/dashboard/jitsi')
-                ->with('swal', [
-                    'icon'  => 'success',
-                    'title' => 'Aula criada!',
-                    'text'  => 'A nova aula virtual foi criada com sucesso.'
-                ]);
         }
+        $model->insert($data);
+        return redirect()
+            ->to('/instructor/dashboard/jitsi')
+            ->with('swal', [
+                'icon'  => 'success',
+                'title' => 'Aula criada!',
+                'text'  => 'A nova aula virtual foi criada com sucesso.'
+            ]);
     }
-
     public function deleteJitsi($id)
     {
         $user  = service('auth')->user();
         $model = new JitsiModel();
-
         // Verifica se a aula existe
         $aula = $model->find($id);
-
         if (!$aula) {
+            $this->auditLogger->write(
+                'instructor.jitsi.delete_not_found',
+                'warning',
+                'Tentativa de excluir aula inexistente.',
+                [
+                    'jitsi_id' => (int) $id,
+                ]
+            );
             return redirect()->back()->with('swal', [
                 'icon'  => 'error',
-                'title' => 'Aula nÃƒÂ£o encontrada',
-                'text'  => 'A aula que tentou excluir nÃƒÂ£o existe.'
+                'title' => 'Aula nao encontrada',
+                'text'  => 'A aula que tentou excluir nao existe.'
             ]);
         }
-
         // Impede que um instrutor exclua aula de outro instrutor
         if ($aula->id_user_jitsi != $user->id) {
+            $this->auditLogger->write(
+                'instructor.jitsi.delete_denied',
+                'warning',
+                'Tentativa de excluir aula de outro instrutor.',
+                [
+                    'jitsi_id' => (int) $id,
+                    'owner_user_id' => (int) $aula->id_user_jitsi,
+                ]
+            );
             return redirect()->back()->with('swal', [
                 'icon'  => 'error',
                 'title' => 'Acesso negado',
-                'text'  => 'VocÃƒÂª nÃƒÂ£o tem permissÃƒÂ£o para excluir esta aula.'
+                'text'  => 'Voce nao tem permissao para excluir esta aula.'
             ]);
         }
-
         // Delete
         if ($model->delete($id)) {
+            $this->auditLogger->write(
+                'instructor.jitsi.deleted',
+                'info',
+                'Aula ao vivo removida.',
+                [
+                    'jitsi_id' => (int) $id,
+                    'owner_user_id' => (int) $aula->id_user_jitsi,
+                ]
+            );
             return redirect()
                 ->to('/instructor/dashboard/jitsi')
                 ->with('swal', [
                     'icon'  => 'success',
-                    'title' => 'Aula excluÃƒÂ­da!',
+                    'title' => 'Aula excluida!',
                     'text'  => 'A aula foi removida com sucesso.'
                 ]);
         }
-
         // Caso ocorra algum erro inesperado
+        $this->auditLogger->write(
+            'instructor.jitsi.delete_failed',
+            'error',
+            'Falha ao excluir aula ao vivo.',
+            [
+                'jitsi_id' => (int) $id,
+                'owner_user_id' => (int) $aula->id_user_jitsi,
+            ]
+        );
         return redirect()
             ->back()
             ->with('swal', [
                 'icon'  => 'error',
                 'title' => 'Erro ao excluir',
-                'text'  => 'NÃƒÂ£o foi possÃƒÂ­vel excluir esta aula.'
+                'text'  => 'Nao foi possivel excluir esta aula.'
             ]);
     }
-
     public function stream($id)
     {
         $user  = service('auth')->user();
         $model = new JitsiModel();
-
+        $recordingModel = new JitsiRecordingModel();
+        /** @var JitsiJwtService $jitsiJwt */
+        $jitsiJwt = service('jitsiJwt');
         $aula = $model->find($id);
-
-        if (!$aula) {
+        if (! $aula) {
             return redirect()->back()->with('swal', [
                 'icon' => 'error',
-                'title' => 'Aula nÃƒÂ£o encontrada',
-                'text' => 'A aula que tentou acessar nÃƒÂ£o existe.'
+                'title' => 'Aula nao encontrada',
+                'text' => 'A aula que tentou acessar nao existe.'
             ]);
         }
-
-        // Permitir somente instrutor dono + alunos inscritos (se quiser implementar depois)
-        if ($aula->id_user_jitsi != $user->id) {
+        if ((int) $aula->id_user_jitsi !== (int) $user->id) {
             return redirect()->back()->with('swal', [
                 'icon' => 'error',
-                'title' => 'Sem PermissÃƒÂ£o',
-                'text' => 'VocÃƒÂª nÃƒÂ£o pode acessar esta sala.'
+                'title' => 'Sem permissao',
+                'text' => 'Voce nao pode acessar esta sala.'
             ]);
         }
-
+        $model->update((int) $aula->id_jitsi, ['status_jitsi' => 'Ao vivo']);
+        $aula = $model->find($id);
+        $displayName = trim((string) ($user->username ?? $user->name ?? ('Instrutor ' . $user->id)));
+        $email = trim((string) ($user->email ?? ''));
+        $avatar = ! empty($user->img) ? base_url((string) $user->img) : '';
+        $token = null;
+        try {
+            $token = $jitsiJwt->buildToken(
+                (string) $aula->room_jitsi,
+                [
+                    'id' => (string) $user->id,
+                    'name' => $displayName,
+                    'email' => $email,
+                    'avatar' => $avatar,
+                ],
+                true,
+                [
+                    'recording' => (bool) $aula->recording_jitsi,
+                    'screen-sharing' => (bool) $aula->screenshare_jitsi,
+                ]
+            );
+        } catch (\Throwable $e) {
+            log_message('warning', 'Falha ao gerar JWT do Jitsi: {message}', ['message' => $e->getMessage()]);
+        }
+        $recordings = $recordingModel
+            ->where('id_jitsi_session', (int) $aula->id_jitsi)
+            ->orderBy('id_jitsi_recording', 'DESC')
+            ->findAll();
         return view('pages/instructor/live_stream', [
             'aula' => $aula,
             'user' => $user,
             'sidebarLinks' => $this->sidebarLinks(),
-            'currentUrl' => current_url()
+            'currentUrl' => current_url(),
+            'jitsiDomain' => $jitsiJwt->getDomain(),
+            'jitsiExternalApiScript' => $jitsiJwt->getExternalApiScriptUrl(),
+            'jitsiRoomName' => $jitsiJwt->buildRoomName((string) $aula->room_jitsi),
+            'jitsiToken' => $token,
+            'jitsiRecordingMode' => $jitsiJwt->getDefaultRecordingMode(),
+            'canModerate' => true,
+            'canManageRecordings' => true,
+            'backUrl' => site_url('instructor/dashboard/jitsi'),
+            'endStreamUrl' => site_url('instructor/dashboard/jitsi/stream/' . (int) $aula->id_jitsi . '/end'),
+            'saveRecordingUrl' => site_url('instructor/dashboard/jitsi/stream/' . (int) $aula->id_jitsi . '/recording'),
+            'publishToggleBaseUrl' => site_url('instructor/dashboard/jitsi/recordings'),
+            'recordings' => $recordings,
         ]);
     }
-
+    public function endStream($id)
+    {
+        $user  = service('auth')->user();
+        $model = new JitsiModel();
+        $aula = $model->find($id);
+        if (! $aula || (int) $aula->id_user_jitsi !== (int) $user->id) {
+            return redirect()->to('/instructor/dashboard/jitsi')->with('error', 'Aula nao encontrada ou sem permissao.');
+        }
+        $model->update((int) $aula->id_jitsi, ['status_jitsi' => 'Expirado']);
+        return redirect()->to('/instructor/dashboard/jitsi')->with('swal', [
+            'icon' => 'success',
+            'title' => 'Aula encerrada',
+            'text' => 'A transmissao foi encerrada com sucesso.',
+        ]);
+    }
+    public function storeRecording($id)
+    {
+        $user  = service('auth')->user();
+        $jitsiModel = new JitsiModel();
+        $recordingModel = new JitsiRecordingModel();
+        $aula = $jitsiModel->find($id);
+        if (! $aula || (int) $aula->id_user_jitsi !== (int) $user->id) {
+            if ($this->wantsJson()) {
+                return $this->jsonMessage('Aula nao encontrada ou sem permissao.', 403);
+            }
+            return redirect()->to('/instructor/dashboard/jitsi')->with('error', 'Aula nao encontrada ou sem permissao.');
+        }
+        $rules = [
+            'recording_url' => 'required|valid_url|max_length[2048]',
+            'provider_recording_id' => 'permit_empty|max_length[255]',
+            'recording_mode' => 'required|in_list[file,stream,local,manual]',
+            'status_recording' => 'required|in_list[pending,processing,ready,failed]',
+            'duration_seconds' => 'permit_empty|integer',
+            'publish_now' => 'permit_empty|in_list[0,1,on]',
+        ];
+        if (! $this->validate($rules)) {
+            if ($this->wantsJson()) {
+                return $this->response
+                    ->setStatusCode(422)
+                    ->setJSON([
+                        'message' => 'Dados invalidos para gravacao.',
+                        'errors' => $this->validator->getErrors(),
+                        'csrf' => csrf_hash(),
+                    ]);
+            }
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+        $publishNow = in_array((string) $this->request->getPost('publish_now'), ['1', 'on'], true);
+        $providerId = trim((string) $this->request->getPost('provider_recording_id'));
+        $data = [
+            'id_jitsi_session' => (int) $aula->id_jitsi,
+            'recording_url' => trim((string) $this->request->getPost('recording_url')),
+            'provider_recording_id' => $providerId !== '' ? $providerId : null,
+            'recording_mode' => (string) $this->request->getPost('recording_mode'),
+            'status_recording' => (string) $this->request->getPost('status_recording'),
+            'duration_seconds' => $this->request->getPost('duration_seconds') !== null && $this->request->getPost('duration_seconds') !== ''
+                ? (int) $this->request->getPost('duration_seconds')
+                : null,
+            'is_published' => $publishNow ? 1 : 0,
+            'published_at' => $publishNow ? date('Y-m-d H:i:s') : null,
+        ];
+        if ($providerId !== '') {
+            $existing = $recordingModel
+                ->where('id_jitsi_session', (int) $aula->id_jitsi)
+                ->where('provider_recording_id', $providerId)
+                ->first();
+            if ($existing) {
+                $recordingModel->update((int) $existing->id_jitsi_recording, $data);
+                $recordingId = (int) $existing->id_jitsi_recording;
+            } else {
+                $recordingModel->insert($data);
+                $recordingId = (int) $recordingModel->getInsertID();
+            }
+        } else {
+            $recordingModel->insert($data);
+            $recordingId = (int) $recordingModel->getInsertID();
+        }
+        if ($this->wantsJson()) {
+            return $this->response->setJSON([
+                'message' => 'Gravacao salva.',
+                'recording_id' => $recordingId,
+                'csrf' => csrf_hash(),
+            ]);
+        }
+        return redirect()->back()->with('swal', [
+            'icon' => 'success',
+            'title' => 'Gravacao salva',
+            'text' => 'O link da gravacao foi guardado.',
+        ]);
+    }
+    public function toggleRecordingPublish($recordingId)
+    {
+        $user  = service('auth')->user();
+        $db = db_connect();
+        $row = $db->table('jitsi_recordings r')
+            ->select('r.id_jitsi_recording, r.is_published, r.id_jitsi_session, j.id_user_jitsi')
+            ->join('jitsi j', 'j.id_jitsi = r.id_jitsi_session')
+            ->where('r.id_jitsi_recording', (int) $recordingId)
+            ->get()
+            ->getRow();
+        if (! $row || (int) $row->id_user_jitsi !== (int) $user->id) {
+            return redirect()->back()->with('error', 'Gravacao nao encontrada ou sem permissao.');
+        }
+        $publish = ! (bool) $row->is_published;
+        $recordingModel = new JitsiRecordingModel();
+        $recordingModel->update((int) $row->id_jitsi_recording, [
+            'is_published' => $publish ? 1 : 0,
+            'published_at' => $publish ? date('Y-m-d H:i:s') : null,
+        ]);
+        return redirect()->back()->with('swal', [
+            'icon' => 'success',
+            'title' => $publish ? 'Gravacao publicada' : 'Gravacao despublicada',
+            'text' => $publish
+                ? 'Os alunos ja podem ver esta gravacao.'
+                : 'A gravacao foi ocultada dos alunos.',
+        ]);
+    }
     public function students()
     {
         $user = service('auth')->user();
@@ -592,6 +798,15 @@ class Dashboard extends BaseController
             ->getRow();
 
         if (! $row || (int) $row->id_instructor_course !== (int) $user->id) {
+            $this->auditLogger->write(
+                'instructor.enrollment.toggle_denied',
+                'warning',
+                'Tentativa de alterar matricula sem permissao.',
+                [
+                    'enrollment_id' => $enrollmentId,
+                ]
+            );
+
             if ($this->wantsJson()) {
                 return $this->jsonMessage('Acesso negado.', 403);
             }
@@ -600,7 +815,20 @@ class Dashboard extends BaseController
 
         $currentStatus = strtolower((string) $row->status_enrollment);
         $newStatus = $currentStatus === 'ativa' ? 'cancelada' : 'ativa';
-        $enrollmentModel->update($enrollmentId, ['status_enrollment' => $newStatus]);
+        $updated = $enrollmentModel->update($enrollmentId, ['status_enrollment' => $newStatus]);
+
+        $this->auditLogger->write(
+            'instructor.enrollment.toggled',
+            $updated ? 'info' : 'error',
+            $updated
+                ? 'Status de matricula alterado.'
+                : 'Falha ao alterar status de matricula.',
+            [
+                'enrollment_id' => $enrollmentId,
+                'from_status' => $currentStatus,
+                'to_status' => $newStatus,
+            ]
+        );
 
         $msg = $newStatus === 'ativa'
             ? 'Acesso do aluno liberado.'
@@ -659,6 +887,194 @@ class Dashboard extends BaseController
             'labels' => $labels,
             'data' => $series,
         ]);
+    }
+
+    public function logs()
+    {
+        $user = service('auth')->user();
+
+        return view('pages/instructor/logs', [
+            'user' => $user,
+            'sidebarLinks' => $this->sidebarLinks(),
+            'currentUrl' => current_url(),
+        ]);
+    }
+
+    public function logsData()
+    {
+        $user = service('auth')->user();
+        $search = trim((string) $this->request->getGet('q'));
+        $level = strtolower(trim((string) $this->request->getGet('level')));
+        $dateFrom = $this->normalizeDateFilter((string) $this->request->getGet('date_from'));
+        $dateTo = $this->normalizeDateFilter((string) $this->request->getGet('date_to'));
+        if ($dateFrom !== null && $dateTo !== null && $dateFrom > $dateTo) {
+            [$dateFrom, $dateTo] = [$dateTo, $dateFrom];
+        }
+        $page = max(1, (int) $this->request->getGet('page'));
+        $perPage = (int) $this->request->getGet('per_page');
+        if ($perPage <= 0) {
+            $perPage = 10;
+        }
+        $perPage = min(max($perPage, 5), 50);
+        $offset = ($page - 1) * $perPage;
+
+        $levels = ['debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'];
+        if ($level !== '' && ! in_array($level, $levels, true)) {
+            $level = '';
+        }
+
+        $builder = $this->buildAuditLogQuery((int) $user->id, $search, $level, $dateFrom, $dateTo);
+
+        $countBuilder = clone $builder;
+        $total = (int) $countBuilder->countAllResults();
+
+        $rows = $builder
+            ->orderBy('created_at', 'DESC')
+            ->limit($perPage, $offset)
+            ->get()
+            ->getResultArray();
+
+        $items = array_map(fn (array $row): array => $this->mapAuditRow($row), $rows);
+
+        $totalPages = (int) ceil($total / $perPage);
+
+        return $this->response->setJSON([
+            'items' => $items,
+            'pagination' => [
+                'page' => $page,
+                'per_page' => $perPage,
+                'total' => $total,
+                'total_pages' => $totalPages,
+            ],
+        ]);
+    }
+
+    public function logsExportCsv()
+    {
+        $user = service('auth')->user();
+        $search = trim((string) $this->request->getGet('q'));
+        $level = strtolower(trim((string) $this->request->getGet('level')));
+        $dateFrom = $this->normalizeDateFilter((string) $this->request->getGet('date_from'));
+        $dateTo = $this->normalizeDateFilter((string) $this->request->getGet('date_to'));
+        if ($dateFrom !== null && $dateTo !== null && $dateFrom > $dateTo) {
+            [$dateFrom, $dateTo] = [$dateTo, $dateFrom];
+        }
+
+        $levels = ['debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'];
+        if ($level !== '' && ! in_array($level, $levels, true)) {
+            $level = '';
+        }
+
+        $rows = $this->buildAuditLogQuery((int) $user->id, $search, $level, $dateFrom, $dateTo)
+            ->orderBy('created_at', 'DESC')
+            ->get()
+            ->getResultArray();
+
+        $filename = 'logs-' . (int) $user->id . '-' . date('Ymd-His') . '.csv';
+        $handle = fopen('php://temp', 'r+');
+
+        if ($handle === false) {
+            return $this->response->setStatusCode(500)->setBody('Falha ao gerar CSV.');
+        }
+
+        fwrite($handle, "\xEF\xBB\xBF");
+        fputcsv($handle, ['Data', 'Nivel', 'Evento', 'Mensagem', 'Metodo', 'Rota', 'IP', 'Contexto']);
+
+        foreach ($rows as $row) {
+            $mapped = $this->mapAuditRow($row);
+            fputcsv($handle, [
+                (string) ($mapped['created_at'] ?? ''),
+                (string) ($mapped['level_audit_log'] ?? ''),
+                (string) ($mapped['event_audit_log'] ?? ''),
+                (string) ($mapped['message_audit_log'] ?? ''),
+                (string) ($mapped['method_audit_log'] ?? ''),
+                (string) ($mapped['uri_audit_log'] ?? ''),
+                (string) ($mapped['ip_address_audit_log'] ?? ''),
+                (string) ($mapped['context_pretty'] ?? ''),
+            ]);
+        }
+
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
+
+        return $this->response
+            ->setHeader('Content-Type', 'text/csv; charset=UTF-8')
+            ->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"')
+            ->setBody($csv === false ? '' : $csv);
+    }
+
+    private function buildAuditLogQuery(int $userId, string $search, string $level, ?string $dateFrom, ?string $dateTo)
+    {
+        $builder = db_connect()->table('audit_logs')
+            ->select([
+                'id_audit_log',
+                'event_audit_log',
+                'level_audit_log',
+                'message_audit_log',
+                'method_audit_log',
+                'uri_audit_log',
+                'ip_address_audit_log',
+                'context_audit_log',
+                'created_at',
+            ])
+            ->where('actor_user_id', $userId);
+
+        if ($search !== '') {
+            $builder->groupStart()
+                ->like('event_audit_log', $search)
+                ->orLike('message_audit_log', $search)
+                ->orLike('uri_audit_log', $search)
+                ->orLike('context_audit_log', $search)
+                ->groupEnd();
+        }
+
+        if ($level !== '') {
+            $builder->where('level_audit_log', $level);
+        }
+
+        if ($dateFrom !== null) {
+            $builder->where('created_at >=', $dateFrom . ' 00:00:00');
+        }
+
+        if ($dateTo !== null) {
+            $builder->where('created_at <=', $dateTo . ' 23:59:59');
+        }
+
+        return $builder;
+    }
+
+    private function normalizeDateFilter(string $date): ?string
+    {
+        $date = trim($date);
+        if ($date === '') {
+            return null;
+        }
+
+        $parsed = \DateTime::createFromFormat('Y-m-d', $date);
+        if (! $parsed) {
+            return null;
+        }
+
+        return $parsed->format('Y-m-d') === $date ? $date : null;
+    }
+
+    private function mapAuditRow(array $row): array
+    {
+        $context = trim((string) ($row['context_audit_log'] ?? ''));
+        $decoded = null;
+        if ($context !== '') {
+            $decoded = json_decode($context, true);
+        }
+
+        if (is_array($decoded)) {
+            $pretty = json_encode($decoded, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            $row['context_pretty'] = $pretty === false ? $context : $pretty;
+        } else {
+            $row['context_pretty'] = $context;
+        }
+
+        return $row;
     }
 
     public function profile()
@@ -867,6 +1283,8 @@ class Dashboard extends BaseController
     public function approveEnrollment($courseId, $pendingId)
     {
         $actualUser = service('auth')->user();
+        $courseId = (int) $courseId;
+        $pendingId = (int) $pendingId;
 
         $db = db_connect();
         helper('text');
@@ -888,6 +1306,16 @@ class Dashboard extends BaseController
                 ])
                 ->update();
 
+            $this->auditLogger->write(
+                'instructor.payment.rejected',
+                'info',
+                'Pagamento rejeitado pelo instrutor.',
+                [
+                    'course_id' => $courseId,
+                    'pending_user_id' => $pendingId,
+                ]
+            );
+
             if ($this->wantsJson()) {
                 return $this->jsonMessage('Pagamento rejeitado.');
             }
@@ -898,6 +1326,16 @@ class Dashboard extends BaseController
         // 1. Buscar dados do pending_user
         $pendingUser = $pendingUserModel->find($pendingId);
         if (!$pendingUser) {
+            $this->auditLogger->write(
+                'instructor.enrollment.pending_user_not_found',
+                'warning',
+                'Usuario pendente nao encontrado para aprovacao.',
+                [
+                    'course_id' => $courseId,
+                    'pending_user_id' => $pendingId,
+                ]
+            );
+
             if ($this->wantsJson()) {
                 return $this->jsonMessage('Usuario pendente nao encontrado.', 404);
             }
@@ -931,6 +1369,17 @@ class Dashboard extends BaseController
                 ->first();
 
             if ($alreadyEnrolled) {
+                $this->auditLogger->write(
+                    'instructor.enrollment.already_enrolled',
+                    'notice',
+                    'Aprovacao ignorada porque usuario ja estava inscrito.',
+                    [
+                        'course_id' => $courseId,
+                        'pending_user_id' => $pendingId,
+                        'existing_user_id' => (int) $existingUser->id,
+                    ]
+                );
+
                 if ($this->wantsJson()) {
                     return $this->jsonMessage('Usuario ja inscrito neste curso.', 409);
                 }
@@ -958,6 +1407,17 @@ class Dashboard extends BaseController
 
             // Remover pending_user
             $pendingUserModel->delete($pendingId);
+
+            $this->auditLogger->write(
+                'instructor.enrollment.approved_existing_user',
+                'info',
+                'Inscricao aprovada para usuario existente.',
+                [
+                    'course_id' => $courseId,
+                    'pending_user_id' => $pendingId,
+                    'existing_user_id' => (int) $existingUser->id,
+                ]
+            );
 
 
             if ($this->wantsJson()) {
@@ -1033,6 +1493,17 @@ class Dashboard extends BaseController
         // 7. Remover pending_user
         $pendingUserModel->delete($pendingId);
 
+        $this->auditLogger->write(
+            'instructor.enrollment.approved_new_user',
+            'info',
+            'Inscricao aprovada com criacao de usuario.',
+            [
+                'course_id' => $courseId,
+                'pending_user_id' => $pendingId,
+                'new_user_id' => (int) $userId,
+            ]
+        );
+
         if ($this->wantsJson()) {
             return $this->jsonMessage('Inscricao aprovada e usuario criado com sucesso.');
         }
@@ -1057,9 +1528,6 @@ class Dashboard extends BaseController
         ]);
     }
 }
-
-
-
 
 
 

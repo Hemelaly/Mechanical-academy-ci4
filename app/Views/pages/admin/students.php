@@ -51,11 +51,6 @@
         <div class="relative overflow-x-auto">
             <table
                 id="admin-students-table"
-                data-flowbite-datatable
-                data-datatable-searchable="false"
-                data-datatable-paging="false"
-                data-datatable-sortable="false"
-                data-datatable-per-page-select="false"
                 class="w-full text-left text-sm text-slate-500 dark:text-slate-400">
                 <thead class="text-xs uppercase text-slate-600 bg-slate-50 dark:bg-slate-700 dark:text-slate-300">
                     <tr>
@@ -82,42 +77,109 @@
 <aside id="student-drawer" class="fixed right-0 top-0 z-50 h-full w-[95%] max-w-lg translate-x-full overflow-y-auto bg-white shadow-xl transition-transform sm:w-[90%] md:w-[70%] lg:w-[520px] dark:bg-slate-900">
     <div class="flex items-center justify-between border-b border-slate-200 p-5 dark:border-slate-800">
         <div>
-            <p class="text-sm text-slate-500 dark:text-slate-400">Detalhes do estudante</p>
-            <h2 id="student-drawer-name" class="text-lg font-semibold text-slate-900 dark:text-white">—</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Editar usuario</p>
+            <h2 id="student-drawer-name" class="text-lg font-semibold text-slate-900 dark:text-white">-</h2>
         </div>
         <button id="student-drawer-close" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
             <i class="bi bi-x-lg"></i>
         </button>
     </div>
     <div class="space-y-4 p-5">
-        <div class="flex items-center gap-4">
-            <img id="student-drawer-avatar" class="h-16 w-16 rounded-full object-cover" src="<?= base_url('assets/img/user-default.png') ?>" alt="Avatar">
-            <div>
-                <p id="student-drawer-email" class="text-sm text-slate-500 dark:text-slate-400">—</p>
-                <p id="student-drawer-status" class="text-sm font-medium text-slate-900 dark:text-white">—</p>
+        <div id="student-edit-feedback" class="hidden rounded-lg p-3 text-sm"></div>
+        <form id="student-edit-form" class="space-y-4">
+            <input type="hidden" id="student-edit-id" name="id">
+            <div class="flex items-center gap-4">
+                <img id="student-drawer-avatar" class="h-16 w-16 rounded-full object-cover" src="<?= base_url('assets/img/user-default.png') ?>" alt="Avatar">
+                <div class="w-full">
+                    <label for="student-edit-image-file" class="block text-xs uppercase text-slate-500">Imagem (ficheiro)</label>
+                    <input id="student-edit-image-file" name="image_file" type="file" accept="image/*" class="mt-1 block w-full rounded-lg border border-slate-300 bg-slate-50 p-2 text-sm text-slate-900 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-600 file:px-3 file:py-1.5 file:text-white hover:file:bg-blue-700 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                </div>
             </div>
-        </div>
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-                <p class="text-xs uppercase text-slate-500">ID</p>
-                <p id="student-drawer-id" class="text-sm font-medium text-slate-900 dark:text-white">—</p>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                    <p class="text-xs uppercase text-slate-500">ID</p>
+                    <p id="student-drawer-id" class="text-sm font-medium text-slate-900 dark:text-white">-</p>
+                </div>
+                <div>
+                    <p class="text-xs uppercase text-slate-500">Ultimo acesso</p>
+                    <p id="student-drawer-last" class="text-sm font-medium text-slate-900 dark:text-white">-</p>
+                </div>
+                <div>
+                    <p class="text-xs uppercase text-slate-500">Criado em</p>
+                    <p id="student-drawer-created" class="text-sm font-medium text-slate-900 dark:text-white">-</p>
+                </div>
+                <div>
+                    <p class="text-xs uppercase text-slate-500">Status atual</p>
+                    <p id="student-drawer-status" class="text-sm font-medium text-slate-900 dark:text-white">-</p>
+                </div>
             </div>
-            <div>
-                <p class="text-xs uppercase text-slate-500">Ultimo acesso</p>
-                <p id="student-drawer-last" class="text-sm font-medium text-slate-900 dark:text-white">—</p>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                    <label for="student-edit-username" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Username</label>
+                    <input id="student-edit-username" name="username" required type="text" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                </div>
+                <div>
+                    <label for="student-edit-email" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Email</label>
+                    <input id="student-edit-email" name="email" required type="email" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                </div>
+                <div>
+                    <label for="student-edit-role" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Role</label>
+                    <select id="student-edit-role" name="role" class="mt-1 block w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                        <option value="student">student</option>
+                        <option value="instructor">instructor</option>
+                        <option value="admin">admin</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="student-edit-active" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Status</label>
+                    <select id="student-edit-active" name="active" class="mt-1 block w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                        <option value="1">Ativo</option>
+                        <option value="0">Inativo</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="student-edit-force-pass-reset" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Forcar reset senha</label>
+                    <select id="student-edit-force-pass-reset" name="force_pass_reset" class="mt-1 block w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                        <option value="0">Nao</option>
+                        <option value="1">Sim</option>
+                    </select>
+                </div>
             </div>
-            <div>
-                <p class="text-xs uppercase text-slate-500">Criado em</p>
-                <p id="student-drawer-created" class="text-sm font-medium text-slate-900 dark:text-white">—</p>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                    <label for="student-edit-country" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Pais</label>
+                    <input id="student-edit-country" name="country" type="text" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                </div>
+                <div>
+                    <label for="student-edit-province" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Provincia</label>
+                    <input id="student-edit-province" name="province" type="text" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                </div>
+                <div>
+                    <label for="student-edit-city" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Cidade</label>
+                    <input id="student-edit-city" name="city" type="text" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                </div>
+                <div>
+                    <label for="student-edit-phone" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Telefone</label>
+                    <input id="student-edit-phone" name="phone" type="text" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                </div>
             </div>
-            <div>
-                <p class="text-xs uppercase text-slate-500">Role</p>
-                <p id="student-drawer-role" class="text-sm font-medium text-slate-900 dark:text-white">—</p>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                    <label for="student-edit-password" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Nova senha</label>
+                    <input id="student-edit-password" name="password" type="password" placeholder="Opcional" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                </div>
+                <div>
+                    <label for="student-edit-password-confirm" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Confirmar senha</label>
+                    <input id="student-edit-password-confirm" name="password_confirm" type="password" placeholder="Opcional" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                </div>
             </div>
-        </div>
+            <div class="flex justify-end gap-2 pt-1">
+                <button type="button" id="student-edit-cancel" class="rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">Cancelar</button>
+                <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Guardar alteracoes</button>
+            </div>
+        </form>
     </div>
 </aside>
-
 <div id="student-create-backdrop" class="fixed inset-0 z-40 hidden bg-slate-900/50"></div>
 <aside id="student-create-drawer" class="fixed right-0 top-0 z-50 h-full w-[76%] max-w-3xl translate-x-full overflow-y-auto bg-white shadow-xl transition-transform sm:w-[72%] md:w-[65%] lg:w-[680px] dark:bg-slate-900">
     <div class="flex items-center justify-between border-b border-slate-200 p-5 dark:border-slate-800">
@@ -153,6 +215,14 @@
             <?= csrf_field() ?>
             <input type="hidden" name="role" value="student">
 
+            <div class="flex items-center gap-4">
+                <img id="student-create-avatar-preview" class="h-14 w-14 rounded-full object-cover" src="<?= base_url('assets/img/user-default.png') ?>" alt="Preview">
+                <div class="w-full">
+                    <label for="student-create-image-file" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Imagem (ficheiro)</label>
+                    <input id="student-create-image-file" name="image_file" type="file" accept="image/*" class="mt-1 block w-full rounded-lg border border-slate-300 bg-slate-50 p-2 text-sm text-slate-900 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-600 file:px-3 file:py-1.5 file:text-white hover:file:bg-blue-700 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                </div>
+            </div>
+
             <div>
                 <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Email</label>
                 <input type="email" name="email" required class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
@@ -181,6 +251,7 @@
 <script>
     (function () {
         const endpoint = <?= json_encode(site_url('admin/dashboard/estudantes/data')) ?>;
+        const updateEndpoint = <?= json_encode(site_url('admin/dashboard/usuarios/update')) ?>;
         const studentsTable = document.getElementById('admin-students-table');
         const getTableBody = () => studentsTable?.querySelector('tbody');
         const summary = document.getElementById('students-summary');
@@ -198,6 +269,25 @@
         const createCancel = document.getElementById('student-create-cancel');
         const createForm = document.getElementById('student-create-form');
         const createFeedback = document.getElementById('student-create-feedback');
+        const createImageFile = document.getElementById('student-create-image-file');
+        const createAvatarPreview = document.getElementById('student-create-avatar-preview');
+        const editForm = document.getElementById('student-edit-form');
+        const editFeedback = document.getElementById('student-edit-feedback');
+        const editCancel = document.getElementById('student-edit-cancel');
+        const editId = document.getElementById('student-edit-id');
+        const editImageFile = document.getElementById('student-edit-image-file');
+        const editUsername = document.getElementById('student-edit-username');
+        const editEmail = document.getElementById('student-edit-email');
+        const editRole = document.getElementById('student-edit-role');
+        const editActive = document.getElementById('student-edit-active');
+        const editForcePassReset = document.getElementById('student-edit-force-pass-reset');
+        const editCountry = document.getElementById('student-edit-country');
+        const editProvince = document.getElementById('student-edit-province');
+        const editCity = document.getElementById('student-edit-city');
+        const editPhone = document.getElementById('student-edit-phone');
+        const editPassword = document.getElementById('student-edit-password');
+        const editPasswordConfirm = document.getElementById('student-edit-password-confirm');
+        const studentAvatarFallback = <?= json_encode(base_url('assets/img/user-default.png')) ?>;
         const csrfName = <?= json_encode(csrf_token()) ?>;
         let csrfHash = <?= json_encode(csrf_hash()) ?>;
 
@@ -256,13 +346,32 @@
                 });
         };
 
+        const postActionFormData = (url, formData) => {
+            formData.append(csrfName, csrfHash);
+            return fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            }).then(async (res) => {
+                const data = await res.json();
+                if (data.csrf) {
+                    csrfHash = data.csrf;
+                }
+                if (!res.ok) {
+                    throw data;
+                }
+                return data;
+            });
+        };
+
         const renderRows = (items) => {
             const tableBody = getTableBody();
             if (!tableBody) return;
 
             if (!items.length) {
                 tableBody.innerHTML = `<tr><td colspan="6" class="px-6 py-6 text-center text-slate-500">Nenhum estudante encontrado.</td></tr>`;
-                window.FlowbiteDashboardTables?.refreshTable(studentsTable);
                 return;
             }
             tableBody.innerHTML = items.map(item => {
@@ -308,7 +417,6 @@
                 </tr>
             `;
             }).join('');
-            window.FlowbiteDashboardTables?.refreshTable(studentsTable);
         };
 
         const renderPagination = (paginationData) => {
@@ -383,29 +491,45 @@
                     }
                     summary.textContent = 'Erro ao carregar estudantes.';
                     pagination.innerHTML = '';
-                    window.FlowbiteDashboardTables?.refreshTable(studentsTable);
                 })
                 .finally(() => {
                     state.loading = false;
                 });
         };
-
         const openDrawer = (item) => {
             drawer.classList.remove('translate-x-full');
             drawerBackdrop.classList.remove('hidden');
-            document.getElementById('student-drawer-name').textContent = item.username || '—';
-            document.getElementById('student-drawer-email').textContent = item.email || '—';
+            document.getElementById('student-drawer-name').textContent = item.username || '-';
             document.getElementById('student-drawer-status').textContent = Number(item.active) === 1 ? 'Ativo' : 'Inativo';
-            document.getElementById('student-drawer-id').textContent = item.id || '—';
+            document.getElementById('student-drawer-id').textContent = item.id || '-';
             document.getElementById('student-drawer-last').textContent = formatDate(item.last_active);
             document.getElementById('student-drawer-created').textContent = formatDate(item.created_at);
-            document.getElementById('student-drawer-role').textContent = item.role || 'student';
-            document.getElementById('student-drawer-avatar').src = item.img || <?= json_encode(base_url('assets/img/user-default.png')) ?>;
+            document.getElementById('student-drawer-avatar').src = item.img || studentAvatarFallback;
+
+            editFeedback.classList.add('hidden');
+            editFeedback.textContent = '';
+
+            editId.value = item.id || '';
+            editUsername.value = item.username || '';
+            editEmail.value = item.email || '';
+            editRole.value = item.role || 'student';
+            editActive.value = Number(item.active) === 1 ? '1' : '0';
+            editForcePassReset.value = Number(item.force_pass_reset) === 1 ? '1' : '0';
+            editCountry.value = item.country || '';
+            editProvince.value = item.province || '';
+            editCity.value = item.city || '';
+            editPhone.value = item.phone || '';
+            editImageFile.value = '';
+            editPassword.value = '';
+            editPasswordConfirm.value = '';
         };
 
         const closeDrawer = () => {
             drawer.classList.add('translate-x-full');
             drawerBackdrop.classList.add('hidden');
+            editFeedback.classList.add('hidden');
+            editPassword.value = '';
+            editPasswordConfirm.value = '';
         };
 
         drawerBackdrop.addEventListener('click', closeDrawer);
@@ -419,6 +543,8 @@
         const closeCreateDrawer = () => {
             createDrawer.classList.add('translate-x-full');
             createBackdrop.classList.add('hidden');
+            if (createImageFile) createImageFile.value = '';
+            if (createAvatarPreview) createAvatarPreview.src = studentAvatarFallback;
         };
 
         createButton.addEventListener('click', openCreateDrawer);
@@ -426,17 +552,30 @@
         createClose.addEventListener('click', closeCreateDrawer);
         createCancel.addEventListener('click', closeCreateDrawer);
 
+        createImageFile?.addEventListener('change', () => {
+            const file = createImageFile.files && createImageFile.files[0];
+            if (!file || !file.type.startsWith('image/')) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const result = e.target?.result;
+                if (typeof result === 'string' && createAvatarPreview) {
+                    createAvatarPreview.src = result;
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+
         createForm.addEventListener('submit', (event) => {
             event.preventDefault();
             createFeedback.classList.add('hidden');
             const formData = new FormData(createForm);
-            const payload = Object.fromEntries(formData.entries());
-            postAction(<?= json_encode(site_url('admin/dashboard/usuarios/create')) ?>, payload)
+            postActionFormData(<?= json_encode(site_url('admin/dashboard/usuarios/create')) ?>, formData)
                 .then(data => {
                     if (window.Swal) {
                         Swal.fire({ icon: 'success', title: 'Sucesso', text: data.message || 'Usuario criado.' });
                     }
                     createForm.reset();
+                    if (createAvatarPreview) createAvatarPreview.src = studentAvatarFallback;
                     loadData();
                     setTimeout(closeCreateDrawer, 600);
                 })
@@ -448,6 +587,46 @@
                     createFeedback.classList.remove('hidden');
                     createFeedback.classList.remove('bg-emerald-50', 'text-emerald-700');
                     createFeedback.classList.add('bg-rose-50', 'text-rose-700');
+                });
+        });
+
+        editCancel?.addEventListener('click', closeDrawer);
+
+        editImageFile?.addEventListener('change', () => {
+            const file = editImageFile.files && editImageFile.files[0];
+            if (!file) return;
+            if (!file.type.startsWith('image/')) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const result = e.target?.result;
+                if (typeof result === 'string') {
+                    document.getElementById('student-drawer-avatar').src = result;
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+
+        editForm?.addEventListener('submit', (event) => {
+            event.preventDefault();
+            editFeedback.classList.add('hidden');
+
+            const formData = new FormData(editForm);
+            postActionFormData(updateEndpoint, formData)
+                .then((data) => {
+                    if (window.Swal) {
+                        Swal.fire({ icon: 'success', title: 'Sucesso', text: data.message || 'Usuario atualizado.' });
+                    }
+                    closeDrawer();
+                    loadData();
+                })
+                .catch((error) => {
+                    const message = error?.message || 'Nao foi possivel atualizar o usuario.';
+                    if (window.Swal) {
+                        Swal.fire({ icon: 'error', title: 'Erro', text: message });
+                    }
+                    editFeedback.textContent = message;
+                    editFeedback.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-700');
+                    editFeedback.classList.add('bg-rose-50', 'text-rose-700');
                 });
         });
 
@@ -593,3 +772,5 @@
     })();
 </script>
 <?= $this->endSection() ?>
+
+

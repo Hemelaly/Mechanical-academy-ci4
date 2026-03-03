@@ -2,6 +2,8 @@
 
 namespace Config;
 
+use App\Libraries\AuditLogger;
+use App\Libraries\JitsiJwtService;
 use CodeIgniter\Config\BaseService;
 
 /**
@@ -19,6 +21,24 @@ use CodeIgniter\Config\BaseService;
  */
 class Services extends BaseService
 {
+    public static function auditLogger(bool $getShared = true): AuditLogger
+    {
+        if ($getShared) {
+            return static::getSharedInstance('auditLogger');
+        }
+
+        return new AuditLogger();
+    }
+
+    public static function jitsiJwt(bool $getShared = true): JitsiJwtService
+    {
+        if ($getShared) {
+            return static::getSharedInstance('jitsiJwt');
+        }
+
+        return new JitsiJwtService();
+    }
+
     /*
      * public static function example($getShared = true)
      * {

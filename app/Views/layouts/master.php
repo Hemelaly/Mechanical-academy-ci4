@@ -49,6 +49,8 @@
 
                         <?= $this->renderSection('my_courses') ?>
 
+                        <?= $this->renderSection('jitsi') ?>
+
                         <?= $this->renderSection('all_courses') ?>
 
                         <?= $this->renderSection('profile') ?>
@@ -90,6 +92,8 @@
                         <?= $this->renderSection('jitsi') ?>
 
                         <?= $this->renderSection('students') ?>
+
+                        <?= $this->renderSection('logs') ?>
 
                         <?= $this->renderSection('certificates') ?>
 
