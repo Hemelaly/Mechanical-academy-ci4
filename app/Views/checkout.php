@@ -479,9 +479,9 @@ $session = session();
                 <a href="<?= base_url('/instructor/dashboard/inscricoes') ?>" class="btn btn-primary">Ir para meus cursos</a>
               </div>
             <?php else: ?>
-              <form id="checkout-form" action="/checkout/pending/<?= $course->id_course ?>" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
-                <?= csrf_field() ?>
 
+              
+              <form id="checkout-form" action="<?= base_url('mpesa/send') ?>" method="post" class="needs-validation" novalidate>
                 <div class="mb-3">
                   <div class="input-group">
                     <input type="text" class="form-control text-sm" id="coupon" placeholder="Código do Cupom">
@@ -535,13 +535,13 @@ $session = session();
                 </div>
 
                 <!-- Div oculta que será exibida quando o radio estiver selecionado -->
-                <div id="payment-info" class="mt-3 d-none">
+                <!-- <div id="payment-info" class="mt-3 d-none">
                   <p><strong>Contacto para transferência:</strong></p>
                   <p style="margin-top: -10px;">+258 84 272 6761 - Mpesa</p>
-                  <p style="margin-top: -10px;">+258 86 010 4704 - Emola</p>
+                  <p style="margin-top: -10px;">+258 86 010 4704 - Emola</p> -->
 
                   <!-- Dropzone -->
-                  <div class="divider text-muted">
+                  <!-- <div class="divider text-muted">
                     <span>Envio do Comprovativo</span>
                   </div>
 
@@ -566,13 +566,14 @@ $session = session();
                         </button>
                       </div>
                     </div>
-                  </div>
-
-                  <!-- <input type="tel" class="form-control mb-3" name="client_number" placeholder="Nr de Telefone com Mpesa" required>
-                  <div class="invalid-feedback">
-                    Por favor, insira seu número de Telefone com Mpesa.
                   </div> -->
 
+                  <input type="tel" class="form-control mb-3" name="client_number" placeholder="Nr de Telefone com Mpesa" required>
+                  <div class="invalid-feedback">
+                    Por favor, insira seu número de Telefone com Mpesa.
+                  </div>
+
+                  <input type="hidden" name="id_course" value="<?= $course->id_course ?>">
                   <input type="hidden" name="amount_payment" value="<?= $course->price_course ?>">
                 </div>
 

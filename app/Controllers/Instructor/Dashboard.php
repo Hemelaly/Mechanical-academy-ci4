@@ -379,8 +379,18 @@ class Dashboard extends BaseController
     }
     public function deleteJitsi($id)
     {
+        $id = (int) $id;
         $user  = service('auth')->user();
         $model = new JitsiModel();
+
+        if ($id <= 0) {
+            return redirect()->back()->with('swal', [
+                'icon'  => 'error',
+                'title' => 'Aula invalida',
+                'text'  => 'Identificador da aula invalido.'
+            ]);
+        }
+
         // Verifica se a aula existe
         $aula = $model->find($id);
         if (!$aula) {
@@ -416,7 +426,7 @@ class Dashboard extends BaseController
             ]);
         }
         // Delete
-        if ($model->delete($id)) {
+        if ($model->where('id_jitsi', $id)->delete()) {
             $this->auditLogger->write(
                 'instructor.jitsi.deleted',
                 'info',
@@ -1406,7 +1416,7 @@ class Dashboard extends BaseController
                 ->update();
 
             // Remover pending_user
-            $pendingUserModel->delete($pendingId);
+            $pendingUserModel->where('id', $pendingId)->delete();
 
             $this->auditLogger->write(
                 'instructor.enrollment.approved_existing_user',
@@ -1491,7 +1501,7 @@ class Dashboard extends BaseController
             ->update();
 
         // 7. Remover pending_user
-        $pendingUserModel->delete($pendingId);
+        $pendingUserModel->where('id', $pendingId)->delete();
 
         $this->auditLogger->write(
             'instructor.enrollment.approved_new_user',

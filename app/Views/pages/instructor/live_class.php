@@ -640,31 +640,14 @@ $aulas  = $aulas ?? []; // lista de aulas vindas do controller
         document.getElementById('classFormCard').classList.add('hidden');
     }
 
-    // Confirmação de exclusão
+        // Confirmacao de exclusao
     function confirmDelete(id) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Excluir aula?',
-            text: 'Esta ação não pode ser desfeita.',
-            showCancelButton: true,
-            confirmButtonText: 'Sim, excluir',
-            cancelButtonText: 'Cancelar'
-        }).then(result => {
-            if (result.isConfirmed) {
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = "<?= site_url('instructor/dashboard/jitsi/deletar') ?>/" + id;
+        const ok = window.confirm('Excluir aula? Esta acao nao pode ser desfeita.');
+        if (!ok) {
+            return;
+        }
 
-                const csrf = document.createElement('input');
-                csrf.type = 'hidden';
-                csrf.name = "<?= csrf_token() ?>";
-                csrf.value = "<?= csrf_hash() ?>";
-
-                form.appendChild(csrf);
-                document.body.appendChild(form);
-                form.submit();
-            }
-        });
+        window.location.href = "<?= site_url('instructor/dashboard/jitsi/deletar') ?>/" + id;
     }
 
     // Atualiza preview quando clicar na linha
@@ -714,6 +697,8 @@ $aulas  = $aulas ?? []; // lista de aulas vindas do controller
 </script>
 
 <?= $this->endSection() ?>
+
+
 
 
 

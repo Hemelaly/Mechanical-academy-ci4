@@ -121,16 +121,29 @@ class JitsiJwtService
             return null;
         }
 
-        if (! is_file($path)) {
-            return null;
+        $candidatePaths = [$path];
+
+        // When running on Linux VPS, allow relative paths from project roots.
+        if (! preg_match('#^([a-zA-Z]:[\\\\/]|/)#', $path)) {
+            $candidatePaths[] = rtrim(ROOTPATH, '/\\') . DIRECTORY_SEPARATOR . ltrim($path, '/\\');
+            $candidatePaths[] = rtrim(WRITEPATH, '/\\') . DIRECTORY_SEPARATOR . ltrim($path, '/\\');
+            $candidatePaths[] = rtrim(FCPATH, '/\\') . DIRECTORY_SEPARATOR . ltrim($path, '/\\');
         }
 
-        $contents = file_get_contents($path);
-        if ($contents === false) {
-            return null;
+        foreach (array_unique($candidatePaths) as $candidate) {
+            if (! is_file($candidate)) {
+                continue;
+            }
+
+            $contents = file_get_contents($candidate);
+            if ($contents === false) {
+                continue;
+            }
+
+            return $contents;
         }
 
-        return $contents;
+        return null;
     }
 
     private function encodeRs256(array $header, array $payload, string $privateKey): string

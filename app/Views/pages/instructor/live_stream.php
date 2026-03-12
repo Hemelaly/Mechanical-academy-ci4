@@ -237,6 +237,8 @@ if (! (bool) ($aula->screenshare_jitsi ?? 1)) {
         body.append('recording_url', link);
         body.append('recording_mode', recordingMode || 'file');
         body.append('status_recording', 'ready');
+        // Publica automaticamente para aparecer em /student/dashboard/aulas_ao_vivo
+        body.append('publish_now', '1');
         if (payload?.recordingSessionId) {
             body.append('provider_recording_id', String(payload.recordingSessionId));
         }

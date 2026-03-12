@@ -1,0 +1,15 @@
+{
+    "created_at": "2026-03-12T14:54:29+00:00",
+    "payment_id": 102,
+    "reference": "PAY-2026-000102",
+    "request": {
+        "amount": 1499,
+        "client_number": "855454532"
+    },
+    "response": "{\"output_ResponseCode\":\"INS-2051\",\"output_ResponseDesc\":\"MSISDN invalid.\",\"output_TransactionID\":\"N\/A\",\"output_ConversationID\":\"10ccdd5eb3c04e23a8a0bb3d30c6006f\",\"output_ThirdPartyReference\":\"58396\"}",
+    "parsed": {
+        "code": "",
+        "status": ""
+    },
+    "final": "pending_flow"
+}

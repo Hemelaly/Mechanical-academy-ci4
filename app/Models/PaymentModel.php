@@ -12,7 +12,7 @@ class PaymentModel extends Model
     protected $returnType       = 'object';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['id_user_payment', 'id_course_payment', 'amount_payment', 'status_payment', 'reference_payment', 'id_enrollment_payment', 'proof_file_payment', 'status_payment', 'approved_by_payment', 'created_at', 'updated_at'];
+    protected $allowedFields    = ['id_user_payment', 'id_course_payment', 'amount_payment', 'status_payment', 'reference_payment', 'id_enrollment_payment', 'proof_file_payment', 'approved_by_payment', 'created_at', 'updated_at'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
