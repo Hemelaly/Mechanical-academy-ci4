@@ -104,7 +104,7 @@ class MpesaController extends Controller
         try {
             $apiKey    = getenv('MPESA_API_KEY');
             $publicKey = getenv('MPESA_PUBLIC_KEY');
-            $env       = getenv('MPESA_ENV') ?: 'development';
+            $env       = strtolower(trim((string) (getenv('MPESA_ENV') ?: 'production')));
 
             if (empty($apiKey) || empty($publicKey)) {
                 throw new \RuntimeException('Credenciais do M-Pesa não configuradas.');

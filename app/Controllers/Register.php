@@ -72,9 +72,10 @@ class Register extends Controller
         if ($useMpesa) {
             $apiKey    = getenv('MPESA_API_KEY');
             $publicKey = getenv('MPESA_PUBLIC_KEY');
-            $env       = getenv('MPESA_ENV') ?: 'development';
+            $agentId   = (int) getenv('MPESA_AGENT_ID');
+            $env       = strtolower(trim((string) (getenv('MPESA_ENV') ?: 'production')));
 
-            if (!$apiKey || !$publicKey) {
+            if (!$apiKey || !$publicKey || $agentId <= 0) {
                 return redirect()->back()->withInput()->with(
                     'error',
                     'Configuração M-Pesa ausente: defina MPESA_API_KEY e MPESA_PUBLIC_KEY no .env.'
@@ -90,7 +91,7 @@ class Register extends Controller
                 $payload = [
                     'value'                 => $amount,
                     'client_number'         => $clientNumber,
-                    'agent_id'              => 171717, // TODO: seu agent_id
+                    'agent_id'              => $agentId,
                     'third_party_reference' => $thirdPartyRef,
                     'transaction_reference' => $transactionRef,
                 ];
