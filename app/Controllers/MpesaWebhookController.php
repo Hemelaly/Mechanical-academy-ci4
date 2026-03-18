@@ -65,37 +65,9 @@ class MpesaWebhookController extends Controller
         $userId = (int) $payment->id_user_payment;
         $courseId = (int) $payment->id_course_payment;
 
-        if ((string) $responseCode === 'INS-0' && $userId <= 0) {
-            log_message('warning', 'Webhook M-Pesa recebeu aprovacao para pagamento sem usuario resolvido: ' . $referencePayment);
-
-            return $this->response->setStatusCode(200)->setJSON([
-                'status'  => 'ok',
-                'message' => 'Pagamento aprovado, aguardando resolucao interna do usuario.',
-            ]);
-        }
-
         if ((string) $responseCode === 'INS-0') {
             $course = (new CourseModel())->find($courseId);
-            $identity = db_connect()
-                ->table('auth_identities')
-                ->select('secret')
-                ->where('user_id', $userId)
-                ->where('type', 'email_password')
-                ->orderBy('id', 'DESC')
-                ->get()
-                ->getRow();
-
-            $student = db_connect()
-                ->table('students')
-                ->select('name_student, email_student')
-                ->where('id_user_student', $userId)
-                ->get()
-                ->getRow();
-
-            $email = trim(strtolower((string) ($identity->secret ?? $student->email_student ?? '')));
-            $fullName = trim((string) ($student->name_student ?? 'Aluno'));
-
-            if (! $course || $email === '') {
+            if (! $course) {
                 log_message('warning', 'Webhook M-Pesa sem dados suficientes para finalizar checkout.', [
                     'payment_id' => $paymentId,
                     'course_id'  => $courseId,
@@ -109,14 +81,57 @@ class MpesaWebhookController extends Controller
             }
 
             try {
-                $checkoutService->finalizeApprovedPayment(
-                    $paymentId,
-                    $courseId,
-                    (string) $course->title_course,
-                    $email,
-                    $fullName,
-                    null
-                );
+                $guestEmail = trim(strtolower((string) ($payment->guest_email_payment ?? '')));
+                $guestName = trim((string) ($payment->guest_name_payment ?? ''));
+
+                if ($guestEmail !== '') {
+                    $checkoutService->finalizeApprovedGuestPayment(
+                        $paymentId,
+                        $courseId,
+                        (string) $course->title_course,
+                        $guestEmail,
+                        $guestName
+                    );
+
+                    return $this->response->setStatusCode(200)->setJSON([
+                        'status'  => 'ok',
+                        'message' => 'Pagamento aprovado e email de configuracao enviado.',
+                    ]);
+                }
+
+                $identity = db_connect()
+                    ->table('auth_identities')
+                    ->select('secret')
+                    ->where('user_id', $userId)
+                    ->where('type', 'email_password')
+                    ->orderBy('id', 'DESC')
+                    ->get()
+                    ->getRow();
+
+                $student = db_connect()
+                    ->table('students')
+                    ->select('name_student, email_student')
+                    ->where('id_user_student', $userId)
+                    ->get()
+                    ->getRow();
+
+                $email = trim(strtolower((string) ($identity->secret ?? $student->email_student ?? '')));
+                $fullName = trim((string) ($student->name_student ?? 'Aluno'));
+
+                if ($email === '') {
+                    log_message('warning', 'Webhook M-Pesa recebeu aprovacao sem email resolvido.', [
+                        'payment_id' => $paymentId,
+                        'course_id'  => $courseId,
+                        'user_id'    => $userId,
+                    ]);
+
+                    return $this->response->setStatusCode(200)->setJSON([
+                        'status'  => 'ok',
+                        'message' => 'Pagamento aprovado, aguardando resolucao interna do utilizador.',
+                    ]);
+                }
+
+                $checkoutService->finalizeApprovedPayment($paymentId, $courseId, (string) $course->title_course, $email, $fullName, null, $userId);
             } catch (\Throwable $e) {
                 log_message('critical', 'Webhook M-Pesa aprovou pagamento, mas a inscricao falhou: ' . $e->getMessage());
 

@@ -6,6 +6,7 @@ use App\Models\EnrollmentModel;
 use App\Models\ExtendedUserModel;
 use App\Models\PasswordResetModel;
 use App\Models\PaymentModel;
+use App\Models\PendingUserModel;
 use App\Models\StudentModel;
 use CodeIgniter\Shield\Entities\User as ShieldUser;
 use CodeIgniter\Shield\Models\UserModel as ShieldUserModel;
@@ -20,6 +21,21 @@ class CheckoutEnrollmentService
         }
 
         return (new ShieldUserModel())->findByCredentials(['email' => $email]);
+    }
+
+    public function findPendingPaidCheckout(string $email, int $courseId): ?object
+    {
+        $email = trim(strtolower($email));
+        if ($email === '' || $courseId <= 0) {
+            return null;
+        }
+
+        return (new PendingUserModel())
+            ->where('email', $email)
+            ->where('course_id', $courseId)
+            ->where('status', 'paid')
+            ->orderBy('id', 'DESC')
+            ->first();
     }
 
     public function hasActiveEnrollment(int $userId, int $courseId): bool
@@ -39,9 +55,18 @@ class CheckoutEnrollmentService
     public function prepareCheckoutUser(
         string $email,
         string $fullName,
-        ?object $authenticatedUser = null
+        ?object $authenticatedUser = null,
+        int $preferredUserId = 0
     ): object {
-        $user = $authenticatedUser ?: $this->findUserByEmail($email);
+        $user = $authenticatedUser;
+
+        if (! $user && $preferredUserId > 0) {
+            $user = (new ShieldUserModel())->find($preferredUserId);
+        }
+
+        if (! $user) {
+            $user = $this->findUserByEmail($email);
+        }
 
         if ($user && ! $this->canCheckoutAsStudent($user)) {
             throw new \RuntimeException('Esta conta nao pode ser usada para comprar cursos como estudante.');
@@ -75,13 +100,14 @@ class CheckoutEnrollmentService
         string $courseTitle,
         string $email,
         string $fullName,
-        ?object $authenticatedUser = null
+        ?object $authenticatedUser = null,
+        int $preferredUserId = 0
     ): array {
         $db = db_connect();
         $db->transException(true);
         $db->transStart();
 
-        $user = $this->prepareCheckoutUser($email, $fullName, $authenticatedUser);
+        $user = $this->prepareCheckoutUser($email, $fullName, $authenticatedUser, $preferredUserId);
         $enrollmentId = $this->ensureEnrollment((int) $user->id, $courseId);
 
         $paymentModel = new PaymentModel();
@@ -112,11 +138,195 @@ class CheckoutEnrollmentService
         $db->transComplete();
 
         return [
-            'user_id'                => (int) $user->id,
-            'enrollment_id'          => $enrollmentId,
-            'course_path'            => $coursePath,
-            'redirect_url'           => $redirectUrl,
+            'user_id'                 => (int) $user->id,
+            'enrollment_id'           => $enrollmentId,
+            'course_path'             => $coursePath,
+            'redirect_url'            => $redirectUrl,
             'requires_password_setup' => $authenticatedUser === null,
+            'email_sent'              => true,
+        ];
+    }
+
+    public function finalizeApprovedGuestPayment(
+        int $paymentId,
+        int $courseId,
+        string $courseTitle,
+        string $email,
+        string $fullName
+    ): array {
+        $normalizedEmail = trim(strtolower($email));
+        $resolvedName = $this->cleanName($fullName);
+
+        if ($normalizedEmail === '') {
+            throw new \RuntimeException('Nao foi possivel identificar o email do checkout pendente.');
+        }
+
+        if ($resolvedName === '') {
+            $resolvedName = 'Aluno';
+        }
+
+        $existingUser = $this->findUserByEmail($normalizedEmail);
+        if ($existingUser && ! $this->canCheckoutAsStudent($existingUser)) {
+            throw new \RuntimeException('Esta conta nao pode ser usada para concluir a compra como estudante.');
+        }
+
+        $paymentModel = new PaymentModel();
+        $pendingModel = new PendingUserModel();
+        $payment = $paymentModel->find($paymentId);
+
+        if (! $payment) {
+            throw new \RuntimeException('Pagamento nao encontrado para criar o acesso pendente.');
+        }
+
+        if ((int) ($payment->id_enrollment_payment ?? 0) > 0) {
+            return [
+                'redirect_url'            => $this->buildCourseAccessPath($courseId),
+                'course_path'             => $this->buildCourseAccessPath($courseId),
+                'requires_password_setup' => false,
+                'email_sent'              => true,
+                'pending_user_id'         => 0,
+            ];
+        }
+
+        $db = db_connect();
+        $db->transException(true);
+        $db->transStart();
+
+        $setupToken = bin2hex(random_bytes(16));
+        $setupExpiresAt = date('Y-m-d H:i:s', strtotime('+1 day'));
+
+        $pendingUser = $pendingModel
+            ->where('payment_id', $paymentId)
+            ->first();
+
+        $pendingData = [
+            'username'         => $resolvedName,
+            'email'            => $normalizedEmail,
+            'course_id'        => $courseId,
+            'payment_id'       => $paymentId,
+            'status'           => 'paid',
+            'setup_token'      => $setupToken,
+            'setup_expires_at' => $setupExpiresAt,
+        ];
+
+        if ($pendingUser) {
+            $updated = $pendingModel->update((int) $pendingUser->id, $pendingData);
+            if (! $updated) {
+                throw new \RuntimeException('Nao foi possivel atualizar o acesso pendente.');
+            }
+
+            $pendingId = (int) $pendingUser->id;
+        } else {
+            $pendingId = (int) $pendingModel->insert($pendingData, true);
+            if ($pendingId <= 0) {
+                throw new \RuntimeException(implode(', ', $pendingModel->errors() ?: ['Nao foi possivel criar o acesso pendente.']));
+            }
+        }
+
+        $updatedPayment = $paymentModel->update($paymentId, [
+            'id_user_payment'       => $pendingId,
+            'id_enrollment_payment' => 0,
+            'status_payment'        => 'Aprovado',
+            'approved_by_payment'   => 0,
+            'guest_email_payment'   => $normalizedEmail,
+            'guest_name_payment'    => $resolvedName,
+            'updated_at'            => date('Y-m-d H:i:s'),
+        ]);
+
+        if (! $updatedPayment) {
+            throw new \RuntimeException('Nao foi possivel atualizar o pagamento aprovado para acesso pendente.');
+        }
+
+        $coursePath = $this->buildCourseAccessPath($courseId);
+        $redirectUrl = site_url('reset-password') . '?' . http_build_query([
+            'token'  => $setupToken,
+            'next'   => $coursePath,
+            'course' => $courseTitle,
+        ]);
+
+        $db->transComplete();
+
+        $emailSent = $this->sendPendingSetupEmail($normalizedEmail, $resolvedName, $courseTitle, $redirectUrl);
+
+        return [
+            'pending_user_id'         => $pendingId,
+            'course_path'             => $coursePath,
+            'redirect_url'            => $redirectUrl,
+            'requires_password_setup' => true,
+            'email_sent'              => $emailSent,
+        ];
+    }
+
+    public function completePendingUserCheckout(string $token, string $password): array
+    {
+        $pendingModel = new PendingUserModel();
+        $pendingUser = $pendingModel
+            ->where('setup_token', trim($token))
+            ->first();
+
+        if (! $pendingUser) {
+            throw new \RuntimeException('Token invalido.');
+        }
+
+        if (! empty($pendingUser->setup_expires_at) && strtotime((string) $pendingUser->setup_expires_at) < time()) {
+            throw new \RuntimeException('Token expirado.');
+        }
+
+        $paymentModel = new PaymentModel();
+        $payment = $paymentModel->find((int) $pendingUser->payment_id);
+
+        if (! $payment) {
+            throw new \RuntimeException('Pagamento associado ao acesso pendente nao foi encontrado.');
+        }
+
+        $db = db_connect();
+        $db->transException(true);
+        $db->transStart();
+
+        $existingUser = $this->findUserByEmail((string) $pendingUser->email);
+        if ($existingUser) {
+            if (! $this->canCheckoutAsStudent($existingUser)) {
+                throw new \RuntimeException('Esta conta nao pode ser usada para ativar a inscricao.');
+            }
+
+            $user = $this->setUserPassword((int) $existingUser->id, $password);
+        } else {
+            $user = $this->createStudentUser((string) $pendingUser->email, (string) $pendingUser->username, $password);
+        }
+
+        $this->promoteToStudent((int) $user->id);
+        $user = (new ShieldUserModel())->find((int) $user->id);
+
+        if (! $user) {
+            throw new \RuntimeException('Nao foi possivel carregar a conta apos criar a senha.');
+        }
+
+        $this->ensureStudentProfile((int) $user->id, (string) $pendingUser->username, (string) $pendingUser->email);
+        $enrollmentId = $this->ensureEnrollment((int) $user->id, (int) $pendingUser->course_id);
+
+        $updated = $paymentModel->update((int) $payment->id_payment, [
+            'id_user_payment'       => (int) $user->id,
+            'id_enrollment_payment' => $enrollmentId,
+            'status_payment'        => 'Aprovado',
+            'approved_by_payment'   => 0,
+            'updated_at'            => date('Y-m-d H:i:s'),
+        ]);
+
+        if (! $updated) {
+            throw new \RuntimeException('Nao foi possivel concluir a ativacao do pagamento.');
+        }
+
+        $pendingModel->delete((int) $pendingUser->id);
+        (new PasswordResetModel())->where('user_id', (int) $user->id)->delete();
+
+        $db->transComplete();
+
+        return [
+            'user'          => $user,
+            'user_id'       => (int) $user->id,
+            'enrollment_id' => $enrollmentId,
+            'course_id'     => (int) $pendingUser->course_id,
+            'course_path'   => $this->buildCourseAccessPath((int) $pendingUser->course_id),
         ];
     }
 
@@ -127,7 +337,7 @@ class CheckoutEnrollmentService
         return $role === '' || $role === 'student';
     }
 
-    private function createStudentUser(string $email, string $fullName): object
+    private function createStudentUser(string $email, string $fullName, ?string $plainPassword = null): object
     {
         $users = new ShieldUserModel();
         $normalizedEmail = trim(strtolower($email));
@@ -137,7 +347,7 @@ class CheckoutEnrollmentService
             'active'   => 1,
         ]);
         $entity->email = $normalizedEmail;
-        $entity->password = bin2hex(random_bytes(8));
+        $entity->password = $plainPassword ?: bin2hex(random_bytes(8));
 
         if (! $users->save($entity)) {
             $existing = $users->findByCredentials(['email' => $normalizedEmail]);
@@ -157,6 +367,23 @@ class CheckoutEnrollmentService
 
         $users->addToDefaultGroup($created);
         $this->promoteToStudent($userId);
+
+        return $users->find($userId);
+    }
+
+    private function setUserPassword(int $userId, string $password): object
+    {
+        $users = new ShieldUserModel();
+        $user = $users->find($userId);
+
+        if (! $user) {
+            throw new \RuntimeException('Usuario nao encontrado para configuracao de senha.');
+        }
+
+        $user->password = $password;
+        if (! $users->save($user)) {
+            throw new \RuntimeException(implode(', ', $users->errors() ?: ['Nao foi possivel atualizar a senha.']));
+        }
 
         return $users->find($userId);
     }
@@ -332,6 +559,42 @@ class CheckoutEnrollmentService
         ]);
 
         return $token;
+    }
+
+    private function sendPendingSetupEmail(string $email, string $fullName, string $courseTitle, string $link): bool
+    {
+        try {
+            $mail = \Config\Services::email();
+            $mail->setTo($email);
+            $mail->setSubject('Configure a sua senha e ative o acesso ao curso');
+            $mail->setMailType('html');
+            $mail->setMessage(
+                '<p>Ola ' . esc($fullName) . ',</p>' .
+                '<p>Recebemos o seu pagamento do curso <strong>' . esc($courseTitle) . '</strong>.</p>' .
+                '<p>Para ativar o acesso, configure a sua senha no link abaixo:</p>' .
+                '<p><a href="' . esc($link) . '">Configurar senha e ativar acesso</a></p>' .
+                '<p>Se o botao nao funcionar, copie e cole este link no navegador:</p>' .
+                '<p>' . esc($link) . '</p>'
+            );
+
+            if (! $mail->send()) {
+                log_message('warning', 'Falha ao enviar email de configuracao do checkout pendente.', [
+                    'email' => $email,
+                    'course' => $courseTitle,
+                ]);
+
+                return false;
+            }
+
+            return true;
+        } catch (\Throwable $e) {
+            log_message('warning', 'Excecao ao enviar email de configuracao do checkout pendente: ' . $e->getMessage(), [
+                'email' => $email,
+                'course' => $courseTitle,
+            ]);
+
+            return false;
+        }
     }
 
     private function generateUniqueUsername(string $fullName, string $email): string

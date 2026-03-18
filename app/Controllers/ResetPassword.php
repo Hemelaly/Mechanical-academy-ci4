@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use App\Models\PasswordResetModel;
+use App\Services\CheckoutEnrollmentService;
 use CodeIgniter\Shield\Models\UserModel;
 
 class ResetPassword extends BaseController
@@ -91,46 +92,67 @@ class ResetPassword extends BaseController
         $passwordResetModel = new PasswordResetModel();
         $reset = $passwordResetModel->where('token', $token)->first();
 
-        if (! $reset) {
-            return redirect()->back()->withInput()->with('error', 'Token invalido.');
+        if ($reset) {
+            if (! empty($reset['expires_at']) && strtotime((string) $reset['expires_at']) < time()) {
+                return redirect()->back()->withInput()->with('error', 'Token expirado.');
+            }
+
+            $users = auth()->getProvider();
+            if ($users === null) {
+                $users = new UserModel();
+            }
+
+            $user = $users->find((int) $reset['user_id']);
+            if (! $user) {
+                return redirect()->back()->withInput()->with('error', 'Usuario nao encontrado.');
+            }
+
+            $user->password = $password;
+            if (! $users->save($user)) {
+                $errors = $users->errors();
+
+                return redirect()->back()->withInput()->with(
+                    'error',
+                    $errors ? implode(', ', $errors) : 'Nao foi possivel atualizar a senha.'
+                );
+            }
+
+            $passwordResetModel->where('user_id', $user->id)->delete();
+
+            session()->regenerate(true);
+            auth()->login($user);
+
+            $target = $this->isSafeLocalPath($next) ? $next : '/student/dashboard';
+            $swal = [
+                'icon'  => 'success',
+                'title' => 'Senha criada',
+                'text'  => $course !== ''
+                    ? 'Senha criada com sucesso. Voce foi inscrito no curso ' . $course . '.'
+                    : 'Sua senha foi redefinida com sucesso.',
+            ];
+
+            return redirect()->to($target)->with('swal', $swal);
         }
 
-        if (! empty($reset['expires_at']) && strtotime((string) $reset['expires_at']) < time()) {
-            return redirect()->back()->withInput()->with('error', 'Token expirado.');
+        try {
+            $result = (new CheckoutEnrollmentService())->completePendingUserCheckout($token, $password);
+        } catch (\Throwable $e) {
+            return redirect()->back()->withInput()->with('error', $e->getMessage() ?: 'Token invalido.');
         }
-
-        $users = auth()->getProvider();
-        if ($users === null) {
-            $users = new UserModel();
-        }
-
-        $user = $users->find((int) $reset['user_id']);
-        if (! $user) {
-            return redirect()->back()->withInput()->with('error', 'Usuario nao encontrado.');
-        }
-
-        $user->password = $password;
-        if (! $users->save($user)) {
-            $errors = $users->errors();
-
-            return redirect()->back()->withInput()->with(
-                'error',
-                $errors ? implode(', ', $errors) : 'Nao foi possivel atualizar a senha.'
-            );
-        }
-
-        $passwordResetModel->where('user_id', $user->id)->delete();
 
         session()->regenerate(true);
-        auth()->login($user);
+        auth()->login($result['user']);
 
-        $target = $this->isSafeLocalPath($next) ? $next : '/student/dashboard';
+        $target = $this->isSafeLocalPath($next)
+            ? $next
+            : ($result['course_path'] ?? '/student/dashboard');
+
         $swal = [
             'icon'  => 'success',
-            'title' => 'Senha criada',
+            'title' => 'Conta ativada',
             'text'  => $course !== ''
-                ? 'Senha criada com sucesso. Voce foi inscrito no curso ' . $course . '.'
-                : 'Sua senha foi redefinida com sucesso.',
+                ? 'Senha criada com sucesso. O seu acesso ao curso ' . $course . ' foi ativado.'
+                : 'Senha criada com sucesso. A sua conta foi ativada.',
         ];
 
         return redirect()->to($target)->with('swal', $swal);

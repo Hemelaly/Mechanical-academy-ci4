@@ -1,0 +1,9 @@
+DEBUG - 2026-03-18 18:03:36 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-18 18:03:49 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-18 18:03:56 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-18 18:04:21 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-03-18 18:04:21 --> Falha ao preparar usuario do checkout: Este email já foi registrado! Tente outro.
+DEBUG - 2026-03-18 18:04:46 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-03-18 18:04:46 --> Falha ao preparar usuario do checkout: Este email já foi registrado! Tente outro.
+DEBUG - 2026-03-18 18:19:13 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-03-18 18:19:13 --> Falha ao preparar usuario do checkout: Este email já foi registrado! Tente outro.

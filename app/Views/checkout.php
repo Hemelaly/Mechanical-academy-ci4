@@ -632,8 +632,13 @@ $session = session();
           text: 'Nao foi possivel concluir o pagamento.'
         };
 
+        const shouldAutoRedirect = payload?.status === 'approved' && !!payload?.redirect_url;
+
         await Swal.fire({
-          confirmButtonText: 'OK',
+          confirmButtonText: shouldAutoRedirect ? undefined : 'OK',
+          showConfirmButton: !shouldAutoRedirect,
+          timer: shouldAutoRedirect ? 1400 : undefined,
+          timerProgressBar: shouldAutoRedirect,
           ...swalData
         });
 
@@ -644,11 +649,67 @@ $session = session();
 
       const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+      const parseJsonResponse = async (response) => {
+        const rawText = await response.text();
+
+        if (!rawText) {
+          return {
+            payload: null,
+            rawText: ''
+          };
+        }
+
+        try {
+          return {
+            payload: JSON.parse(rawText),
+            rawText
+          };
+        } catch (error) {
+          const start = rawText.indexOf('{');
+          const end = rawText.lastIndexOf('}');
+
+          if (start !== -1 && end > start) {
+            try {
+              return {
+                payload: JSON.parse(rawText.slice(start, end + 1)),
+                rawText
+              };
+            } catch (nestedError) {
+              // continua para fallback abaixo
+            }
+          }
+        }
+
+        return {
+          payload: null,
+          rawText
+        };
+      };
+
+      const toReadableErrorText = (rawText) => {
+        if (!rawText) {
+          return 'Nao foi possivel concluir o pedido agora. Tente novamente em instantes.';
+        }
+
+        const text = rawText
+          .replace(/<[^>]*>/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+
+        if (!text) {
+          return 'Nao foi possivel concluir o pedido agora. Tente novamente em instantes.';
+        }
+
+        return text.slice(0, 220);
+      };
+
       const buildStatusFormData = (payload) => {
         const statusData = new FormData();
         statusData.append('payment_id', String(payload?.payment_id || ''));
         statusData.append('reference', String(payload?.reference || ''));
         statusData.append('query_reference', String(payload?.query_reference || ''));
+        statusData.append('gateway_mode', String(payload?.gateway_mode || 'sync'));
+        statusData.append('remote_query_enabled', payload?.remote_query_enabled === false ? '0' : '1');
 
         const emailInput = form.querySelector('input[name="email"]');
         const usernameInput = form.querySelector('input[name="username"]');
@@ -678,11 +739,20 @@ $session = session();
           }
         });
 
-        return response.json();
+        const {
+          payload: statusPayload,
+          rawText
+        } = await parseJsonResponse(response);
+
+        if (statusPayload) {
+          return statusPayload;
+        }
+
+        throw new Error(toReadableErrorText(rawText));
       };
 
       const waitForConfirmation = async (payload) => {
-        if (!payload?.status_check_url || !payload?.query_reference) {
+        if (!payload?.status_check_url) {
           await Swal.fire({
             icon: 'info',
             title: 'Pedido enviado',
@@ -713,9 +783,25 @@ $session = session();
             updateCsrf(statusPayload.csrf);
           }
 
+          if (statusPayload?.query_reference) {
+            payload.query_reference = statusPayload.query_reference;
+          }
+
+          if (statusPayload?.gateway_mode) {
+            payload.gateway_mode = statusPayload.gateway_mode;
+          }
+
+          if (typeof statusPayload?.remote_query_enabled === 'boolean') {
+            payload.remote_query_enabled = statusPayload.remote_query_enabled;
+          }
+
           if (statusPayload?.status === 'pending_confirmation') {
+            const waitingText = payload?.gateway_mode === 'async'
+              ? `O pedido foi aceite pelo gateway. Estamos a aguardar a confirmacao final do M-Pesa. Verificacao ${attempt} de ${maxAttempts}.`
+              : `Aguardando a confirmacao do pagamento no M-Pesa. Verificacao ${attempt} de ${maxAttempts}.`;
+
             Swal.update({
-              text: `Aguardando a confirmacao do pagamento no M-Pesa. Verificacao ${attempt} de ${maxAttempts}.`
+              text: waitingText
             });
             continue;
           }
@@ -729,7 +815,9 @@ $session = session();
         await Swal.fire({
           icon: 'info',
           title: 'Ainda pendente',
-          text: 'O pedido continua pendente. Confirme o PIN no popup do celular e tente novamente em instantes.'
+          text: payload?.gateway_mode === 'async'
+            ? 'O pedido continua pendente. O gateway aceitou a solicitacao, mas a confirmacao final ainda nao chegou.'
+            : 'O pedido continua pendente. Confirme o PIN no popup do celular e tente novamente em instantes.'
         });
       };
 
@@ -774,12 +862,10 @@ $session = session();
             }
           });
 
-          let payload = null;
-          try {
-            payload = await response.json();
-          } catch (parseError) {
-            payload = null;
-          }
+          const {
+            payload,
+            rawText
+          } = await parseJsonResponse(response);
 
           if (payload?.csrf) {
             updateCsrf(payload.csrf);
@@ -788,7 +874,7 @@ $session = session();
           Swal.close();
 
           if (!payload) {
-            throw new Error('Resposta invalida do servidor.');
+            throw new Error(toReadableErrorText(rawText));
           }
 
           if (payload?.status === 'pending_confirmation') {
@@ -802,7 +888,7 @@ $session = session();
           await Swal.fire({
             icon: 'error',
             title: 'Falha na comunicacao',
-            text: 'Nao foi possivel concluir o pedido agora. Tente novamente em instantes.'
+            text: error?.message || 'Nao foi possivel concluir o pedido agora. Tente novamente em instantes.'
           });
         } finally {
           if (submitButton) {
