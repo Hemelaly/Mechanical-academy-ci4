@@ -359,7 +359,7 @@ class Dashboard extends BaseController
         if (! $lesson) {
             $course = $courseModel->find($id);
             if (! $course) {
-                return redirect()->to('/student/dashboard/meus_cursos')
+                return redirect()->to('/student/dashboard/inscricoes')
                     ->with('error', 'Curso nÃ£o encontrado.');
             }
 
@@ -381,7 +381,7 @@ class Dashboard extends BaseController
                     return redirect()->to('/student/dashboard/ver_aulas/' . (int) $targetId)
                         ->with('blocked_access', true);
                 }
-                return redirect()->to('/student/dashboard/meus_cursos')
+                return redirect()->to('/student/dashboard/inscricoes')
                     ->with('error', 'Seu acesso a este curso está bloqueado.');
             }
 
@@ -397,7 +397,7 @@ class Dashboard extends BaseController
                     ->with('info', 'Retomando de onde parou.');
             }
 
-            return redirect()->to('/student/dashboard/meus_cursos')
+            return redirect()->to('/student/dashboard/inscricoes')
                 ->with('error', 'Nenhuma aula encontrada para este curso.');
         }
 
@@ -406,13 +406,13 @@ class Dashboard extends BaseController
         // ===========================
         $module = $moduleModel->find($lesson->id_module_lesson);
         if (! $module) {
-            return redirect()->to('/student/dashboard/meus_cursos')
+            return redirect()->to('/student/dashboard/inscricoes')
                 ->with('error', 'MÃ³dulo da aula nÃ£o encontrado.');
         }
 
         $course = $courseModel->find($module->id_course_module);
         if (! $course) {
-            return redirect()->to('/student/dashboard/meus_cursos')
+            return redirect()->to('/student/dashboard/inscricoes')
                 ->with('error', 'Curso da aula nÃ£o encontrado.');
         }
 
@@ -1149,6 +1149,31 @@ class Dashboard extends BaseController
 
         // Atualizar sessÃ£o
         $updated = $users->find($user->id);
+        $db = db_connect();
+        $studentEmail = strtolower(trim((string) ($emailChanged ? $email : ($user->email ?? ''))));
+        $student = $db->table('students')
+            ->select('id_student')
+            ->where('id_user_student', $user->id)
+            ->get()
+            ->getRow();
+
+        $studentPayload = [
+            'name_student'  => $dataProfile['username'],
+            'email_student' => $studentEmail,
+            'updated_at'    => date('Y-m-d H:i:s'),
+        ];
+
+        if ($student) {
+            $db->table('students')
+                ->where('id_student', $student->id_student)
+                ->update($studentPayload);
+        } else {
+            $db->table('students')->insert($studentPayload + [
+                'id_user_student' => $user->id,
+                'created_at'      => date('Y-m-d H:i:s'),
+            ]);
+        }
+
         auth()->setUser($updated);
 
         return redirect()->to($profileUrl)->with('swal', [

@@ -482,6 +482,7 @@ $session = session();
 
               
               <form id="checkout-form" action="<?= base_url('mpesa/send') ?>" method="post" class="needs-validation" novalidate>
+                <?= csrf_field() ?>
                 <div class="mb-3">
                   <div class="input-group">
                     <input type="text" class="form-control text-sm" id="coupon" placeholder="Código do Cupom">
@@ -490,8 +491,6 @@ $session = session();
                 </div>
 
                 <?php if (($user) && ($user->role !== "instructor")): ?>
-                  <!-- Se já estiver logado, passa os dados como hidden -->
-                  <input type="hidden" name="id_user" value="<?= $user->id ?>">
                   <input type="hidden" name="email" value="<?= $user->email ?>">
                   <input type="hidden" name="username" value="<?= $user->username ?>">
 
@@ -514,6 +513,10 @@ $session = session();
                       Por favor, insira seu nome e sobrenome.
                     </div>
                   </div>
+
+                  <p class="small text-muted">
+                    O email e o nome informados serão usados para criar a sua conta automaticamente após a confirmação do pagamento.
+                  </p>
                 <?php endif; ?>
 
 
@@ -522,7 +525,7 @@ $session = session();
                     <div class="form-check">
                       <input class="form-check-input" type="radio" name="payment" id="mobile" checked>
                       <label class="form-check-label" for="mobile">
-                        Tranferir para Mpesa/E-mola
+                        Pagar com Mpesa
                       </label>
                     </div>
                     <!-- <div class="form-check">
@@ -534,48 +537,18 @@ $session = session();
                   </div>
                 </div>
 
-                <!-- Div oculta que será exibida quando o radio estiver selecionado -->
-                <!-- <div id="payment-info" class="mt-3 d-none">
-                  <p><strong>Contacto para transferência:</strong></p>
-                  <p style="margin-top: -10px;">+258 84 272 6761 - Mpesa</p>
-                  <p style="margin-top: -10px;">+258 86 010 4704 - Emola</p> -->
-
-                  <!-- Dropzone -->
-                  <!-- <div class="divider text-muted">
-                    <span>Envio do Comprovativo</span>
-                  </div>
-
-                  <div class="mb-4">
-                    <label class="form-label fw-semibold">Envie a imagem do comprovativo</label>
-                    <div class="dropzone text-muted" id="dropzone">
-                      <i class="fas fa-cloud-upload-alt"></i>
-                      <p class="mb-1">Arraste e solte a imagem aqui</p>
-                      <p class="text-muted">ou</p>
-                      <button type="button" class="btn btn-sm btn-outline-primary">Selecionar arquivo</button>
-                      <input type="file" name="proof_file_payment" id="file-input" class="d-none" accept="image/*" required>
-                      <div class="invalid-feedback">
-                        Por favor, carregue o comprovativo antes de submeter o seu pedido.
-                      </div>
-                    </div>
-
-                    <div class="preview-container" id="preview-container">
-                      <img src="" class="preview-image" id="preview-image" alt="Preview do comprovante">
-                      <div>
-                        <button type="button" class="btn btn-sm btn-danger" id="remove-image">
-                          <i class="fas fa-trash me-1"></i> Remover imagem
-                        </button>
-                      </div>
-                    </div>
-                  </div> -->
-
-                  <input type="tel" class="form-control mb-3" name="client_number" placeholder="Nr de Telefone com Mpesa" required>
-                  <div class="invalid-feedback">
-                    Por favor, insira seu número de Telefone com Mpesa.
-                  </div>
-
-                  <input type="hidden" name="id_course" value="<?= $course->id_course ?>">
-                  <input type="hidden" name="amount_payment" value="<?= $course->price_course ?>">
+                <label for="client_number" class="form-label fw-semibold">Número de Telefone com M-Pesa</label>
+                <input type="tel" class="form-control mb-3" id="client_number" name="client_number" placeholder="84 000 0000" required>
+                <div class="invalid-feedback">
+                  Por favor, insira seu número de Telefone com Mpesa.
                 </div>
+
+                <p class="small text-muted mb-3">
+                  Depois de enviar, confirme a solicitação no popup do seu celular com a sua senha/PIN do M-Pesa.
+                </p>
+
+                <input type="hidden" name="id_course" value="<?= $course->id_course ?>">
+                <input type="hidden" name="amount_payment" value="<?= $course->price_course ?>">
 
 
                 <!-- <div class="form-check mb-4">
@@ -603,7 +576,6 @@ $session = session();
   </section>
 
   <!-- SCRIPTS (junta ao final da página, depois de carregar o DOM) -->
-  <script src="https://cdn.jsdelivr.net/npm/dropzone@5/dist/min/dropzone.min.js"></script>
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -618,7 +590,7 @@ $session = session();
           text: swalData.text
         });
       <?php endif; ?>
-    });
+    
 
     // Validação do formulário
     (function() {
@@ -638,46 +610,208 @@ $session = session();
     })();
 
 
-    // Pagamento Mpesa/Emola
-    const radios = document.querySelectorAll('input[name="payment"]');
-    const paymentInfo = document.getElementById('payment-info');
-
-    function togglePaymentInfo() {
-      if (document.getElementById('mobile').checked) {
-        paymentInfo.classList.remove('d-none');
-      } else {
-        paymentInfo.classList.add('d-none');
-      }
-    }
-
-    // Escuta quando QUALQUER radio mudar
-    radios.forEach(radio => {
-      radio.addEventListener('change', togglePaymentInfo);
-    });
-
-    // Estado inicial
-    togglePaymentInfo();
-
-
-    // Dropzone
-    document.addEventListener('DOMContentLoaded', function() {
-      const dropzone = document.getElementById('dropzone');
-      const fileInput = document.getElementById('file-input');
-      const previewContainer = document.getElementById('preview-container');
-      const previewImage = document.getElementById('preview-image');
-      const removeImageBtn = document.getElementById('remove-image');
       const form = document.getElementById('checkout-form');
+      if (!form) {
+        return;
+      }
 
-      // Abrir seletor de arquivo
-      dropzone.addEventListener('click', function(e) {
-        if (e.target.tagName !== 'BUTTON') {
-          fileInput.click();
+      const submitButton = form.querySelector('button[type="submit"]');
+      const csrfInput = form.querySelector('input[name="<?= csrf_token() ?>"]');
+
+      const updateCsrf = (hash) => {
+        if (csrfInput && hash) {
+          csrfInput.value = hash;
+        }
+      };
+
+
+      const showResult = async (payload) => {
+        const swalData = payload?.swal || {
+          icon: 'error',
+          title: 'Erro',
+          text: 'Nao foi possivel concluir o pagamento.'
+        };
+
+        await Swal.fire({
+          confirmButtonText: 'OK',
+          ...swalData
+        });
+
+        if (payload?.redirect_url) {
+          window.location.href = payload.redirect_url;
+        }
+      };
+
+      const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      const buildStatusFormData = (payload) => {
+        const statusData = new FormData();
+        statusData.append('payment_id', String(payload?.payment_id || ''));
+        statusData.append('reference', String(payload?.reference || ''));
+        statusData.append('query_reference', String(payload?.query_reference || ''));
+
+        const emailInput = form.querySelector('input[name="email"]');
+        const usernameInput = form.querySelector('input[name="username"]');
+
+        if (emailInput?.value) {
+          statusData.append('email', emailInput.value);
+        }
+
+        if (usernameInput?.value) {
+          statusData.append('username', usernameInput.value);
+        }
+
+        if (csrfInput?.name && csrfInput?.value) {
+          statusData.append(csrfInput.name, csrfInput.value);
+        }
+
+        return statusData;
+      };
+
+      const fetchPaymentStatus = async (payload) => {
+        const response = await fetch(payload.status_check_url, {
+          method: 'POST',
+          body: buildStatusFormData(payload),
+          headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
+
+        return response.json();
+      };
+
+      const waitForConfirmation = async (payload) => {
+        if (!payload?.status_check_url || !payload?.query_reference) {
+          await Swal.fire({
+            icon: 'info',
+            title: 'Pedido enviado',
+            text: 'O pedido foi enviado ao M-Pesa. Confirme o PIN no celular e aguarde alguns instantes.'
+          });
+          return;
+        }
+
+        const maxAttempts = 18;
+
+        Swal.fire({
+          icon: 'info',
+          title: 'Confirme o PIN',
+          text: 'Estamos aguardando a confirmacao do pagamento no M-Pesa.',
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          showConfirmButton: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+          await sleep(5000);
+
+          const statusPayload = await fetchPaymentStatus(payload);
+          if (statusPayload?.csrf) {
+            updateCsrf(statusPayload.csrf);
+          }
+
+          if (statusPayload?.status === 'pending_confirmation') {
+            Swal.update({
+              text: `Aguardando a confirmacao do pagamento no M-Pesa. Verificacao ${attempt} de ${maxAttempts}.`
+            });
+            continue;
+          }
+
+          Swal.close();
+          await showResult(statusPayload);
+          return;
+        }
+
+        Swal.close();
+        await Swal.fire({
+          icon: 'info',
+          title: 'Ainda pendente',
+          text: 'O pedido continua pendente. Confirme o PIN no popup do celular e tente novamente em instantes.'
+        });
+      };
+
+      form.addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        if (!form.checkValidity()) {
+          event.stopPropagation();
+          form.classList.add('was-validated');
+
+          await Swal.fire({
+            icon: 'warning',
+            title: 'Dados obrigatorios',
+            text: 'Preencha os campos do checkout antes de continuar.'
+          });
+          return;
+        }
+
+        form.classList.add('was-validated');
+        if (submitButton) {
+          submitButton.disabled = true;
+        }
+
+        Swal.fire({
+          icon: 'info',
+          title: 'Aguardando confirmacao',
+          text: 'Estamos a iniciar o pedido no M-Pesa. Se o gateway aceitar a solicitacao, confirme depois no popup do seu celular com a sua senha/PIN.',
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        try {
+          const response = await fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: {
+              'Accept': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          });
+
+          let payload = null;
+          try {
+            payload = await response.json();
+          } catch (parseError) {
+            payload = null;
+          }
+
+          if (payload?.csrf) {
+            updateCsrf(payload.csrf);
+          }
+
+          Swal.close();
+
+          if (!payload) {
+            throw new Error('Resposta invalida do servidor.');
+          }
+
+          if (payload?.status === 'pending_confirmation') {
+            await waitForConfirmation(payload);
+            return;
+          }
+
+          await showResult(payload);
+        } catch (error) {
+          Swal.close();
+          await Swal.fire({
+            icon: 'error',
+            title: 'Falha na comunicacao',
+            text: 'Nao foi possivel concluir o pedido agora. Tente novamente em instantes.'
+          });
+        } finally {
+          if (submitButton) {
+            submitButton.disabled = false;
+          }
         }
       });
 
-      dropzone.querySelector('button').addEventListener('click', function() {
-        fileInput.click();
-      });
+      return;
 
       // Manipular seleção de arquivo
       fileInput.addEventListener('change', function() {

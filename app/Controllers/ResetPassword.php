@@ -3,28 +3,30 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
-use App\Models\PasswordResetModel as ModelsPasswordResetModel;
 use App\Models\PasswordResetModel;
 use CodeIgniter\Shield\Models\UserModel;
-use CodeIgniter\Shield\Entities\User;
 
 class ResetPassword extends BaseController
 {
     public function showResetForm()
     {
-        $token = $this->request->getGet('token');
-        if (!$token) {
+        $token = trim((string) $this->request->getGet('token'));
+        if ($token === '') {
             return view('auth/forgot_password');
         }
 
-        return view('reset_password', ['token' => $token]);
+        return view('reset_password', [
+            'token'  => $token,
+            'next'   => trim((string) $this->request->getGet('next')),
+            'course' => trim((string) $this->request->getGet('course')),
+        ]);
     }
 
     public function requestReset()
     {
         $email = trim((string) $this->request->getPost('email'));
 
-        if ($email == '' || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if ($email === '' || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return redirect()->back()->withInput()->with('error', 'Informe um email valido.');
         }
 
@@ -49,15 +51,15 @@ class ResetPassword extends BaseController
                 'created_at' => date('Y-m-d H:i:s'),
             ]);
 
-            $link = site_url("reset-password?token={$token}");
+            $link = site_url('reset-password') . '?' . http_build_query(['token' => $token]);
 
             $mail = \Config\Services::email();
             $mail->setTo($user->email);
             $mail->setSubject('Redefinicao de senha');
             $mail->setMessage(
-                "Ola {$user->username},<br><br>" .
-                "Clique no link abaixo para redefinir sua senha:<br><br>" .
-                "<a href=\"{$link}\">Redefinir senha</a>"
+                'Ola ' . $user->username . ",<br><br>" .
+                'Clique no link abaixo para redefinir sua senha:<br><br>' .
+                '<a href="' . $link . '">Redefinir senha</a>'
             );
             $mail->send();
         }
@@ -67,62 +69,75 @@ class ResetPassword extends BaseController
 
     public function submitReset()
     {
-        $post     = $this->request->getPost();
-        $token    = trim((string)($post['token'] ?? ''));
-        $password = (string)($post['password'] ?? '');
-        $confirm  = array_key_exists('password_confirm', $post) ? (string)$post['password_confirm'] : null;
+        $post = $this->request->getPost();
+        $token = trim((string) ($post['token'] ?? ''));
+        $password = (string) ($post['password'] ?? '');
+        $confirm = (string) ($post['password_confirm'] ?? '');
+        $next = trim((string) ($post['next'] ?? ''));
+        $course = trim((string) ($post['course'] ?? ''));
 
-        if ($token === '' || $password === '') {
-            return redirect()->back()->with('error', 'Preencha todos os campos.');
+        if ($token === '' || $password === '' || $confirm === '') {
+            return redirect()->back()->withInput()->with('error', 'Preencha todos os campos.');
         }
+
         if (strlen($password) < 8) {
-            return redirect()->back()->with('error', 'A senha deve ter pelo menos 8 caracteres.');
+            return redirect()->back()->withInput()->with('error', 'A senha deve ter pelo menos 8 caracteres.');
         }
-        if ($confirm !== null && $confirm !== $password) {
-            return redirect()->back()->with('error', 'A confirmação da senha não confere.');
+
+        if ($confirm !== $password) {
+            return redirect()->back()->withInput()->with('error', 'A confirmacao da senha nao confere.');
         }
 
         $passwordResetModel = new PasswordResetModel();
         $reset = $passwordResetModel->where('token', $token)->first();
-        if (!$reset) {
-            return redirect()->back()->with('error', 'Token inválido.');
-        }
-        if (isset($reset['expires_at']) && strtotime($reset['expires_at']) < time()) {
-            return redirect()->back()->with('error', 'Token expirado.');
+
+        if (! $reset) {
+            return redirect()->back()->withInput()->with('error', 'Token invalido.');
         }
 
-        // ---------- AQUI ESTÁ A CORREÇÃO ----------
-        // Tente obter o provider do Shield (melhor caminho):
-        $users = auth()->getProvider();
-        // Se por algum motivo vier null, instancia direto o model do Shield:
-        if ($users === null) {
-            $users = new ShieldUserModel(); // \CodeIgniter\Shield\Models\UserModel
+        if (! empty($reset['expires_at']) && strtotime((string) $reset['expires_at']) < time()) {
+            return redirect()->back()->withInput()->with('error', 'Token expirado.');
         }
-        // -----------------------------------------
+
+        $users = auth()->getProvider();
+        if ($users === null) {
+            $users = new UserModel();
+        }
 
         $user = $users->find((int) $reset['user_id']);
-        if (!$user) {
-            return redirect()->back()->with('error', 'Usuário não encontrado.');
+        if (! $user) {
+            return redirect()->back()->withInput()->with('error', 'Usuario nao encontrado.');
         }
 
-        // Atualiza a senha (Shield faz hash em password_hash via mutator)
         $user->password = $password;
-        if (!$users->save($user)) {
-            $errs = $users->errors();
-            return redirect()->back()->with('error', $errs ? implode(', ', $errs) : 'Não foi possível atualizar a senha.');
+        if (! $users->save($user)) {
+            $errors = $users->errors();
+
+            return redirect()->back()->withInput()->with(
+                'error',
+                $errors ? implode(', ', $errors) : 'Nao foi possivel atualizar a senha.'
+            );
         }
 
-        // Apaga tokens desse usuário
         $passwordResetModel->where('user_id', $user->id)->delete();
 
-        // Regenera sessão e faz login automático
         session()->regenerate(true);
         auth()->login($user);
 
-        return redirect()->to('/login')->with('swal', [
+        $target = $this->isSafeLocalPath($next) ? $next : '/student/dashboard';
+        $swal = [
             'icon'  => 'success',
-            'title' => 'Senha atualizada',
-            'text'  => 'Sua senha foi redefinida com sucesso. Faça login novamente.',
-        ]);
+            'title' => 'Senha criada',
+            'text'  => $course !== ''
+                ? 'Senha criada com sucesso. Voce foi inscrito no curso ' . $course . '.'
+                : 'Sua senha foi redefinida com sucesso.',
+        ];
+
+        return redirect()->to($target)->with('swal', $swal);
+    }
+
+    private function isSafeLocalPath(string $path): bool
+    {
+        return $path !== '' && str_starts_with($path, '/') && ! str_starts_with($path, '//');
     }
 }

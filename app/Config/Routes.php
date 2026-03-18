@@ -104,6 +104,7 @@ $routes->post('checkout/pending/(:num)', 'Register::createPendingUser/$1');
 // Pagamentos
 $routes->group('mpesa', function ($routes) {
     $routes->post('send', 'MpesaController::send');
+    $routes->post('status', 'MpesaController::status');
     $routes->post('callback', 'MpesaWebhookController::receive');
 });
 

@@ -1,0 +1,167 @@
+DEBUG - 2026-03-17 17:45:24 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 17:45:40 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 17:46:07 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 17:47:38 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 17:53:17 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 17:53:18 --> Checkout M-Pesa: {"payment_id":112,"reference":"CRS25U0T177376999742","response":{"output_error":"Bad API Key"}}
+DEBUG - 2026-03-17 17:53:25 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 17:53:25 --> Checkout M-Pesa: {"payment_id":113,"reference":"CRS25U0T177377000551","response":{"output_error":"Bad API Key"}}
+DEBUG - 2026-03-17 17:53:35 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 17:53:36 --> Checkout M-Pesa: {"payment_id":114,"reference":"CRS25U0T177377001580","response":{"output_error":"Bad API Key"}}
+DEBUG - 2026-03-17 17:56:00 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 17:56:01 --> Checkout M-Pesa: {"payment_id":115,"reference":"CRS25U0T177377016045","response":{"output_error":"Bad API Key"}}
+DEBUG - 2026-03-17 17:58:28 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 17:58:38 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 17:58:44 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 17:59:01 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 17:59:01 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 17:59:06 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 17:59:07 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 17:59:07 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 17:59:14 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 17:59:17 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 17:59:30 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 17:59:42 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 17:59:48 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 17:59:53 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:00:02 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:00:06 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:00:10 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:00:11 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:00:12 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:00:12 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:01:57 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:02:05 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:02:10 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:02:10 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:02:13 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:02:17 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:03:40 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:04:04 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:04:04 --> Checkout M-Pesa: {"payment_id":116,"reference":"CRS26U0T177377064489","response":{"output_error":"Bad API Key"}}
+ERROR - 2026-03-17 18:04:04 --> Checkout M-Pesa retornou erro tecnico: {"payment_id":116,"reference":"CRS26U0T177377064489","response":{"output_error":"Bad API Key"}}
+DEBUG - 2026-03-17 18:04:57 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:05:17 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:05:33 --> Checkout M-Pesa: {"payment_id":117,"reference":"CRS26U0T177377071737","response":{"output_ResponseCode":"INS-0","output_ResponseDesc":"Request processed successfully","output_TransactionID":"DCH7JGUWI3T","output_ConversationID":"ce7d7bd433614e878f5dc236f14d6481","output_ThirdPartyReference":"CRS26U0T177377071737"}}
+CRITICAL - 2026-03-17 18:05:34 --> Pagamento aprovado sem finalizar inscricao: Este email já foi registrado! Tente outro.
+DEBUG - 2026-03-17 18:05:45 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:05:53 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:05:53 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:06:04 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:06:04 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:06:08 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:06:08 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:06:09 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:07:21 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:07:42 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:07:42 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:07:45 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:07:58 --> Checkout M-Pesa: {"payment_id":118,"reference":"CRS26U0T177377086590","response":{"output_ResponseCode":"INS-2006","output_ResponseDesc":"Insufficient balance","output_TransactionID":"DCH4JGUXU4C","output_ConversationID":"79e73b4bf40344cc819cdd06e04cfe05","output_ThirdPartyReference":"CRS26U0T177377086590"}}
+DEBUG - 2026-03-17 18:19:17 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:19:38 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:19:39 --> Checkout M-Pesa: {"payment_id":119,"reference":"CRS26U0T177377157812","response":{"output_ThirdPartyReference":"CRS26U0T177377157812","output_ConversationID":"b7d3ff603b99485ab65d99e515bbda43","output_ResponseCode":"INS-0","output_ResponseDesc":"Successfully Accepted Request"}}
+CRITICAL - 2026-03-17 18:19:39 --> Pagamento aprovado sem finalizar inscricao: Este email já foi registrado! Tente outro.
+DEBUG - 2026-03-17 18:20:00 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:20:53 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:20:55 --> Checkout M-Pesa: {"payment_id":120,"reference":"CRS26U0T177377165325","response":{"output_ThirdPartyReference":"CRS26U0T177377165325","output_ConversationID":"8521387394ba4951a2558ba49368cba7","output_ResponseCode":"INS-0","output_ResponseDesc":"Successfully Accepted Request"}}
+CRITICAL - 2026-03-17 18:20:55 --> Pagamento aprovado sem finalizar inscricao: Este email já foi registrado! Tente outro.
+DEBUG - 2026-03-17 18:27:14 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:27:35 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:27:36 --> Checkout M-Pesa: {"payment_id":121,"reference":"CRS26U0T177377205577","response":{"output_ThirdPartyReference":"CRS26U0T177377205577","output_ConversationID":"b98bce580b444a20a59cbc57550d87c4","output_ResponseCode":"INS-0","output_ResponseDesc":"Successfully Accepted Request"}}
+DEBUG - 2026-03-17 18:27:48 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:28:38 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:28:45 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:36:29 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:36:34 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:36:56 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:36:57 --> Checkout M-Pesa: {"payment_id":122,"reference":"CRS26U0T177377261630","response":{"output_ThirdPartyReference":"CRS26U0T177377261630","output_ConversationID":"5a1eab12edd341f6a168328a7ec7adf4","output_ResponseCode":"INS-0","output_ResponseDesc":"Successfully Accepted Request"}}
+DEBUG - 2026-03-17 18:37:08 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:37:26 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:37:26 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:39:58 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:40:21 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:40:22 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:40:57 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:41:04 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:41:08 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:41:32 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:41:33 --> Checkout M-Pesa: {"payment_id":123,"reference":"CRS26U104T177377289383","response":{"output_ThirdPartyReference":"CRS26U104T177377289383","output_ConversationID":"7c85de16cd0e416fa73b0953044b6cae","output_ResponseCode":"INS-0","output_ResponseDesc":"Successfully Accepted Request"}}
+DEBUG - 2026-03-17 18:41:38 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:41:39 --> Checkout M-Pesa status: {"payment_id":123,"reference":"CRS26U104T177377289383","query_reference":"7c85de16cd0e416fa73b0953044b6cae","response":{"raw":"<html><body><h1>403 Forbidden<\/h1>\nRequest forbidden by administrative rules.\n<\/body><\/html>\n"}}
+DEBUG - 2026-03-17 18:41:44 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:41:44 --> Checkout M-Pesa status: {"payment_id":123,"reference":"CRS26U104T177377289383","query_reference":"7c85de16cd0e416fa73b0953044b6cae","response":{"raw":"<html><body><h1>403 Forbidden<\/h1>\nRequest forbidden by administrative rules.\n<\/body><\/html>\n"}}
+DEBUG - 2026-03-17 18:41:50 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:41:51 --> Checkout M-Pesa status: {"payment_id":123,"reference":"CRS26U104T177377289383","query_reference":"7c85de16cd0e416fa73b0953044b6cae","response":{"output_ThirdPartyReference":"CRS26U104T177377289383","output_ConversationID":"d3981711ea5e4f7d8669d1f8269e892e","output_ResponseCode":"INS-0","output_ResponseDesc":"Successfully Accepted Request"}}
+DEBUG - 2026-03-17 18:41:56 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:41:57 --> Checkout M-Pesa status: {"payment_id":123,"reference":"CRS26U104T177377289383","query_reference":"7c85de16cd0e416fa73b0953044b6cae","response":{"raw":"<html><body><h1>403 Forbidden<\/h1>\nRequest forbidden by administrative rules.\n<\/body><\/html>\n"}}
+DEBUG - 2026-03-17 18:42:02 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:42:03 --> Checkout M-Pesa status: {"payment_id":123,"reference":"CRS26U104T177377289383","query_reference":"7c85de16cd0e416fa73b0953044b6cae","response":{"output_ThirdPartyReference":"CRS26U104T177377289383","output_ConversationID":"beb14324f9c4496f828d60e4e4ec2d30","output_ResponseCode":"INS-0","output_ResponseDesc":"Successfully Accepted Request"}}
+DEBUG - 2026-03-17 18:42:08 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:42:09 --> Checkout M-Pesa status: {"payment_id":123,"reference":"CRS26U104T177377289383","query_reference":"7c85de16cd0e416fa73b0953044b6cae","response":{"output_ThirdPartyReference":"CRS26U104T177377289383","output_ConversationID":"e3a6d55aefcf44c08464e6c77fff87ad","output_ResponseCode":"INS-0","output_ResponseDesc":"Successfully Accepted Request"}}
+DEBUG - 2026-03-17 18:42:14 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:42:16 --> Checkout M-Pesa status: {"payment_id":123,"reference":"CRS26U104T177377289383","query_reference":"7c85de16cd0e416fa73b0953044b6cae","response":{"raw":"<html><body><h1>403 Forbidden<\/h1>\nRequest forbidden by administrative rules.\n<\/body><\/html>\n"}}
+DEBUG - 2026-03-17 18:42:21 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:42:22 --> Checkout M-Pesa status: {"payment_id":123,"reference":"CRS26U104T177377289383","query_reference":"7c85de16cd0e416fa73b0953044b6cae","response":{"output_ThirdPartyReference":"CRS26U104T177377289383","output_ConversationID":"9f9cc977d4d44221a5a9291de97fbc7c","output_ResponseCode":"INS-0","output_ResponseDesc":"Successfully Accepted Request"}}
+DEBUG - 2026-03-17 18:42:28 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:42:28 --> Checkout M-Pesa status: {"payment_id":123,"reference":"CRS26U104T177377289383","query_reference":"7c85de16cd0e416fa73b0953044b6cae","response":{"raw":"<html><body><h1>403 Forbidden<\/h1>\nRequest forbidden by administrative rules.\n<\/body><\/html>\n"}}
+DEBUG - 2026-03-17 18:42:33 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:42:34 --> Checkout M-Pesa status: {"payment_id":123,"reference":"CRS26U104T177377289383","query_reference":"7c85de16cd0e416fa73b0953044b6cae","response":{"output_ThirdPartyReference":"CRS26U104T177377289383","output_ConversationID":"6d3e2387b9fb42e6913411ed6e3f5c83","output_ResponseCode":"INS-0","output_ResponseDesc":"Successfully Accepted Request"}}
+DEBUG - 2026-03-17 18:42:40 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:42:40 --> Checkout M-Pesa status: {"payment_id":123,"reference":"CRS26U104T177377289383","query_reference":"7c85de16cd0e416fa73b0953044b6cae","response":{"raw":"<html><body><h1>403 Forbidden<\/h1>\nRequest forbidden by administrative rules.\n<\/body><\/html>\n"}}
+DEBUG - 2026-03-17 18:42:45 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:42:46 --> Checkout M-Pesa status: {"payment_id":123,"reference":"CRS26U104T177377289383","query_reference":"7c85de16cd0e416fa73b0953044b6cae","response":{"output_ThirdPartyReference":"CRS26U104T177377289383","output_ConversationID":"504ffc3f5b0c48dbab4cfa2f685e2c6d","output_ResponseCode":"INS-0","output_ResponseDesc":"Successfully Accepted Request"}}
+DEBUG - 2026-03-17 18:42:51 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:42:52 --> Checkout M-Pesa status: {"payment_id":123,"reference":"CRS26U104T177377289383","query_reference":"7c85de16cd0e416fa73b0953044b6cae","response":{"raw":"<html><body><h1>403 Forbidden<\/h1>\nRequest forbidden by administrative rules.\n<\/body><\/html>\n"}}
+DEBUG - 2026-03-17 18:42:57 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:42:58 --> Checkout M-Pesa status: {"payment_id":123,"reference":"CRS26U104T177377289383","query_reference":"7c85de16cd0e416fa73b0953044b6cae","response":{"output_ThirdPartyReference":"CRS26U104T177377289383","output_ConversationID":"42b4c66ca57d4d6db8a04e895fa98153","output_ResponseCode":"INS-0","output_ResponseDesc":"Successfully Accepted Request"}}
+DEBUG - 2026-03-17 18:43:03 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:43:04 --> Checkout M-Pesa status: {"payment_id":123,"reference":"CRS26U104T177377289383","query_reference":"7c85de16cd0e416fa73b0953044b6cae","response":{"raw":"<html><body><h1>403 Forbidden<\/h1>\nRequest forbidden by administrative rules.\n<\/body><\/html>\n"}}
+DEBUG - 2026-03-17 18:43:09 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:43:09 --> Checkout M-Pesa status: {"payment_id":123,"reference":"CRS26U104T177377289383","query_reference":"7c85de16cd0e416fa73b0953044b6cae","response":{"raw":"<html><body><h1>403 Forbidden<\/h1>\nRequest forbidden by administrative rules.\n<\/body><\/html>\n"}}
+DEBUG - 2026-03-17 18:43:14 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:43:15 --> Checkout M-Pesa status: {"payment_id":123,"reference":"CRS26U104T177377289383","query_reference":"7c85de16cd0e416fa73b0953044b6cae","response":{"raw":"<html><body><h1>403 Forbidden<\/h1>\nRequest forbidden by administrative rules.\n<\/body><\/html>\n"}}
+DEBUG - 2026-03-17 18:43:20 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:43:20 --> Checkout M-Pesa status: {"payment_id":123,"reference":"CRS26U104T177377289383","query_reference":"7c85de16cd0e416fa73b0953044b6cae","response":{"raw":"<html><body><h1>403 Forbidden<\/h1>\nRequest forbidden by administrative rules.\n<\/body><\/html>\n"}}
+DEBUG - 2026-03-17 18:43:30 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-03-17 18:43:30 --> Falha ao preparar usuario do checkout: Este email já foi registrado! Tente outro.
+DEBUG - 2026-03-17 18:43:41 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-03-17 18:43:41 --> Falha ao preparar usuario do checkout: Este email já foi registrado! Tente outro.
+DEBUG - 2026-03-17 18:44:38 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-03-17 18:44:55 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:44:57 --> Checkout M-Pesa: {"payment_id":124,"reference":"CRS26U105T177377309684","response":{"output_ThirdPartyReference":"CRS26U105T177377309684","output_ConversationID":"d2fd7af58981423b93aa239e96e20f55","output_ResponseCode":"INS-0","output_ResponseDesc":"Successfully Accepted Request"}}
+DEBUG - 2026-03-17 18:45:03 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:45:03 --> Checkout M-Pesa status: {"payment_id":124,"reference":"CRS26U105T177377309684","query_reference":"d2fd7af58981423b93aa239e96e20f55","response":{"raw":"<html><body><h1>403 Forbidden<\/h1>\nRequest forbidden by administrative rules.\n<\/body><\/html>\n"}}
+DEBUG - 2026-03-17 18:45:08 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:45:09 --> Checkout M-Pesa status: {"payment_id":124,"reference":"CRS26U105T177377309684","query_reference":"d2fd7af58981423b93aa239e96e20f55","response":{"output_ThirdPartyReference":"CRS26U105T177377309684","output_ConversationID":"688e40bf345c4b819abe2ad40f729c70","output_ResponseCode":"INS-0","output_ResponseDesc":"Successfully Accepted Request"}}
+DEBUG - 2026-03-17 18:45:14 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:45:14 --> Checkout M-Pesa status: {"payment_id":124,"reference":"CRS26U105T177377309684","query_reference":"d2fd7af58981423b93aa239e96e20f55","response":{"raw":"<html><body><h1>403 Forbidden<\/h1>\nRequest forbidden by administrative rules.\n<\/body><\/html>\n"}}
+DEBUG - 2026-03-17 18:45:22 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:45:23 --> Checkout M-Pesa status: {"payment_id":124,"reference":"CRS26U105T177377309684","query_reference":"d2fd7af58981423b93aa239e96e20f55","response":{"output_ThirdPartyReference":"CRS26U105T177377309684","output_ConversationID":"1cc3a9047a294e96a4dff552d9790329","output_ResponseCode":"INS-0","output_ResponseDesc":"Successfully Accepted Request"}}
+DEBUG - 2026-03-17 18:45:29 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:45:29 --> Checkout M-Pesa status: {"payment_id":124,"reference":"CRS26U105T177377309684","query_reference":"d2fd7af58981423b93aa239e96e20f55","response":{"raw":"<html><body><h1>403 Forbidden<\/h1>\nRequest forbidden by administrative rules.\n<\/body><\/html>\n"}}
+DEBUG - 2026-03-17 18:45:35 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:45:35 --> Checkout M-Pesa status: {"payment_id":124,"reference":"CRS26U105T177377309684","query_reference":"d2fd7af58981423b93aa239e96e20f55","response":{"raw":"<html><body><h1>403 Forbidden<\/h1>\nRequest forbidden by administrative rules.\n<\/body><\/html>\n"}}
+DEBUG - 2026-03-17 18:45:41 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:45:42 --> Checkout M-Pesa status: {"payment_id":124,"reference":"CRS26U105T177377309684","query_reference":"d2fd7af58981423b93aa239e96e20f55","response":{"output_ThirdPartyReference":"CRS26U105T177377309684","output_ConversationID":"b75d6d0ef88246f5820fe785614f25a0","output_ResponseCode":"INS-0","output_ResponseDesc":"Successfully Accepted Request"}}
+DEBUG - 2026-03-17 18:45:48 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:45:49 --> Checkout M-Pesa status: {"payment_id":124,"reference":"CRS26U105T177377309684","query_reference":"d2fd7af58981423b93aa239e96e20f55","response":{"output_ThirdPartyReference":"CRS26U105T177377309684","output_ConversationID":"ed754b50ccbf46ebafaa77e26aff2edd","output_ResponseCode":"INS-0","output_ResponseDesc":"Successfully Accepted Request"}}
+DEBUG - 2026-03-17 18:45:55 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:45:55 --> Checkout M-Pesa status: {"payment_id":124,"reference":"CRS26U105T177377309684","query_reference":"d2fd7af58981423b93aa239e96e20f55","response":{"raw":"<html><body><h1>403 Forbidden<\/h1>\nRequest forbidden by administrative rules.\n<\/body><\/html>\n"}}
+DEBUG - 2026-03-17 18:46:01 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:46:01 --> Checkout M-Pesa status: {"payment_id":124,"reference":"CRS26U105T177377309684","query_reference":"d2fd7af58981423b93aa239e96e20f55","response":{"output_ThirdPartyReference":"CRS26U105T177377309684","output_ConversationID":"5ed8ac34bb97420cacc161264d916ab0","output_ResponseCode":"INS-0","output_ResponseDesc":"Successfully Accepted Request"}}
+DEBUG - 2026-03-17 18:46:06 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:46:07 --> Checkout M-Pesa status: {"payment_id":124,"reference":"CRS26U105T177377309684","query_reference":"d2fd7af58981423b93aa239e96e20f55","response":{"raw":"<html><body><h1>403 Forbidden<\/h1>\nRequest forbidden by administrative rules.\n<\/body><\/html>\n"}}
+DEBUG - 2026-03-17 18:46:12 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:46:13 --> Checkout M-Pesa status: {"payment_id":124,"reference":"CRS26U105T177377309684","query_reference":"d2fd7af58981423b93aa239e96e20f55","response":{"output_ThirdPartyReference":"CRS26U105T177377309684","output_ConversationID":"f908e5a1b3fb4c98b55012e9bb3e5677","output_ResponseCode":"INS-0","output_ResponseDesc":"Successfully Accepted Request"}}
+DEBUG - 2026-03-17 18:46:18 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:46:18 --> Checkout M-Pesa status: {"payment_id":124,"reference":"CRS26U105T177377309684","query_reference":"d2fd7af58981423b93aa239e96e20f55","response":{"output_ThirdPartyReference":"CRS26U105T177377309684","output_ConversationID":"bae5c494c2ef43f69f1c691dbb600d40","output_ResponseCode":"INS-0","output_ResponseDesc":"Successfully Accepted Request"}}
+DEBUG - 2026-03-17 18:46:24 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:46:24 --> Checkout M-Pesa status: {"payment_id":124,"reference":"CRS26U105T177377309684","query_reference":"d2fd7af58981423b93aa239e96e20f55","response":{"raw":"<html><body><h1>403 Forbidden<\/h1>\nRequest forbidden by administrative rules.\n<\/body><\/html>\n"}}
+DEBUG - 2026-03-17 18:46:29 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:46:30 --> Checkout M-Pesa status: {"payment_id":124,"reference":"CRS26U105T177377309684","query_reference":"d2fd7af58981423b93aa239e96e20f55","response":{"output_ThirdPartyReference":"CRS26U105T177377309684","output_ConversationID":"723a607bc32542a58681a4bfba97beac","output_ResponseCode":"INS-0","output_ResponseDesc":"Successfully Accepted Request"}}
+DEBUG - 2026-03-17 18:46:36 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:46:36 --> Checkout M-Pesa status: {"payment_id":124,"reference":"CRS26U105T177377309684","query_reference":"d2fd7af58981423b93aa239e96e20f55","response":{"raw":"<html><body><h1>403 Forbidden<\/h1>\nRequest forbidden by administrative rules.\n<\/body><\/html>\n"}}
+DEBUG - 2026-03-17 18:46:42 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:46:42 --> Checkout M-Pesa status: {"payment_id":124,"reference":"CRS26U105T177377309684","query_reference":"d2fd7af58981423b93aa239e96e20f55","response":{"raw":"<html><body><h1>403 Forbidden<\/h1>\nRequest forbidden by administrative rules.\n<\/body><\/html>\n"}}
+DEBUG - 2026-03-17 18:46:47 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-03-17 18:46:48 --> Checkout M-Pesa status: {"payment_id":124,"reference":"CRS26U105T177377309684","query_reference":"d2fd7af58981423b93aa239e96e20f55","response":{"output_ThirdPartyReference":"CRS26U105T177377309684","output_ConversationID":"9d3dc6f4653c45aa8f63b605c90d1860","output_ResponseCode":"INS-0","output_ResponseDesc":"Successfully Accepted Request"}}

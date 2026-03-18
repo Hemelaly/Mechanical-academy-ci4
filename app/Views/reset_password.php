@@ -176,13 +176,23 @@
             Token expirado ou inválido. Solicite um novo link de redefinição.
         </div> -->
 
+        <?php if (session('error')): ?>
+            <div class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <?= esc(session('error')) ?>
+            </div>
+        <?php endif; ?>
+
         <form method="post" action="<?= site_url('reset-password') ?>">
+            <?= csrf_field() ?>
             <input type="hidden" name="token" value="<?= esc($token) ?>">
+            <input type="hidden" name="next" value="<?= esc($next ?? '') ?>">
+            <input type="hidden" name="course" value="<?= esc($course ?? '') ?>">
 
             <div class="mb-3">
                 <label for="password" class="form-label">Nova Senha</label>
                 <div class="input-group">
-                    <input type="password" class="form-control" id="password" required placeholder="Digite sua nova senha">
+                    <input type="password" class="form-control" id="password" name="password" required placeholder="Digite sua nova senha">
                     <button class="btn btn-outline-secondary" type="button" id="togglePassword">
                         <i class="fas fa-eye"></i>
                     </button>
@@ -203,7 +213,7 @@
             <div class="mb-3">
                 <label for="confirmPassword" class="form-label">Confirmar Senha</label>
                 <div class="input-group">
-                    <input type="password" class="form-control" id="confirmPassword" name="password" required placeholder="Confirme sua nova senha">
+                    <input type="password" class="form-control" id="confirmPassword" name="password_confirm" required placeholder="Confirme sua nova senha">
                     <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword">
                         <i class="fas fa-eye"></i>
                     </button>
