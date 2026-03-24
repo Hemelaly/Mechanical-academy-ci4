@@ -814,31 +814,54 @@ $buyerText = $isCcnaCourse
         }
       };
 
-      const renderSuccessMessage = () => {
+      const renderSuccessMessage = (options = {}) => {
         if (!checkoutWrapper) return;
+
+        const requiresPasswordSetup = options?.requiresPasswordSetup === true;
+        const title = requiresPasswordSetup
+          ? 'Pagamento confirmado!'
+          : 'Pagamento efectuado com sucesso!';
+        const description = requiresPasswordSetup
+          ? 'Enviamos um e-mail com os proximos passos para concluir a sua inscricao.'
+          : 'O seu pagamento foi efectuado com sucesso.';
+        const nextStep = requiresPasswordSetup
+          ? 'Verifique a sua caixa de entrada e siga o link enviado por e-mail para criar a sua senha e activar o acesso ao curso.'
+          : 'Verifique a sua caixa de e-mails e prossiga com a criacao da senha para concluir a inscricao.';
+        const actionButton = requiresPasswordSetup
+          ? ''
+          : `<a href="<?= base_url('/login') ?>" class="btn btn-success mt-2">
+              Prosseguir para o login
+            </a>`;
 
         checkoutWrapper.innerHTML = `
           <div class="success-checkout-box">
             <div class="icon">
               <i class="bi bi-check-circle-fill"></i>
             </div>
-            <h4>Pagamento efectuado com sucesso!</h4>
-            <p>O seu pagamento foi efectuado com sucesso.</p>
+            <h4>${title}</h4>
+            <p>${description}</p>
             <p>Verifique a sua caixa de e-mails e prossiga com a criação da senha para concluir a inscrição.</p>
-            <a href="<?= base_url('/login') ?>" class="btn btn-success mt-2">
-              Prosseguir para o login
-            </a>
+            ${actionButton}
           </div>
         `;
+
+        const successBox = checkoutWrapper.querySelector('.success-checkout-box');
+        const descriptionElement = successBox?.querySelectorAll('p')?.[1];
+
+        if (descriptionElement) {
+          descriptionElement.textContent = nextStep;
+        }
       };
 
       const showResult = async (payload) => {
         const isApproved = payload?.status === 'approved';
+        const requiresPasswordSetup = payload?.status === 'password_setup_pending' || payload?.requires_password_setup === true;
+        const isSuccessfulCheckout = isApproved || requiresPasswordSetup;
 
         const swalData = payload?.swal || {
-          icon: isApproved ? 'success' : 'error',
-          title: isApproved ? 'Pagamento aprovado' : 'Erro',
-          text: isApproved
+          icon: isSuccessfulCheckout ? 'success' : 'error',
+          title: isSuccessfulCheckout ? 'Pagamento aprovado' : 'Erro',
+          text: isSuccessfulCheckout
             ? 'O seu pagamento foi efectuado com sucesso.'
             : 'Não foi possível concluir o pagamento.'
         };
@@ -850,8 +873,10 @@ $buyerText = $isCcnaCourse
           confirmButtonText: 'OK'
         });
 
-        if (isApproved) {
-          renderSuccessMessage();
+        if (isSuccessfulCheckout) {
+          renderSuccessMessage({
+            requiresPasswordSetup
+          });
           return;
         }
 
