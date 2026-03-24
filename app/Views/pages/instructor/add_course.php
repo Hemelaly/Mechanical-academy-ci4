@@ -50,6 +50,7 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
         box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.45);
         border-radius: 12px;
     }
+
     .note-editor.note-frame {
         border: 1px solid #cbd5f5;
         border-radius: 1rem;
@@ -84,6 +85,152 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
     .note-editor.note-dark-mode .note-statusbar {
         background-color: #0f172a;
         color: #e2e8f0 !important;
+    }
+
+    .course-preview-card {
+        position: sticky;
+        top: 24px;
+    }
+
+    .course-preview-cover {
+        position: relative;
+        min-height: 220px;
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        overflow: hidden;
+    }
+
+    .course-preview-cover img {
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+        display: block;
+    }
+
+    .course-preview-cover-fallback {
+        height: 220px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(255, 255, 255, .9);
+        font-size: 42px;
+    }
+
+    .course-preview-badge {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        background: rgba(15, 23, 42, 0.78);
+        color: #fff;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        backdrop-filter: blur(8px);
+    }
+
+    .course-preview-price {
+        position: absolute;
+        right: 16px;
+        bottom: 16px;
+        background: #fff;
+        color: #0f172a;
+        padding: 10px 14px;
+        border-radius: 14px;
+        font-size: 14px;
+        font-weight: 800;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+    }
+
+    .dark .course-preview-price {
+        background: #0f172a;
+        color: #fff;
+        border: 1px solid #334155;
+    }
+
+    .course-preview-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        object-fit: contain;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        padding: 8px;
+    }
+
+    .dark .course-preview-icon {
+        background: #0f172a;
+        border-color: #334155;
+    }
+
+    .course-preview-section-title {
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+
+    .dark .course-preview-section-title {
+        color: #94a3b8;
+    }
+
+    .course-preview-richtext ul,
+    .course-preview-richtext ol {
+        padding-left: 18px;
+        margin: 8px 0;
+    }
+
+    .course-preview-richtext p {
+        margin: 0 0 8px;
+    }
+
+    .course-preview-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .dark .course-preview-pill {
+        background: rgba(59, 130, 246, .15);
+        color: #93c5fd;
+    }
+
+    .course-preview-module {
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 14px;
+        background: #fff;
+    }
+
+    .dark .course-preview-module {
+        background: #0f172a;
+        border-color: #334155;
+    }
+
+    .course-preview-project {
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 12px;
+        background: #fff;
+    }
+
+    .dark .course-preview-project {
+        background: #0f172a;
+        border-color: #334155;
+    }
+
+    .course-preview-project img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 12px;
+        margin-bottom: 10px;
     }
 </style>
 
@@ -148,716 +295,725 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
         </div>
 
         <!-- Main Content -->
-        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+            <div class="xl:col-span-2 bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
 
-            <!-- Navigation Tabs -->
-            <div class="border-b border-slate-200 dark:border-slate-700">
-                <div class="flex overflow-x-auto">
-                    <button class="tab-button flex items-center gap-2 px-4 sm:px-6 py-4 border-b-2 border-blue-600 text-blue-600 dark:text-blue-400 font-medium text-sm sm:text-base whitespace-nowrap flex-shrink-0" data-tab="basic-info">
-                        <i class="bi bi-info-circle"></i>
-                        Informações Básicas
-                    </button>
-                    <button class="tab-button flex items-center gap-2 px-4 sm:px-6 py-4 border-b-2 border-transparent text-slate-500 dark:text-slate-400 font-medium text-sm sm:text-base whitespace-nowrap flex-shrink-0" data-tab="content-structure">
-                        <i class="bi bi-diagram-3"></i>
-                        Estrutura do Conteúdo
-                    </button>
-                    <button class="tab-button flex items-center gap-2 px-4 sm:px-6 py-4 border-b-2 border-transparent text-slate-500 dark:text-slate-400 font-medium text-sm sm:text-base whitespace-nowrap flex-shrink-0" data-tab="advanced-settings">
-                        <i class="bi bi-gear"></i>
-                        Configurações Avançadas
-                    </button>
-                    <button class="tab-button flex items-center gap-2 px-4 sm:px-6 py-4 border-b-2 border-transparent text-slate-500 dark:text-slate-400 font-medium text-sm sm:text-base whitespace-nowrap flex-shrink-0" data-tab="review-publish">
-                        <i class="bi bi-rocket"></i>
-                        Revisão e Publicação
-                    </button>
+                <!-- Navigation Tabs -->
+                <div class="border-b border-slate-200 dark:border-slate-700">
+                    <div class="flex overflow-x-auto">
+                        <button class="tab-button flex items-center gap-2 px-4 sm:px-6 py-4 border-b-2 border-blue-600 text-blue-600 dark:text-blue-400 font-medium text-sm sm:text-base whitespace-nowrap flex-shrink-0" data-tab="basic-info">
+                            <i class="bi bi-info-circle"></i>
+                            Informações Básicas
+                        </button>
+                        <button class="tab-button flex items-center gap-2 px-4 sm:px-6 py-4 border-b-2 border-transparent text-slate-500 dark:text-slate-400 font-medium text-sm sm:text-base whitespace-nowrap flex-shrink-0" data-tab="content-structure">
+                            <i class="bi bi-diagram-3"></i>
+                            Estrutura do Conteúdo
+                        </button>
+                        <button class="tab-button flex items-center gap-2 px-4 sm:px-6 py-4 border-b-2 border-transparent text-slate-500 dark:text-slate-400 font-medium text-sm sm:text-base whitespace-nowrap flex-shrink-0" data-tab="advanced-settings">
+                            <i class="bi bi-gear"></i>
+                            Configurações Avançadas
+                        </button>
+                        <button class="tab-button flex items-center gap-2 px-4 sm:px-6 py-4 border-b-2 border-transparent text-slate-500 dark:text-slate-400 font-medium text-sm sm:text-base whitespace-nowrap flex-shrink-0" data-tab="review-publish">
+                            <i class="bi bi-rocket"></i>
+                            Revisão e Publicação
+                        </button>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Form -->
-            <form id="courseForm" action="<?= base_url('instructor/dashboard/novo_curso/criar') ?>" method="post" enctype="multipart/form-data">
-                <input type="hidden" name="id_instructor_course" value="<?= $user->id ?>">
-                <input type="hidden" id="draft-id" name="draft_id" value="<?= esc($draft->id_course ?? '') ?>">
-                <input type="hidden" id="modules-json" name="modules">
-                <input type="hidden" id="modules-json-alt" name="modules_json">
-                <input type="hidden" id="tags-json" name="tags">
-                <input type="hidden" id="projects-json" name="projects_json">
-                <input type="hidden" name="projects_present" value="1">
+                <!-- Form -->
+                <form id="courseForm" action="<?= base_url('instructor/dashboard/novo_curso/criar') ?>" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="id_instructor_course" value="<?= $user->id ?>">
+                    <input type="hidden" id="draft-id" name="draft_id" value="<?= esc($draft->id_course ?? '') ?>">
+                    <input type="hidden" id="modules-json" name="modules">
+                    <input type="hidden" id="modules-json-alt" name="modules_json">
+                    <input type="hidden" id="tags-json" name="tags">
+                    <input type="hidden" id="projects-json" name="projects_json">
+                    <input type="hidden" name="projects_present" value="1">
 
-                <div class="p-4 sm:p-6 lg:p-8">
-                    <!-- Step 1: Basic Info -->
-                    <div class="tab-content active" id="basic-info">
-                        <div class="space-y-6">
-                            <!-- Header -->
-                            <div class="border-b border-slate-200 dark:border-slate-700 pb-4">
-                                <h3 class="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                                    <i class="bi bi-pencil-square text-blue-600"></i>
-                                    Informações Básicas do Curso
-                                </h3>
-                                <p class="text-slate-600 dark:text-slate-400 text-sm mt-1">
-                                    Preencha os campos obrigatórios para o seu curso
-                                </p>
-                            </div>
-
-                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                <!-- Left Column - Text Fields -->
-                                <div class="lg:col-span-2 space-y-6">
-                                    <!-- Course Title -->
-                                    <div>
-                                        <label for="title_course" class="block text-sm font-semibold text-slate-800 dark:text-white mb-2 flex items-center gap-2">
-                                            <i class="bi bi-type text-blue-600"></i>
-                                            Título do Curso *
-                                        </label>
-                                <input type="text"
-                                    id="title_course"
-                                    name="title_course"
-                                    value="<?= esc($draft->title_course ?? '') ?>"
-                                    class="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                    placeholder="Ex: Desenvolvimento Web Completo"
-                                    required />
-                                    </div>
-
-                                    <!-- Course Subtitle -->
-                                    <div>
-                                        <label for="courseSubtitle" class="block text-sm font-semibold text-slate-800 dark:text-white mb-2 flex items-center gap-2">
-                                            <i class="bi bi-text-paragraph text-blue-600"></i>
-                                            Subtítulo do Curso *
-                                        </label>
-                                <input type="text"
-                                    id="courseSubtitle"
-                                    name="subtitle_course"
-                                    value="<?= esc($draft->subtitle_course ?? '') ?>"
-                                    class="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                    placeholder="Ex: Do zero ao avançado com HTML, CSS e JavaScript"
-                                    required />
-                                    </div>
-
-                                    <!-- Course Description -->
-                                    <div>
-                                        <label for="courseDescription" class="block text-sm font-semibold text-slate-800 dark:text-white mb-2 flex items-center gap-2">
-                                            <i class="bi bi-file-text text-blue-600"></i>
-                                            Descrição do Curso *
-                                        </label>
-                                <textarea id="courseDescription"
-                                    name="description_course"
-                                    rows="8"
-                                    class="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
-                                    placeholder="Descreva detalhadamente o conteúdo, objetivos e benefícios do seu curso..."><?= $draftDescription ?></textarea>
-                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">
-                                            Recomendado: mínimo 200 caracteres
-                                        </p>
-                                    </div>
-
-                                    <div>
-                                        <label for="courseLearning" class="block text-sm font-semibold text-slate-800 dark:text-white mb-2 flex items-center gap-2">
-                                            <i class="bi bi-list-check text-blue-600"></i>
-                                            O que você aprenderá *
-                                        </label>
-                                        <textarea id="courseLearning"
-                                            name="learning_course"
-                                            rows="6"
-                                            class="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
-                                            placeholder="Liste os principais tópicos ou habilidades que os alunos vão dominar..."><?= $draftLearning ?></textarea>
-                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">
-                                            Use o editor para criar listas, negritos e links personalizados
-                                        </p>
-                                    </div>
-
-                                    <div>
-                                        <label for="courseVideo" class="block text-sm font-semibold text-slate-800 dark:text-white mb-2 flex items-center gap-2">
-                                            <i class="bi bi-play-btn text-blue-600"></i>
-                                            Vídeo de visão geral
-                                        </label>
-                                        <input type="url"
-                                            id="courseVideo"
-                                            name="url_video_course"
-                                            value="<?= esc($draft->url_video_course ?? '') ?>"
-                                            class="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
-                                            placeholder="https://vimeo.com/xxxxx ou https://www.youtube.com/watch?v=...">
-                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">
-                                            URL exibida na página pública dentro do bloco de vídeo.
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <!-- Right Column - Image Upload -->
-                                <div class="space-y-6">
-                                    <!-- Image Upload -->
-                                    <div>
-                                        <label class="block text-sm font-semibold text-slate-800 dark:text-white mb-2 flex items-center gap-2">
-                                            <i class="bi bi-image text-blue-600"></i>
-                                            Imagem de Capa *
-                                        </label>
-
-                                        <!-- Upload Area -->
-                                        <div id="upload-area"
-                                            class="border-2 border-dashed border-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-4 sm:p-6 text-center transition-all duration-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 cursor-pointer <?= !empty($draft->image_course) ? 'hidden' : '' ?>">
-                                            <i class="bi bi-cloud-arrow-up text-blue-500 text-2xl sm:text-3xl mb-3"></i>
-                                            <h6 class="font-semibold text-slate-800 dark:text-white mb-2 text-sm">
-                                                Arraste uma imagem ou clique para selecionar
-                                            </h6>
-                                            <p class="text-slate-500 dark:text-slate-400 text-xs mb-4">
-                                                Recomendado: 1280x720px, máx. 2MB
-                                            </p>
-                                            <input type="file"
-                                                id="courseImage"
-                                                name="image_course"
-                                                accept="image/*"
-                                                class="hidden" />
-                                            <button type="button"
-                                                onclick="document.getElementById('courseImage').click()"
-                                                class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 text-sm">
-                                                <i class="bi bi-folder2-open"></i>
-                                                Selecionar Arquivo
-                                            </button>
-                                        </div>
-
-                                        <!-- Image Preview -->
-                                        <div id="image-preview" class="<?= !empty($draft->image_course) ? '' : 'hidden' ?> mt-4">
-                                            <div class="relative">
-                                                <img id="preview-img"
-                                                    src="<?= !empty($draft->image_course) ? base_url('assets/instructor/img/courses/' . $draft->image_course) : '' ?>"
-                                                    alt="Preview"
-                                                    class="w-full h-32 sm:h-48 object-cover rounded-2xl shadow-lg" />
-                                                <button type="button"
-                                                    id="remove-image"
-                                                    class="absolute top-2 right-2 w-8 h-8 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center transition-colors">
-                                                    <i class="bi bi-x text-sm"></i>
-                                                </button>
-                                            </div>
-                                            <p class="text-xs text-green-600 dark:text-green-400 mt-2 text-center">
-                                                <i class="bi bi-check-circle"></i> Imagem selecionada com sucesso
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label for="courseIcon" class="block text-sm font-semibold text-slate-800 dark:text-white mb-2 flex items-center gap-2">
-                                            <i class="bi bi-grid-1x2-fill text-blue-600"></i>
-                                            Ícone do Curso
-                                        </label>
-                                        <input type="file"
-                                            id="courseIcon"
-                                            name="icon_course"
-                                            accept=".png,.jpg,.jpeg,.gif,.webp,.avif"
-                                            class="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700" />
-                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">
-                                            Ícone usado nos cards da home. Recomendado: 64x64px (PNG/WebP).
-                                        </p>
-                                        <div id="icon-preview" class="mt-3 inline-flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2 bg-slate-50 dark:bg-slate-700/40 <?= !empty($draft->icon_course) ? '' : 'hidden' ?>">
-                                            <img id="icon-preview-img"
-                                                src="<?= !empty($draft->icon_course) ? base_url('assets/img/' . $draft->icon_course) : '' ?>"
-                                                alt="Ícone do curso"
-                                                class="w-10 h-10 object-contain rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600">
-                                            <span id="icon-preview-label" class="text-xs text-slate-600 dark:text-slate-300">
-                                                <?= !empty($draft->icon_course) ? 'Ícone atual do curso' : 'Pré-visualização do ícone' ?>
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <!-- Quick Tips -->
-                                    <div class="bg-slate-50 dark:bg-slate-700 rounded-2xl p-4">
-                                        <h4 class="font-semibold text-slate-800 dark:text-white text-sm mb-3 flex items-center gap-2">
-                                            <i class="bi bi-lightbulb text-amber-500"></i>
-                                            Dicas Rápidas
-                                        </h4>
-                                        <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-2">
-                                            <li class="flex items-start gap-2">
-                                                <i class="bi bi-check-circle text-green-500 mt-0.5"></i>
-                                                Título claro e objetivo
-                                            </li>
-                                            <li class="flex items-start gap-2">
-                                                <i class="bi bi-check-circle text-green-500 mt-0.5"></i>
-                                                Subtítulo atrativo
-                                            </li>
-                                            <li class="flex items-start gap-2">
-                                                <i class="bi bi-check-circle text-green-500 mt-0.5"></i>
-                                                Imagem de alta qualidade
-                                            </li>
-                                            <li class="flex items-start gap-2">
-                                                <i class="bi bi-check-circle text-green-500 mt-0.5"></i>
-                                                Descrição detalhada
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Step 2: Content Structure -->
-                    <div class="tab-content hidden" id="content-structure">
-                        <div class="space-y-6">
-                            <div class="border-b border-slate-200 dark:border-slate-700 pb-4">
-                                <h3 class="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                                    <i class="bi bi-diagram-3 text-blue-600"></i>
-                                    Estrutura do Conteúdo
-                                </h3>
-                                <p class="text-slate-600 dark:text-slate-400 text-sm mt-1">
-                                    Organize seu curso em módulos e aulas
-                                </p>
-                            </div>
-
-                            <div class="flex items-center justify-between mb-4">
-                                <h4 class="text-sm font-semibold text-slate-800 dark:text-white">
-                                    Módulos e Aulas
-                                </h4>
-                                <button type="button"
-                                    id="add-module"
-                                    class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl transition-all duration-300">
-                                    <i class="bi bi-plus-circle"></i>
-                                    Adicionar Módulo
-                                </button>
-                            </div>
-
-                            <div id="modules-container" class="space-y-4">
-                                <?php if (!empty($draftModules)): ?>
-                                    <?php foreach ($draftModules as $mIndex => $module): ?>
-                                        <div class="module-card mb-4 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 bg-white dark:bg-slate-900">
-                                            <div class="flex justify-between items-center mb-3 gap-2">
-                                                <input type="text"
-                                                    name="modules[<?= $mIndex ?>][title]"
-                                                    class="flex-1 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-sm text-slate-800 dark:text-slate-100"
-                                                    placeholder="Nome do módulo"
-                                                    value="<?= esc($module->title_module) ?>">
-                                                <button type="button"
-                                                    class="remove-module text-red-500 hover:text-red-600 text-lg"
-                                                    title="Remover módulo">
-                                                    <i class="bi bi-x-circle"></i>
-                                                </button>
-                                            </div>
-                                            <textarea name="modules[<?= $mIndex ?>][description]"
-                                                class="w-full px-3 py-2 mb-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-sm text-slate-800 dark:text-slate-100"
-                                                placeholder="Descrição do módulo (opcional)"><?= esc($module->description_module ?? '') ?></textarea>
-
-                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                                                <div>
-                                                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
-                                                        Nota mínima do quiz (%)
-                                                    </label>
-                                                    <input type="number"
-                                                        name="modules[<?= $mIndex ?>][min_score]"
-                                                        min="0"
-                                                        max="100"
-                                                        value="<?= esc($module->min_score_module ?? 80) ?>"
-                                                        class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
-                                                        placeholder="Ex: 80">
-                                                </div>
-                                            </div>
-
-                                            <div class="lessons-container space-y-2 mb-3">
-                                                <?php foreach ($module->lessons as $lIndex => $lesson): ?>
-                                                    <div class="lesson-item border border-slate-200 dark:border-slate-700 rounded-xl p-3 bg-slate-50 dark:bg-slate-800" draggable="true">
-                                                        <?php
-                                                        $quizQuestions = [];
-                                                        if (($lesson->type_lesson ?? '') === 'quiz' && !empty($lesson->content_lesson)) {
-                                                            $decodedQuiz = json_decode($lesson->content_lesson, true);
-                                                            if (is_array($decodedQuiz) && !empty($decodedQuiz['questions'])) {
-                                                                $quizQuestions = $decodedQuiz['questions'];
-                                                            }
-                                                        }
-
-                                                        foreach ($quizQuestions as $qIndex => $q) {
-                                                            if (!is_array($q)) {
-                                                                $quizQuestions[$qIndex] = [
-                                                                    'question' => (string) $q,
-                                                                    'options' => ['', '', '', ''],
-                                                                    'correct' => 0,
-                                                                ];
-                                                                continue;
-                                                            }
-
-                                                            if (!isset($q['options'])) {
-                                                                $quizQuestions[$qIndex]['options'] = ['', '', '', ''];
-                                                                $quizQuestions[$qIndex]['correct'] = 0;
-                                                            }
-                                                        }
-                                                        ?>
-                                                        <div class="flex justify-between items-center mb-2 gap-2">
-                                                            <span class="drag-handle text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-grab select-none px-1" title="Arraste para ordenar" draggable="true">
-                                                                <i class="bi bi-grip-vertical"></i>
-                                                            </span>
-                                                            <input type="text"
-                                                                name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][title]"
-                                                                class="flex-1 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
-                                                                placeholder="Título da aula"
-                                                                value="<?= esc($lesson->title_lesson) ?>">
-                                                            <button type="button"
-                                                                class="remove-lesson text-red-500 hover:text-red-600 text-base"
-                                                                title="Remover aula">
-                                                                <i class="bi bi-x-circle"></i>
-                                                            </button>
-                                                        </div>
-                                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-2">
-                                                            <select name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][type]"
-                                                                class="lesson-type px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100">
-                                                                <option value="video" <?= $lesson->type_lesson == 'video' ? 'selected' : '' ?>>Vídeo</option>
-                                                                <option value="text" <?= $lesson->type_lesson == 'text' ? 'selected' : '' ?>>Texto</option>
-                                                                <option value="quiz" <?= $lesson->type_lesson == 'quiz' ? 'selected' : '' ?>>Quiz</option>
-                                                                <option value="exercise" <?= $lesson->type_lesson == 'exercise' ? 'selected' : '' ?>>Exercício</option>
-                                                            </select>
-                                                            <input type="number"
-                                                                name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][duration]"
-                                                                class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
-                                                                placeholder="Duração (min)"
-                                                                value="<?= esc($lesson->duration_lesson) ?>">
-                                                            <div class="video-fields">
-                                                                <input type="url"
-                                                                    name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][video_url]"
-                                                                    class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
-                                                                    placeholder="Link do vídeo (opcional)"
-                                                                    value="<?= esc($lesson->video_url_lesson) ?>">
-                                                            </div>
-                                                        </div>
-                                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
-                                                            <div>
-                                                                <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
-                                                                    Arquivo da aula (opcional)
-                                                                </label>
-                                                                <input type="file"
-                                                                    name="lesson_files[<?= $mIndex ?>][<?= $lIndex ?>]"
-                                                                    accept=".zip,.rar,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx"
-                                                                    class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100" />
-                                                                <input type="hidden"
-                                                                    name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][file_existing]"
-                                                                    value="<?= esc($lesson->attachment_path_lesson ?? '') ?>">
-                                                                <input type="hidden"
-                                                                    name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][file_existing_name]"
-                                                                    value="<?= esc($lesson->attachment_name_lesson ?? '') ?>">
-                                                                <?php if (!empty($lesson->attachment_path_lesson)): ?>
-                                                                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                                                                        Atual: <?= esc($lesson->attachment_name_lesson ?? $lesson->attachment_path_lesson) ?>
-                                                                    </p>
-                                                                <?php endif; ?>
-                                                            </div>
-                                                        </div>
-                                                        <div class="quiz-fields <?= $lesson->type_lesson === 'quiz' ? '' : 'hidden' ?> bg-white/60 dark:bg-slate-900/60 border border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-3">
-                                                            <div class="flex items-center justify-between mb-2">
-                                                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">
-                                                                    Perguntas do quiz
-                                                                </span>
-                                                                <button type="button"
-                                                                    class="btn-add-quiz-question inline-flex items-center gap-1 px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-medium rounded-lg">
-                                                                    <i class="bi bi-plus"></i>
-                                                                    Adicionar pergunta
-                                                                </button>
-                                                            </div>
-                                                            <div class="quiz-questions space-y-2">
-                                                                <?php foreach ($quizQuestions as $qIndex => $question): ?>
-                                                                    <div class="quiz-question grid grid-cols-1 md:grid-cols-2 gap-2 items-center">
-                                                                        <input type="text"
-                                                                            name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][quiz][<?= $qIndex ?>][question]"
-                                                                            class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
-                                                                            placeholder="Pergunta"
-                                                                            value="<?= esc($question['question'] ?? '') ?>">
-                                                                        <div class="flex flex-col gap-2">
-                                                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                                                <?php for ($opt = 0; $opt < 4; $opt++): ?>
-                                                                                    <input type="text"
-                                                                                        name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][quiz][<?= $qIndex ?>][options][<?= $opt ?>]"
-                                                                                        class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
-                                                                                        placeholder="Alternativa <?= $opt + 1 ?>"
-                                                                                        value="<?= esc($question['options'][$opt] ?? '') ?>">
-                                                                                <?php endfor; ?>
-                                                                            </div>
-                                                                            <div class="flex gap-2 items-center">
-                                                                                <select name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][quiz][<?= $qIndex ?>][correct]"
-                                                                                    class="flex-1 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100">
-                                                                                    <?php for ($opt = 0; $opt < 4; $opt++): ?>
-                                                                                        <option value="<?= $opt ?>" <?= (int) ($question['correct'] ?? 0) === $opt ? 'selected' : '' ?>>
-                                                                                            Correta: alternativa <?= $opt + 1 ?>
-                                                                                        </option>
-                                                                                    <?php endfor; ?>
-                                                                                </select>
-                                                                                <button type="button"
-                                                                                    class="remove-quiz-question text-red-500 hover:text-red-600 text-base"
-                                                                                    title="Remover pergunta">
-                                                                                    <i class="bi bi-x-circle"></i>
-                                                                                </button>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                <?php endforeach; ?>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                <?php endforeach; ?>
-                                            </div>
-
-                                            <button type="button"
-                                                class="btn-add-lesson inline-flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-xl"
-                                                data-module="<?= $mIndex ?>">
-                                                <i class="bi bi-plus-circle"></i>
-                                                Adicionar Aula
-                                            </button>
-                                        </div>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </div>
-
-                            <p class="text-xs text-slate-500 dark:text-slate-400">
-                                Você poderá reorganizar e editar os módulos e aulas depois.
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Step 3: Advanced Settings -->
-                    <div class="tab-content hidden" id="advanced-settings">
-                        <div class="space-y-6">
-                            <div class="border-b border-slate-200 dark:border-slate-700 pb-4">
-                                <h3 class="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                                    <i class="bi bi-gear text-blue-600"></i>
-                                    Configurações Avançadas
-                                </h3>
-                                <p class="text-slate-600 dark:text-slate-400 text-sm mt-1">
-                                    Configure as opções avançadas do seu curso
-                                </p>
-                            </div>
-
-                            <!-- Tipo de curso -->
-                            <div class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 sm:p-6 space-y-4">
-                                <h4 class="text-sm font-semibold text-slate-800 dark:text-white flex items-center gap-2">
-                                    <i class="bi bi-currency-dollar text-blue-600"></i>
-                                    Tipo de curso
-                                </h4>
-                                <div class="flex flex-col sm:flex-row gap-3">
-                                    <label class="inline-flex items-center gap-2 cursor-pointer">
-                                        <input type="radio" name="courseType" value="free" class="text-blue-600" <?= !empty($draft->price_course) && $draft->price_course > 0 ? '' : 'checked' ?>>
-                                        <span class="text-sm text-slate-700 dark:text-slate-200">Gratuito</span>
-                                    </label>
-                                    <label class="inline-flex items-center gap-2 cursor-pointer">
-                                        <input type="radio" name="courseType" value="paid" class="text-blue-600" <?= !empty($draft->price_course) && $draft->price_course > 0 ? 'checked' : '' ?>>
-                                        <span class="text-sm text-slate-700 dark:text-slate-200">Pago</span>
-                                    </label>
-                                </div>
-
-                                <div id="price-settings" class="mt-3 <?= !empty($draft->price_course) && $draft->price_course > 0 ? '' : 'hidden' ?>">
-                                    <label for="price_course" class="block text-sm font-semibold text-slate-800 dark:text-white mb-2">
-                                        Preço do curso
-                                    </label>
-                                    <div class="flex gap-2 items-center">
-                                        <span class="px-3 py-2 rounded-l-xl bg-slate-200 dark:bg-slate-700 text-sm text-slate-800 dark:text-slate-100">
-                                            $
-                                        </span>
-                                        <input type="number"
-                                            step="0.01"
-                                            min="0"
-                                            id="price_course"
-                                            name="price_course"
-                                            value="<?= esc($draft->price_course ?? '') ?>"
-                                            class="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-r-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                                            placeholder="Ex: 49.90">
-                                    </div>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                        O preço será aplicado apenas se o curso for marcado como pago.
+                    <div class="p-4 sm:p-6 lg:p-8">
+                        <!-- Step 1: Basic Info -->
+                        <div class="tab-content active" id="basic-info">
+                            <div class="space-y-6">
+                                <!-- Header -->
+                                <div class="border-b border-slate-200 dark:border-slate-700 pb-4">
+                                    <h3 class="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                                        <i class="bi bi-pencil-square text-blue-600"></i>
+                                        Informações Básicas do Curso
+                                    </h3>
+                                    <p class="text-slate-600 dark:text-slate-400 text-sm mt-1">
+                                        Preencha os campos obrigatórios para o seu curso
                                     </p>
                                 </div>
-                            </div>
 
-                            <!-- Cor primária -->
-                            <div class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 sm:p-6 space-y-3">
-                                <h4 class="text-sm font-semibold text-slate-800 dark:text-white flex items-center gap-2">
-                                    <i class="bi bi-palette text-blue-600"></i>
-                                    Cor primária do curso
-                                </h4>
-                                <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-center">
-                                    <input type="text"
-                                        id="courseColorText"
-                                        name="color_course"
-                                        value="<?= esc($draft->color_course ?? '#3b82f6') ?>"
-                                        class="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                                        placeholder="#3b82f6">
-                                    <input type="color"
-                                        id="courseColorPicker"
-                                        value="<?= esc($draft->color_course ?? '#3b82f6') ?>"
-                                        class="h-12 w-16 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700">
+                                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                    <!-- Left Column - Text Fields -->
+                                    <div class="lg:col-span-2 space-y-6">
+                                        <!-- Course Title -->
+                                        <div>
+                                            <label for="title_course" class="block text-sm font-semibold text-slate-800 dark:text-white mb-2 flex items-center gap-2">
+                                                <i class="bi bi-type text-blue-600"></i>
+                                                Título do Curso *
+                                            </label>
+                                            <input type="text"
+                                                id="title_course"
+                                                name="title_course"
+                                                value="<?= esc($draft->title_course ?? '') ?>"
+                                                class="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                placeholder="Ex: Desenvolvimento Web Completo"
+                                                required />
+                                        </div>
+
+                                        <!-- Course Subtitle -->
+                                        <div>
+                                            <label for="courseSubtitle" class="block text-sm font-semibold text-slate-800 dark:text-white mb-2 flex items-center gap-2">
+                                                <i class="bi bi-text-paragraph text-blue-600"></i>
+                                                Subtítulo do Curso *
+                                            </label>
+                                            <input type="text"
+                                                id="courseSubtitle"
+                                                name="subtitle_course"
+                                                value="<?= esc($draft->subtitle_course ?? '') ?>"
+                                                class="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                placeholder="Ex: Do zero ao avançado com HTML, CSS e JavaScript"
+                                                required />
+                                        </div>
+
+                                        <!-- Course Description -->
+                                        <div>
+                                            <label for="courseDescription" class="block text-sm font-semibold text-slate-800 dark:text-white mb-2 flex items-center gap-2">
+                                                <i class="bi bi-file-text text-blue-600"></i>
+                                                Descrição do Curso *
+                                            </label>
+                                            <textarea id="courseDescription"
+                                                name="description_course"
+                                                rows="8"
+                                                class="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
+                                                placeholder="Descreva detalhadamente o conteúdo, objetivos e benefícios do seu curso..."><?= $draftDescription ?></textarea>
+                                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                                                Recomendado: mínimo 200 caracteres
+                                            </p>
+                                        </div>
+
+                                        <div>
+                                            <label for="courseLearning" class="block text-sm font-semibold text-slate-800 dark:text-white mb-2 flex items-center gap-2">
+                                                <i class="bi bi-list-check text-blue-600"></i>
+                                                O que você aprenderá *
+                                            </label>
+                                            <textarea id="courseLearning"
+                                                name="learning_course"
+                                                rows="6"
+                                                class="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
+                                                placeholder="Liste os principais tópicos ou habilidades que os alunos vão dominar..."><?= $draftLearning ?></textarea>
+                                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                                                Use o editor para criar listas, negritos e links personalizados
+                                            </p>
+                                        </div>
+
+                                        <div>
+                                            <label for="courseVideo" class="block text-sm font-semibold text-slate-800 dark:text-white mb-2 flex items-center gap-2">
+                                                <i class="bi bi-play-btn text-blue-600"></i>
+                                                Vídeo de visão geral
+                                            </label>
+                                            <input type="url"
+                                                id="courseVideo"
+                                                name="url_video_course"
+                                                value="<?= esc($draft->url_video_course ?? '') ?>"
+                                                class="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
+                                                placeholder="https://vimeo.com/xxxxx ou https://www.youtube.com/watch?v=...">
+                                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                                                URL exibida na página pública dentro do bloco de vídeo.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Right Column - Image Upload -->
+                                    <div class="space-y-6">
+                                        <!-- Image Upload -->
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-800 dark:text-white mb-2 flex items-center gap-2">
+                                                <i class="bi bi-image text-blue-600"></i>
+                                                Imagem de Capa *
+                                            </label>
+
+                                            <!-- Upload Area -->
+                                            <div id="upload-area"
+                                                class="border-2 border-dashed border-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-4 sm:p-6 text-center transition-all duration-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 cursor-pointer <?= !empty($draft->image_course) ? 'hidden' : '' ?>">
+                                                <i class="bi bi-cloud-arrow-up text-blue-500 text-2xl sm:text-3xl mb-3"></i>
+                                                <h6 class="font-semibold text-slate-800 dark:text-white mb-2 text-sm">
+                                                    Arraste uma imagem ou clique para selecionar
+                                                </h6>
+                                                <p class="text-slate-500 dark:text-slate-400 text-xs mb-4">
+                                                    Recomendado: 1280x720px, máx. 2MB
+                                                </p>
+                                                <input type="file"
+                                                    id="courseImage"
+                                                    name="image_course"
+                                                    accept="image/*"
+                                                    class="hidden" />
+                                                <button type="button"
+                                                    onclick="document.getElementById('courseImage').click()"
+                                                    class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 text-sm">
+                                                    <i class="bi bi-folder2-open"></i>
+                                                    Selecionar Arquivo
+                                                </button>
+                                            </div>
+
+                                            <!-- Image Preview -->
+                                            <div id="image-preview" class="<?= !empty($draft->image_course) ? '' : 'hidden' ?> mt-4">
+                                                <div class="relative">
+                                                    <img id="preview-img"
+                                                        src="<?= !empty($draft->image_course) ? base_url('assets/instructor/img/courses/' . $draft->image_course) : '' ?>"
+                                                        alt="Preview"
+                                                        class="w-full h-32 sm:h-48 object-cover rounded-2xl shadow-lg" />
+                                                    <button type="button"
+                                                        id="remove-image"
+                                                        class="absolute top-2 right-2 w-8 h-8 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center transition-colors">
+                                                        <i class="bi bi-x text-sm"></i>
+                                                    </button>
+                                                </div>
+                                                <p class="text-xs text-green-600 dark:text-green-400 mt-2 text-center">
+                                                    <i class="bi bi-check-circle"></i> Imagem selecionada com sucesso
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label for="courseIcon" class="block text-sm font-semibold text-slate-800 dark:text-white mb-2 flex items-center gap-2">
+                                                <i class="bi bi-grid-1x2-fill text-blue-600"></i>
+                                                Ícone do Curso
+                                            </label>
+                                            <input type="file"
+                                                id="courseIcon"
+                                                name="icon_course"
+                                                accept=".png,.jpg,.jpeg,.gif,.webp,.avif"
+                                                class="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700" />
+                                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                                                Ícone usado nos cards da home. Recomendado: 64x64px (PNG/WebP).
+                                            </p>
+                                            <div id="icon-preview" class="mt-3 inline-flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2 bg-slate-50 dark:bg-slate-700/40 <?= !empty($draft->icon_course) ? '' : 'hidden' ?>">
+                                                <img id="icon-preview-img"
+                                                    src="<?= !empty($draft->icon_course) ? base_url('assets/img/' . $draft->icon_course) : '' ?>"
+                                                    alt="Ícone do curso"
+                                                    class="w-10 h-10 object-contain rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600">
+                                                <span id="icon-preview-label" class="text-xs text-slate-600 dark:text-slate-300">
+                                                    <?= !empty($draft->icon_course) ? 'Ícone atual do curso' : 'Pré-visualização do ícone' ?>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Quick Tips -->
+                                        <div class="bg-slate-50 dark:bg-slate-700 rounded-2xl p-4">
+                                            <h4 class="font-semibold text-slate-800 dark:text-white text-sm mb-3 flex items-center gap-2">
+                                                <i class="bi bi-lightbulb text-amber-500"></i>
+                                                Dicas Rápidas
+                                            </h4>
+                                            <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-2">
+                                                <li class="flex items-start gap-2">
+                                                    <i class="bi bi-check-circle text-green-500 mt-0.5"></i>
+                                                    Título claro e objetivo
+                                                </li>
+                                                <li class="flex items-start gap-2">
+                                                    <i class="bi bi-check-circle text-green-500 mt-0.5"></i>
+                                                    Subtítulo atrativo
+                                                </li>
+                                                <li class="flex items-start gap-2">
+                                                    <i class="bi bi-check-circle text-green-500 mt-0.5"></i>
+                                                    Imagem de alta qualidade
+                                                </li>
+                                                <li class="flex items-start gap-2">
+                                                    <i class="bi bi-check-circle text-green-500 mt-0.5"></i>
+                                                    Descrição detalhada
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
                                 </div>
-                                <p class="text-xs text-slate-500 dark:text-slate-400">
-                                    Cole um código HEX ou selecione no color picker.
-                                </p>
                             </div>
+                        </div>
 
-                            <!-- Projetos do curso -->
-                            <div class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 sm:p-6 space-y-3">
-                                <div class="flex items-center justify-between gap-3">
-                                    <h4 class="text-sm font-semibold text-slate-800 dark:text-white flex items-center gap-2">
-                                        <i class="bi bi-kanban text-blue-600"></i>
-                                        Projetos relacionados
+                        <!-- Step 2: Content Structure -->
+                        <div class="tab-content hidden" id="content-structure">
+                            <div class="space-y-6">
+                                <div class="border-b border-slate-200 dark:border-slate-700 pb-4">
+                                    <h3 class="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                                        <i class="bi bi-diagram-3 text-blue-600"></i>
+                                        Estrutura do Conteúdo
+                                    </h3>
+                                    <p class="text-slate-600 dark:text-slate-400 text-sm mt-1">
+                                        Organize seu curso em módulos e aulas
+                                    </p>
+                                </div>
+
+                                <div class="flex items-center justify-between mb-4">
+                                    <h4 class="text-sm font-semibold text-slate-800 dark:text-white">
+                                        Módulos e Aulas
                                     </h4>
                                     <button type="button"
-                                        id="add-project"
-                                        class="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-xl transition-all duration-300">
+                                        id="add-module"
+                                        class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl transition-all duration-300">
                                         <i class="bi bi-plus-circle"></i>
-                                        Adicionar projeto
+                                        Adicionar Módulo
                                     </button>
                                 </div>
-                                <div id="projects-container" class="space-y-4">
-                                    <?php if (!empty($draftProjects ?? [])): ?>
-                                        <?php foreach (($draftProjects ?? []) as $pIndex => $project): ?>
-                                            <div class="project-card border border-slate-200 dark:border-slate-700 rounded-2xl p-4 bg-white dark:bg-slate-800" data-index="<?= $pIndex ?>">
-                                                <div class="flex items-center justify-between gap-2 mb-2">
+
+                                <div id="modules-container" class="space-y-4">
+                                    <?php if (!empty($draftModules)): ?>
+                                        <?php foreach ($draftModules as $mIndex => $module): ?>
+                                            <div class="module-card mb-4 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 bg-white dark:bg-slate-900">
+                                                <div class="flex justify-between items-center mb-3 gap-2">
                                                     <input type="text"
-                                                        name="projects[<?= $pIndex ?>][title]"
-                                                        value="<?= esc($project->title_project ?? '') ?>"
-                                                        class="flex-1 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-sm text-slate-800 dark:text-slate-100"
-                                                        placeholder="Título do projeto">
+                                                        name="modules[<?= $mIndex ?>][title]"
+                                                        class="flex-1 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-sm text-slate-800 dark:text-slate-100"
+                                                        placeholder="Nome do módulo"
+                                                        value="<?= esc($module->title_module) ?>">
                                                     <button type="button"
-                                                        class="remove-project text-red-500 hover:text-red-600 text-lg"
-                                                        title="Remover projeto">
+                                                        class="remove-module text-red-500 hover:text-red-600 text-lg"
+                                                        title="Remover módulo">
                                                         <i class="bi bi-x-circle"></i>
                                                     </button>
                                                 </div>
-                                                <textarea name="projects[<?= $pIndex ?>][description]"
-                                                    class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-sm text-slate-800 dark:text-slate-100"
-                                                    placeholder="Descrição do projeto"><?= esc($project->description_project ?? '') ?></textarea>
-                                                <div class="mt-3">
-                                                    <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
-                                                        Imagem do projeto (opcional)
-                                                    </label>
-                                                    <input type="file"
-                                                        name="project_images[<?= $pIndex ?>]"
-                                                        accept="image/*"
-                                                        class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100">
-                                                    <input type="hidden"
-                                                        name="projects[<?= $pIndex ?>][img_existing]"
-                                                        value="<?= esc($project->img_project ?? '') ?>">
-                                                    <?php if (!empty($project->img_project)): ?>
-                                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                                            Atual: <?= esc($project->img_project) ?>
-                                                        </p>
-                                                    <?php endif; ?>
+                                                <textarea name="modules[<?= $mIndex ?>][description]"
+                                                    class="w-full px-3 py-2 mb-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-sm text-slate-800 dark:text-slate-100"
+                                                    placeholder="Descrição do módulo (opcional)"><?= esc($module->description_module ?? '') ?></textarea>
+
+                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                                                    <div>
+                                                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                                                            Nota mínima do quiz (%)
+                                                        </label>
+                                                        <input type="number"
+                                                            name="modules[<?= $mIndex ?>][min_score]"
+                                                            min="0"
+                                                            max="100"
+                                                            value="<?= esc($module->min_score_module ?? 80) ?>"
+                                                            class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
+                                                            placeholder="Ex: 80">
+                                                    </div>
                                                 </div>
+
+                                                <div class="lessons-container space-y-2 mb-3">
+                                                    <?php foreach ($module->lessons as $lIndex => $lesson): ?>
+                                                        <div class="lesson-item border border-slate-200 dark:border-slate-700 rounded-xl p-3 bg-slate-50 dark:bg-slate-800" draggable="true">
+                                                            <?php
+                                                            $quizQuestions = [];
+                                                            if (($lesson->type_lesson ?? '') === 'quiz' && !empty($lesson->content_lesson)) {
+                                                                $decodedQuiz = json_decode($lesson->content_lesson, true);
+                                                                if (is_array($decodedQuiz) && !empty($decodedQuiz['questions'])) {
+                                                                    $quizQuestions = $decodedQuiz['questions'];
+                                                                }
+                                                            }
+
+                                                            foreach ($quizQuestions as $qIndex => $q) {
+                                                                if (!is_array($q)) {
+                                                                    $quizQuestions[$qIndex] = [
+                                                                        'question' => (string) $q,
+                                                                        'options' => ['', '', '', ''],
+                                                                        'correct' => 0,
+                                                                    ];
+                                                                    continue;
+                                                                }
+
+                                                                if (!isset($q['options'])) {
+                                                                    $quizQuestions[$qIndex]['options'] = ['', '', '', ''];
+                                                                    $quizQuestions[$qIndex]['correct'] = 0;
+                                                                }
+                                                            }
+                                                            ?>
+                                                            <div class="flex justify-between items-center mb-2 gap-2">
+                                                                <span class="drag-handle text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-grab select-none px-1" title="Arraste para ordenar" draggable="true">
+                                                                    <i class="bi bi-grip-vertical"></i>
+                                                                </span>
+                                                                <input type="text"
+                                                                    name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][title]"
+                                                                    class="flex-1 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
+                                                                    placeholder="Título da aula"
+                                                                    value="<?= esc($lesson->title_lesson) ?>">
+                                                                <button type="button"
+                                                                    class="remove-lesson text-red-500 hover:text-red-600 text-base"
+                                                                    title="Remover aula">
+                                                                    <i class="bi bi-x-circle"></i>
+                                                                </button>
+                                                            </div>
+                                                            <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-2">
+                                                                <select name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][type]"
+                                                                    class="lesson-type px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100">
+                                                                    <option value="video" <?= $lesson->type_lesson == 'video' ? 'selected' : '' ?>>Vídeo</option>
+                                                                    <option value="text" <?= $lesson->type_lesson == 'text' ? 'selected' : '' ?>>Texto</option>
+                                                                    <option value="quiz" <?= $lesson->type_lesson == 'quiz' ? 'selected' : '' ?>>Quiz</option>
+                                                                    <option value="exercise" <?= $lesson->type_lesson == 'exercise' ? 'selected' : '' ?>>Exercício</option>
+                                                                </select>
+                                                                <input type="number"
+                                                                    name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][duration]"
+                                                                    class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
+                                                                    placeholder="Duração (min)"
+                                                                    value="<?= esc($lesson->duration_lesson) ?>">
+                                                                <div class="video-fields">
+                                                                    <input type="url"
+                                                                        name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][video_url]"
+                                                                        class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
+                                                                        placeholder="Link do vídeo (opcional)"
+                                                                        value="<?= esc($lesson->video_url_lesson) ?>">
+                                                                </div>
+                                                            </div>
+                                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
+                                                                <div>
+                                                                    <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                                                                        Arquivo da aula (opcional)
+                                                                    </label>
+                                                                    <input type="file"
+                                                                        name="lesson_files[<?= $mIndex ?>][<?= $lIndex ?>]"
+                                                                        accept=".zip,.rar,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx"
+                                                                        class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100" />
+                                                                    <input type="hidden"
+                                                                        name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][file_existing]"
+                                                                        value="<?= esc($lesson->attachment_path_lesson ?? '') ?>">
+                                                                    <input type="hidden"
+                                                                        name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][file_existing_name]"
+                                                                        value="<?= esc($lesson->attachment_name_lesson ?? '') ?>">
+                                                                    <?php if (!empty($lesson->attachment_path_lesson)): ?>
+                                                                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                                                                            Atual: <?= esc($lesson->attachment_name_lesson ?? $lesson->attachment_path_lesson) ?>
+                                                                        </p>
+                                                                    <?php endif; ?>
+                                                                </div>
+                                                            </div>
+                                                            <div class="quiz-fields <?= $lesson->type_lesson === 'quiz' ? '' : 'hidden' ?> bg-white/60 dark:bg-slate-900/60 border border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-3">
+                                                                <div class="flex items-center justify-between mb-2">
+                                                                    <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                                                                        Perguntas do quiz
+                                                                    </span>
+                                                                    <button type="button"
+                                                                        class="btn-add-quiz-question inline-flex items-center gap-1 px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-medium rounded-lg">
+                                                                        <i class="bi bi-plus"></i>
+                                                                        Adicionar pergunta
+                                                                    </button>
+                                                                </div>
+                                                                <div class="quiz-questions space-y-2">
+                                                                    <?php foreach ($quizQuestions as $qIndex => $question): ?>
+                                                                        <div class="quiz-question grid grid-cols-1 md:grid-cols-2 gap-2 items-center">
+                                                                            <input type="text"
+                                                                                name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][quiz][<?= $qIndex ?>][question]"
+                                                                                class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
+                                                                                placeholder="Pergunta"
+                                                                                value="<?= esc($question['question'] ?? '') ?>">
+                                                                            <div class="flex flex-col gap-2">
+                                                                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                                                    <?php for ($opt = 0; $opt < 4; $opt++): ?>
+                                                                                        <input type="text"
+                                                                                            name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][quiz][<?= $qIndex ?>][options][<?= $opt ?>]"
+                                                                                            class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
+                                                                                            placeholder="Alternativa <?= $opt + 1 ?>"
+                                                                                            value="<?= esc($question['options'][$opt] ?? '') ?>">
+                                                                                    <?php endfor; ?>
+                                                                                </div>
+                                                                                <div class="flex gap-2 items-center">
+                                                                                    <select name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][quiz][<?= $qIndex ?>][correct]"
+                                                                                        class="flex-1 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100">
+                                                                                        <?php for ($opt = 0; $opt < 4; $opt++): ?>
+                                                                                            <option value="<?= $opt ?>" <?= (int) ($question['correct'] ?? 0) === $opt ? 'selected' : '' ?>>
+                                                                                                Correta: alternativa <?= $opt + 1 ?>
+                                                                                            </option>
+                                                                                        <?php endfor; ?>
+                                                                                    </select>
+                                                                                    <button type="button"
+                                                                                        class="remove-quiz-question text-red-500 hover:text-red-600 text-base"
+                                                                                        title="Remover pergunta">
+                                                                                        <i class="bi bi-x-circle"></i>
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    <?php endforeach; ?>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    <?php endforeach; ?>
+                                                </div>
+
+                                                <button type="button"
+                                                    class="btn-add-lesson inline-flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-xl"
+                                                    data-module="<?= $mIndex ?>">
+                                                    <i class="bi bi-plus-circle"></i>
+                                                    Adicionar Aula
+                                                </button>
                                             </div>
                                         <?php endforeach; ?>
                                     <?php endif; ?>
                                 </div>
-                                <p class="text-xs text-slate-500 dark:text-slate-400">
-                                    Adicione projetos práticos relacionados ao curso.
-                                </p>
-                            </div>
 
-                            <!-- Status do curso -->
-                            <div class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 sm:p-6 space-y-3">
-                                <h4 class="text-sm font-semibold text-slate-800 dark:text-white flex items-center gap-2">
-                                    <i class="bi bi-toggle-on text-blue-600"></i>
-                                    Status do curso
-                                </h4>
-                                <select name="status_course"
-                                    id="status_course"
-                                    class="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
-                                    <option value="Rascunho" <?= ($draft->status_course ?? '') === 'Rascunho' ? 'selected' : '' ?>>Rascunho</option>
-                                    <option value="Ativo" <?= ($draft->status_course ?? '') === 'Ativo' ? 'selected' : '' ?>>Ativo</option>
-                                    <option value="Arquivado" <?= ($draft->status_course ?? '') === 'Arquivado' ? 'selected' : '' ?>>Arquivado</option>
-                                </select>
                                 <p class="text-xs text-slate-500 dark:text-slate-400">
-                                    Você pode manter o curso como rascunho e publicar depois.
+                                    Você poderá reorganizar e editar os módulos e aulas depois.
                                 </p>
-                            </div>
-
-                            <!-- Tags -->
-                            <div class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 sm:p-6 space-y-3">
-                                <h4 class="text-sm font-semibold text-slate-800 dark:text-white flex items-center gap-2">
-                                    <i class="bi bi-tags text-blue-600"></i>
-                                    Tags do curso
-                                </h4>
-                                <input type="text"
-                                    id="courseTags"
-                                    class="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                                    placeholder="Digite uma tag e pressione Enter (ex: JavaScript, Front-end)">
-                                <div id="tags-display" class="flex flex-wrap gap-2 mt-2"></div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Step 4: Review and Publish -->
-                    <div class="tab-content hidden" id="review-publish">
-                        <div class="space-y-6">
-                            <div class="border-b border-slate-200 dark:border-slate-700 pb-4">
-                                <h3 class="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                                    <i class="bi bi-rocket text-blue-600"></i>
-                                    Revisão e Publicação
-                                </h3>
-                                <p class="text-slate-600 dark:text-slate-400 text-sm mt-1">
-                                    Revise e publique seu curso
-                                </p>
-                            </div>
+                        <!-- Step 3: Advanced Settings -->
+                        <div class="tab-content hidden" id="advanced-settings">
+                            <div class="space-y-6">
+                                <div class="border-b border-slate-200 dark:border-slate-700 pb-4">
+                                    <h3 class="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                                        <i class="bi bi-gear text-blue-600"></i>
+                                        Configurações Avançadas
+                                    </h3>
+                                    <p class="text-slate-600 dark:text-slate-400 text-sm mt-1">
+                                        Configure as opções avançadas do seu curso
+                                    </p>
+                                </div>
 
-                            <!-- Resumo do curso -->
-                            <div class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 sm:p-6 space-y-3">
-                                <h4 class="text-sm font-semibold text-slate-800 dark:text-white flex items-center gap-2">
-                                    <i class="bi bi-bar-chart text-blue-600"></i>
-                                    Resumo do curso
-                                </h4>
-                                <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
-                                    <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3">
-                                        <div class="text-[11px] text-slate-500 dark:text-slate-400">Horas do curso</div>
-                                        <div id="stats-course-hours" class="text-lg font-semibold text-slate-800 dark:text-white">0h</div>
+                                <!-- Tipo de curso -->
+                                <div class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 sm:p-6 space-y-4">
+                                    <h4 class="text-sm font-semibold text-slate-800 dark:text-white flex items-center gap-2">
+                                        <i class="bi bi-currency-dollar text-blue-600"></i>
+                                        Tipo de curso
+                                    </h4>
+                                    <div class="flex flex-col sm:flex-row gap-3">
+                                        <label class="inline-flex items-center gap-2 cursor-pointer">
+                                            <input type="radio" name="courseType" value="free" class="text-blue-600" <?= !empty($draft->price_course) && $draft->price_course > 0 ? '' : 'checked' ?>>
+                                            <span class="text-sm text-slate-700 dark:text-slate-200">Gratuito</span>
+                                        </label>
+                                        <label class="inline-flex items-center gap-2 cursor-pointer">
+                                            <input type="radio" name="courseType" value="paid" class="text-blue-600" <?= !empty($draft->price_course) && $draft->price_course > 0 ? 'checked' : '' ?>>
+                                            <span class="text-sm text-slate-700 dark:text-slate-200">Pago</span>
+                                        </label>
                                     </div>
-                                    <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3">
-                                        <div class="text-[11px] text-slate-500 dark:text-slate-400">Minutos das aulas</div>
-                                        <div id="stats-lesson-minutes" class="text-lg font-semibold text-slate-800 dark:text-white">0</div>
-                                    </div>
-                                    <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3">
-                                        <div class="text-[11px] text-slate-500 dark:text-slate-400">Total de aulas</div>
-                                        <div id="stats-lessons" class="text-lg font-semibold text-slate-800 dark:text-white">0</div>
-                                    </div>
-                                    <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3">
-                                        <div class="text-[11px] text-slate-500 dark:text-slate-400">Total de módulos</div>
-                                        <div id="stats-modules" class="text-lg font-semibold text-slate-800 dark:text-white">0</div>
-                                    </div>
-                                    <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3">
-                                        <div class="text-[11px] text-slate-500 dark:text-slate-400">Arquivos do curso</div>
-                                        <div id="stats-files" class="text-lg font-semibold text-slate-800 dark:text-white">0</div>
+
+                                    <div id="price-settings" class="mt-3 <?= !empty($draft->price_course) && $draft->price_course > 0 ? '' : 'hidden' ?>">
+                                        <label for="price_course" class="block text-sm font-semibold text-slate-800 dark:text-white mb-2">
+                                            Preço do curso
+                                        </label>
+                                        <div class="flex gap-2 items-center">
+                                            <span class="px-3 py-2 rounded-l-xl bg-slate-200 dark:bg-slate-700 text-sm text-slate-800 dark:text-slate-100">
+                                                $
+                                            </span>
+                                            <input type="number"
+                                                step="0.01"
+                                                min="0"
+                                                id="price_course"
+                                                name="price_course"
+                                                value="<?= esc($draft->price_course ?? '') ?>"
+                                                class="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-r-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                                placeholder="Ex: 49.90">
+                                        </div>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                            O preço será aplicado apenas se o curso for marcado como pago.
+                                        </p>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-6 text-center">
-                                <i class="bi bi-rocket text-slate-400 text-4xl mb-4"></i>
-                                <h4 class="font-bold text-slate-700 dark:text-slate-300 mb-2">Revisão e Publicação</h4>
-                                <p class="text-slate-500 dark:text-slate-400 text-sm">
-                                    Revise todas as informações e publique seu curso
-                                </p>
-                                <button type="submit" name="publish" value="1" class="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition-all duration-300">
-                                    <i class="bi bi-rocket"></i>
-                                    Publicar Curso
-                                </button>
+                                <!-- Cor primária -->
+                                <div class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 sm:p-6 space-y-3">
+                                    <h4 class="text-sm font-semibold text-slate-800 dark:text-white flex items-center gap-2">
+                                        <i class="bi bi-palette text-blue-600"></i>
+                                        Cor primária do curso
+                                    </h4>
+                                    <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-center">
+                                        <input type="text"
+                                            id="courseColorText"
+                                            name="color_course"
+                                            value="<?= esc($draft->color_course ?? '#3b82f6') ?>"
+                                            class="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                            placeholder="#3b82f6">
+                                        <input type="color"
+                                            id="courseColorPicker"
+                                            value="<?= esc($draft->color_course ?? '#3b82f6') ?>"
+                                            class="h-12 w-16 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700">
+                                    </div>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                                        Cole um código HEX ou selecione no color picker.
+                                    </p>
+                                </div>
+
+                                <!-- Projetos do curso -->
+                                <div class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 sm:p-6 space-y-3">
+                                    <div class="flex items-center justify-between gap-3">
+                                        <h4 class="text-sm font-semibold text-slate-800 dark:text-white flex items-center gap-2">
+                                            <i class="bi bi-kanban text-blue-600"></i>
+                                            Projetos relacionados
+                                        </h4>
+                                        <button type="button"
+                                            id="add-project"
+                                            class="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-xl transition-all duration-300">
+                                            <i class="bi bi-plus-circle"></i>
+                                            Adicionar projeto
+                                        </button>
+                                    </div>
+                                    <div id="projects-container" class="space-y-4">
+                                        <?php if (!empty($draftProjects ?? [])): ?>
+                                            <?php foreach (($draftProjects ?? []) as $pIndex => $project): ?>
+                                                <div class="project-card border border-slate-200 dark:border-slate-700 rounded-2xl p-4 bg-white dark:bg-slate-800" data-index="<?= $pIndex ?>">
+                                                    <div class="flex items-center justify-between gap-2 mb-2">
+                                                        <input type="text"
+                                                            name="projects[<?= $pIndex ?>][title]"
+                                                            value="<?= esc($project->title_project ?? '') ?>"
+                                                            class="flex-1 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-sm text-slate-800 dark:text-slate-100"
+                                                            placeholder="Título do projeto">
+                                                        <button type="button"
+                                                            class="remove-project text-red-500 hover:text-red-600 text-lg"
+                                                            title="Remover projeto">
+                                                            <i class="bi bi-x-circle"></i>
+                                                        </button>
+                                                    </div>
+                                                    <textarea name="projects[<?= $pIndex ?>][description]"
+                                                        class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-sm text-slate-800 dark:text-slate-100"
+                                                        placeholder="Descrição do projeto"><?= esc($project->description_project ?? '') ?></textarea>
+                                                    <div class="mt-3">
+                                                        <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                                                            Imagem do projeto (opcional)
+                                                        </label>
+                                                        <input type="file"
+                                                            name="project_images[<?= $pIndex ?>]"
+                                                            accept="image/*"
+                                                            class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100">
+                                                        <input type="hidden"
+                                                            name="projects[<?= $pIndex ?>][img_existing]"
+                                                            value="<?= esc($project->img_project ?? '') ?>">
+                                                        <?php if (!empty($project->img_project)): ?>
+                                                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                                                Atual: <?= esc($project->img_project) ?>
+                                                            </p>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </div>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                                        Adicione projetos práticos relacionados ao curso.
+                                    </p>
+                                </div>
+
+                                <!-- Status do curso -->
+                                <div class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 sm:p-6 space-y-3">
+                                    <h4 class="text-sm font-semibold text-slate-800 dark:text-white flex items-center gap-2">
+                                        <i class="bi bi-toggle-on text-blue-600"></i>
+                                        Status do curso
+                                    </h4>
+                                    <select name="status_course"
+                                        id="status_course"
+                                        class="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                                        <option value="Rascunho" <?= ($draft->status_course ?? '') === 'Rascunho' ? 'selected' : '' ?>>Rascunho</option>
+                                        <option value="Ativo" <?= ($draft->status_course ?? '') === 'Ativo' ? 'selected' : '' ?>>Ativo</option>
+                                        <option value="Arquivado" <?= ($draft->status_course ?? '') === 'Arquivado' ? 'selected' : '' ?>>Arquivado</option>
+                                    </select>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                                        Você pode manter o curso como rascunho e publicar depois.
+                                    </p>
+                                </div>
+
+                                <!-- Tags -->
+                                <div class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 sm:p-6 space-y-3">
+                                    <h4 class="text-sm font-semibold text-slate-800 dark:text-white flex items-center gap-2">
+                                        <i class="bi bi-tags text-blue-600"></i>
+                                        Tags do curso
+                                    </h4>
+                                    <input type="text"
+                                        id="courseTags"
+                                        class="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                        placeholder="Digite uma tag e pressione Enter (ex: JavaScript, Front-end)">
+                                    <div id="tags-display" class="flex flex-wrap gap-2 mt-2"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 4: Review and Publish -->
+                        <div class="tab-content hidden" id="review-publish">
+                            <div class="space-y-6">
+                                <div class="border-b border-slate-200 dark:border-slate-700 pb-4">
+                                    <h3 class="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                                        <i class="bi bi-rocket text-blue-600"></i>
+                                        Revisão e Publicação
+                                    </h3>
+                                    <p class="text-slate-600 dark:text-slate-400 text-sm mt-1">
+                                        Revise e publique seu curso
+                                    </p>
+                                </div>
+
+                                <!-- Resumo do curso -->
+                                <div class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 sm:p-6 space-y-3">
+                                    <h4 class="text-sm font-semibold text-slate-800 dark:text-white flex items-center gap-2">
+                                        <i class="bi bi-bar-chart text-blue-600"></i>
+                                        Resumo do curso
+                                    </h4>
+                                    <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
+                                        <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3">
+                                            <div class="text-[11px] text-slate-500 dark:text-slate-400">Horas do curso</div>
+                                            <div id="stats-course-hours" class="text-lg font-semibold text-slate-800 dark:text-white">0h</div>
+                                        </div>
+                                        <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3">
+                                            <div class="text-[11px] text-slate-500 dark:text-slate-400">Minutos das aulas</div>
+                                            <div id="stats-lesson-minutes" class="text-lg font-semibold text-slate-800 dark:text-white">0</div>
+                                        </div>
+                                        <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3">
+                                            <div class="text-[11px] text-slate-500 dark:text-slate-400">Total de aulas</div>
+                                            <div id="stats-lessons" class="text-lg font-semibold text-slate-800 dark:text-white">0</div>
+                                        </div>
+                                        <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3">
+                                            <div class="text-[11px] text-slate-500 dark:text-slate-400">Total de módulos</div>
+                                            <div id="stats-modules" class="text-lg font-semibold text-slate-800 dark:text-white">0</div>
+                                        </div>
+                                        <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3">
+                                            <div class="text-[11px] text-slate-500 dark:text-slate-400">Arquivos do curso</div>
+                                            <div id="stats-files" class="text-lg font-semibold text-slate-800 dark:text-white">0</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-6 text-center">
+                                    <i class="bi bi-rocket text-slate-400 text-4xl mb-4"></i>
+                                    <h4 class="font-bold text-slate-700 dark:text-slate-300 mb-2">Revisão e Publicação</h4>
+                                    <p class="text-slate-500 dark:text-slate-400 text-sm">
+                                        Revise todas as informações e publique seu curso
+                                    </p>
+                                    <button type="submit" name="publish" value="1" class="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition-all duration-300">
+                                        <i class="bi bi-rocket"></i>
+                                        Publicar Curso
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Navigation Buttons -->
-                <div class="flex flex-col sm:flex-row justify-between gap-4 p-4 sm:p-6 lg:p-8 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50">
-                    <button type="button"
-                        class="order-2 sm:order-1 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                        id="prev-step"
-                        disabled>
-                        <i class="bi bi-arrow-left"></i>
-                        Anterior
-                    </button>
+                    <!-- Navigation Buttons -->
+                    <div class="flex flex-col sm:flex-row justify-between gap-4 p-4 sm:p-6 lg:p-8 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/50">
+                        <button type="button"
+                            class="order-2 sm:order-1 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                            id="prev-step"
+                            disabled>
+                            <i class="bi bi-arrow-left"></i>
+                            Anterior
+                        </button>
 
-                    <div class="order-1 sm:order-2 flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                        <button type="button"
-                            id="save-draft"
-                            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-slate-500 hover:bg-slate-600 text-white font-medium rounded-xl transition-all duration-300 transform hover:-translate-y-0.5">
-                            <i class="bi bi-file-earmark"></i>
-                            Salvar Rascunho
-                        </button>
-                        <button type="button"
-                            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-all duration-300 transform hover:-translate-y-0.5"
-                            id="next-step">
-                            Próximo
-                            <i class="bi bi-arrow-right"></i>
-                        </button>
+                        <div class="order-1 sm:order-2 flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                            <button type="button"
+                                id="save-draft"
+                                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-slate-500 hover:bg-slate-600 text-white font-medium rounded-xl transition-all duration-300 transform hover:-translate-y-0.5">
+                                <i class="bi bi-file-earmark"></i>
+                                Salvar Rascunho
+                            </button>
+                            <button type="button"
+                                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-all duration-300 transform hover:-translate-y-0.5"
+                                id="next-step">
+                                Próximo
+                                <i class="bi bi-arrow-right"></i>
+                            </button>
+                            <button type="button"
+                                id="open-student-preview"
+                                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white">
+                                <i class="bi bi-display"></i>
+                                Abrir tela do aluno
+                            </button>
+                        </div>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 </div>
+
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.js"></script>
 <script>
-    $(function () {
+    $(function() {
         if (typeof $.fn.summernote !== "function") {
             return;
         }
@@ -873,13 +1029,13 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                 ["view", ["fullscreen", "codeview"]],
             ],
             callbacks: {
-                onChange: function () {
+                onChange: function() {
                     window.dispatchEvent(new Event("course-editor-input"));
                 },
-                onKeyup: function () {
+                onKeyup: function() {
                     window.dispatchEvent(new Event("course-editor-input"));
                 },
-                onPaste: function () {
+                onPaste: function() {
                     window.dispatchEvent(new Event("course-editor-input"));
                 }
             }
@@ -907,7 +1063,10 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
 
         applyEditorTheme();
         const themeObserver = new MutationObserver(applyEditorTheme);
-        themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+        themeObserver.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ["class"]
+        });
     });
 </script>
 <script>
@@ -922,8 +1081,10 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
         const form = document.getElementById("courseForm");
         const draftIdInput = document.getElementById("draft-id");
         const saveDraftButton = document.getElementById("save-draft");
+        const openStudentPreviewButton = document.getElementById("open-student-preview");
         const draftCreateUrl = "<?= base_url('instructor/dashboard/novo_curso/rascunho') ?>";
         const draftSaveBaseUrl = "<?= base_url('instructor/dashboard/novo_curso/rascunho') ?>";
+        const studentPreviewBaseUrl = "<?= base_url('instructor/dashboard/cursos/preview') ?>";
 
         // Navegação / stepper / tabs
         const prevButton = document.getElementById("prev-step");
@@ -944,6 +1105,42 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
         const iconPreview = document.getElementById("icon-preview");
         const iconPreviewImg = document.getElementById("icon-preview-img");
         const iconPreviewLabel = document.getElementById("icon-preview-label");
+        const previewCoverImgStatic = document.getElementById("preview-cover-img");
+        const previewCoverFallbackStatic = document.getElementById("preview-cover-fallback");
+
+        previewImg?.addEventListener("error", () => {
+            previewImg.removeAttribute("src");
+            previewContainer?.classList.add("hidden");
+            uploadArea?.classList.remove("hidden");
+        });
+
+        previewCoverImgStatic?.addEventListener("error", () => {
+            previewCoverImgStatic.removeAttribute("src");
+            previewCoverImgStatic.classList.add("hidden");
+            previewCoverFallbackStatic?.classList.remove("hidden");
+        });
+
+        iconPreviewImg?.addEventListener("error", () => {
+            iconPreviewImg.removeAttribute("src");
+            iconPreview?.classList.add("hidden");
+        });
+
+        if (previewImg?.getAttribute("src")?.trim() && previewImg.complete && previewImg.naturalWidth === 0) {
+            previewImg.removeAttribute("src");
+            previewContainer?.classList.add("hidden");
+            uploadArea?.classList.remove("hidden");
+        }
+
+        if (previewCoverImgStatic?.getAttribute("src")?.trim() && previewCoverImgStatic.complete && previewCoverImgStatic.naturalWidth === 0) {
+            previewCoverImgStatic.removeAttribute("src");
+            previewCoverImgStatic.classList.add("hidden");
+            previewCoverFallbackStatic?.classList.remove("hidden");
+        }
+
+        if (iconPreviewImg?.getAttribute("src")?.trim() && iconPreviewImg.complete && iconPreviewImg.naturalWidth === 0) {
+            iconPreviewImg.removeAttribute("src");
+            iconPreview?.classList.add("hidden");
+        }
 
         // Módulos
         const modulesContainer = document.getElementById("modules-container");
@@ -993,9 +1190,9 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                 document.body.appendChild(saveToastElement);
             }
 
-            const toneClasses = type === "error"
-                ? "bg-red-600 text-white"
-                : "bg-emerald-600 text-white";
+            const toneClasses = type === "error" ?
+                "bg-red-600 text-white" :
+                "bg-emerald-600 text-white";
 
             saveToastElement.className = `fixed bottom-4 right-4 z-[9999] px-4 py-2 rounded-lg shadow-lg text-sm font-medium transition-all duration-200 pointer-events-none ${toneClasses}`;
             saveToastElement.textContent = message;
@@ -1084,10 +1281,11 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
         }
 
         function hasExistingImage() {
+            const imageSrc = previewImg?.getAttribute("src")?.trim();
             return previewContainer &&
                 !previewContainer.classList.contains("hidden") &&
                 previewImg &&
-                previewImg.src;
+                imageSrc;
         }
 
         function validateCurrentStep() {
@@ -1172,7 +1370,11 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                             const correct = Number.isFinite(parseInt(correctRaw, 10)) ? parseInt(correctRaw, 10) : 0;
 
                             if (question || options.some(Boolean)) {
-                                quiz_questions.push({ question, options, correct });
+                                quiz_questions.push({
+                                    question,
+                                    options,
+                                    correct
+                                });
                             }
                         });
                     }
@@ -1266,7 +1468,10 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
             }
         }
 
-        async function saveDraft({ validate = false, silent = false } = {}) {
+        async function saveDraft({
+            validate = false,
+            silent = false
+        } = {}) {
             if (!form) return false;
             if (validate && !validateCurrentStep()) return false;
 
@@ -1313,6 +1518,33 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
             }
         }
 
+        function buildStudentPreviewUrl(courseId) {
+            const returnUrl = new URL(window.location.href);
+            returnUrl.searchParams.set("load_draft", "1");
+
+            const params = new URLSearchParams({
+                return_url: returnUrl.toString()
+            });
+
+            return `${studentPreviewBaseUrl}/${courseId}?${params.toString()}`;
+        }
+
+        async function openStudentPreview() {
+            const saved = await saveDraft({
+                silent: true
+            });
+            if (!saved) return;
+
+            const currentDraftId = draftIdInput?.value?.trim();
+            if (!currentDraftId) {
+                showSaveToast("Salve o rascunho antes de abrir a pre-visualizacao.", "error");
+                return;
+            }
+
+            const previewUrl = buildStudentPreviewUrl(currentDraftId);
+            window.open(previewUrl, "_blank", "noopener");
+        }
+
         // ======================
         // Navegação (próximo / anterior / clique em tabs / clique no stepper)
         // ======================
@@ -1321,7 +1553,9 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                 if (!validateCurrentStep()) return;
 
                 if (currentStep < totalSteps) {
-                    const saved = await saveDraft({ silent: true });
+                    const saved = await saveDraft({
+                        silent: true
+                    });
                     if (!saved) return;
                     currentStep++;
                     updateStepperUI();
@@ -1405,9 +1639,19 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
         }
 
         if (removeBtn) {
+            const previewCoverImg = document.getElementById("preview-cover-img");
+            const previewCoverFallback = document.getElementById("preview-cover-fallback");
+            if (previewCoverImg) {
+                previewCoverImg.removeAttribute("src");
+                previewCoverImg.classList.add("hidden");
+            }
+            if (previewCoverFallback) {
+                previewCoverFallback.classList.remove("hidden");
+            }
+            updateCoursePreview();
             removeBtn.addEventListener("click", () => {
                 fileInput.value = "";
-                previewImg.src = "";
+                previewImg.removeAttribute("src");
                 previewContainer.classList.add("hidden");
                 uploadArea.classList.remove("hidden");
                 scheduleAutoSave();
@@ -1822,57 +2066,57 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                 scheduleAutoSave();
             });
 
-        modulesContainer.addEventListener("dragover", (e) => {
-            if (!draggedLesson || !dragPlaceholder) return;
-            const targetContainer = e.target.closest(".lessons-container");
-            if (!targetContainer) return;
-            e.preventDefault();
+            modulesContainer.addEventListener("dragover", (e) => {
+                if (!draggedLesson || !dragPlaceholder) return;
+                const targetContainer = e.target.closest(".lessons-container");
+                if (!targetContainer) return;
+                e.preventDefault();
 
-            const targetLesson = e.target.closest(".lesson-item");
-            if (!targetLesson || targetLesson === draggedLesson) {
-                if (dragPlaceholder.parentElement !== targetContainer || dragPlaceholder.nextSibling !== null) {
-                    targetContainer.appendChild(dragPlaceholder);
+                const targetLesson = e.target.closest(".lesson-item");
+                if (!targetLesson || targetLesson === draggedLesson) {
+                    if (dragPlaceholder.parentElement !== targetContainer || dragPlaceholder.nextSibling !== null) {
+                        targetContainer.appendChild(dragPlaceholder);
+                    }
+                    return;
                 }
-                return;
-            }
-            if (targetLesson === dragPlaceholder) return;
-            const rect = targetLesson.getBoundingClientRect();
-            const after = (e.clientY - rect.top) > rect.height / 2;
-            if (after) {
-                if (dragPlaceholder.previousSibling !== targetLesson) {
-                    targetContainer.insertBefore(dragPlaceholder, targetLesson.nextSibling);
+                if (targetLesson === dragPlaceholder) return;
+                const rect = targetLesson.getBoundingClientRect();
+                const after = (e.clientY - rect.top) > rect.height / 2;
+                if (after) {
+                    if (dragPlaceholder.previousSibling !== targetLesson) {
+                        targetContainer.insertBefore(dragPlaceholder, targetLesson.nextSibling);
+                    }
+                } else {
+                    if (dragPlaceholder.nextSibling !== targetLesson) {
+                        targetContainer.insertBefore(dragPlaceholder, targetLesson);
+                    }
                 }
-            } else {
-                if (dragPlaceholder.nextSibling !== targetLesson) {
-                    targetContainer.insertBefore(dragPlaceholder, targetLesson);
+            });
+
+            modulesContainer.addEventListener("dragenter", (e) => {
+                if (!draggedLesson) return;
+                const targetContainer = e.target.closest(".lessons-container");
+                if (targetContainer) {
+                    targetContainer.classList.add("drag-over");
                 }
-            }
-        });
+            });
 
-        modulesContainer.addEventListener("dragenter", (e) => {
-            if (!draggedLesson) return;
-            const targetContainer = e.target.closest(".lessons-container");
-            if (targetContainer) {
-                targetContainer.classList.add("drag-over");
-            }
-        });
+            modulesContainer.addEventListener("dragleave", (e) => {
+                const targetContainer = e.target.closest(".lessons-container");
+                if (!targetContainer) return;
+                if (!targetContainer.contains(e.relatedTarget)) {
+                    targetContainer.classList.remove("drag-over");
+                }
+            });
 
-        modulesContainer.addEventListener("dragleave", (e) => {
-            const targetContainer = e.target.closest(".lessons-container");
-            if (!targetContainer) return;
-            if (!targetContainer.contains(e.relatedTarget)) {
-                targetContainer.classList.remove("drag-over");
-            }
-        });
+            modulesContainer.addEventListener("drop", (e) => {
+                const targetContainer = e.target.closest(".lessons-container");
+                if (targetContainer) {
+                    targetContainer.classList.remove("drag-over");
+                }
+            });
 
-        modulesContainer.addEventListener("drop", (e) => {
-            const targetContainer = e.target.closest(".lessons-container");
-            if (targetContainer) {
-                targetContainer.classList.remove("drag-over");
-            }
-        });
-
-        updateCourseStats();
+            updateCourseStats();
         }
 
         document.querySelectorAll(".lesson-item").forEach((lessonEl) => {
@@ -2042,7 +2286,9 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                 }
 
                 autoSaveInFlight = true;
-                await saveDraft({ silent: true });
+                await saveDraft({
+                    silent: true
+                });
                 autoSaveInFlight = false;
 
                 if (autoSaveQueued) {
@@ -2058,13 +2304,278 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
 
         if (saveDraftButton) {
             saveDraftButton.addEventListener("click", async () => {
-                await saveDraft({ silent: false });
+                await saveDraft({
+                    silent: false
+                });
+            });
+        }
+
+        if (openStudentPreviewButton) {
+            openStudentPreviewButton.addEventListener("click", async () => {
+                await openStudentPreview();
             });
         }
 
         // inicializar UI
         updateStepperUI();
+
+        document.addEventListener("input", updateCoursePreview);
+        document.addEventListener("change", updateCoursePreview);
+        window.addEventListener("course-editor-input", updateCoursePreview);
+
+        updateCoursePreview();
     });
+
+    function escapeHtml(value) {
+        const div = document.createElement("div");
+        div.textContent = value ?? "";
+        return div.innerHTML;
+    }
+
+    function formatMoneyPreview(value) {
+        const amount = Number(value || 0);
+        return amount > 0 ?
+            `${amount.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MZN` :
+            "Gratuito";
+    }
+
+    function getEditorHtmlOrTextareaValue(selector) {
+        if (typeof window.jQuery === "function" && typeof window.jQuery.fn?.summernote === "function") {
+            const editor = window.jQuery(selector);
+            if (editor.length && editor.next(".note-editor").length) {
+                return editor.summernote("code");
+            }
+        }
+
+        const el = document.querySelector(selector);
+        return el ? el.value : "";
+    }
+
+    function getCourseTypePreview() {
+        const paidRadio = document.querySelector('input[name="courseType"][value="paid"]');
+        return paidRadio?.checked ? "Curso pago" : "Curso gratuito";
+    }
+
+    function getCoursePricePreview() {
+        const paidRadio = document.querySelector('input[name="courseType"][value="paid"]');
+        const priceInput = document.getElementById("price_course") || document.getElementById("coursePrice");
+        if (paidRadio?.checked) {
+            return formatMoneyPreview(priceInput?.value || 0);
+        }
+        return "Gratuito";
+    }
+
+    function getModulePreviewData() {
+        const moduleCards = document.querySelectorAll(".module-card");
+        let totalLessons = 0;
+        let totalMinutes = 0;
+
+        const modules = Array.from(moduleCards).map((moduleCard, moduleIndex) => {
+            const title = moduleCard.querySelector('input[name$="[title]"]')?.value?.trim() || `Módulo ${moduleIndex + 1}`;
+            const description = moduleCard.querySelector('textarea[name$="[description]"]')?.value?.trim() || "";
+
+            const lessons = Array.from(moduleCard.querySelectorAll(".lesson-item")).map((lessonEl, lessonIndex) => {
+                const lessonTitle = lessonEl.querySelector('input[name$="[title]"]')?.value?.trim() || `Aula ${lessonIndex + 1}`;
+                const lessonType = lessonEl.querySelector('select[name$="[type]"]')?.value || "text";
+                const lessonDuration = Number(lessonEl.querySelector('input[name$="[duration]"]')?.value || 0);
+
+                totalLessons += 1;
+                totalMinutes += lessonDuration > 0 ? lessonDuration : 0;
+
+                return {
+                    title: lessonTitle,
+                    type: lessonType,
+                    duration: lessonDuration
+                };
+            });
+
+            return {
+                title,
+                description,
+                lessons
+            };
+        });
+
+        return {
+            modules,
+            totalLessons,
+            totalMinutes
+        };
+    }
+
+    function getProjectsPreviewData() {
+        const projectCards = document.querySelectorAll(".project-card");
+        return Array.from(projectCards).map((projectCard, index) => {
+            const title = projectCard.querySelector('input[name$="[title]"]')?.value?.trim() || `Projeto ${index + 1}`;
+            const description = projectCard.querySelector('textarea[name$="[description]"]')?.value?.trim() || "";
+            const fileInput = projectCard.querySelector('input[type="file"][name^="project_images"]');
+            const existingText = projectCard.querySelector('input[name$="[img_existing]"]')?.value || "";
+
+            let imageUrl = "";
+            if (fileInput?.files?.[0]) {
+                imageUrl = URL.createObjectURL(fileInput.files[0]);
+            } else if (existingText) {
+                imageUrl = existingText.includes("/") ? existingText : `<?= base_url('assets/img/') ?>/${existingText}`;
+            }
+
+            return {
+                title,
+                description,
+                imageUrl
+            };
+        }).filter(project => project.title || project.description || project.imageUrl);
+    }
+
+    function renderPreviewModules() {
+        const container = document.getElementById("preview-modules");
+        const totalModulesEl = document.getElementById("preview-total-modules");
+        const totalLessonsEl = document.getElementById("preview-total-lessons");
+        const totalDurationEl = document.getElementById("preview-total-duration");
+
+        if (!container) return;
+
+        const {
+            modules,
+            totalLessons,
+            totalMinutes
+        } = getModulePreviewData();
+
+        if (totalModulesEl) {
+            totalModulesEl.textContent = `${modules.length} módulo${modules.length === 1 ? "" : "s"}`;
+        }
+        if (totalLessonsEl) {
+            totalLessonsEl.textContent = `${totalLessons} aula${totalLessons === 1 ? "" : "s"}`;
+        }
+        if (totalDurationEl) {
+            totalDurationEl.textContent = `${Math.round(totalMinutes)} min`;
+        }
+
+        if (!modules.length) {
+            container.innerHTML = `<div class="text-sm text-slate-500 dark:text-slate-400">Nenhum módulo adicionado ainda.</div>`;
+            return;
+        }
+
+        container.innerHTML = modules.map((module, idx) => `
+        <div class="course-preview-module">
+            <div class="flex items-center justify-between gap-3 mb-2">
+                <h5 class="font-semibold text-slate-800 dark:text-white text-sm">
+                    ${idx + 1}. ${escapeHtml(module.title)}
+                </h5>
+                <span class="text-xs text-slate-500 dark:text-slate-400">
+                    ${module.lessons.length} aula${module.lessons.length === 1 ? "" : "s"}
+                </span>
+            </div>
+            ${module.description ? `<p class="text-xs text-slate-600 dark:text-slate-400 mb-3">${escapeHtml(module.description)}</p>` : ""}
+            <div class="space-y-2">
+                ${
+                    module.lessons.length
+                    ? module.lessons.map((lesson, lessonIndex) => `
+                        <div class="flex items-center justify-between gap-2 text-xs">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <i class="bi ${
+                                    lesson.type === "video" ? "bi-play-btn" :
+                                    lesson.type === "quiz" ? "bi-patch-question" :
+                                    lesson.type === "exercise" ? "bi-journal-check" :
+                                    "bi-file-text"
+                                } text-blue-600"></i>
+                                <span class="truncate text-slate-700 dark:text-slate-300">
+                                    ${lessonIndex + 1}. ${escapeHtml(lesson.title)}
+                                </span>
+                            </div>
+                            <span class="text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                                ${lesson.duration > 0 ? `${lesson.duration} min` : "--"}
+                            </span>
+                        </div>
+                    `).join("")
+                    : `<div class="text-xs text-slate-500 dark:text-slate-400">Sem aulas neste módulo.</div>`
+                }
+            </div>
+        </div>
+    `).join("");
+    }
+
+    function renderPreviewProjects() {
+        const container = document.getElementById("preview-projects");
+        if (!container) return;
+
+        const projects = getProjectsPreviewData();
+
+        if (!projects.length) {
+            container.innerHTML = `<div class="text-sm text-slate-500 dark:text-slate-400">Nenhum projeto adicionado ainda.</div>`;
+            return;
+        }
+
+        container.innerHTML = projects.map(project => `
+        <div class="course-preview-project">
+            ${project.imageUrl ? `<img src="${project.imageUrl}" alt="${escapeHtml(project.title)}">` : ""}
+            <div class="font-semibold text-sm text-slate-800 dark:text-white">
+                ${escapeHtml(project.title || "Projeto")}
+            </div>
+            ${project.description ? `<p class="text-xs text-slate-600 dark:text-slate-400 mt-1">${escapeHtml(project.description)}</p>` : ""}
+        </div>
+    `).join("");
+    }
+
+    function updateCoursePreview() {
+        const titleEl = document.getElementById("preview-title");
+        const subtitleEl = document.getElementById("preview-subtitle");
+        const descriptionEl = document.getElementById("preview-description");
+        const learningEl = document.getElementById("preview-learning");
+        const statusEl = document.getElementById("preview-status");
+        const priceEl = document.getElementById("preview-price");
+        const coverEl = document.getElementById("preview-cover");
+        const coverImgEl = document.getElementById("preview-cover-img");
+        const coverFallbackEl = document.getElementById("preview-cover-fallback");
+
+        const titleInput = document.getElementById("title_course");
+        const subtitleInput = document.getElementById("courseSubtitle");
+        const colorInput = document.getElementById("courseColorText") || document.querySelector('input[name="color_course"]');
+        const imageInput = document.getElementById("courseImage");
+        const iconInputLocal = document.getElementById("courseIcon");
+        const previewIconImg = document.getElementById("preview-icon-img");
+
+        if (titleEl) titleEl.textContent = titleInput?.value?.trim() || "Título do curso";
+        if (subtitleEl) subtitleEl.textContent = subtitleInput?.value?.trim() || "Subtítulo do curso aparecerá aqui.";
+        if (descriptionEl) descriptionEl.innerHTML = getEditorHtmlOrTextareaValue("#courseDescription") || "<p>Adicione uma descrição para ver a pré-visualização.</p>";
+        if (learningEl) learningEl.innerHTML = getEditorHtmlOrTextareaValue("#courseLearning") || "<p>Os tópicos de aprendizagem aparecerão aqui.</p>";
+        if (statusEl) statusEl.textContent = getCourseTypePreview();
+        if (priceEl) priceEl.textContent = getCoursePricePreview();
+
+        const selectedColor = colorInput?.value?.trim() || "#3b82f6";
+        if (coverEl) {
+            coverEl.style.background = `linear-gradient(135deg, ${selectedColor}, #1d4ed8)`;
+        }
+
+        const existingCoverSrc = coverImgEl?.getAttribute("src")?.trim();
+
+        if (imageInput?.files?.[0] && coverImgEl) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                coverImgEl.src = e.target.result;
+                coverImgEl.classList.remove("hidden");
+                coverFallbackEl?.classList.add("hidden");
+            };
+            reader.readAsDataURL(imageInput.files[0]);
+        } else if (existingCoverSrc) {
+            coverImgEl.classList.remove("hidden");
+            coverFallbackEl?.classList.add("hidden");
+        } else {
+            coverImgEl?.classList.add("hidden");
+            coverFallbackEl?.classList.remove("hidden");
+        }
+
+        if (iconInputLocal?.files?.[0] && previewIconImg) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewIconImg.src = e.target.result;
+                previewIconImg.classList.remove("hidden");
+            };
+            reader.readAsDataURL(iconInputLocal.files[0]);
+        }
+
+        renderPreviewModules();
+        renderPreviewProjects();
+    }
 </script>
 
 <?= $this->endSection() ?>

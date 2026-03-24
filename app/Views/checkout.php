@@ -5,19 +5,18 @@ $session = session();
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Checkout - <?= $course->title_course ?? '' ?></title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dropzone@5/dist/min/dropzone.min.css" />
-  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link rel="shortcut icon" href="<?= base_url('assets/img/favicon.png') ?>" width="100%" type="image/x-icon">
+
   <style>
     .container {
       max-width: 980px !important;
@@ -29,9 +28,6 @@ $session = session();
       color: #000;
     }
 
-    /* ==============================
-       HEADER / HERO
-    ============================== */
     .hero {
       color: #fff;
       position: relative;
@@ -71,9 +67,6 @@ $session = session();
       margin-top: 0.5rem;
     }
 
-    /* ==============================
-       MAIN CONTENT
-    ============================== */
     .course-section {
       padding: 4rem 1rem;
     }
@@ -119,9 +112,6 @@ $session = session();
       margin-top: 0.5rem;
     }
 
-    /* ==============================
-       PRICE BOX (RIGHT SIDE)
-    ============================== */
     .gradient-bg {
       background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
     }
@@ -135,7 +125,6 @@ $session = session();
       transform: translateY(-5px);
     }
 
-    /* Customização para manter a aparência do Tailwind */
     .header-bg {
       background: url(<?= base_url('assets/instructor/img/courses/' . $course->image_course) ?>) center/cover no-repeat;
       position: relative;
@@ -188,7 +177,6 @@ $session = session();
       box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
     }
 
-    /* Ajustes para o accordion */
     details summary {
       list-style: none;
     }
@@ -260,6 +248,40 @@ $session = session();
 
     .rounded {
       border-radius: 10px !important;
+    }
+
+    .success-checkout-box {
+      background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+      border: 1px solid #d1fae5;
+      border-radius: 18px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      box-shadow: 0 12px 35px rgba(25, 135, 84, 0.08);
+    }
+
+    .success-checkout-box .icon {
+      width: 86px;
+      height: 86px;
+      border-radius: 50%;
+      background: #d1fae5;
+      color: #198754;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.4rem;
+      margin-bottom: 1rem;
+    }
+
+    .success-checkout-box h4 {
+      font-weight: 800;
+      margin-bottom: 0.75rem;
+      color: #146c43;
+    }
+
+    .success-checkout-box p {
+      color: #375a4a;
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
     }
 
     footer {
@@ -402,9 +424,7 @@ $session = session();
   <!-- PRELOADER -->
   <div id="preloader" role="status" aria-live="polite" aria-label="Carregando conteúdo">
     <div class="preloader__inner">
-      <!-- opcional: seu logotipo -->
       <img src="<?= base_url('assets/img/logo.png') ?>" alt="Minha Marca" class="preloader__logo h-auto w-50" />
-
 
       <div class="preloader__bar">
         <div class="preloader__bar__fill" id="preloaderFill" style="width:0%"></div>
@@ -415,8 +435,7 @@ $session = session();
 
   <!-- HERO -->
   <section class="hero">
-    <div class="container">
-    </div>
+    <div class="container"></div>
   </section>
 
   <!-- CONTENT -->
@@ -426,7 +445,7 @@ $session = session();
         <!-- LEFT -->
         <div class="col-lg-7">
           <div class="course-thumb mb-4">
-            <img src="<?= base_url('assets/instructor/img/courses/' . $course->image_course) ?>" alt="Modern JavaScript" class="img-fluid rounded w-100">
+            <img src="<?= base_url('assets/instructor/img/courses/' . $course->image_course) ?>" alt="<?= esc($course->title_course ?? 'Curso') ?>" class="img-fluid rounded w-100">
           </div>
 
           <h3 class="fw-bold mb-3"><?= $course->title_course ?></h3>
@@ -445,7 +464,7 @@ $session = session();
 
           <div class="testimonial">
             “Conteúdo excelente, tanto para profissionais quanto para iniciantes. Este é mais um exemplo do porquê o Brad é tão bem-sucedido como instrutor.
-            OURO é difícil de encontrar se você não souber onde procurar nesta área.”
+            Ouro é difícil de encontrar se você não souber onde procurar nesta área.”
             <strong>— Benny V.</strong>
           </div>
 
@@ -453,14 +472,12 @@ $session = session();
             “Brad é o melhor. Todos os cursos dele são incríveis. A minha parte favorita é o quanto ele é detalhista e nunca se esquece dos iniciantes.”
             <strong>— Brandon W.</strong>
           </div>
-
         </div>
 
         <!-- RIGHT -->
         <div class="col-lg-5">
           <div class="course-card shadow bg-white rounded-3 p-4 sticky-top">
             <div class="mb-4">
-
               <p class="h2 fw-bold text-dark mb-1"><?= number_format($course->price_course, 2, ",", ".") ?> MZN</p>
             </div>
 
@@ -469,114 +486,100 @@ $session = session();
                 <h4 class="alert-heading">Você já está inscrito neste curso!</h4>
                 <p>Já tem acesso completo ao curso <?= $course->title_course ?>.</p>
                 <hr>
-                <a href="<?= base_url('/student/dashboard/inscricoes') ?>" class="btn btn-primary">Ir para meus cursos</a>
+                <a href="<?= base_url('/student/dashboard/inscricoes') ?>" class="btn btn-primary">Ir para os meus cursos</a>
               </div>
+
             <?php elseif (($user) && ($user->role == "instructor")): ?>
               <div class="alert alert-warning text-center">
                 <h4 class="alert-heading">Você é um instrutor!</h4>
                 <p>Não pode se inscrever neste curso.</p>
                 <hr>
-                <a href="<?= base_url('/instructor/dashboard/inscricoes') ?>" class="btn btn-primary">Ir para meus cursos</a>
+                <a href="<?= base_url('/instructor/dashboard/inscricoes') ?>" class="btn btn-primary">Ir para os meus cursos</a>
               </div>
+
             <?php else: ?>
-
-              
-              <form id="checkout-form" action="<?= base_url('mpesa/send') ?>" method="post" class="needs-validation" novalidate>
-                <?= csrf_field() ?>
-                <div class="mb-3">
-                  <div class="input-group">
-                    <input type="text" class="form-control text-sm" id="coupon" placeholder="Código do Cupom">
-                    <button class="btn btn-outline-secondary" type="button">Aplicar</button>
-                  </div>
-                </div>
-
-                <?php if (($user) && ($user->role !== "instructor")): ?>
-                  <input type="hidden" name="email" value="<?= $user->email ?>">
-                  <input type="hidden" name="username" value="<?= $user->username ?>">
-
-                <?php else: ?>
-                  <!-- Se NÃO estiver logado, mostra os campos -->
-                  <a href="<?= base_url('/login') ?>" type="button" class="w-100 mb-3 nav-link text-primary fw-bold text-end">
-                    Fazer login
-                  </a>
+              <div id="checkout-wrapper">
+                <form id="checkout-form" action="<?= base_url('mpesa/send') ?>" method="post" class="needs-validation" novalidate>
+                  <?= csrf_field() ?>
 
                   <div class="mb-3">
-                    <input type="email" name="email" class="form-control" id="email" placeholder="Endereço de Email" required>
-                    <div class="invalid-feedback">
-                      Por favor, insira um email válido.
+                    <div class="input-group">
+                      <input type="text" class="form-control text-sm" id="coupon" placeholder="Código do cupom">
+                      <button class="btn btn-outline-secondary" type="button">Aplicar</button>
                     </div>
                   </div>
 
-                  <div class="mb-3">
-                    <input type="text" name="username" class="form-control" id="name" placeholder="Nome e Sobrenome" required>
-                    <div class="invalid-feedback">
-                      Por favor, insira seu nome e sobrenome.
+                  <?php if (($user) && ($user->role !== "instructor")): ?>
+                    <input type="hidden" name="email" value="<?= $user->email ?>">
+                    <input type="hidden" name="username" value="<?= $user->username ?>">
+
+                  <?php else: ?>
+                    <a href="<?= base_url('/login') ?>" type="button" class="w-100 mb-3 nav-link text-primary fw-bold text-end">
+                      Fazer login
+                    </a>
+
+                    <div class="mb-3">
+                      <input type="email" name="email" class="form-control" id="email" placeholder="Endereço de e-mail" required>
+                      <div class="invalid-feedback">
+                        Por favor, insira um e-mail válido.
+                      </div>
+                    </div>
+
+                    <div class="mb-3">
+                      <input type="text" name="username" class="form-control" id="name" placeholder="Nome e sobrenome" required>
+                      <div class="invalid-feedback">
+                        Por favor, insira o seu nome e sobrenome.
+                      </div>
+                    </div>
+
+                    <p class="small text-muted">
+                      O e-mail e o nome informados serão usados para criar a sua conta automaticamente após a confirmação do pagamento.
+                    </p>
+                  <?php endif; ?>
+
+                  <div class="mb-3 border rounded p-3">
+                    <div class="d-flex flex-column gap-4">
+                      <div class="form-check">
+                        <input class="form-check-input" type="radio" name="payment" id="mobile" checked>
+                        <label class="form-check-label" for="mobile">
+                          Pagar com M-Pesa
+                        </label>
+                      </div>
                     </div>
                   </div>
 
-                  <p class="small text-muted">
-                    O email e o nome informados serão usados para criar a sua conta automaticamente após a confirmação do pagamento.
+                  <label for="client_number" class="form-label fw-semibold">Número de telefone com M-Pesa</label>
+                  <input type="tel" class="form-control mb-3" id="client_number" name="client_number" placeholder="84 000 0000" required>
+                  <div class="invalid-feedback">
+                    Por favor, insira o seu número de telefone com M-Pesa.
+                  </div>
+
+                  <p class="small text-muted mb-3">
+                    Depois de enviar, confirme a solicitação no pop-up do seu celular com a sua senha/PIN do M-Pesa.
                   </p>
-                <?php endif; ?>
 
+                  <input type="hidden" name="id_course" value="<?= $course->id_course ?>">
+                  <input type="hidden" name="amount_payment" value="<?= $course->price_course ?>">
 
-                <div class="mb-3 border rounded p-3" for="mobile">
-                  <div class="d-flex flex-column gap-4">
-                    <div class="form-check">
-                      <input class="form-check-input" type="radio" name="payment" id="mobile" checked>
-                      <label class="form-check-label" for="mobile">
-                        Pagar com Mpesa
-                      </label>
-                    </div>
-                    <!-- <div class="form-check">
-                  <input class="form-check-input" type="radio" name="payment" id="paypal">
-                  <label class="form-check-label" for="paypal">
-                    PayPal
-                  </label>
-                </div> -->
-                  </div>
-                </div>
+                  <button type="submit" class="btn bg-blue-500 text-white w-100 py-2 fw-semibold hover:bg-blue-600">
+                    Finalizar a minha compra
+                    <i class="fas fa-arrow-right ms-2"></i>
+                  </button>
 
-                <label for="client_number" class="form-label fw-semibold">Número de Telefone com M-Pesa</label>
-                <input type="tel" class="form-control mb-3" id="client_number" name="client_number" placeholder="84 000 0000" required>
-                <div class="invalid-feedback">
-                  Por favor, insira seu número de Telefone com Mpesa.
-                </div>
-
-                <p class="small text-muted mb-3">
-                  Depois de enviar, confirme a solicitação no popup do seu celular com a sua senha/PIN do M-Pesa.
-                </p>
-
-                <input type="hidden" name="id_course" value="<?= $course->id_course ?>">
-                <input type="hidden" name="amount_payment" value="<?= $course->price_course ?>">
-
-
-                <!-- <div class="form-check mb-4">
-                  <input class="form-check-input" type="checkbox" id="newsletter">
-                  <label class="form-check-label small" for="newsletter">
-                    Inscrever-se na nossa lista de email
-                  </label>
-                </div> -->
-
-                <button type="submit" class="btn bg-blue-500 text-white w-100 py-2 fw-semibold hover:bg-blue-600">
-                  Finalizar minha compra
-                  <i class="fas fa-arrow-right ms-2"></i>
-                </button>
-
-                <p class="small text-muted text-center mt-3">
-                  Ao finalizar a compra, você concorda com nossos
-                  <a href="#" class="text-blue-500 text-decoration-none">Termos de Serviço</a>
-                </p>
-              </form>
+                  <p class="small text-muted text-center mt-3">
+                    Ao finalizar a compra, você concorda com os nossos
+                    <a href="#" class="text-blue-500 text-decoration-none">Termos de Serviço</a>
+                  </p>
+                </form>
+              </div>
             <?php endif; ?>
-
           </div>
         </div>
       </div>
+    </div>
   </section>
 
-  <!-- SCRIPTS (junta ao final da página, depois de carregar o DOM) -->
-  <!-- Bootstrap JS -->
+  <!-- SCRIPTS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -590,31 +593,27 @@ $session = session();
           text: swalData.text
         });
       <?php endif; ?>
-    
 
-    // Validação do formulário
-    (function() {
-      'use strict';
-      window.addEventListener('load', function() {
-        var forms = document.getElementsByClassName('needs-validation');
-        var validation = Array.prototype.filter.call(forms, function(form) {
-          form.addEventListener('submit', function(event) {
-            if (form.checkValidity() === false) {
-              event.preventDefault();
-              event.stopPropagation();
-            }
-            form.classList.add('was-validated');
-          }, false);
-        });
-      }, false);
-    })();
-
+      (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+          const forms = document.getElementsByClassName('needs-validation');
+          Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+              if (form.checkValidity() === false) {
+                event.preventDefault();
+                event.stopPropagation();
+              }
+              form.classList.add('was-validated');
+            }, false);
+          });
+        }, false);
+      })();
 
       const form = document.getElementById('checkout-form');
-      if (!form) {
-        return;
-      }
+      if (!form) return;
 
+      const checkoutWrapper = document.getElementById('checkout-wrapper');
       const submitButton = form.querySelector('button[type="submit"]');
       const csrfInput = form.querySelector('input[name="<?= csrf_token() ?>"]');
 
@@ -624,23 +623,46 @@ $session = session();
         }
       };
 
+      const renderSuccessMessage = () => {
+        if (!checkoutWrapper) return;
+
+        checkoutWrapper.innerHTML = `
+          <div class="success-checkout-box">
+            <div class="icon">
+              <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <h4>Pagamento efectuado com sucesso!</h4>
+            <p>O seu pagamento foi efectuado com sucesso.</p>
+            <p>Verifique a sua caixa de e-mails e prossiga com a criação da senha para concluir a inscrição.</p>
+            <a href="<?= base_url('/login') ?>" class="btn btn-success mt-2">
+              Prosseguir para o login
+            </a>
+          </div>
+        `;
+      };
 
       const showResult = async (payload) => {
+        const isApproved = payload?.status === 'approved';
+
         const swalData = payload?.swal || {
-          icon: 'error',
-          title: 'Erro',
-          text: 'Nao foi possivel concluir o pagamento.'
+          icon: isApproved ? 'success' : 'error',
+          title: isApproved ? 'Pagamento aprovado' : 'Erro',
+          text: isApproved
+            ? 'O seu pagamento foi efectuado com sucesso.'
+            : 'Não foi possível concluir o pagamento.'
         };
 
-        const shouldAutoRedirect = payload?.status === 'approved' && !!payload?.redirect_url;
-
         await Swal.fire({
-          confirmButtonText: shouldAutoRedirect ? undefined : 'OK',
-          showConfirmButton: !shouldAutoRedirect,
-          timer: shouldAutoRedirect ? 1400 : undefined,
-          timerProgressBar: shouldAutoRedirect,
-          ...swalData
+          icon: swalData.icon,
+          title: swalData.title,
+          text: swalData.text,
+          confirmButtonText: 'OK'
         });
+
+        if (isApproved) {
+          renderSuccessMessage();
+          return;
+        }
 
         if (payload?.redirect_url) {
           window.location.href = payload.redirect_url;
@@ -675,7 +697,7 @@ $session = session();
                 rawText
               };
             } catch (nestedError) {
-              // continua para fallback abaixo
+              // continua para o fallback abaixo
             }
           }
         }
@@ -688,7 +710,7 @@ $session = session();
 
       const toReadableErrorText = (rawText) => {
         if (!rawText) {
-          return 'Nao foi possivel concluir o pedido agora. Tente novamente em instantes.';
+          return 'Não foi possível concluir o pedido agora. Tente novamente dentro de instantes.';
         }
 
         const text = rawText
@@ -696,8 +718,8 @@ $session = session();
           .replace(/\s+/g, ' ')
           .trim();
 
-        if (!text) {
-          return 'Nao foi possivel concluir o pedido agora. Tente novamente em instantes.';
+        if (!text || text === '""' || text === "''") {
+          return 'Não foi possível concluir o pedido agora. Tente novamente dentro de instantes.';
         }
 
         return text.slice(0, 220);
@@ -766,7 +788,7 @@ $session = session();
         Swal.fire({
           icon: 'info',
           title: 'Confirme o PIN',
-          text: 'Estamos aguardando a confirmacao do pagamento no M-Pesa.',
+          text: 'Estamos a aguardar a confirmação do pagamento no M-Pesa.',
           allowOutsideClick: false,
           allowEscapeKey: false,
           showConfirmButton: false,
@@ -779,6 +801,7 @@ $session = session();
           await sleep(5000);
 
           const statusPayload = await fetchPaymentStatus(payload);
+
           if (statusPayload?.csrf) {
             updateCsrf(statusPayload.csrf);
           }
@@ -797,8 +820,8 @@ $session = session();
 
           if (statusPayload?.status === 'pending_confirmation') {
             const waitingText = payload?.gateway_mode === 'async'
-              ? `O pedido foi aceite pelo gateway. Estamos a aguardar a confirmacao final do M-Pesa. Verificacao ${attempt} de ${maxAttempts}.`
-              : `Aguardando a confirmacao do pagamento no M-Pesa. Verificacao ${attempt} de ${maxAttempts}.`;
+              ? `O pedido foi aceite pelo gateway. Estamos a aguardar a confirmação final do M-Pesa. Verificação ${attempt} de ${maxAttempts}.`
+              : `Aguardando a confirmação do pagamento no M-Pesa. Verificação ${attempt} de ${maxAttempts}.`;
 
             Swal.update({
               text: waitingText
@@ -816,8 +839,8 @@ $session = session();
           icon: 'info',
           title: 'Ainda pendente',
           text: payload?.gateway_mode === 'async'
-            ? 'O pedido continua pendente. O gateway aceitou a solicitacao, mas a confirmacao final ainda nao chegou.'
-            : 'O pedido continua pendente. Confirme o PIN no popup do celular e tente novamente em instantes.'
+            ? 'O pedido continua pendente. O gateway aceitou a solicitação, mas a confirmação final ainda não chegou.'
+            : 'O pedido continua pendente. Confirme o PIN no pop-up do celular e tente novamente dentro de instantes.'
         });
       };
 
@@ -830,23 +853,25 @@ $session = session();
 
           await Swal.fire({
             icon: 'warning',
-            title: 'Dados obrigatorios',
+            title: 'Dados obrigatórios',
             text: 'Preencha os campos do checkout antes de continuar.'
           });
           return;
         }
 
         form.classList.add('was-validated');
+
         if (submitButton) {
           submitButton.disabled = true;
         }
 
         Swal.fire({
           icon: 'info',
-          title: 'Aguardando confirmacao',
-          text: 'Estamos a iniciar o pedido no M-Pesa. Se o gateway aceitar a solicitacao, confirme depois no popup do seu celular com a sua senha/PIN.',
+          title: 'Aguardando confirmação',
+          text: 'O seu pedido está a ser processado. Confirme o PIN no pop-up do celular para concluir a compra.',
           allowOutsideClick: false,
           allowEscapeKey: false,
+          showConfirmButton: false,
           didOpen: () => {
             Swal.showLoading();
           }
@@ -887,8 +912,8 @@ $session = session();
           Swal.close();
           await Swal.fire({
             icon: 'error',
-            title: 'Falha na comunicacao',
-            text: error?.message || 'Nao foi possivel concluir o pedido agora. Tente novamente em instantes.'
+            title: 'Falha na comunicação',
+            text: toReadableErrorText(error?.message || '')
           });
         } finally {
           if (submitButton) {
@@ -896,133 +921,39 @@ $session = session();
           }
         }
       });
-
-      return;
-
-      // Manipular seleção de arquivo
-      fileInput.addEventListener('change', function() {
-        if (this.files && this.files[0]) {
-          const file = this.files[0];
-
-          // Verificar se é uma imagem
-          if (!file.type.match('image.*')) {
-            Swal.fire({
-              icon: 'error',
-              title: 'Arquivo inválido',
-              text: 'Por favor, selecione apenas arquivos de imagem.'
-            });
-            return;
-          }
-
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            previewImage.src = e.target.result;
-            previewContainer.style.display = 'block';
-            dropzone.style.display = 'none';
-          }
-          reader.readAsDataURL(file);
-        }
-      });
-
-      // Remover imagem
-      removeImageBtn.addEventListener('click', function() {
-        fileInput.value = '';
-        previewContainer.style.display = 'none';
-        dropzone.style.display = 'flex';
-      });
-
-      // Drag and drop
-      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dropzone.addEventListener(eventName, preventDefaults, false);
-      });
-
-      function preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-
-      ['dragenter', 'dragover'].forEach(eventName => {
-        dropzone.addEventListener(eventName, () => dropzone.classList.add('dragover'), false);
-      });
-
-      ['dragleave', 'drop'].forEach(eventName => {
-        dropzone.addEventListener(eventName, () => dropzone.classList.remove('dragover'), false);
-      });
-
-      dropzone.addEventListener('drop', function(e) {
-        const dt = e.dataTransfer;
-        const files = dt.files;
-
-        if (files.length) {
-          fileInput.files = files;
-          fileInput.dispatchEvent(new Event('change'));
-        }
-      });
-
-      // Validação do formulário
-      form.addEventListener('submit', function(e) {
-        if (!fileInput.files.length) {
-          e.preventDefault();
-          Swal.fire({
-            icon: 'warning',
-            title: 'Comprovante obrigatório',
-            text: 'Por favor, envie o comprovante de pagamento.'
-          });
-          return;
-        }
-
-        // Se quiseres mostrar feedback antes de enviar:
-        Swal.fire({
-          icon: 'info',
-          title: 'Enviando pedido...',
-          text: 'Estamos processando o seu comprovante.',
-          allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading()
-          }
-        });
-      });
     });
   </script>
 
   <script>
-    /**
-     * PRELOADER com percentagem em:
-     *  - #preloaderFill   (largura da barra)
-     *  - #preloaderPct    (texto 0–100)
-     *
-     * Mantém:
-     *  - MIN_PRELOAD_TIME (mínimo visível)
-     *  - Esconde após window.load respeitando o mínimo
-     *  - Fallback de segurança (MIN + 1000)
-     */
     function initPreloader() {
-      const MIN_PRELOAD_TIME = 2000; // 2s mínimo
+      const MIN_PRELOAD_TIME = 2000;
       const startTime = Date.now();
 
       const preloader = document.getElementById('preloader');
       const fillEl = document.getElementById('preloaderFill');
       const pctEl = document.getElementById('preloaderPct');
+
       if (!preloader || !fillEl || !pctEl) return;
 
-      // (opcional) bloquear rolagem enquanto o preloader está visível
       const lockScroll = () => {
         document.documentElement.style.overflow = 'hidden';
       };
+
       const unlockScroll = () => {
         document.documentElement.style.overflow = '';
       };
+
       lockScroll();
 
-      // ---- Medição de progresso (realista) ----
       const WEIGHTS = {
         dom: 20,
         fonts: 10,
         images: 60,
         load: 10
       };
-      let target = 0; // alvo calculado pelos eventos
-      let current = 0; // valor exibido (animação)
+
+      let target = 0;
+      let current = 0;
       let rafId = 0;
       let doneFlag = false;
 
@@ -1030,29 +961,32 @@ $session = session();
         if (target < 0) target = 0;
         if (target > 100) target = 100;
       };
+
       const render = () => {
         const pct = Math.round(current);
         fillEl.style.width = pct + '%';
         pctEl.textContent = pct;
       };
+
       const tick = () => {
-        // easing suave em direção ao alvo
         current += (target - current) * 0.12;
         render();
         if (!doneFlag) rafId = requestAnimationFrame(tick);
       };
 
-      // 1) DOM pronto
       const bumpDom = () => {
         target += WEIGHTS.dom;
         clamp();
       };
-      if (document.readyState === 'interactive' || document.readyState === 'complete') bumpDom();
-      else document.addEventListener('DOMContentLoaded', bumpDom, {
-        once: true
-      });
 
-      // 2) Fontes
+      if (document.readyState === 'interactive' || document.readyState === 'complete') {
+        bumpDom();
+      } else {
+        document.addEventListener('DOMContentLoaded', bumpDom, {
+          once: true
+        });
+      }
+
       if (document.fonts && document.fonts.ready) {
         document.fonts.ready.then(() => {
           target += WEIGHTS.fonts;
@@ -1066,10 +1000,10 @@ $session = session();
         clamp();
       }
 
-      // 3) Imagens (<img> do DOM)
       const imgs = Array.from(document.images || []);
       const total = imgs.length;
       let loaded = 0;
+
       const onImgDone = () => {
         loaded++;
         const frac = total ? loaded / total : 1;
@@ -1078,13 +1012,15 @@ $session = session();
         target = base + imgProgress;
         clamp();
       };
+
       if (total === 0) {
         target += WEIGHTS.images;
         clamp();
       } else {
         imgs.forEach(img => {
-          if (img.complete) onImgDone();
-          else {
+          if (img.complete) {
+            onImgDone();
+          } else {
             img.addEventListener('load', onImgDone, {
               once: true
             });
@@ -1095,14 +1031,13 @@ $session = session();
         });
       }
 
-      // 4) load = fecha a conta (vamos a 100, mas respeitando o mínimo)
       function hidePreloader() {
         if (doneFlag) return;
         doneFlag = true;
 
         target = 100;
         current = 100;
-        render(); // garante 100% visual
+        render();
 
         preloader.style.opacity = '0';
         preloader.addEventListener('transitionend', () => {
@@ -1115,11 +1050,9 @@ $session = session();
         if (rafId) cancelAnimationFrame(rafId);
       }
 
-      // fallback: força esconder após MIN + 1000 (se algo travar)
       const forceHideTimeout = setTimeout(hidePreloader, MIN_PRELOAD_TIME + 1000);
 
       window.addEventListener('load', () => {
-        // soma o peso do load para o indicador
         target += WEIGHTS.load;
         clamp();
 
@@ -1132,11 +1065,9 @@ $session = session();
         once: true
       });
 
-      // inicia a animação do indicador
       rafId = requestAnimationFrame(tick);
     }
 
-    // iniciar quando o DOM estiver pronto
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', initPreloader, {
         once: true
@@ -1145,7 +1076,6 @@ $session = session();
       initPreloader();
     }
   </script>
-
 </body>
 
 </html>

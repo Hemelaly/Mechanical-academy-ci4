@@ -50,6 +50,7 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
         box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.45);
         border-radius: 12px;
     }
+
     .note-editor.note-frame {
         border: 1px solid #cbd5f5;
         border-radius: 1rem;
@@ -84,6 +85,152 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
     .note-editor.note-dark-mode .note-statusbar {
         background-color: #0f172a;
         color: #e2e8f0 !important;
+    }
+
+    .course-preview-card {
+        position: sticky;
+        top: 24px;
+    }
+
+    .course-preview-cover {
+        position: relative;
+        min-height: 220px;
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        overflow: hidden;
+    }
+
+    .course-preview-cover img {
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+        display: block;
+    }
+
+    .course-preview-cover-fallback {
+        height: 220px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(255, 255, 255, .9);
+        font-size: 42px;
+    }
+
+    .course-preview-badge {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        background: rgba(15, 23, 42, 0.78);
+        color: #fff;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        backdrop-filter: blur(8px);
+    }
+
+    .course-preview-price {
+        position: absolute;
+        right: 16px;
+        bottom: 16px;
+        background: #fff;
+        color: #0f172a;
+        padding: 10px 14px;
+        border-radius: 14px;
+        font-size: 14px;
+        font-weight: 800;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+    }
+
+    .dark .course-preview-price {
+        background: #0f172a;
+        color: #fff;
+        border: 1px solid #334155;
+    }
+
+    .course-preview-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        object-fit: contain;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        padding: 8px;
+    }
+
+    .dark .course-preview-icon {
+        background: #0f172a;
+        border-color: #334155;
+    }
+
+    .course-preview-section-title {
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+
+    .dark .course-preview-section-title {
+        color: #94a3b8;
+    }
+
+    .course-preview-richtext ul,
+    .course-preview-richtext ol {
+        padding-left: 18px;
+        margin: 8px 0;
+    }
+
+    .course-preview-richtext p {
+        margin: 0 0 8px;
+    }
+
+    .course-preview-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .dark .course-preview-pill {
+        background: rgba(59, 130, 246, .15);
+        color: #93c5fd;
+    }
+
+    .course-preview-module {
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 14px;
+        background: #fff;
+    }
+
+    .dark .course-preview-module {
+        background: #0f172a;
+        border-color: #334155;
+    }
+
+    .course-preview-project {
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 12px;
+        background: #fff;
+    }
+
+    .dark .course-preview-project {
+        background: #0f172a;
+        border-color: #334155;
+    }
+
+    .course-preview-project img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 12px;
+        margin-bottom: 10px;
     }
 </style>
 
@@ -146,557 +293,567 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
         </div>
 
         <!-- Form -->
-        <form id="courseForm" action="<?= base_url('instructor/dashboard/editar_curso/' . $course->id_course) ?>" method="post" enctype="multipart/form-data" class="space-y-6">
-            <input type="hidden" name="id_instructor_course" value="<?= $user->id ?>">
-            <input type="hidden" id="modules-json" name="modules">
-            <input type="hidden" id="modules-json-alt" name="modules_json">
-            <input type="hidden" id="projects-json" name="projects_json">
-            <input type="hidden" name="projects_present" value="1">
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+            <div class="xl:col-span-2">
+                <form id="courseForm" action="<?= base_url('instructor/dashboard/editar_curso/' . $course->id_course) ?>" method="post" enctype="multipart/form-data" class="space-y-6">
+                    <input type="hidden" name="id_instructor_course" value="<?= $user->id ?>">
+                    <input type="hidden" id="modules-json" name="modules">
+                    <input type="hidden" id="modules-json-alt" name="modules_json">
+                    <input type="hidden" id="projects-json" name="projects_json">
+                    <input type="hidden" name="projects_present" value="1">
 
-            <!-- Step 1: Basic Info -->
-            <div id="basic-info" class="tab-content active bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-                <!-- Header -->
-                <div class="p-6 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
-                            <i class="bi bi-info-circle text-white text-sm"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-2xl font-bold text-slate-800 dark:text-white">Informações Básicas do Curso</h3>
-                            <p class="text-slate-600 dark:text-slate-400 text-sm">Atualize os campos do seu curso</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Content -->
-                <div class="p-6">
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <!-- Left Column (Text fields) -->
-                        <div class="lg:col-span-2 space-y-4">
-                            <div class="space-y-2">
-                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                                    <i class="bi bi-type text-blue-500 mr-2"></i>
-                                    Título do Curso *
-                                </label>
-                                <input type="text" id="title_course" name="title_course"
-                                    placeholder="Ex: Desenvolvimento Web Completo"
-                                    required value="<?= esc($course->title_course) ?>"
-                                    class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm">
-                            </div>
-
-                            <div class="space-y-2">
-                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                                    <i class="bi bi-text-left text-blue-500 mr-2"></i>
-                                    Subtítulo do Curso *
-                                </label>
-                                <input type="text" id="courseSubtitle" name="subtitle_course"
-                                    placeholder="Ex: Do zero ao avançado com HTML, CSS e JavaScript"
-                                    required value="<?= esc($course->subtitle_course) ?>"
-                                    class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm">
-                            </div>
-
-                            <div class="space-y-2">
-                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                                    <i class="bi bi-card-text text-blue-500 mr-2"></i>
-                                    Descrição do Curso *
-                                </label>
-                                <textarea rows="8" id="courseDescription" name="description_course"
-                                    placeholder="Descreva detalhadamente seu curso..."
-                                    class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"><?= $courseDescriptionValue ?></textarea>
-                            </div>
-
-                            <div class="space-y-2">
-                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                                    <i class="bi bi-list-check text-blue-500 mr-2"></i>
-                                    O que você aprenderá *
-                                </label>
-                                <textarea rows="6" id="courseLearning" name="learning_course"
-                                    placeholder="Liste os principais tópicos ou habilidades que os alunos dominarão..."
-                                    class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"><?= $courseLearningValue ?></textarea>
-                                <p class="text-xs text-slate-500 dark:text-slate-400">
-                                    Use o editor para criar listas, negritos e links personalizados
-                                </p>
-                            </div>
-
-                            <div class="space-y-2">
-                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                                    <i class="bi bi-play-btn text-blue-500 mr-2"></i>
-                                    Vídeo de visão geral
-                                </label>
-                                <input type="url" id="courseVideo" name="url_video_course"
-                                    placeholder="https://vimeo.com/xxxxx ou https://www.youtube.com/watch?v=..."
-                                    value="<?= esc($course->url_video_course) ?>"
-                                    class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm">
-                                <p class="text-xs text-slate-500 dark:text-slate-400">
-                                    URL exibida na página pública dentro do bloco de vídeo.
-                                </p>
+                    <!-- Step 1: Basic Info -->
+                    <div id="basic-info" class="tab-content active bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                        <!-- Header -->
+                        <div class="p-6 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                                    <i class="bi bi-info-circle text-white text-sm"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-2xl font-bold text-slate-800 dark:text-white">Informações Básicas do Curso</h3>
+                                    <p class="text-slate-600 dark:text-slate-400 text-sm">Atualize os campos do seu curso</p>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Right Column (Image upload) -->
-                        <div class="space-y-4">
-                            <div class="space-y-2">
-                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                                    <i class="bi bi-image text-blue-500 mr-2"></i>
-                                    Imagem de Capa *
-                                </label>
+                        <!-- Content -->
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                <!-- Left Column (Text fields) -->
+                                <div class="lg:col-span-2 space-y-4">
+                                    <div class="space-y-2">
+                                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                            <i class="bi bi-type text-blue-500 mr-2"></i>
+                                            Título do Curso *
+                                        </label>
+                                        <input type="text" id="title_course" name="title_course"
+                                            placeholder="Ex: Desenvolvimento Web Completo"
+                                            required value="<?= esc($course->title_course) ?>"
+                                            class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm">
+                                    </div>
 
-                                <!-- Upload Area -->
-                                <div id="upload-area" class="border-2 border-dashed border-blue-400 rounded-2xl p-6 text-center bg-blue-50 dark:bg-blue-900/20 transition-all duration-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-500 cursor-pointer <?= $course->image_course ? 'hidden' : '' ?>">
-                                    <i class="bi bi-cloud-arrow-up text-blue-500 text-3xl mb-3"></i>
-                                    <h6 class="font-medium text-slate-700 dark:text-slate-300 text-sm mb-1">
-                                        Arraste uma imagem ou clique para selecionar
-                                    </h6>
-                                    <p class="text-slate-500 dark:text-slate-400 text-xs mb-3">
-                                        Recomendado: 1280x720px, máx. 2MB
-                                    </p>
-                                    <input type="file" id="courseImage" name="image_course" accept="image/*" class="hidden">
-                                    <button type="button" onclick="document.getElementById('courseImage').click()"
-                                        class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors text-sm">
-                                        <i class="bi bi-folder2-open mr-2"></i>
-                                        Selecionar Arquivo
-                                    </button>
+                                    <div class="space-y-2">
+                                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                            <i class="bi bi-text-left text-blue-500 mr-2"></i>
+                                            Subtítulo do Curso *
+                                        </label>
+                                        <input type="text" id="courseSubtitle" name="subtitle_course"
+                                            placeholder="Ex: Do zero ao avançado com HTML, CSS e JavaScript"
+                                            required value="<?= esc($course->subtitle_course) ?>"
+                                            class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm">
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                            <i class="bi bi-card-text text-blue-500 mr-2"></i>
+                                            Descrição do Curso *
+                                        </label>
+                                        <textarea rows="8" id="courseDescription" name="description_course"
+                                            placeholder="Descreva detalhadamente seu curso..."
+                                            class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"><?= $courseDescriptionValue ?></textarea>
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                            <i class="bi bi-list-check text-blue-500 mr-2"></i>
+                                            O que você aprenderá *
+                                        </label>
+                                        <textarea rows="6" id="courseLearning" name="learning_course"
+                                            placeholder="Liste os principais tópicos ou habilidades que os alunos dominarão..."
+                                            class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"><?= $courseLearningValue ?></textarea>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400">
+                                            Use o editor para criar listas, negritos e links personalizados
+                                        </p>
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                            <i class="bi bi-play-btn text-blue-500 mr-2"></i>
+                                            Vídeo de visão geral
+                                        </label>
+                                        <input type="url" id="courseVideo" name="url_video_course"
+                                            placeholder="https://vimeo.com/xxxxx ou https://www.youtube.com/watch?v=..."
+                                            value="<?= esc($course->url_video_course) ?>"
+                                            class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm">
+                                        <p class="text-xs text-slate-500 dark:text-slate-400">
+                                            URL exibida na página pública dentro do bloco de vídeo.
+                                        </p>
+                                    </div>
                                 </div>
 
-                                <!-- Image Preview -->
-                                <?php if ($course->image_course): ?>
-                                    <div id="image-preview" class="mt-3">
-                                        <img id="preview-img"
-                                            src="<?= base_url('assets/instructor/img/courses/' . $course->image_course) ?>"
-                                            alt="Preview"
-                                            class="w-full h-48 object-cover rounded-2xl shadow-lg">
-                                        <button type="button" id="remove-image"
-                                            class="w-full mt-3 px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg transition-colors text-sm">
-                                            <i class="bi bi-trash mr-2"></i>
-                                            Remover Imagem
+                                <!-- Right Column (Image upload) -->
+                                <div class="space-y-4">
+                                    <div class="space-y-2">
+                                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                            <i class="bi bi-image text-blue-500 mr-2"></i>
+                                            Imagem de Capa *
+                                        </label>
+
+                                        <!-- Upload Area -->
+                                        <div id="upload-area" class="border-2 border-dashed border-blue-400 rounded-2xl p-6 text-center bg-blue-50 dark:bg-blue-900/20 transition-all duration-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-500 cursor-pointer <?= $course->image_course ? 'hidden' : '' ?>">
+                                            <i class="bi bi-cloud-arrow-up text-blue-500 text-3xl mb-3"></i>
+                                            <h6 class="font-medium text-slate-700 dark:text-slate-300 text-sm mb-1">
+                                                Arraste uma imagem ou clique para selecionar
+                                            </h6>
+                                            <p class="text-slate-500 dark:text-slate-400 text-xs mb-3">
+                                                Recomendado: 1280x720px, máx. 2MB
+                                            </p>
+                                            <input type="file" id="courseImage" name="image_course" accept="image/*" class="hidden">
+                                            <button type="button" onclick="document.getElementById('courseImage').click()"
+                                                class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors text-sm">
+                                                <i class="bi bi-folder2-open mr-2"></i>
+                                                Selecionar Arquivo
+                                            </button>
+                                        </div>
+
+                                        <!-- Image Preview -->
+                                        <div id="image-preview" class="<?= !empty($course->image_course) ? '' : 'hidden' ?> mt-4">
+                                            <div class="relative">
+                                                <img id="preview-img"
+                                                    src="<?= !empty($course->image_course) ? base_url('assets/instructor/img/courses/' . $course->image_course) : '' ?>"
+                                                    alt="Preview"
+                                                    class="w-full h-32 sm:h-48 object-cover rounded-2xl shadow-lg" />
+                                                <button type="button"
+                                                    id="remove-image"
+                                                    class="absolute top-2 right-2 w-8 h-8 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center transition-colors">
+                                                    <i class="bi bi-x text-sm"></i>
+                                                </button>
+                                            </div>
+                                            <p class="text-xs text-green-600 dark:text-green-400 mt-2 text-center">
+                                                <i class="bi bi-check-circle"></i> Imagem selecionada com sucesso
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <label for="courseIcon" class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                            <i class="bi bi-grid-1x2-fill text-blue-500 mr-2"></i>
+                                            Ícone do Curso
+                                        </label>
+                                        <input type="file" id="courseIcon" name="icon_course"
+                                            accept=".png,.jpg,.jpeg,.gif,.webp,.avif"
+                                            class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700">
+                                        <p class="text-xs text-slate-500 dark:text-slate-400">
+                                            Ícone exibido nos cards da home. Recomendado: 64x64px (PNG/WebP).
+                                        </p>
+                                        <div id="icon-preview" class="mt-2 inline-flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2 bg-slate-50 dark:bg-slate-900 <?= !empty($course->icon_course) ? '' : 'hidden' ?>">
+                                            <img id="icon-preview-img"
+                                                src="<?= !empty($course->icon_course) ? base_url('assets/img/' . $course->icon_course) : '' ?>"
+                                                alt="Ícone do curso"
+                                                class="w-10 h-10 object-contain rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600">
+                                            <span id="icon-preview-label" class="text-xs text-slate-600 dark:text-slate-300">
+                                                <?= !empty($course->icon_course) ? 'Ícone atual do curso' : 'Pré-visualização do ícone' ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Content Structure -->
+                    <div id="content-structure" class="tab-content hidden bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                        <!-- Header -->
+                        <div class="p-6 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                                    <i class="bi bi-diagram-3 text-white text-sm"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-2xl font-bold text-slate-800 dark:text-white">Estrutura do Conteúdo</h3>
+                                    <p class="text-slate-600 dark:text-slate-400 text-sm">Organize seu curso em módulos e aulas</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="p-6">
+                            <div id="modules-container" class="space-y-4">
+                                <?php foreach ($modules as $mIndex => $module): ?>
+                                    <div class="module-card border border-slate-300 dark:border-slate-700 rounded-2xl p-4 bg-slate-50 dark:bg-slate-900" data-index="<?= $mIndex ?>">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <input type="text" name="modules[<?= $mIndex ?>][title]"
+                                                placeholder="Nome do Módulo"
+                                                value="<?= esc($module->title_module) ?>"
+                                                class="flex-1 px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <i class="bi bi-x-circle text-red-500 text-lg ml-2 cursor-pointer hover:text-red-600 transition-colors remove-module" title="Remover módulo"></i>
+                                        </div>
+
+                                        <textarea name="modules[<?= $mIndex ?>][description]"
+                                            placeholder="Descrição do Módulo"
+                                            class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500"><?= esc($module->description_module) ?></textarea>
+
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                                            <div>
+                                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                                                    Nota mínima do quiz (%)
+                                                </label>
+                                                <input type="number"
+                                                    name="modules[<?= $mIndex ?>][min_score]"
+                                                    min="0"
+                                                    max="100"
+                                                    value="<?= esc($module->min_score_module ?? 80) ?>"
+                                                    class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                                    placeholder="Ex: 80">
+                                            </div>
+                                        </div>
+
+                                        <!-- Lessons Container -->
+                                        <div class="lessons-container space-y-3 mb-3">
+                                            <?php foreach ($module->lessons as $lIndex => $lesson): ?>
+                                                <div class="lesson-item border border-slate-200 dark:border-slate-700 rounded-xl p-3 bg-white dark:bg-slate-800" data-index="<?= $lIndex ?>" draggable="true">
+                                                    <?php
+                                                    $quizQuestions = [];
+                                                    if (($lesson->type_lesson ?? '') === 'quiz' && !empty($lesson->content_lesson)) {
+                                                        $decodedQuiz = json_decode($lesson->content_lesson, true);
+                                                        if (is_array($decodedQuiz) && !empty($decodedQuiz['questions'])) {
+                                                            $quizQuestions = $decodedQuiz['questions'];
+                                                        }
+                                                    }
+
+                                                    foreach ($quizQuestions as $qIndex => $q) {
+                                                        if (!is_array($q)) {
+                                                            $quizQuestions[$qIndex] = [
+                                                                'question' => (string) $q,
+                                                                'options' => ['', '', '', ''],
+                                                                'correct' => 0,
+                                                            ];
+                                                            continue;
+                                                        }
+
+                                                        if (!isset($q['options'])) {
+                                                            $quizQuestions[$qIndex]['options'] = ['', '', '', ''];
+                                                            $quizQuestions[$qIndex]['correct'] = 0;
+                                                        }
+                                                    }
+                                                    ?>
+                                                    <div class="flex items-center justify-between mb-2">
+                                                        <span class="drag-handle text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-grab select-none px-1" title="Arraste para ordenar" draggable="true">
+                                                            <i class="bi bi-grip-vertical"></i>
+                                                        </span>
+                                                        <input type="text"
+                                                            name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][title]"
+                                                            placeholder="Título da Aula"
+                                                            value="<?= esc($lesson->title_lesson) ?>"
+                                                            class="flex-1 px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                                        <i class="bi bi-x-circle text-red-500 text-base ml-2 cursor-pointer hover:text-red-600 transition-colors remove-lesson" title="Remover aula"></i>
+                                                    </div>
+
+                                                    <select name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][type]"
+                                                        class="lesson-type w-full px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-sm mb-2 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                                        <option value="video" <?= $lesson->type_lesson == 'video' ? 'selected' : '' ?>>Vídeo</option>
+                                                        <option value="text" <?= $lesson->type_lesson == 'text' ? 'selected' : '' ?>>Texto</option>
+                                                        <option value="quiz" <?= $lesson->type_lesson == 'quiz' ? 'selected' : '' ?>>Quiz</option>
+                                                        <option value="exercise" <?= $lesson->type_lesson == 'exercise' ? 'selected' : '' ?>>Exercício</option>
+                                                    </select>
+
+                                                    <input type="number" name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][duration]"
+                                                        placeholder="Duração (min)"
+                                                        value="<?= esc($lesson->duration_lesson) ?>"
+                                                        class="w-full px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-sm mb-2 focus:outline-none focus:ring-1 focus:ring-blue-500">
+
+                                                    <div class="video-fields">
+                                                        <input type="url" name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][video_url]"
+                                                            placeholder="Link do vídeo (para aulas de vídeo)"
+                                                            value="<?= esc($lesson->video_url_lesson) ?>"
+                                                            class="w-full px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                                    </div>
+
+                                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
+                                                        <div>
+                                                            <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                                                                Arquivo da aula (opcional)
+                                                            </label>
+                                                            <input type="file"
+                                                                name="lesson_files[<?= $mIndex ?>][<?= $lIndex ?>]"
+                                                                accept=".zip,.rar,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx"
+                                                                class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                                            <input type="hidden"
+                                                                name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][file_existing]"
+                                                                value="<?= esc($lesson->attachment_path_lesson ?? '') ?>">
+                                                            <input type="hidden"
+                                                                name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][file_existing_name]"
+                                                                value="<?= esc($lesson->attachment_name_lesson ?? '') ?>">
+                                                            <?php if (!empty($lesson->attachment_path_lesson)): ?>
+                                                                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                                                                    Atual: <?= esc($lesson->attachment_name_lesson ?? $lesson->attachment_path_lesson) ?>
+                                                                </p>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="quiz-fields <?= $lesson->type_lesson === 'quiz' ? '' : 'hidden' ?> mt-3 bg-slate-100/60 dark:bg-slate-900/60 border border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-3">
+                                                        <div class="flex items-center justify-between mb-2">
+                                                            <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                                                                Perguntas do quiz
+                                                            </span>
+                                                            <button type="button"
+                                                                class="btn-add-quiz-question inline-flex items-center gap-1 px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white text-[11px] font-medium rounded-lg">
+                                                                <i class="bi bi-plus"></i>
+                                                                Adicionar pergunta
+                                                            </button>
+                                                        </div>
+                                                        <div class="quiz-questions space-y-2">
+                                                            <?php foreach ($quizQuestions as $qIndex => $question): ?>
+                                                                <div class="quiz-question grid grid-cols-1 md:grid-cols-2 gap-2 items-center">
+                                                                    <input type="text"
+                                                                        name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][quiz][<?= $qIndex ?>][question]"
+                                                                        class="px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                                                        placeholder="Pergunta"
+                                                                        value="<?= esc($question['question'] ?? '') ?>">
+                                                                    <div class="flex flex-col gap-2">
+                                                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                                            <?php for ($opt = 0; $opt < 4; $opt++): ?>
+                                                                                <input type="text"
+                                                                                    name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][quiz][<?= $qIndex ?>][options][<?= $opt ?>]"
+                                                                                    class="px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                                                                    placeholder="Alternativa <?= $opt + 1 ?>"
+                                                                                    value="<?= esc($question['options'][$opt] ?? '') ?>">
+                                                                            <?php endfor; ?>
+                                                                        </div>
+                                                                        <div class="flex gap-2 items-center">
+                                                                            <select name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][quiz][<?= $qIndex ?>][correct]"
+                                                                                class="flex-1 px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                                                                <?php for ($opt = 0; $opt < 4; $opt++): ?>
+                                                                                    <option value="<?= $opt ?>" <?= (int) ($question['correct'] ?? 0) === $opt ? 'selected' : '' ?>>
+                                                                                        Correta: alternativa <?= $opt + 1 ?>
+                                                                                    </option>
+                                                                                <?php endfor; ?>
+                                                                            </select>
+                                                                            <button type="button"
+                                                                                class="remove-quiz-question text-red-500 hover:text-red-600 text-base"
+                                                                                title="Remover pergunta">
+                                                                                <i class="bi bi-x-circle"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            <?php endforeach; ?>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+
+                                        <button type="button" class="add-lesson px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors text-sm" data-module="<?= $mIndex ?>">
+                                            <i class="bi bi-plus-circle mr-1"></i> Adicionar Aula
                                         </button>
                                     </div>
-                                <?php else: ?>
-                                    <div id="image-preview" class="hidden"></div>
-                                <?php endif; ?>
+                                <?php endforeach; ?>
                             </div>
 
-                            <div class="space-y-2">
-                                <label for="courseIcon" class="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                                    <i class="bi bi-grid-1x2-fill text-blue-500 mr-2"></i>
-                                    Ícone do Curso
-                                </label>
-                                <input type="file" id="courseIcon" name="icon_course"
-                                    accept=".png,.jpg,.jpeg,.gif,.webp,.avif"
-                                    class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700">
-                                <p class="text-xs text-slate-500 dark:text-slate-400">
-                                    Ícone exibido nos cards da home. Recomendado: 64x64px (PNG/WebP).
-                                </p>
-                                <div id="icon-preview" class="mt-2 inline-flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2 bg-slate-50 dark:bg-slate-900 <?= !empty($course->icon_course) ? '' : 'hidden' ?>">
-                                    <img id="icon-preview-img"
-                                        src="<?= !empty($course->icon_course) ? base_url('assets/img/' . $course->icon_course) : '' ?>"
-                                        alt="Ícone do curso"
-                                        class="w-10 h-10 object-contain rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600">
-                                    <span id="icon-preview-label" class="text-xs text-slate-600 dark:text-slate-300">
-                                        <?= !empty($course->icon_course) ? 'Ícone atual do curso' : 'Pré-visualização do ícone' ?>
-                                    </span>
+                            <button type="button" id="add-module" class="mt-4 px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl">
+                                <i class="bi bi-plus-circle mr-2"></i>
+                                Adicionar Módulo
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Advanced Settings -->
+                    <div id="advanced-settings" class="tab-content hidden bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                        <!-- Header -->
+                        <div class="p-6 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                                    <i class="bi bi-gear text-white text-sm"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-2xl font-bold text-slate-800 dark:text-white">Configurações Avançadas</h3>
+                                    <p class="text-slate-600 dark:text-slate-400 text-sm">Defina as configurações do curso</p>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Step 2: Content Structure -->
-            <div id="content-structure" class="tab-content hidden bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-                <!-- Header -->
-                <div class="p-6 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
-                            <i class="bi bi-diagram-3 text-white text-sm"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-2xl font-bold text-slate-800 dark:text-white">Estrutura do Conteúdo</h3>
-                            <p class="text-slate-600 dark:text-slate-400 text-sm">Organize seu curso em módulos e aulas</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Content -->
-                <div class="p-6">
-                    <div id="modules-container" class="space-y-4">
-                        <?php foreach ($modules as $mIndex => $module): ?>
-                            <div class="module-card border border-slate-300 dark:border-slate-700 rounded-2xl p-4 bg-slate-50 dark:bg-slate-900" data-index="<?= $mIndex ?>">
-                                <div class="flex items-center justify-between mb-3">
-                                    <input type="text" name="modules[<?= $mIndex ?>][title]"
-                                        placeholder="Nome do Módulo"
-                                        value="<?= esc($module->title_module) ?>"
-                                        class="flex-1 px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <i class="bi bi-x-circle text-red-500 text-lg ml-2 cursor-pointer hover:text-red-600 transition-colors remove-module" title="Remover módulo"></i>
-                                </div>
-
-                                <textarea name="modules[<?= $mIndex ?>][description]"
-                                    placeholder="Descrição do Módulo"
-                                    class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500"><?= esc($module->description_module) ?></textarea>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
-                                            Nota mínima do quiz (%)
+                        <!-- Content -->
+                        <div class="p-6">
+                            <div class="space-y-4">
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                        Tipo de Curso
+                                    </label>
+                                    <div class="flex flex-wrap gap-4">
+                                        <label class="inline-flex items-center">
+                                            <input type="radio" name="courseType" value="free" <?= $course->price_course == 0 ? 'checked' : '' ?>
+                                                class="text-blue-500 focus:ring-blue-500">
+                                            <span class="ml-2 text-slate-700 dark:text-slate-300 text-sm">Gratuito</span>
                                         </label>
-                                        <input type="number"
-                                            name="modules[<?= $mIndex ?>][min_score]"
-                                            min="0"
-                                            max="100"
-                                            value="<?= esc($module->min_score_module ?? 80) ?>"
-                                            class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                            placeholder="Ex: 80">
+                                        <label class="inline-flex items-center">
+                                            <input type="radio" name="courseType" value="paid" <?= $course->price_course > 0 ? 'checked' : '' ?>
+                                                class="text-blue-500 focus:ring-blue-500">
+                                            <span class="ml-2 text-slate-700 dark:text-slate-300 text-sm">Pago</span>
+                                        </label>
                                     </div>
                                 </div>
 
-                                <!-- Lessons Container -->
-                                <div class="lessons-container space-y-3 mb-3">
-                                    <?php foreach ($module->lessons as $lIndex => $lesson): ?>
-                                        <div class="lesson-item border border-slate-200 dark:border-slate-700 rounded-xl p-3 bg-white dark:bg-slate-800" data-index="<?= $lIndex ?>" draggable="true">
-                                            <?php
-                                            $quizQuestions = [];
-                                            if (($lesson->type_lesson ?? '') === 'quiz' && !empty($lesson->content_lesson)) {
-                                                $decodedQuiz = json_decode($lesson->content_lesson, true);
-                                                if (is_array($decodedQuiz) && !empty($decodedQuiz['questions'])) {
-                                                    $quizQuestions = $decodedQuiz['questions'];
-                                                }
-                                            }
+                                <div id="price-settings" class="space-y-2 <?= $course->price_course > 0 ? '' : 'hidden' ?>">
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                        Preço do Curso
+                                    </label>
+                                    <input type="number" id="coursePrice" name="price_course" min="0" step="0.01"
+                                        value="<?= esc($course->price_course) ?>"
+                                        class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm">
+                                </div>
 
-                                            foreach ($quizQuestions as $qIndex => $q) {
-                                                if (!is_array($q)) {
-                                                    $quizQuestions[$qIndex] = [
-                                                        'question' => (string) $q,
-                                                        'options' => ['', '', '', ''],
-                                                        'correct' => 0,
-                                                    ];
-                                                    continue;
-                                                }
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                        Cor primária do curso
+                                    </label>
+                                    <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-center">
+                                        <input type="text"
+                                            id="courseColorText"
+                                            name="color_course"
+                                            value="<?= esc($course->color_course ?? '#3b82f6') ?>"
+                                            class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
+                                            placeholder="#3b82f6">
+                                        <input type="color"
+                                            id="courseColorPicker"
+                                            value="<?= esc($course->color_course ?? '#3b82f6') ?>"
+                                            class="h-12 w-16 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+                                    </div>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                                        Cole um código HEX ou selecione no color picker.
+                                    </p>
+                                </div>
 
-                                                if (!isset($q['options'])) {
-                                                    $quizQuestions[$qIndex]['options'] = ['', '', '', ''];
-                                                    $quizQuestions[$qIndex]['correct'] = 0;
-                                                }
-                                            }
-                                            ?>
-                                            <div class="flex items-center justify-between mb-2">
-                                                <span class="drag-handle text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-grab select-none px-1" title="Arraste para ordenar" draggable="true">
-                                                    <i class="bi bi-grip-vertical"></i>
-                                                </span>
-                                                <input type="text"
-                                                    name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][title]"
-                                                    placeholder="Título da Aula"
-                                                    value="<?= esc($lesson->title_lesson) ?>"
-                                                    class="flex-1 px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
-                                                <i class="bi bi-x-circle text-red-500 text-base ml-2 cursor-pointer hover:text-red-600 transition-colors remove-lesson" title="Remover aula"></i>
-                                            </div>
-
-                                            <select name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][type]"
-                                                class="lesson-type w-full px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-sm mb-2 focus:outline-none focus:ring-1 focus:ring-blue-500">
-                                                <option value="video" <?= $lesson->type_lesson == 'video' ? 'selected' : '' ?>>Vídeo</option>
-                                                <option value="text" <?= $lesson->type_lesson == 'text' ? 'selected' : '' ?>>Texto</option>
-                                                <option value="quiz" <?= $lesson->type_lesson == 'quiz' ? 'selected' : '' ?>>Quiz</option>
-                                                <option value="exercise" <?= $lesson->type_lesson == 'exercise' ? 'selected' : '' ?>>Exercício</option>
-                                            </select>
-
-                                            <input type="number" name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][duration]"
-                                                placeholder="Duração (min)"
-                                                value="<?= esc($lesson->duration_lesson) ?>"
-                                                class="w-full px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-sm mb-2 focus:outline-none focus:ring-1 focus:ring-blue-500">
-
-                                            <div class="video-fields">
-                                                <input type="url" name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][video_url]"
-                                                    placeholder="Link do vídeo (para aulas de vídeo)"
-                                                    value="<?= esc($lesson->video_url_lesson) ?>"
-                                                    class="w-full px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
-                                            </div>
-
-                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-between gap-3">
+                                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                            Projetos relacionados
+                                        </label>
+                                        <button type="button"
+                                            id="add-project"
+                                            class="inline-flex items-center gap-2 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-xl transition-all duration-200">
+                                            <i class="bi bi-plus-circle"></i>
+                                            Adicionar projeto
+                                        </button>
+                                    </div>
+                                    <div id="projects-container" class="space-y-4">
+                                        <?php foreach (($projects ?? []) as $pIndex => $project): ?>
+                                            <div class="project-card border border-slate-200 dark:border-slate-700 rounded-2xl p-4 bg-slate-50 dark:bg-slate-900" data-index="<?= $pIndex ?>">
+                                                <div class="flex items-center justify-between gap-2 mb-2">
+                                                    <input type="text"
+                                                        name="projects[<?= $pIndex ?>][title]"
+                                                        value="<?= esc($project->title_project ?? '') ?>"
+                                                        class="flex-1 px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                    <button type="button"
+                                                        class="remove-project text-red-500 hover:text-red-600 text-lg"
+                                                        title="Remover projeto">
+                                                        <i class="bi bi-x-circle"></i>
+                                                    </button>
+                                                </div>
+                                                <textarea name="projects[<?= $pIndex ?>][description]"
+                                                    class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    placeholder="Descrição do projeto"><?= esc($project->description_project ?? '') ?></textarea>
                                                 <div>
-                                                    <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
-                                                        Arquivo da aula (opcional)
+                                                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                                                        Imagem do projeto (opcional)
                                                     </label>
                                                     <input type="file"
-                                                        name="lesson_files[<?= $mIndex ?>][<?= $lIndex ?>]"
-                                                        accept=".zip,.rar,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx"
-                                                        class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                                        name="project_images[<?= $pIndex ?>]"
+                                                        accept="image/*"
+                                                        class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
                                                     <input type="hidden"
-                                                        name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][file_existing]"
-                                                        value="<?= esc($lesson->attachment_path_lesson ?? '') ?>">
-                                                    <input type="hidden"
-                                                        name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][file_existing_name]"
-                                                        value="<?= esc($lesson->attachment_name_lesson ?? '') ?>">
-                                                    <?php if (!empty($lesson->attachment_path_lesson)): ?>
-                                                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                                                            Atual: <?= esc($lesson->attachment_name_lesson ?? $lesson->attachment_path_lesson) ?>
+                                                        name="projects[<?= $pIndex ?>][img_existing]"
+                                                        value="<?= esc($project->img_project ?? '') ?>">
+                                                    <?php if (!empty($project->img_project)): ?>
+                                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                                            Atual: <?= esc($project->img_project) ?>
                                                         </p>
                                                     <?php endif; ?>
                                                 </div>
                                             </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                                        Adicione projetos práticos relacionados ao curso.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                                            <div class="quiz-fields <?= $lesson->type_lesson === 'quiz' ? '' : 'hidden' ?> mt-3 bg-slate-100/60 dark:bg-slate-900/60 border border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-3">
-                                                <div class="flex items-center justify-between mb-2">
-                                                    <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">
-                                                        Perguntas do quiz
-                                                    </span>
-                                                    <button type="button"
-                                                        class="btn-add-quiz-question inline-flex items-center gap-1 px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white text-[11px] font-medium rounded-lg">
-                                                        <i class="bi bi-plus"></i>
-                                                        Adicionar pergunta
-                                                    </button>
-                                                </div>
-                                                <div class="quiz-questions space-y-2">
-                                                    <?php foreach ($quizQuestions as $qIndex => $question): ?>
-                                                        <div class="quiz-question grid grid-cols-1 md:grid-cols-2 gap-2 items-center">
-                                                            <input type="text"
-                                                                name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][quiz][<?= $qIndex ?>][question]"
-                                                                class="px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                                                placeholder="Pergunta"
-                                                                value="<?= esc($question['question'] ?? '') ?>">
-                                                            <div class="flex flex-col gap-2">
-                                                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                                    <?php for ($opt = 0; $opt < 4; $opt++): ?>
-                                                                        <input type="text"
-                                                                            name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][quiz][<?= $qIndex ?>][options][<?= $opt ?>]"
-                                                                            class="px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                                                            placeholder="Alternativa <?= $opt + 1 ?>"
-                                                                            value="<?= esc($question['options'][$opt] ?? '') ?>">
-                                                                    <?php endfor; ?>
-                                                                </div>
-                                                                <div class="flex gap-2 items-center">
-                                                                    <select name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][quiz][<?= $qIndex ?>][correct]"
-                                                                        class="flex-1 px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
-                                                                        <?php for ($opt = 0; $opt < 4; $opt++): ?>
-                                                                            <option value="<?= $opt ?>" <?= (int) ($question['correct'] ?? 0) === $opt ? 'selected' : '' ?>>
-                                                                                Correta: alternativa <?= $opt + 1 ?>
-                                                                            </option>
-                                                                        <?php endfor; ?>
-                                                                    </select>
-                                                                    <button type="button"
-                                                                        class="remove-quiz-question text-red-500 hover:text-red-600 text-base"
-                                                                        title="Remover pergunta">
-                                                                        <i class="bi bi-x-circle"></i>
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    <?php endforeach; ?>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    <?php endforeach; ?>
+                    <!-- Step 4: Review and Publish -->
+                    <div id="review-publish" class="tab-content hidden bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                        <!-- Header -->
+                        <div class="p-6 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                                    <i class="bi bi-rocket text-white text-sm"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-2xl font-bold text-slate-800 dark:text-white">Revisão e Publicação</h3>
+                                    <p class="text-slate-600 dark:text-slate-400 text-sm">Finalize e publique seu curso</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="p-6">
+                            <div class="space-y-6">
+                                <div class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 sm:p-6 space-y-3">
+                                    <h4 class="text-sm font-semibold text-slate-800 dark:text-white flex items-center gap-2">
+                                        <i class="bi bi-people text-blue-600"></i>
+                                        Estudantes inscritos
+                                    </h4>
+                                    <div class="text-2xl font-bold text-slate-800 dark:text-white">
+                                        <?= number_format((int) ($enrolledCount ?? 0), 0, '', '.') ?>
+                                    </div>
                                 </div>
 
-                                <button type="button" class="add-lesson px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors text-sm" data-module="<?= $mIndex ?>">
-                                    <i class="bi bi-plus-circle mr-1"></i> Adicionar Aula
-                                </button>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-
-                    <button type="button" id="add-module" class="mt-4 px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl">
-                        <i class="bi bi-plus-circle mr-2"></i>
-                        Adicionar Módulo
-                    </button>
-                </div>
-            </div>
-
-            <!-- Step 3: Advanced Settings -->
-            <div id="advanced-settings" class="tab-content hidden bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-                <!-- Header -->
-                <div class="p-6 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
-                            <i class="bi bi-gear text-white text-sm"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-2xl font-bold text-slate-800 dark:text-white">Configurações Avançadas</h3>
-                            <p class="text-slate-600 dark:text-slate-400 text-sm">Defina as configurações do curso</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Content -->
-                <div class="p-6">
-                    <div class="space-y-4">
-                        <div class="space-y-2">
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                                Tipo de Curso
-                            </label>
-                            <div class="flex flex-wrap gap-4">
-                                <label class="inline-flex items-center">
-                                    <input type="radio" name="courseType" value="free" <?= $course->price_course == 0 ? 'checked' : '' ?>
-                                        class="text-blue-500 focus:ring-blue-500">
-                                    <span class="ml-2 text-slate-700 dark:text-slate-300 text-sm">Gratuito</span>
-                                </label>
-                                <label class="inline-flex items-center">
-                                    <input type="radio" name="courseType" value="paid" <?= $course->price_course > 0 ? 'checked' : '' ?>
-                                        class="text-blue-500 focus:ring-blue-500">
-                                    <span class="ml-2 text-slate-700 dark:text-slate-300 text-sm">Pago</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div id="price-settings" class="space-y-2 <?= $course->price_course > 0 ? '' : 'hidden' ?>">
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                                Preço do Curso
-                            </label>
-                            <input type="number" id="coursePrice" name="price_course" min="0" step="0.01"
-                                value="<?= esc($course->price_course) ?>"
-                                class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm">
-                        </div>
-
-                        <div class="space-y-2">
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                                Cor primária do curso
-                            </label>
-                            <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 items-center">
-                                <input type="text"
-                                    id="courseColorText"
-                                    name="color_course"
-                                    value="<?= esc($course->color_course ?? '#3b82f6') ?>"
-                                    class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
-                                    placeholder="#3b82f6">
-                                <input type="color"
-                                    id="courseColorPicker"
-                                    value="<?= esc($course->color_course ?? '#3b82f6') ?>"
-                                    class="h-12 w-16 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-                            </div>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">
-                                Cole um código HEX ou selecione no color picker.
-                            </p>
-                        </div>
-
-                        <div class="space-y-3">
-                            <div class="flex items-center justify-between gap-3">
-                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                                    Projetos relacionados
-                                </label>
-                                <button type="button"
-                                    id="add-project"
-                                    class="inline-flex items-center gap-2 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-xl transition-all duration-200">
-                                    <i class="bi bi-plus-circle"></i>
-                                    Adicionar projeto
-                                </button>
-                            </div>
-                            <div id="projects-container" class="space-y-4">
-                                <?php foreach (($projects ?? []) as $pIndex => $project): ?>
-                                    <div class="project-card border border-slate-200 dark:border-slate-700 rounded-2xl p-4 bg-slate-50 dark:bg-slate-900" data-index="<?= $pIndex ?>">
-                                        <div class="flex items-center justify-between gap-2 mb-2">
-                                            <input type="text"
-                                                name="projects[<?= $pIndex ?>][title]"
-                                                value="<?= esc($project->title_project ?? '') ?>"
-                                                class="flex-1 px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                            <button type="button"
-                                                class="remove-project text-red-500 hover:text-red-600 text-lg"
-                                                title="Remover projeto">
-                                                <i class="bi bi-x-circle"></i>
-                                            </button>
+                                <div class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 sm:p-6 space-y-3">
+                                    <h4 class="text-sm font-semibold text-slate-800 dark:text-white flex items-center gap-2">
+                                        <i class="bi bi-bar-chart text-blue-600"></i>
+                                        Resumo do curso
+                                    </h4>
+                                    <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
+                                        <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3">
+                                            <div class="text-[11px] text-slate-500 dark:text-slate-400">Horas do curso</div>
+                                            <div id="stats-course-hours" class="text-lg font-semibold text-slate-800 dark:text-white">0h</div>
                                         </div>
-                                        <textarea name="projects[<?= $pIndex ?>][description]"
-                                            class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            placeholder="Descrição do projeto"><?= esc($project->description_project ?? '') ?></textarea>
-                                        <div>
-                                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
-                                                Imagem do projeto (opcional)
-                                            </label>
-                                            <input type="file"
-                                                name="project_images[<?= $pIndex ?>]"
-                                                accept="image/*"
-                                                class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
-                                            <input type="hidden"
-                                                name="projects[<?= $pIndex ?>][img_existing]"
-                                                value="<?= esc($project->img_project ?? '') ?>">
-                                            <?php if (!empty($project->img_project)): ?>
-                                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                                    Atual: <?= esc($project->img_project) ?>
-                                                </p>
-                                            <?php endif; ?>
+                                        <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3">
+                                            <div class="text-[11px] text-slate-500 dark:text-slate-400">Minutos das aulas</div>
+                                            <div id="stats-lesson-minutes" class="text-lg font-semibold text-slate-800 dark:text-white">0</div>
+                                        </div>
+                                        <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3">
+                                            <div class="text-[11px] text-slate-500 dark:text-slate-400">Total de aulas</div>
+                                            <div id="stats-lessons" class="text-lg font-semibold text-slate-800 dark:text-white">0</div>
+                                        </div>
+                                        <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3">
+                                            <div class="text-[11px] text-slate-500 dark:text-slate-400">Total de módulos</div>
+                                            <div id="stats-modules" class="text-lg font-semibold text-slate-800 dark:text-white">0</div>
+                                        </div>
+                                        <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3">
+                                            <div class="text-[11px] text-slate-500 dark:text-slate-400">Arquivos do curso</div>
+                                            <div id="stats-files" class="text-lg font-semibold text-slate-800 dark:text-white">0</div>
                                         </div>
                                     </div>
-                                <?php endforeach; ?>
+                                </div>
+
+                                <div class="space-y-3">
+                                    <button type="submit" id="publish-course" name="publish" value="1"
+                                        class="w-full px-6 py-3.5 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-xl transition-all duration-200 transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl">
+                                        <i class="bi bi-rocket mr-2"></i>
+                                        Publicar Curso
+                                    </button>
+
+                                    <button type="submit" name="draft" value="1"
+                                        class="w-full px-6 py-3.5 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-xl transition-colors">
+                                        <i class="bi bi-save mr-2"></i>
+                                        Salvar como Rascunho
+                                    </button>
+                                    <button type="button" id="open-student-preview"
+                                        class="w-full px-6 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl transition-colors dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white">
+                                        <i class="bi bi-display mr-2"></i>
+                                        Abrir tela do aluno
+                                    </button>
+                                </div>
                             </div>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">
-                                Adicione projetos práticos relacionados ao curso.
-                            </p>
                         </div>
                     </div>
-                </div>
+                </form>
             </div>
-
-            <!-- Step 4: Review and Publish -->
-            <div id="review-publish" class="tab-content hidden bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-                <!-- Header -->
-                <div class="p-6 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
-                            <i class="bi bi-rocket text-white text-sm"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-2xl font-bold text-slate-800 dark:text-white">Revisão e Publicação</h3>
-                            <p class="text-slate-600 dark:text-slate-400 text-sm">Finalize e publique seu curso</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Content -->
-                <div class="p-6">
-                    <div class="space-y-6">
-                        <div class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 sm:p-6 space-y-3">
-                            <h4 class="text-sm font-semibold text-slate-800 dark:text-white flex items-center gap-2">
-                                <i class="bi bi-people text-blue-600"></i>
-                                Estudantes inscritos
-                            </h4>
-                            <div class="text-2xl font-bold text-slate-800 dark:text-white">
-                                <?= number_format((int) ($enrolledCount ?? 0), 0, '', '.') ?>
-                            </div>
-                        </div>
-
-                        <div class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 sm:p-6 space-y-3">
-                            <h4 class="text-sm font-semibold text-slate-800 dark:text-white flex items-center gap-2">
-                                <i class="bi bi-bar-chart text-blue-600"></i>
-                                Resumo do curso
-                            </h4>
-                            <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
-                                <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3">
-                                    <div class="text-[11px] text-slate-500 dark:text-slate-400">Horas do curso</div>
-                                    <div id="stats-course-hours" class="text-lg font-semibold text-slate-800 dark:text-white">0h</div>
-                                </div>
-                                <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3">
-                                    <div class="text-[11px] text-slate-500 dark:text-slate-400">Minutos das aulas</div>
-                                    <div id="stats-lesson-minutes" class="text-lg font-semibold text-slate-800 dark:text-white">0</div>
-                                </div>
-                                <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3">
-                                    <div class="text-[11px] text-slate-500 dark:text-slate-400">Total de aulas</div>
-                                    <div id="stats-lessons" class="text-lg font-semibold text-slate-800 dark:text-white">0</div>
-                                </div>
-                                <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3">
-                                    <div class="text-[11px] text-slate-500 dark:text-slate-400">Total de módulos</div>
-                                    <div id="stats-modules" class="text-lg font-semibold text-slate-800 dark:text-white">0</div>
-                                </div>
-                                <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3">
-                                    <div class="text-[11px] text-slate-500 dark:text-slate-400">Arquivos do curso</div>
-                                    <div id="stats-files" class="text-lg font-semibold text-slate-800 dark:text-white">0</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="space-y-3">
-                        <button type="submit" id="publish-course" name="publish" value="1"
-                            class="w-full px-6 py-3.5 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-xl transition-all duration-200 transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl">
-                            <i class="bi bi-rocket mr-2"></i>
-                            Publicar Curso
-                        </button>
-
-                        <button type="submit" name="draft" value="1"
-                            class="w-full px-6 py-3.5 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-xl transition-colors">
-                            <i class="bi bi-save mr-2"></i>
-                            Salvar como Rascunho
-                        </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </form>
+        </div>
 
         <!-- Navigation Buttons -->
         <div class="flex justify-between items-center mt-6">
@@ -715,7 +872,7 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.js"></script>
 <script>
-    $(function () {
+    $(function() {
         if (typeof $.fn.summernote !== "function") {
             return;
         }
@@ -731,13 +888,13 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
                 ["view", ["fullscreen", "codeview"]],
             ],
             callbacks: {
-                onChange: function () {
+                onChange: function() {
                     window.dispatchEvent(new Event("course-editor-input"));
                 },
-                onKeyup: function () {
+                onKeyup: function() {
                     window.dispatchEvent(new Event("course-editor-input"));
                 },
-                onPaste: function () {
+                onPaste: function() {
                     window.dispatchEvent(new Event("course-editor-input"));
                 }
             }
@@ -765,7 +922,10 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
 
         applyEditorTheme();
         const themeObserver = new MutationObserver(applyEditorTheme);
-        themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+        themeObserver.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ["class"]
+        });
     });
 </script>
 <script>
@@ -788,6 +948,42 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
         const iconPreview = document.getElementById("icon-preview");
         const iconPreviewImg = document.getElementById("icon-preview-img");
         const iconPreviewLabel = document.getElementById("icon-preview-label");
+        const previewCoverImgStatic = document.getElementById("preview-cover-img");
+        const previewCoverFallbackStatic = document.getElementById("preview-cover-fallback");
+
+        previewImg?.addEventListener("error", () => {
+            previewImg.removeAttribute("src");
+            previewContainer?.classList.add("hidden");
+            uploadArea?.classList.remove("hidden");
+        });
+
+        previewCoverImgStatic?.addEventListener("error", () => {
+            previewCoverImgStatic.removeAttribute("src");
+            previewCoverImgStatic.classList.add("hidden");
+            previewCoverFallbackStatic?.classList.remove("hidden");
+        });
+
+        iconPreviewImg?.addEventListener("error", () => {
+            iconPreviewImg.removeAttribute("src");
+            iconPreview?.classList.add("hidden");
+        });
+
+        if (previewImg?.getAttribute("src")?.trim() && previewImg.complete && previewImg.naturalWidth === 0) {
+            previewImg.removeAttribute("src");
+            previewContainer?.classList.add("hidden");
+            uploadArea?.classList.remove("hidden");
+        }
+
+        if (previewCoverImgStatic?.getAttribute("src")?.trim() && previewCoverImgStatic.complete && previewCoverImgStatic.naturalWidth === 0) {
+            previewCoverImgStatic.removeAttribute("src");
+            previewCoverImgStatic.classList.add("hidden");
+            previewCoverFallbackStatic?.classList.remove("hidden");
+        }
+
+        if (iconPreviewImg?.getAttribute("src")?.trim() && iconPreviewImg.complete && iconPreviewImg.naturalWidth === 0) {
+            iconPreviewImg.removeAttribute("src");
+            iconPreview?.classList.add("hidden");
+        }
         const modulesContainer = document.getElementById("modules-container");
         const nextBtn = document.getElementById("next-step");
         const prevBtn = document.getElementById("prev-step");
@@ -798,6 +994,8 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
         const courseTypeRadios = document.querySelectorAll('input[name="courseType"]');
         const form = document.getElementById("courseForm");
         const draftSaveUrl = "<?= base_url('instructor/dashboard/novo_curso/rascunho/' . $course->id_course) ?>";
+        const openStudentPreviewButton = document.getElementById("open-student-preview");
+        const studentPreviewUrl = "<?= base_url('instructor/dashboard/cursos/preview/' . $course->id_course) ?>";
 
         // Projetos
         const projectsContainer = document.getElementById("projects-container");
@@ -831,9 +1029,9 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
                 document.body.appendChild(saveToastElement);
             }
 
-            const toneClasses = type === "error"
-                ? "bg-red-600 text-white"
-                : "bg-emerald-600 text-white";
+            const toneClasses = type === "error" ?
+                "bg-red-600 text-white" :
+                "bg-emerald-600 text-white";
 
             saveToastElement.className = `fixed bottom-4 right-4 z-[9999] px-4 py-2 rounded-lg shadow-lg text-sm font-medium transition-all duration-200 pointer-events-none ${toneClasses}`;
             saveToastElement.textContent = message;
@@ -963,19 +1161,6 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
                     previewImg.src = e.target.result;
                 }
                 if (previewContainer) {
-                    if (!previewContainer.querySelector('img')) {
-                        previewContainer.innerHTML = `
-                        <img id="preview-img" src="${e.target.result}" alt="Preview" class="w-full h-48 object-cover rounded-2xl shadow-lg">
-                        <button type="button" id="remove-image" class="w-full mt-3 px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg transition-colors text-sm">
-                            <i class="bi bi-trash mr-2"></i>
-                            Remover Imagem
-                        </button>
-                    `;
-                        // Re-attach remove button event
-                        document.getElementById('remove-image').addEventListener('click', removeImage);
-                    } else {
-                        previewImg.src = e.target.result;
-                    }
                     previewContainer.classList.remove("hidden");
                 }
                 if (uploadArea) uploadArea.classList.add("hidden");
@@ -1011,15 +1196,40 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
         }
 
         function removeImage() {
+            const previewCoverImg = document.getElementById("preview-cover-img");
+            const previewCoverFallback = document.getElementById("preview-cover-fallback");
+
             fileInput.value = "";
-            if (previewContainer) previewContainer.classList.add("hidden");
-            if (uploadArea) uploadArea.classList.remove("hidden");
+
+            if (previewImg) {
+                previewImg.removeAttribute("src");
+            }
+
+            if (previewContainer) {
+                previewContainer.classList.add("hidden");
+            }
+
+            if (uploadArea) {
+                uploadArea.classList.remove("hidden");
+            }
+
+            if (previewCoverImg) {
+                previewCoverImg.removeAttribute("src");
+                previewCoverImg.classList.add("hidden");
+            }
+
+            if (previewCoverFallback) {
+                previewCoverFallback.classList.remove("hidden");
+            }
+
+            updateCoursePreview();
             scheduleAutoSave();
         }
 
         // Attach remove image event
-        document.addEventListener('click', function(e) {
-            if (e.target && e.target.id === 'remove-image') {
+        document.addEventListener("click", function(e) {
+            const trigger = e.target.closest("#remove-image");
+            if (trigger) {
                 removeImage();
             }
         });
@@ -1099,7 +1309,11 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
                             const correct = Number.isFinite(parseInt(correctRaw, 10)) ? parseInt(correctRaw, 10) : 0;
 
                             if (question || options.some(Boolean)) {
-                                quiz_questions.push({ question, options, correct });
+                                quiz_questions.push({
+                                    question,
+                                    options,
+                                    correct
+                                });
                             }
                         });
                     }
@@ -1239,6 +1453,22 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
             }
         }
 
+        function buildStudentPreviewUrl() {
+            const params = new URLSearchParams({
+                return_url: window.location.href
+            });
+
+            return `${studentPreviewUrl}?${params.toString()}`;
+        }
+
+        async function openStudentPreview() {
+            const saved = await saveDraftSilently();
+            if (!saved) return;
+
+            const previewUrl = buildStudentPreviewUrl();
+            window.open(previewUrl, "_blank", "noopener");
+        }
+
         function syncQuizFields(lessonEl) {
             const typeSelect = lessonEl.querySelector(".lesson-type");
             const quizFields = lessonEl.querySelector(".quiz-fields");
@@ -1367,9 +1597,9 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
             const video_url = lessonData.video_url || "";
             const fileExisting = lessonData.file_existing || lessonData.attachment_path || "";
             const fileExistingName = lessonData.file_existing_name || lessonData.attachment_name || "";
-            const fileLabel = fileExisting
-                ? `<p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Atual: ${fileExistingName || fileExisting}</p>`
-                : "";
+            const fileLabel = fileExisting ?
+                `<p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Atual: ${fileExistingName || fileExisting}</p>` :
+                "";
 
             return `
             <div class="lesson-item border border-slate-200 dark:border-slate-700 rounded-xl p-3 bg-white dark:bg-slate-800" data-index="${lIndex}" draggable="true">
@@ -1777,6 +2007,12 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
         document.addEventListener("change", scheduleAutoSave);
         window.addEventListener("course-editor-input", scheduleAutoSave);
 
+        if (openStudentPreviewButton) {
+            openStudentPreviewButton.addEventListener("click", async () => {
+                await openStudentPreview();
+            });
+        }
+
         // ======================
         // Form Validation (Basic)
         // ======================
@@ -1799,12 +2035,264 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
             stripRedundantDynamicFieldNames();
             // You can add more validation here as needed
         });
+
+        document.addEventListener("input", updateCoursePreview);
+        document.addEventListener("change", updateCoursePreview);
+        window.addEventListener("course-editor-input", updateCoursePreview);
+
+        updateCoursePreview();
     });
+
+    function escapeHtml(value) {
+        const div = document.createElement("div");
+        div.textContent = value ?? "";
+        return div.innerHTML;
+    }
+
+    function formatMoneyPreview(value) {
+        const amount = Number(value || 0);
+        return amount > 0 ?
+            `${amount.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MZN` :
+            "Gratuito";
+    }
+
+    function getEditorHtmlOrTextareaValue(selector) {
+        if (typeof window.jQuery === "function" && typeof window.jQuery.fn?.summernote === "function") {
+            const editor = window.jQuery(selector);
+            if (editor.length && editor.next(".note-editor").length) {
+                return editor.summernote("code");
+            }
+        }
+
+        const el = document.querySelector(selector);
+        return el ? el.value : "";
+    }
+
+    function getCourseTypePreview() {
+        const paidRadio = document.querySelector('input[name="courseType"][value="paid"]');
+        return paidRadio?.checked ? "Curso pago" : "Curso gratuito";
+    }
+
+    function getCoursePricePreview() {
+        const paidRadio = document.querySelector('input[name="courseType"][value="paid"]');
+        const priceInput = document.getElementById("price_course") || document.getElementById("coursePrice");
+        if (paidRadio?.checked) {
+            return formatMoneyPreview(priceInput?.value || 0);
+        }
+        return "Gratuito";
+    }
+
+    function getModulePreviewData() {
+        const moduleCards = document.querySelectorAll(".module-card");
+        let totalLessons = 0;
+        let totalMinutes = 0;
+
+        const modules = Array.from(moduleCards).map((moduleCard, moduleIndex) => {
+            const title = moduleCard.querySelector('input[name$="[title]"]')?.value?.trim() || `Módulo ${moduleIndex + 1}`;
+            const description = moduleCard.querySelector('textarea[name$="[description]"]')?.value?.trim() || "";
+
+            const lessons = Array.from(moduleCard.querySelectorAll(".lesson-item")).map((lessonEl, lessonIndex) => {
+                const lessonTitle = lessonEl.querySelector('input[name$="[title]"]')?.value?.trim() || `Aula ${lessonIndex + 1}`;
+                const lessonType = lessonEl.querySelector('select[name$="[type]"]')?.value || "text";
+                const lessonDuration = Number(lessonEl.querySelector('input[name$="[duration]"]')?.value || 0);
+
+                totalLessons += 1;
+                totalMinutes += lessonDuration > 0 ? lessonDuration : 0;
+
+                return {
+                    title: lessonTitle,
+                    type: lessonType,
+                    duration: lessonDuration
+                };
+            });
+
+            return {
+                title,
+                description,
+                lessons
+            };
+        });
+
+        return {
+            modules,
+            totalLessons,
+            totalMinutes
+        };
+    }
+
+    function getProjectsPreviewData() {
+        const projectCards = document.querySelectorAll(".project-card");
+        return Array.from(projectCards).map((projectCard, index) => {
+            const title = projectCard.querySelector('input[name$="[title]"]')?.value?.trim() || `Projeto ${index + 1}`;
+            const description = projectCard.querySelector('textarea[name$="[description]"]')?.value?.trim() || "";
+            const fileInput = projectCard.querySelector('input[type="file"][name^="project_images"]');
+            const existingText = projectCard.querySelector('input[name$="[img_existing]"]')?.value || "";
+
+            let imageUrl = "";
+            if (fileInput?.files?.[0]) {
+                imageUrl = URL.createObjectURL(fileInput.files[0]);
+            } else if (existingText) {
+                imageUrl = existingText.includes("/") ? existingText : `<?= base_url('assets/img/') ?>/${existingText}`;
+            }
+
+            return {
+                title,
+                description,
+                imageUrl
+            };
+        }).filter(project => project.title || project.description || project.imageUrl);
+    }
+
+    function renderPreviewModules() {
+        const container = document.getElementById("preview-modules");
+        const totalModulesEl = document.getElementById("preview-total-modules");
+        const totalLessonsEl = document.getElementById("preview-total-lessons");
+        const totalDurationEl = document.getElementById("preview-total-duration");
+
+        if (!container) return;
+
+        const {
+            modules,
+            totalLessons,
+            totalMinutes
+        } = getModulePreviewData();
+
+        if (totalModulesEl) {
+            totalModulesEl.textContent = `${modules.length} módulo${modules.length === 1 ? "" : "s"}`;
+        }
+        if (totalLessonsEl) {
+            totalLessonsEl.textContent = `${totalLessons} aula${totalLessons === 1 ? "" : "s"}`;
+        }
+        if (totalDurationEl) {
+            totalDurationEl.textContent = `${Math.round(totalMinutes)} min`;
+        }
+
+        if (!modules.length) {
+            container.innerHTML = `<div class="text-sm text-slate-500 dark:text-slate-400">Nenhum módulo adicionado ainda.</div>`;
+            return;
+        }
+
+        container.innerHTML = modules.map((module, idx) => `
+        <div class="course-preview-module">
+            <div class="flex items-center justify-between gap-3 mb-2">
+                <h5 class="font-semibold text-slate-800 dark:text-white text-sm">
+                    ${idx + 1}. ${escapeHtml(module.title)}
+                </h5>
+                <span class="text-xs text-slate-500 dark:text-slate-400">
+                    ${module.lessons.length} aula${module.lessons.length === 1 ? "" : "s"}
+                </span>
+            </div>
+            ${module.description ? `<p class="text-xs text-slate-600 dark:text-slate-400 mb-3">${escapeHtml(module.description)}</p>` : ""}
+            <div class="space-y-2">
+                ${
+                    module.lessons.length
+                    ? module.lessons.map((lesson, lessonIndex) => `
+                        <div class="flex items-center justify-between gap-2 text-xs">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <i class="bi ${
+                                    lesson.type === "video" ? "bi-play-btn" :
+                                    lesson.type === "quiz" ? "bi-patch-question" :
+                                    lesson.type === "exercise" ? "bi-journal-check" :
+                                    "bi-file-text"
+                                } text-blue-600"></i>
+                                <span class="truncate text-slate-700 dark:text-slate-300">
+                                    ${lessonIndex + 1}. ${escapeHtml(lesson.title)}
+                                </span>
+                            </div>
+                            <span class="text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                                ${lesson.duration > 0 ? `${lesson.duration} min` : "--"}
+                            </span>
+                        </div>
+                    `).join("")
+                    : `<div class="text-xs text-slate-500 dark:text-slate-400">Sem aulas neste módulo.</div>`
+                }
+            </div>
+        </div>
+    `).join("");
+    }
+
+    function renderPreviewProjects() {
+        const container = document.getElementById("preview-projects");
+        if (!container) return;
+
+        const projects = getProjectsPreviewData();
+
+        if (!projects.length) {
+            container.innerHTML = `<div class="text-sm text-slate-500 dark:text-slate-400">Nenhum projeto adicionado ainda.</div>`;
+            return;
+        }
+
+        container.innerHTML = projects.map(project => `
+        <div class="course-preview-project">
+            ${project.imageUrl ? `<img src="${project.imageUrl}" alt="${escapeHtml(project.title)}">` : ""}
+            <div class="font-semibold text-sm text-slate-800 dark:text-white">
+                ${escapeHtml(project.title || "Projeto")}
+            </div>
+            ${project.description ? `<p class="text-xs text-slate-600 dark:text-slate-400 mt-1">${escapeHtml(project.description)}</p>` : ""}
+        </div>
+    `).join("");
+    }
+
+    function updateCoursePreview() {
+        const titleEl = document.getElementById("preview-title");
+        const subtitleEl = document.getElementById("preview-subtitle");
+        const descriptionEl = document.getElementById("preview-description");
+        const learningEl = document.getElementById("preview-learning");
+        const statusEl = document.getElementById("preview-status");
+        const priceEl = document.getElementById("preview-price");
+        const coverEl = document.getElementById("preview-cover");
+        const coverImgEl = document.getElementById("preview-cover-img");
+        const coverFallbackEl = document.getElementById("preview-cover-fallback");
+
+        const titleInput = document.getElementById("title_course");
+        const subtitleInput = document.getElementById("courseSubtitle");
+        const colorInput = document.getElementById("courseColorText") || document.querySelector('input[name="color_course"]');
+        const imageInput = document.getElementById("courseImage");
+        const iconInputLocal = document.getElementById("courseIcon");
+        const previewIconImg = document.getElementById("preview-icon-img");
+
+        if (titleEl) titleEl.textContent = titleInput?.value?.trim() || "Título do curso";
+        if (subtitleEl) subtitleEl.textContent = subtitleInput?.value?.trim() || "Subtítulo do curso aparecerá aqui.";
+        if (descriptionEl) descriptionEl.innerHTML = getEditorHtmlOrTextareaValue("#courseDescription") || "<p>Adicione uma descrição para ver a pré-visualização.</p>";
+        if (learningEl) learningEl.innerHTML = getEditorHtmlOrTextareaValue("#courseLearning") || "<p>Os tópicos de aprendizagem aparecerão aqui.</p>";
+        if (statusEl) statusEl.textContent = getCourseTypePreview();
+        if (priceEl) priceEl.textContent = getCoursePricePreview();
+
+        const selectedColor = colorInput?.value?.trim() || "#3b82f6";
+        if (coverEl) {
+            coverEl.style.background = `linear-gradient(135deg, ${selectedColor}, #1d4ed8)`;
+        }
+
+        const existingCoverSrc = coverImgEl?.getAttribute("src")?.trim();
+
+        if (imageInput?.files?.[0] && coverImgEl) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                coverImgEl.src = e.target.result;
+                coverImgEl.classList.remove("hidden");
+                coverFallbackEl?.classList.add("hidden");
+            };
+            reader.readAsDataURL(imageInput.files[0]);
+        } else if (existingCoverSrc) {
+            coverImgEl.classList.remove("hidden");
+            coverFallbackEl?.classList.add("hidden");
+        } else {
+            coverImgEl?.classList.add("hidden");
+            coverFallbackEl?.classList.remove("hidden");
+        }
+
+        if (iconInputLocal?.files?.[0] && previewIconImg) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewIconImg.src = e.target.result;
+                previewIconImg.classList.remove("hidden");
+            };
+            reader.readAsDataURL(iconInputLocal.files[0]);
+        }
+
+        renderPreviewModules();
+        renderPreviewProjects();
+    }
 </script>
 
 <?= $this->endSection() ?>
-
-
-
-
-

@@ -54,6 +54,7 @@ $routes->group('instructor', ['namespace' => 'App\Controllers\Instructor', 'filt
     $routes->post('dashboard/novo_curso/rascunho', 'CourseController::draftCreate');
     $routes->post('dashboard/novo_curso/rascunho/(:num)', 'CourseController::draftSave/$1');
     $routes->get('dashboard/meus_cursos/editar/(:num)', 'Dashboard::edit_course/$1');
+    $routes->get('dashboard/cursos/preview/(:num)', 'Dashboard::course_preview/$1');
     $routes->post('dashboard/editar_curso/(:num)', 'CourseController::editar/$1');
     $routes->post('dashboard/meus_cursos/deletar/(:num)', 'CourseController::deletar/$1');
     $routes->get('dashboard/meus_estudantes', 'Dashboard::students');

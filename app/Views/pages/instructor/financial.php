@@ -4,13 +4,11 @@
 
 <?= $this->section('financial') ?>
 
-<!-- Bootstrap Icons -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
 
-<div class="min-h-screen bg-slate-50 dark:bg-slate-900">
+<div class="min-h-screen bg-slate-50 dark:bg-slate-900 pb-10">
   <div class="container mx-auto">
 
-    <!-- Header -->
     <div class="mb-8">
       <h1 class="text-2xl lg:text-3xl font-bold text-slate-800 dark:text-white mb-2">
         Financeiro
@@ -20,9 +18,7 @@
       </p>
     </div>
 
-    <!-- Cards de Estatísticas -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
-      <!-- Receita Total -->
       <div class="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-4 sm:p-6 text-white shadow-lg">
         <div class="flex items-center justify-between">
           <div class="flex-1 min-w-0">
@@ -30,12 +26,12 @@
               Receita Total
             </p>
             <h3 class="text-2xl sm:text-3xl font-bold mb-1 truncate">
-              0,00 MZN
+              <?= number_format((float) ($totalRevenue ?? 0), 2, ',', '.') ?> MZN
             </h3>
             <div class="flex items-center gap-1">
               <i class="bi bi-arrow-up-short text-green-300 text-sm"></i>
               <span class="text-green-300 text-sm font-medium truncate">
-                0,00 MZN este mês
+                <?= number_format((float) ($monthRevenue ?? 0), 2, ',', '.') ?> MZN este mês
               </span>
             </div>
           </div>
@@ -45,7 +41,6 @@
         </div>
       </div>
 
-      <!-- Próximo Pagamento -->
       <div class="bg-gradient-to-br from-green-600 to-green-800 rounded-2xl p-4 sm:p-6 text-white shadow-lg">
         <div class="flex items-center justify-between">
           <div class="flex-1 min-w-0">
@@ -53,12 +48,12 @@
               Próximo Pagamento
             </p>
             <h3 class="text-2xl sm:text-3xl font-bold mb-1 truncate">
-              0,00 MZN
+              <?= number_format((float) ($nextPayment ?? 0), 2, ',', '.') ?> MZN
             </h3>
             <div class="flex items-center gap-1">
               <i class="bi bi-calendar-check text-green-100 text-sm"></i>
               <span class="text-green-100 text-sm font-medium truncate">
-                0,00 MZN em 5 dias
+                Valor pendente de liberação
               </span>
             </div>
           </div>
@@ -68,7 +63,6 @@
         </div>
       </div>
 
-      <!-- Receita Média/Mês -->
       <div class="bg-gradient-to-br from-purple-600 to-purple-800 rounded-2xl p-4 sm:p-6 text-white shadow-lg">
         <div class="flex items-center justify-between">
           <div class="flex-1 min-w-0">
@@ -76,12 +70,12 @@
               Receita Média/Mês
             </p>
             <h3 class="text-2xl sm:text-3xl font-bold mb-1 truncate">
-              0,00 MZN
+              <?= number_format((float) ($averageMonth ?? 0), 2, ',', '.') ?> MZN
             </h3>
             <div class="flex items-center gap-1">
               <i class="bi bi-graph-up text-green-300 text-sm"></i>
               <span class="text-green-300 text-sm font-medium truncate">
-                0,00 MZN anual
+                <?= number_format((float) ($yearTotal ?? 0), 2, ',', '.') ?> MZN anual
               </span>
             </div>
           </div>
@@ -92,45 +86,49 @@
       </div>
     </div>
 
-    <!-- Gráficos e Transações -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- Pagamentos aprovados por mes -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">
         <div class="flex items-center justify-between mb-4 sm:mb-6">
-          <h3 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-white">
-            Pagamentos aprovados por mes
-          </h3>
+          <div>
+            <h3 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-white">
+              Pagamentos aprovados por mês
+            </h3>
+            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+              Comparação mensal do ano selecionado
+            </p>
+          </div>
+
           <div class="flex items-center gap-2">
-            <select class="text-xs sm:text-sm bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-lg px-2 sm:px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <option>2024</option>
-              <option>2023</option>
-              <option>2022</option>
+            <select id="finance-year-select"
+              class="text-xs sm:text-sm bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-lg px-2 sm:px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
             </select>
           </div>
         </div>
 
-        <div class="h-64 sm:h-72">
-          <canvas id="instructor-finance-chart"></canvas>
-        </div>
+        <div id="instructor-finance-chart" class="h-72 sm:h-80"></div>
 
-        <!-- Mini Stats abaixo do gr?fico -->
         <div class="grid grid-cols-3 gap-3 mt-4">
           <div class="text-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
             <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Maior</p>
-            <p class="text-sm font-bold text-slate-800 dark:text-white">0,00 MZN</p>
+            <p id="finance-stat-max" class="text-sm font-bold text-slate-800 dark:text-white">
+              <?= number_format((float) ($chartMax ?? 0), 2, ',', '.') ?> MZN
+            </p>
           </div>
           <div class="text-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
             <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Média</p>
-            <p class="text-sm font-bold text-slate-800 dark:text-white">0,00 MZN</p>
+            <p id="finance-stat-avg" class="text-sm font-bold text-slate-800 dark:text-white">
+              <?= number_format((float) ($chartAvg ?? 0), 2, ',', '.') ?> MZN
+            </p>
           </div>
           <div class="text-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
             <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Cresc.</p>
-            <p class="text-sm font-bold text-green-600">0,00 MZN</p>
+            <p id="finance-stat-growth" class="text-sm font-bold text-green-600">
+              <?= number_format((float) ($chartGrowth ?? 0), 2, ',', '.') ?> MZN
+            </p>
           </div>
         </div>
       </div>
 
-      <!-- Últimas Transações -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">
         <div class="flex items-center justify-between mb-4 sm:mb-6">
           <h3 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-white">
@@ -142,125 +140,97 @@
         </div>
 
         <div class="space-y-3 max-h-96 overflow-y-auto pr-2">
-          <!-- Transaction 1 -->
-          <div class="flex items-center justify-between p-3 sm:p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-600">
-            <div class="flex items-center gap-3 flex-1 min-w-0">
-              <div class="w-8 h-8 sm:w-10 sm:h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center flex-shrink-0">
-                <i class="bi bi-arrow-down-left text-green-600 dark:text-green-400 text-sm"></i>
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="font-semibold text-slate-800 dark:text-white text-sm sm:text-base truncate">
-                  Pagamento - Dezembro
-                </p>
-                <p class="text-green-600 dark:text-green-400 font-semibold text-sm">
-                  0,00 MZN
-                </p>
-              </div>
-            </div>
-            <div class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 bg-slate-200 dark:bg-slate-700 px-2 sm:px-3 py-1 rounded-lg whitespace-nowrap ml-2">
-              15 Dez 2024
-            </div>
-          </div>
+          <?php if (!empty($latestTransactions)): ?>
+            <?php foreach ($latestTransactions as $transaction): ?>
+              <?php
+              $isApproved = ($transaction->status_payment ?? '') === 'Aprovado';
+              $iconBg = $isApproved
+                ? 'bg-green-100 dark:bg-green-900'
+                : (($transaction->status_payment ?? '') === 'Rejeitado'
+                  ? 'bg-red-100 dark:bg-red-900'
+                  : 'bg-yellow-100 dark:bg-yellow-900');
 
-          <!-- Transaction 2 -->
-          <div class="flex items-center justify-between p-3 sm:p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-600">
-            <div class="flex items-center gap-3 flex-1 min-w-0">
-              <div class="w-8 h-8 sm:w-10 sm:h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center flex-shrink-0">
-                <i class="bi bi-arrow-down-left text-green-600 dark:text-green-400 text-sm"></i>
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="font-semibold text-slate-800 dark:text-white text-sm sm:text-base truncate">
-                  Pagamento - Novembro
-                </p>
-                <p class="text-green-600 dark:text-green-400 font-semibold text-sm">
-                  0,00 MZN
-                </p>
-              </div>
-            </div>
-            <div class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 bg-slate-200 dark:bg-slate-700 px-2 sm:px-3 py-1 rounded-lg whitespace-nowrap ml-2">
-              15 Nov 2024
-            </div>
-          </div>
+              $iconColor = $isApproved
+                ? 'text-green-600 dark:text-green-400'
+                : (($transaction->status_payment ?? '') === 'Rejeitado'
+                  ? 'text-red-600 dark:text-red-400'
+                  : 'text-yellow-600 dark:text-yellow-400');
 
-          <!-- Transaction 3 -->
-          <div class="flex items-center justify-between p-3 sm:p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-600">
-            <div class="flex items-center gap-3 flex-1 min-w-0">
-              <div class="w-8 h-8 sm:w-10 sm:h-10 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center flex-shrink-0">
-                <i class="bi bi-arrow-up-right text-red-600 dark:text-red-400 text-sm"></i>
+              $amountColor = $isApproved
+                ? 'text-green-600 dark:text-green-400'
+                : (($transaction->status_payment ?? '') === 'Rejeitado'
+                  ? 'text-red-600 dark:text-red-400'
+                  : 'text-yellow-600 dark:text-yellow-400');
+              ?>
+              <div class="flex items-center justify-between p-3 sm:p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-600">
+                <div class="flex items-center gap-3 flex-1 min-w-0">
+                  <div class="w-8 h-8 sm:w-10 sm:h-10 <?= $iconBg ?> rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i class="bi <?= $isApproved ? 'bi-arrow-down-left' : 'bi-arrow-up-right' ?> <?= $iconColor ?> text-sm"></i>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="font-semibold text-slate-800 dark:text-white text-sm sm:text-base truncate">
+                      <?= esc($transaction->title_course ?? 'Curso') ?>
+                    </p>
+                    <p class="<?= $amountColor ?> font-semibold text-sm">
+                      <?= number_format((float) ($transaction->amount_payment ?? 0), 2, ',', '.') ?> MZN
+                      - <?= esc($transaction->status_payment ?? '') ?>
+                    </p>
+                  </div>
+                </div>
+                <div class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 bg-slate-200 dark:bg-slate-700 px-2 sm:px-3 py-1 rounded-lg whitespace-nowrap ml-2">
+                  <?= !empty($transaction->created_at) ? date('d M Y', strtotime($transaction->created_at)) : '--' ?>
+                </div>
               </div>
-              <div class="flex-1 min-w-0">
-                <p class="font-semibold text-slate-800 dark:text-white text-sm sm:text-base truncate">
-                  Taxa de Plataforma
-                </p>
-                <p class="text-red-600 dark:text-red-400 font-semibold text-sm">
-                  0,00 MZN
-                </p>
-              </div>
+            <?php endforeach; ?>
+          <?php else: ?>
+            <div class="p-4 text-sm text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 rounded-xl">
+              Ainda não existem transações registadas.
             </div>
-            <div class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 bg-slate-200 dark:bg-slate-700 px-2 sm:px-3 py-1 rounded-lg whitespace-nowrap ml-2">
-              10 Nov 2024
-            </div>
-          </div>
-
-          <!-- Transaction 4 -->
-          <div class="flex items-center justify-between p-3 sm:p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-600">
-            <div class="flex items-center gap-3 flex-1 min-w-0">
-              <div class="w-8 h-8 sm:w-10 sm:h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center flex-shrink-0">
-                <i class="bi bi-arrow-down-left text-green-600 dark:text-green-400 text-sm"></i>
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="font-semibold text-slate-800 dark:text-white text-sm sm:text-base truncate">
-                  Pagamento - Outubro
-                </p>
-                <p class="text-green-600 dark:text-green-400 font-semibold text-sm">
-                  0,00 MZN
-                </p>
-              </div>
-            </div>
-            <div class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 bg-slate-200 dark:bg-slate-700 px-2 sm:px-3 py-1 rounded-lg whitespace-nowrap ml-2">
-              15 Out 2024
-            </div>
-          </div>
+          <?php endif; ?>
         </div>
 
-        <!-- Resumo do Mês -->
         <div class="mt-4 p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
           <div class="flex justify-between items-center">
             <div>
               <p class="text-sm text-blue-800 dark:text-blue-200 font-medium">Saldo do Mês</p>
-              <p class="text-lg font-bold text-blue-900 dark:text-white">0,00 MZN</p>
+              <p class="text-lg font-bold text-blue-900 dark:text-white">
+                <?= number_format((float) ($monthRevenue ?? 0), 2, ',', '.') ?> MZN
+              </p>
             </div>
             <div class="text-right">
               <p class="text-sm text-blue-800 dark:text-blue-200">Disponível</p>
-              <p class="text-green-600 dark:text-green-400 font-semibold">0,00 MZN</p>
+              <p class="text-green-600 dark:text-green-400 font-semibold">
+                <?= number_format((float) ($monthRevenue ?? 0), 2, ',', '.') ?> MZN
+              </p>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Métricas Adicionais -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mt-6">
-      <!-- Cursos Mais Rentáveis -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">
         <h4 class="font-bold text-slate-800 dark:text-white mb-4 text-sm sm:text-base">Cursos Mais Rentáveis</h4>
         <div class="space-y-3">
-          <div class="flex justify-between items-center">
-            <span class="text-sm text-slate-600 dark:text-slate-400 truncate">JavaScript Avançado</span>
-            <span class="text-sm font-semibold text-slate-800 dark:text-white">0,00 MZN</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-sm text-slate-600 dark:text-slate-400 truncate">React Completo</span>
-            <span class="text-sm font-semibold text-slate-800 dark:text-white">0,00 MZN</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-sm text-slate-600 dark:text-slate-400 truncate">Node.js API</span>
-            <span class="text-sm font-semibold text-slate-800 dark:text-white">0,00 MZN</span>
-          </div>
+          <?php if (!empty($topCourses)): ?>
+            <?php foreach ($topCourses as $course): ?>
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-slate-600 dark:text-slate-400 truncate">
+                  <?= esc($course->title_course ?? 'Curso sem título') ?>
+                </span>
+                <span class="text-sm font-semibold text-slate-800 dark:text-white">
+                  <?= number_format((float) ($course->total ?? 0), 2, ',', '.') ?> MZN
+                </span>
+              </div>
+            <?php endforeach; ?>
+          <?php else: ?>
+            <p class="text-sm text-slate-500 dark:text-slate-400">
+              Ainda não há cursos com receita aprovada.
+            </p>
+          <?php endif; ?>
         </div>
       </div>
 
-      <!-- Próximas Metas -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">
         <h4 class="font-bold text-slate-800 dark:text-white mb-4 text-sm sm:text-base">Próximas Metas</h4>
         <div class="space-y-3">
@@ -285,7 +255,6 @@
         </div>
       </div>
 
-      <!-- Ações Rápidas -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">
         <h4 class="font-bold text-slate-800 dark:text-white mb-4 text-sm sm:text-base">Ações Rápidas</h4>
         <div class="space-y-2">
@@ -304,67 +273,221 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
   (function () {
-    const yearSelect = document.querySelector('select');
-    const ctx = document.getElementById('instructor-finance-chart').getContext('2d');
-    let chart;
+    const yearSelect = document.getElementById('finance-year-select');
+    const chartEl = document.getElementById('instructor-finance-chart');
 
-    const loadData = (year) => {
+    const statMax = document.getElementById('finance-stat-max');
+    const statAvg = document.getElementById('finance-stat-avg');
+    const statGrowth = document.getElementById('finance-stat-growth');
+
+    const currentYear = new Date().getFullYear();
+    let chart = null;
+
+    const formatMoney = (value) => {
+      return `${Number(value || 0).toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })} MZN`;
+    };
+
+    const isDarkMode = () => document.documentElement.classList.contains('dark');
+
+    const buildYearOptions = () => {
+      yearSelect.innerHTML = '';
+
+      for (let i = 0; i < 3; i++) {
+        const year = currentYear - i;
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        if (i === 0) option.selected = true;
+        yearSelect.appendChild(option);
+      }
+    };
+
+    const loadData = async (year) => {
       const url = new URL(<?= json_encode(site_url('instructor/dashboard/financas/data')) ?>, window.location.origin);
       url.searchParams.set('year', year);
-      return fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-        .then(res => res.json());
-    };
 
-    const renderChart = (labels, data) => {
-      if (chart) {
-        chart.data.labels = labels;
-        chart.data.datasets[0].data = data;
-        chart.update();
-        return;
-      }
-      chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [{
-            label: 'Pagamentos aprovados',
-            data,
-            borderColor: '#2563eb',
-            backgroundColor: 'rgba(37, 99, 235, 0.2)',
-            tension: 0.35,
-            fill: true,
-            pointRadius: 3,
-            pointBackgroundColor: '#2563eb'
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false }
-          },
-          scales: {
-            y: {
-              ticks: {
-                callback: (value) => `${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MZN`
-              }
-            }
-          }
+      const response = await fetch(url.toString(), {
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
         }
       });
+
+      if (!response.ok) {
+        throw new Error('Falha ao carregar dados financeiros.');
+      }
+
+      return response.json();
     };
 
-    const refresh = () => {
-      const year = yearSelect?.value || new Date().getFullYear();
-      loadData(year).then(payload => {
-        renderChart(payload.labels || [], payload.data || []);
-      });
+    const getGrowth = (data) => {
+      const valid = (data || []).filter(v => Number(v) > 0);
+      if (valid.length < 2) return 0;
+      return Number(valid[valid.length - 1]) - Number(valid[valid.length - 2]);
     };
 
-    yearSelect?.addEventListener('change', refresh);
+    const updateStats = (payload) => {
+      const data = payload.data || [];
+      const max = payload.max || 0;
+      const avg = payload.avg || 0;
+      const growth = getGrowth(data);
+
+      if (statMax) statMax.textContent = formatMoney(max);
+      if (statAvg) statAvg.textContent = formatMoney(avg);
+      if (statGrowth) {
+        statGrowth.textContent = formatMoney(growth);
+        statGrowth.classList.remove('text-green-600', 'text-red-600');
+        statGrowth.classList.add(growth >= 0 ? 'text-green-600' : 'text-red-600');
+      }
+    };
+
+    const renderChart = (payload, year) => {
+      const labels = payload.labels || [];
+      const data = payload.data || [];
+
+      const dark = isDarkMode();
+      const labelColor = dark ? '#cbd5e1' : '#475569';
+      const gridColor = dark ? 'rgba(148, 163, 184, 0.12)' : 'rgba(148, 163, 184, 0.18)';
+
+      const options = {
+        chart: {
+          type: 'area',
+          height: 320,
+          toolbar: {
+            show: false
+          },
+          zoom: {
+            enabled: false
+          },
+          animations: {
+            enabled: true,
+            easing: 'easeinout',
+            speed: 700
+          },
+          fontFamily: 'inherit',
+          foreColor: labelColor
+        },
+        series: [{
+          name: `Receita ${year}`,
+          data: data
+        }],
+        xaxis: {
+          categories: labels,
+          labels: {
+            style: {
+              colors: labelColor
+            }
+          },
+          axisBorder: {
+            show: false
+          },
+          axisTicks: {
+            show: false
+          }
+        },
+        yaxis: {
+          labels: {
+            style: {
+              colors: labelColor
+            },
+            formatter: function (value) {
+              return formatMoney(value);
+            }
+          }
+        },
+        stroke: {
+          curve: 'smooth',
+          width: 4
+        },
+        fill: {
+          type: 'gradient',
+          gradient: {
+            shadeIntensity: 1,
+            opacityFrom: 0.38,
+            opacityTo: 0.05,
+            stops: [0, 90, 100]
+          }
+        },
+        dataLabels: {
+          enabled: false
+        },
+        markers: {
+          size: 5,
+          strokeWidth: 0,
+          hover: {
+            size: 7
+          }
+        },
+        colors: ['#2563eb'],
+        grid: {
+          borderColor: gridColor,
+          strokeDashArray: 5,
+          padding: {
+            left: 10,
+            right: 10
+          }
+        },
+        tooltip: {
+          theme: dark ? 'dark' : 'light',
+          y: {
+            formatter: function (value) {
+              return formatMoney(value);
+            }
+          }
+        },
+        legend: {
+          show: false
+        },
+        noData: {
+          text: 'Sem dados financeiros'
+        }
+      };
+
+      if (chart) {
+        chart.updateOptions({
+          xaxis: options.xaxis,
+          yaxis: options.yaxis,
+          grid: options.grid,
+          tooltip: options.tooltip,
+          chart: options.chart
+        });
+        chart.updateSeries(options.series);
+        return;
+      }
+
+      chart = new ApexCharts(chartEl, options);
+      chart.render();
+    };
+
+    const refresh = async () => {
+      try {
+        const year = yearSelect.value || currentYear;
+        const payload = await loadData(year);
+        renderChart(payload, year);
+        updateStats(payload);
+      } catch (error) {
+        console.error('Erro ao carregar gráfico financeiro:', error);
+      }
+    };
+
+    buildYearOptions();
+    yearSelect.addEventListener('change', refresh);
+
+    const observer = new MutationObserver(() => {
+      if (!chart) return;
+      refresh();
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
     refresh();
   })();
 </script>

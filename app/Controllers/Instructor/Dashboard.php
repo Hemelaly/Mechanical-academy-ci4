@@ -21,6 +21,13 @@ use CodeIgniter\Shield\Models\PasswordResetModel;
 
 class Dashboard extends BaseController
 {
+    private function makeSlug(string $value): string
+    {
+        helper(['text', 'url']);
+
+        return url_title(convert_accented_characters($value), '-', true);
+    }
+
     private function normalizeCourseCompat(?object $course): ?object
     {
         if (! $course) {
@@ -64,6 +71,40 @@ class Dashboard extends BaseController
             ['label' => 'Certificados', 'icon' => 'bi-folder', 'url' => '/instructor/dashboard/certificados'],
             ['label' => 'Perfil', 'icon' => 'bi-person-circle', 'url' => '/instructor/dashboard/perfil'],
         ];
+    }
+
+    private function sanitizePreviewReturnUrl(?string $returnUrl, int $courseId): string
+    {
+        $fallback = site_url('instructor/dashboard/meus_cursos/editar/' . $courseId);
+        $returnUrl = trim((string) $returnUrl);
+
+        if ($returnUrl === '') {
+            return $fallback;
+        }
+
+        $siteBase = rtrim(site_url('/'), '/');
+        $publicBase = rtrim(base_url('/'), '/');
+
+        if (
+            str_starts_with($returnUrl, $siteBase)
+            || str_starts_with($returnUrl, $publicBase)
+        ) {
+            return $returnUrl;
+        }
+
+        if (str_starts_with($returnUrl, '/')) {
+            return site_url(ltrim($returnUrl, '/'));
+        }
+
+        return $fallback;
+    }
+
+    private function buildCoursePreviewUrl(int $courseId, int $lessonId, string $returnUrl): string
+    {
+        return site_url('instructor/dashboard/cursos/preview/' . $courseId . '?' . http_build_query([
+            'lesson' => $lessonId,
+            'return_url' => $returnUrl,
+        ]));
     }
 
     private function makeJitsiRoom(string $title): string
@@ -115,7 +156,7 @@ class Dashboard extends BaseController
         $user = service('auth')->user();
         $courseModel = new CourseModel();
         $moduleModel = new ModuleModel();
-        $lessonModel = new LessonModel ();
+        $lessonModel = new LessonModel();
         $projectModel = new \App\Models\ProjectModel();
 
         $savedDraft = $courseModel
@@ -222,6 +263,124 @@ class Dashboard extends BaseController
         ]);
     }
 
+    public function course_preview($id)
+    {
+        $user = service('auth')->user();
+        $courseModel = new CourseModel();
+        $moduleModel = new ModuleModel();
+        $lessonModel = new LessonModel();
+
+        $courseId = (int) $id;
+        $course = $this->normalizeCourseCompat($courseModel->find($courseId));
+
+        if (! $course) {
+            return redirect()->to('instructor/dashboard/meus_cursos')
+                ->with('error', 'Curso nao encontrado.');
+        }
+
+        if ((int) ($course->id_instructor_course ?? 0) !== (int) auth()->id()) {
+            return redirect()->to('instructor/dashboard/meus_cursos')
+                ->with('error', 'Acesso negado.');
+        }
+
+        $modules = $moduleModel
+            ->where('id_course_module', $courseId)
+            ->orderBy('position_module')
+            ->findAll();
+
+        $orderedLessonIds = [];
+        $orderedLessons = [];
+        $lessonSlugById = [];
+        $moduleIndexByLessonId = [];
+
+        foreach ($modules as $moduleIndex => &$module) {
+            $module->lessons = $lessonModel
+                ->where('id_module_lesson', $module->id_module)
+                ->orderBy('position_lesson')
+                ->findAll();
+
+            foreach ($module->lessons as $moduleLesson) {
+                $lessonId = (int) $moduleLesson->id_lesson;
+                $orderedLessonIds[] = $lessonId;
+                $orderedLessons[$lessonId] = $moduleLesson;
+                $lessonSlugById[$lessonId] = $this->makeSlug((string) $moduleLesson->title_lesson);
+                $moduleIndexByLessonId[$lessonId] = $moduleIndex;
+            }
+        }
+        unset($module);
+
+        $returnUrl = $this->sanitizePreviewReturnUrl($this->request->getGet('return_url'), $courseId);
+
+        if (empty($orderedLessonIds)) {
+            return redirect()->to($returnUrl)
+                ->with('error', 'Adicione pelo menos uma aula para abrir a pre-visualizacao.');
+        }
+
+        $selectedLessonId = (int) ($this->request->getGet('lesson') ?? 0);
+        if (! isset($orderedLessons[$selectedLessonId])) {
+            $selectedLessonId = $orderedLessonIds[0];
+        }
+
+        $lesson = $orderedLessons[$selectedLessonId];
+        $currentIndex = array_search($selectedLessonId, $orderedLessonIds, true);
+        $prevLesson = ($currentIndex !== false && $currentIndex > 0)
+            ? $orderedLessonIds[$currentIndex - 1]
+            : null;
+        $nextLesson = ($currentIndex !== false && $currentIndex < count($orderedLessonIds) - 1)
+            ? $orderedLessonIds[$currentIndex + 1]
+            : null;
+
+        $nextModuleLessonId = null;
+        $currentModuleIndex = $moduleIndexByLessonId[$selectedLessonId] ?? null;
+        if ($currentModuleIndex !== null) {
+            $nextModule = $modules[$currentModuleIndex + 1] ?? null;
+            if ($nextModule && ! empty($nextModule->lessons)) {
+                $nextModuleLessonId = (int) $nextModule->lessons[0]->id_lesson;
+            }
+        }
+
+        $previewUrlsByLessonId = [];
+        foreach ($orderedLessonIds as $lessonId) {
+            $previewUrlsByLessonId[$lessonId] = $this->buildCoursePreviewUrl($courseId, $lessonId, $returnUrl);
+        }
+
+        $enrollment = (object) [
+            'id_enrollment' => 0,
+            'status_enrollment' => 'ativa',
+            'progress_enrollment' => 0,
+            'completed_enrollment' => null,
+        ];
+
+        return view('pages/student/lessons', [
+            'course' => $course,
+            'enrollment' => $enrollment,
+            'accessBlocked' => false,
+            'modules' => $modules,
+            'lesson' => $lesson,
+            'prevLesson' => $prevLesson,
+            'nextLesson' => $nextLesson,
+            'courseSlug' => $this->makeSlug((string) $course->title_course),
+            'prevLessonSlug' => $prevLesson ? ($lessonSlugById[$prevLesson] ?? null) : null,
+            'nextLessonSlug' => $nextLesson ? ($lessonSlugById[$nextLesson] ?? null) : null,
+            'nextModuleLessonId' => $nextModuleLessonId,
+            'nextModuleLessonSlug' => $nextModuleLessonId ? ($lessonSlugById[$nextModuleLessonId] ?? null) : null,
+            'lessonSlugById' => $lessonSlugById,
+            'completedLessonIds' => [],
+            'quizScore' => null,
+            'certificateInfo' => [
+                'completedAt' => null,
+                'availableAt' => null,
+                'pdfReady' => false,
+            ],
+            'previewMode' => true,
+            'previewBackUrl' => $returnUrl,
+            'previewUrlsByLessonId' => $previewUrlsByLessonId,
+            'user' => $user,
+            'sidebarLinks' => $this->sidebarLinks(),
+            'currentUrl' => current_url(),
+        ]);
+    }
+
     public function live($id = null)
     {
         $user  = service('auth')->user();
@@ -234,7 +393,7 @@ class Dashboard extends BaseController
                 ->orderBy('id_jitsi', 'DESC')
                 ->findAll();
             $recordingStats = [];
-            $aulaIds = array_map(static fn ($a) => (int) $a->id_jitsi, $aulas);
+            $aulaIds = array_map(static fn($a) => (int) $a->id_jitsi, $aulas);
             if (! empty($aulaIds)) {
                 $stats = $recordingModel
                     ->select('id_jitsi_session, COUNT(*) as total_recordings, SUM(CASE WHEN is_published = 1 THEN 1 ELSE 0 END) as published_recordings', false)
@@ -377,6 +536,7 @@ class Dashboard extends BaseController
                 'text'  => 'A nova aula virtual foi criada com sucesso.'
             ]);
     }
+
     public function deleteJitsi($id)
     {
         $id = (int) $id;
@@ -462,6 +622,7 @@ class Dashboard extends BaseController
                 'text'  => 'Nao foi possivel excluir esta aula.'
             ]);
     }
+
     public function stream($id)
     {
         $user  = service('auth')->user();
@@ -531,6 +692,7 @@ class Dashboard extends BaseController
             'recordings' => $recordings,
         ]);
     }
+
     public function endStream($id)
     {
         $user  = service('auth')->user();
@@ -546,6 +708,7 @@ class Dashboard extends BaseController
             'text' => 'A transmissao foi encerrada com sucesso.',
         ]);
     }
+
     public function storeRecording($id)
     {
         $user  = service('auth')->user();
@@ -621,6 +784,7 @@ class Dashboard extends BaseController
             'text' => 'O link da gravacao foi guardado.',
         ]);
     }
+
     public function toggleRecordingPublish($recordingId)
     {
         $user  = service('auth')->user();
@@ -648,6 +812,7 @@ class Dashboard extends BaseController
                 : 'A gravacao foi ocultada dos alunos.',
         ]);
     }
+
     public function students()
     {
         $user = service('auth')->user();
@@ -854,11 +1019,139 @@ class Dashboard extends BaseController
     public function financial()
     {
         $user = service('auth')->user();
+        $db = db_connect();
+
+        $currentYear = (int) date('Y');
+        $currentMonth = (int) date('m');
+
+        // Receita total aprovada
+        $totalRevenueRow = $db->table('payments p')
+            ->selectSum('p.amount_payment', 'total')
+            ->join('courses c', 'c.id_course = p.id_course_payment')
+            ->where('c.id_instructor_course', $user->id)
+            ->where('p.status_payment', 'Aprovado')
+            ->get()
+            ->getRow();
+
+        $totalRevenue = (float) ($totalRevenueRow->total ?? 0);
+
+        // Receita do mês atual
+        $monthRevenueRow = $db->table('payments p')
+            ->selectSum('p.amount_payment', 'total')
+            ->join('courses c', 'c.id_course = p.id_course_payment')
+            ->where('c.id_instructor_course', $user->id)
+            ->where('p.status_payment', 'Aprovado')
+            ->where('YEAR(p.created_at)', $currentYear)
+            ->where('MONTH(p.created_at)', $currentMonth)
+            ->get()
+            ->getRow();
+
+        $monthRevenue = (float) ($monthRevenueRow->total ?? 0);
+
+        // Média mensal do ano atual
+        $monthlyRows = $db->table('payments p')
+            ->select('MONTH(p.created_at) as month, SUM(p.amount_payment) as total')
+            ->join('courses c', 'c.id_course = p.id_course_payment')
+            ->where('c.id_instructor_course', $user->id)
+            ->where('p.status_payment', 'Aprovado')
+            ->where('YEAR(p.created_at)', $currentYear)
+            ->groupBy('MONTH(p.created_at)')
+            ->get()
+            ->getResult();
+
+        $monthsWithSales = count($monthlyRows);
+        $yearTotal = 0;
+
+        foreach ($monthlyRows as $row) {
+            $yearTotal += (float) ($row->total ?? 0);
+        }
+
+        $averageMonth = $monthsWithSales > 0 ? $yearTotal / $monthsWithSales : 0;
+
+        // Próximo pagamento
+        // Aqui vou assumir que "Próximo Pagamento" é o valor pendente a liberar.
+        $nextPaymentRow = $db->table('payments p')
+            ->selectSum('p.amount_payment', 'total')
+            ->join('courses c', 'c.id_course = p.id_course_payment')
+            ->where('c.id_instructor_course', $user->id)
+            ->where('p.status_payment', 'Pendente')
+            ->get()
+            ->getRow();
+
+        $nextPayment = (float) ($nextPaymentRow->total ?? 0);
+
+        // Últimas transações
+        $latestTransactions = $db->table('payments p')
+            ->select('
+            p.id_payment,
+            p.amount_payment,
+            p.status_payment,
+            p.reference_payment,
+            p.created_at,
+            c.title_course
+        ')
+            ->join('courses c', 'c.id_course = p.id_course_payment')
+            ->where('c.id_instructor_course', $user->id)
+            ->orderBy('p.created_at', 'DESC')
+            ->limit(8)
+            ->get()
+            ->getResult();
+
+        // Cursos mais rentáveis
+        $topCourses = $db->table('payments p')
+            ->select('c.title_course, SUM(p.amount_payment) as total')
+            ->join('courses c', 'c.id_course = p.id_course_payment')
+            ->where('c.id_instructor_course', $user->id)
+            ->where('p.status_payment', 'Aprovado')
+            ->groupBy('c.id_course, c.title_course')
+            ->orderBy('total', 'DESC')
+            ->limit(5)
+            ->get()
+            ->getResult();
+
+        // Estatísticas do gráfico do ano atual
+        $chartRows = $db->table('payments p')
+            ->select('MONTH(p.created_at) as month, SUM(p.amount_payment) as total')
+            ->join('courses c', 'c.id_course = p.id_course_payment')
+            ->where('c.id_instructor_course', $user->id)
+            ->where('p.status_payment', 'Aprovado')
+            ->where('YEAR(p.created_at)', $currentYear)
+            ->groupBy('MONTH(p.created_at)')
+            ->orderBy('MONTH(p.created_at)')
+            ->get()
+            ->getResultArray();
+
+        $totals = array_fill(1, 12, 0.0);
+        foreach ($chartRows as $row) {
+            $month = (int) ($row['month'] ?? 0);
+            if ($month >= 1 && $month <= 12) {
+                $totals[$month] = (float) ($row['total'] ?? 0);
+            }
+        }
+
+        $chartSeries = array_values($totals);
+        $chartMax = !empty($chartSeries) ? max($chartSeries) : 0;
+        $chartAvg = array_sum($chartSeries) / 12;
+        $chartGrowth = $currentMonth > 1
+            ? ($chartSeries[$currentMonth - 1] - $chartSeries[$currentMonth - 2])
+            : 0;
 
         return view('pages/instructor/financial', [
             'user' => $user,
             'sidebarLinks' => $this->sidebarLinks(),
-            'currentUrl' => current_url()
+            'currentUrl' => current_url(),
+
+            'currentYear' => $currentYear,
+            'totalRevenue' => $totalRevenue,
+            'monthRevenue' => $monthRevenue,
+            'averageMonth' => $averageMonth,
+            'yearTotal' => $yearTotal,
+            'nextPayment' => $nextPayment,
+            'latestTransactions' => $latestTransactions,
+            'topCourses' => $topCourses,
+            'chartMax' => $chartMax,
+            'chartAvg' => $chartAvg,
+            'chartGrowth' => $chartGrowth,
         ]);
     }
 
@@ -874,11 +1167,11 @@ class Dashboard extends BaseController
         $rows = $db->table('payments p')
             ->select('MONTH(p.created_at) as month, SUM(p.amount_payment) as total')
             ->join('courses c', 'c.id_course = p.id_course_payment')
-            ->where('p.status_payment', 'Aprovado')
             ->where('c.id_instructor_course', $user->id)
+            ->where('p.status_payment', 'Aprovado')
             ->where('YEAR(p.created_at)', $year)
             ->groupBy('MONTH(p.created_at)')
-            ->orderBy('MONTH(p.created_at)')
+            ->orderBy('MONTH(p.created_at)', 'ASC')
             ->get()
             ->getResultArray();
 
@@ -895,7 +1188,9 @@ class Dashboard extends BaseController
 
         return $this->response->setJSON([
             'labels' => $labels,
-            'data' => $series,
+            'data'   => $series,
+            'max'    => !empty($series) ? max($series) : 0,
+            'avg'    => count($series) ? array_sum($series) / count($series) : 0,
         ]);
     }
 
@@ -944,7 +1239,7 @@ class Dashboard extends BaseController
             ->get()
             ->getResultArray();
 
-        $items = array_map(fn (array $row): array => $this->mapAuditRow($row), $rows);
+        $items = array_map(fn(array $row): array => $this->mapAuditRow($row), $rows);
 
         $totalPages = (int) ceil($total / $perPage);
 
@@ -1520,6 +1815,7 @@ class Dashboard extends BaseController
 
         return redirect()->back()->with('success', 'InscriÃƒÂ§ÃƒÂ£o aprovada e usuÃƒÂ¡rio criado com sucesso!');
     }
+
     public function certificate()
     {
         $courseModel = new CourseModel();
@@ -1538,6 +1834,3 @@ class Dashboard extends BaseController
         ]);
     }
 }
-
-
-

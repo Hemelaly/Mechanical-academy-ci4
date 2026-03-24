@@ -3,6 +3,9 @@
 $autoplayFlag = (int) ($_GET['autoplay'] ?? 0);
 $auto = $autoplayFlag ? 1 : 0;
 helper('text');
+$previewMode = (bool) ($previewMode ?? false);
+$previewUrlsByLessonId = is_array($previewUrlsByLessonId ?? null) ? $previewUrlsByLessonId : [];
+$previewBackUrl = (string) ($previewBackUrl ?? site_url('instructor/dashboard/meus_cursos'));
 $isQuiz = ($lesson->type_lesson ?? '') === 'quiz';
 $quizQuestions = [];
 $quizMinScore = 75;
@@ -47,6 +50,31 @@ foreach ($quizQuestions as $qIndex => $q) {
     }
 }
 
+$resolveLessonUrl = static function (?int $lessonId, ?string $lessonSlug = null) use ($previewMode, $previewUrlsByLessonId, $courseSlug) {
+    $lessonId = (int) $lessonId;
+
+    if ($lessonId <= 0) {
+        return '';
+    }
+
+    if ($previewMode) {
+        return (string) ($previewUrlsByLessonId[$lessonId] ?? '');
+    }
+
+    if (!empty($courseSlug) && !empty($lessonSlug)) {
+        return site_url('student/dashboard/inscricoes/' . $courseSlug . '/' . $lessonSlug);
+    }
+
+    return site_url('student/dashboard/ver_aulas/' . $lessonId);
+};
+
+$backToCoursesUrl = $previewMode ? $previewBackUrl : site_url('student/dashboard/inscricoes');
+$backToCoursesLabel = $previewMode ? 'Voltar ao editor' : 'Voltar aos Cursos';
+$certificateDashboardUrl = $previewMode ? $previewBackUrl : site_url('student/dashboard/certificados');
+$pendingCertificateUrlValue = $previewMode ? '' : site_url('student/certificates/pending');
+$certificateDownloadUrl = $previewMode
+    ? $previewBackUrl
+    : site_url('certificados/download/' . (int) ($enrollment->id_enrollment ?? 0));
 $isLastInModule = false;
 if ($currentModule && !empty($currentModule->lessons)) {
     $lastIndex = count($currentModule->lessons) - 1;
@@ -55,8 +83,8 @@ if ($currentModule && !empty($currentModule->lessons)) {
         $isLastInModule = (int) $lastLesson->id_lesson === (int) $lesson->id_lesson;
     }
 }
-$nextModuleUrl = !empty($nextModuleLessonSlug)
-    ? site_url('student/dashboard/inscricoes/' . $courseSlug . '/' . $nextModuleLessonSlug)
+$nextModuleUrl = !empty($nextModuleLessonId)
+    ? $resolveLessonUrl((int) $nextModuleLessonId, $nextModuleLessonSlug ?? null)
     : '';
 ?>
 
@@ -191,11 +219,28 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
             </script>
         <?php endif; ?>
 
+        <?php if ($previewMode): ?>
+            <div class="mb-6 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-4 text-sm text-blue-900 shadow-sm dark:border-blue-800 dark:bg-blue-900/20 dark:text-slate-100">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <div class="font-semibold">Modo de pré-visualização do instrutor</div>
+                        <div class="text-blue-800/80 dark:text-blue-100/80">
+                            Esta tela reaproveita a página de assistir aulas. Navegação, progresso e quiz aqui são apenas simulados.
+                        </div>
+                    </div>
+                    <a href="<?= esc($previewBackUrl) ?>" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700">
+                        <i class="bi bi-arrow-left"></i>
+                        Voltar ao editor
+                    </a>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <!-- Breadcrumb -->
         <nav class="flex items-center gap-2 text-sm mb-6">
-            <a href="/student/dashboard/inscricoes" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors flex items-center gap-1">
+            <a href="<?= esc($backToCoursesUrl) ?>" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors flex items-center gap-1">
                 <i class="bi bi-arrow-left"></i>
-                Voltar aos Cursos
+                <?= esc($backToCoursesLabel) ?>
             </a>
             <span class="text-gray-400 dark:text-gray-600">/</span>
             <span class="font-medium text-gray-700 dark:text-gray-300 text-sm truncate max-w-xs md:max-w-md"><?= esc($course->title_course) ?></span>
@@ -244,16 +289,8 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
 
             <!-- Video Section -->
             <?php
-            $nextUrlAttr = $nextLesson
-                ? (!empty($courseSlug) && !empty($nextLessonSlug)
-                    ? site_url('student/dashboard/inscricoes/' . $courseSlug . '/' . $nextLessonSlug)
-                    : site_url('student/dashboard/ver_aulas/' . $nextLesson))
-                : '';
-            $prevUrlAttr = $prevLesson
-                ? (!empty($courseSlug) && !empty($prevLessonSlug)
-                    ? site_url('student/dashboard/inscricoes/' . $courseSlug . '/' . $prevLessonSlug)
-                    : site_url('student/dashboard/ver_aulas/' . $prevLesson))
-                : '';
+            $nextUrlAttr = $nextLesson ? $resolveLessonUrl((int) $nextLesson, $nextLessonSlug ?? null) : '';
+            $prevUrlAttr = $prevLesson ? $resolveLessonUrl((int) $prevLesson, $prevLessonSlug ?? null) : '';
             ?>
             <div id="lesson-content"
                 data-lesson-id="<?= (int) $lesson->id_lesson ?>"
@@ -308,9 +345,7 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
                                         <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm">Avance para a próxima aula quando quiser.</p>
                                         <div class="flex flex-col sm:flex-row gap-3 justify-center mb-4">
                                             <?php
-                                            $nextUrl = (!empty($courseSlug) && !empty($nextLessonSlug))
-                                                ? site_url('student/dashboard/inscricoes/' . $courseSlug . '/' . $nextLessonSlug)
-                                                : site_url('student/dashboard/ver_aulas/' . $nextLesson);
+                                            $nextUrl = $resolveLessonUrl((int) $nextLesson, $nextLessonSlug ?? null);
                                             ?>
                                             <a id="goNextBtn"
                                                 <?php
@@ -447,11 +482,7 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
                 <!-- Navigation Buttons -->
                 <div class="flex justify-between items-center">
                     <?php if ($prevLesson): ?>
-                        <?php
-                        $prevUrl = (!empty($courseSlug) && !empty($prevLessonSlug))
-                            ? site_url('student/dashboard/inscricoes/' . $courseSlug . '/' . $prevLessonSlug)
-                            : site_url('student/dashboard/ver_aulas/' . $prevLesson);
-                        ?>
+                        <?php $prevUrl = $resolveLessonUrl((int) $prevLesson, $prevLessonSlug ?? null); ?>
                         <a href="<?= $prevUrl ?><?= $autoSuffix ?>"
                             class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-5 rounded-lg transition-colors flex items-center gap-2 text-sm shadow-sm">
                             <i class="bi bi-arrow-left"></i>
@@ -518,11 +549,7 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
                                                 $lessonSlug = $lessonSlugById[(int) $l->id_lesson] ?? '';
                                                 $iconClass = in_array($l->type_lesson, ['quiz', 'text'], true) ? 'bi-file-text' : 'bi-camera-video';
                                                 ?>
-                                                <?php
-                                                $lessonUrl = $lessonSlug
-                                                    ? site_url('student/dashboard/inscricoes/' . $courseSlug . '/' . $lessonSlug)
-                                                    : site_url('student/dashboard/ver_aulas/' . $l->id_lesson);
-                                                ?>
+                                                <?php $lessonUrl = $resolveLessonUrl((int) $l->id_lesson, $lessonSlug ?: null); ?>
                                                 <a class="lesson-link flex items-center gap-2 text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex-1 min-w-0"
                                                     href="<?= $lessonUrl ?>">
                                                     <i class="bi <?= $iconClass ?> text-slate-400"></i>
@@ -604,11 +631,7 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
                                                 $lessonSlug = $lessonSlugById[(int) $l->id_lesson] ?? '';
                                                 $iconClass = in_array($l->type_lesson, ['quiz', 'text'], true) ? 'bi-file-text' : 'bi-camera-video';
                                                 ?>
-                                                <?php
-                                                $lessonUrl = $lessonSlug
-                                                    ? site_url('student/dashboard/inscricoes/' . $courseSlug . '/' . $lessonSlug)
-                                                    : site_url('student/dashboard/ver_aulas/' . $l->id_lesson);
-                                                ?>
+                                                <?php $lessonUrl = $resolveLessonUrl((int) $l->id_lesson, $lessonSlug ?: null); ?>
                                                 <a class="lesson-link flex items-center gap-2 text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex-1 min-w-0"
                                                     href="<?= $lessonUrl ?>" onclick="closeDrawerFunc()">
                                                     <i class="bi <?= $iconClass ?> text-slate-400"></i>
@@ -647,10 +670,12 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
     /* =========================
        CSRF & Progress Management
        ========================= */
+    const previewMode = <?= $previewMode ? 'true' : 'false' ?>;
+    const previewBackUrl = <?= json_encode($previewBackUrl, JSON_UNESCAPED_SLASHES) ?>;
     const csrfName = document.querySelector('meta[name="csrf-name"]')?.content;
     let csrfHash = document.querySelector('meta[name="csrf-hash"]')?.content;
     const enrollmentId = document.querySelector('.container')?.dataset?.enrollmentId;
-    const pendingCertificateUrl = "<?= site_url('student/certificates/pending') ?>";
+    const pendingCertificateUrl = <?= json_encode($pendingCertificateUrlValue, JSON_UNESCAPED_SLASHES) ?>;
     let certificateInfo = <?= json_encode(array_merge(
                                 [
                                     'completedAt' => null,
@@ -659,7 +684,7 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
                                 ],
                                 $certificateInfo ?? []
                             ), JSON_UNESCAPED_SLASHES) ?>;
-    certificateInfo.downloadUrl = "<?= site_url('certificados/download/' . (int) ($enrollment->id_enrollment ?? 0)) ?>";
+    certificateInfo.downloadUrl = <?= json_encode($certificateDownloadUrl, JSON_UNESCAPED_SLASHES) ?>;
 
     // Track video progress
     let currentVideoProgress = 0;
@@ -722,12 +747,15 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
         };
 
         const isReady = Boolean(certificateInfo.pdfReady);
-        const message = isReady ?
+        let message = isReady ?
             'O seu certificado em PDF já foi gerado e está disponível.' :
             'Seu certificado foi registrado e aparecerá em Meus Certificados em instantes.';
-        const actionHref = isReady ? certificateInfo.downloadUrl : "<?= site_url('student/dashboard/certificados') ?>";
-        const actionLabel = isReady ? 'Ver PDF' : 'Ver Certificados';
-        const actionColorClass = isReady ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-600 hover:bg-gray-700';
+        if (previewMode) {
+            message = 'Esta e apenas uma pre-visualizacao. Nenhum progresso ou certificado real foi gerado.';
+        }
+        const actionHref = previewMode ? previewBackUrl : (isReady ? certificateInfo.downloadUrl : "<?= $certificateDashboardUrl ?>");
+        const actionLabel = previewMode ? 'Voltar ao editor' : (isReady ? 'Ver PDF' : 'Ver Certificados');
+        const actionColorClass = previewMode ? 'bg-slate-700 hover:bg-slate-800' : (isReady ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-600 hover:bg-gray-700');
 
         const modal = `
             <div id="courseCompletedModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
@@ -777,9 +805,12 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
         const actionLink = modal.querySelector('#courseCompletedAction');
         const isReady = Boolean(certificateInfo.pdfReady);
         if (messageEl) {
-            const newMessage = isReady ?
+            let newMessage = isReady ?
                 'O seu certificado em PDF já foi gerado e está disponível.' :
                 'Seu certificado foi registrado e aparecerá em Meus Certificados em instantes.';
+            if (previewMode) {
+                newMessage = 'Esta e apenas uma pre-visualizacao. Nenhum progresso ou certificado real foi gerado.';
+            }
             if (messageEl.textContent !== newMessage) {
                 messageEl.textContent = newMessage;
             }
@@ -787,15 +818,23 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
 
         if (actionLink) {
             const readyHref = certificateInfo.downloadUrl;
-            const pendingHref = "<?= site_url('student/dashboard/certificados') ?>";
-            actionLink.href = isReady ? readyHref : pendingHref;
-            actionLink.textContent = isReady ? 'Ver PDF' : 'Ver Certificados';
-            if (isReady) {
-                actionLink.classList.remove('bg-gray-600', 'hover:bg-gray-700');
-                actionLink.classList.add('bg-green-600', 'hover:bg-green-700');
+            const pendingHref = "<?= $certificateDashboardUrl ?>";
+            if (previewMode) {
+                actionLink.href = previewBackUrl;
+                actionLink.textContent = 'Voltar ao editor';
+                actionLink.classList.remove('bg-green-600', 'hover:bg-green-700', 'bg-gray-600', 'hover:bg-gray-700');
+                actionLink.classList.add('bg-slate-700', 'hover:bg-slate-800');
             } else {
-                actionLink.classList.remove('bg-green-600', 'hover:bg-green-700');
-                actionLink.classList.add('bg-gray-600', 'hover:bg-gray-700');
+                actionLink.href = isReady ? readyHref : pendingHref;
+                actionLink.textContent = isReady ? 'Ver PDF' : 'Ver Certificados';
+                actionLink.classList.remove('bg-slate-700', 'hover:bg-slate-800');
+                if (isReady) {
+                    actionLink.classList.remove('bg-gray-600', 'hover:bg-gray-700');
+                    actionLink.classList.add('bg-green-600', 'hover:bg-green-700');
+                } else {
+                    actionLink.classList.remove('bg-green-600', 'hover:bg-green-700');
+                    actionLink.classList.add('bg-gray-600', 'hover:bg-gray-700');
+                }
             }
         }
     }
@@ -808,7 +847,9 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
             pdfReady: typeof meta.pdfReady !== 'undefined' ? meta.pdfReady : certificateInfo.pdfReady,
         };
 
-        requestPendingCertificate();
+        if (!previewMode) {
+            requestPendingCertificate();
+        }
         showCourseCompletedModal({
             completedAt: certificateInfo.completedAt,
             availableAt: certificateInfo.availableAt,
@@ -819,6 +860,7 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
 
     async function requestPendingCertificate() {
         if (pendingCertificateRequested) return;
+        if (previewMode) return;
         if (!enrollmentId) return;
 
         pendingCertificateRequested = true;
@@ -880,15 +922,44 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
         return res.json();
     }
 
+    function getLessonProgressSnapshot() {
+        const lessonIds = new Set();
+        const completedIds = new Set();
+
+        document.querySelectorAll('.lesson-row[data-lesson-id]').forEach((row) => {
+            const lessonId = Number(row.dataset.lessonId || 0);
+            if (!lessonId) return;
+
+            lessonIds.add(lessonId);
+
+            const checkbox = row.querySelector('.lesson-check');
+            if (checkbox?.checked) {
+                completedIds.add(lessonId);
+            }
+        });
+
+        return {
+            total: lessonIds.size,
+            done: completedIds.size
+        };
+    }
+
     function computeProgress() {
-        const total = document.querySelectorAll('.lesson-row').length;
-        const done = document.querySelectorAll('.lesson-check:checked').length;
+        const snapshot = getLessonProgressSnapshot();
+        const total = snapshot.total || totalLessons;
+        const done = snapshot.done;
         const pct = total ? Math.round((done / total) * 100) : 0;
         const ppEl = document.getElementById('progressPercentage');
         const barEl = document.getElementById('progressBar');
         if (ppEl) ppEl.textContent = pct + '%';
         if (barEl) barEl.style.width = pct + '%';
         return pct;
+    }
+
+    function syncLessonCheckboxState(lessonId, isChecked) {
+        document.querySelectorAll(`.lesson-row[data-lesson-id="${Number(lessonId)}"] .lesson-check`).forEach((checkbox) => {
+            checkbox.checked = isChecked;
+        });
     }
 
     async function toggleLessonComplete(lessonId, isChecked, checkboxEl) {
@@ -911,6 +982,18 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
                 checkboxEl.disabled = true;
             }
             alert('Este quiz só é marcado como concluído quando você alcançar a nota mínima respondendo às perguntas.');
+            return;
+        }
+
+        if (previewMode) {
+            syncLessonCheckboxState(lessonId, isChecked);
+            completedLessons = getLessonProgressSnapshot().done;
+            const pct = recomputeFromCounters();
+            if (pct === 100) {
+                handleCourseCompletion({
+                    pdfReady: false
+                });
+            }
             return;
         }
 
@@ -963,13 +1046,31 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
     }
 
     async function submitQuizScore(score) {
+        const passed = score >= quizMinScoreValue;
+
+        if (previewMode) {
+            syncLessonCheckboxState(currentLessonId, passed);
+            completedLessons = getLessonProgressSnapshot().done;
+            const pct = recomputeFromCounters();
+            if (pct === 100) {
+                handleCourseCompletion({
+                    pdfReady: false
+                });
+            }
+
+            return {
+                ok: true,
+                preview: true,
+                pdf_ready: false
+            };
+        }
+
         if (!enrollmentId) {
             alert('Matr&iacute;cula n&atilde;o identificada. Recarregue a p&aacute;gina.');
             return null;
         }
 
         const checkbox = document.querySelector(`.lesson-row[data-lesson-id="${currentLessonId}"] .lesson-check`);
-        const passed = score >= quizMinScoreValue;
 
         try {
             const data = await fetchJSON('<?= site_url('student/lessons/complete') ?>', {

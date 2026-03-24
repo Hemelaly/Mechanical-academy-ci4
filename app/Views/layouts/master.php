@@ -41,7 +41,7 @@
                     <?= $this->include('pages/student/partials/navbar') ?>
 
                     <!-- CONTEÚDO -->
-                    <main class="flex min-w-0 flex-1 flex-col overflow-y-auto p-6 md:p-10 space-y-6 w-full max-w-full overflow-x-hidden">
+                    <main class="flex min-w-0 flex-1 flex-col overflow-y-auto p-6 md:p-10 space-y-6 w-full max-w-full overflow-x-hidden pb-6">
 
                         <?= $this->renderSection('home_admin') ?>
 
@@ -75,7 +75,7 @@
                     <?= $this->include('pages/instructor/partials/navbar') ?>
 
                     <!-- CONTEÚDO -->
-                    <main class="flex min-w-0 flex-1 flex-col overflow-y-auto p-6 md:p-10 space-y-6 w-full max-w-full overflow-x-hidden">
+                    <main class="flex min-w-0 flex-1 flex-col overflow-y-auto p-6 md:p-10 space-y-6 w-full max-w-full overflow-x-hidden pb-6">
 
                         <?= $this->renderSection('home_instructor') ?>
 
@@ -94,6 +94,8 @@
                         <?= $this->renderSection('students') ?>
 
                         <?= $this->renderSection('logs') ?>
+
+                        <?= $this->renderSection('lessons') ?>
 
                         <?= $this->renderSection('certificates') ?>
 
