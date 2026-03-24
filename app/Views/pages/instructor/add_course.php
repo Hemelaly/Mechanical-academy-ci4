@@ -655,6 +655,27 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                                                                         value="<?= esc($lesson->video_url_lesson) ?>">
                                                                 </div>
                                                             </div>
+                                                            <div class="mb-2 rounded-xl border border-emerald-300 bg-emerald-100 px-3 py-2 shadow-sm dark:border-emerald-500/70 dark:bg-emerald-950/85">
+                                                                <input type="hidden"
+                                                                    name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][is_preview]"
+                                                                    value="0">
+                                                                <label class="flex items-start gap-3 cursor-pointer">
+                                                                    <input type="checkbox"
+                                                                        name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][is_preview]"
+                                                                        value="1"
+                                                                        class="lesson-preview-toggle mt-0.5 h-4 w-4 rounded border-emerald-400 bg-white text-emerald-600 focus:ring-emerald-500 dark:border-emerald-400 dark:bg-emerald-950"
+                                                                        <?= !empty($lesson->is_preview_lesson) ? 'checked' : '' ?>>
+                                                                    <span>
+                                                                        <span class="inline-flex items-center gap-2 text-xs font-semibold text-emerald-950 dark:text-emerald-100">
+                                                                            <i class="bi bi-unlock-fill text-emerald-700 dark:text-emerald-300"></i>
+                                                                            Aula com pre-visualizacao gratuita
+                                                                        </span>
+                                                                        <span class="block text-[11px] text-emerald-800 dark:text-emerald-200/90">
+                                                                            Exibe cadeado aberto na pagina do curso e permite assistir esta aula antes da compra.
+                                                                        </span>
+                                                                    </span>
+                                                                </label>
+                                                            </div>
                                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
                                                                 <div>
                                                                     <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
@@ -1347,6 +1368,8 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                         lessonEl.querySelector('input[name$="[duration]"]')?.value || 0;
                     const video_url =
                         lessonEl.querySelector('input[name$="[video_url]"]')?.value || null;
+                    const is_preview =
+                        lessonEl.querySelector('.lesson-preview-toggle')?.checked ? 1 : 0;
                     const fileExisting =
                         lessonEl.querySelector('input[name$="[file_existing]"]')?.value || "";
                     const fileExistingName =
@@ -1384,6 +1407,7 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                         type,
                         duration,
                         video_url,
+                        is_preview,
                         quiz_questions,
                         file_input_index: fileInputIndex,
                         file_existing: fileExisting,
@@ -1898,6 +1922,26 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                                        placeholder="Link do vídeo (opcional)">
                             </div>
                         </div>
+                        <div class="mb-2 rounded-xl border border-emerald-300 bg-emerald-100 px-3 py-2 shadow-sm dark:border-emerald-500/70 dark:bg-emerald-950/85">
+                            <input type="hidden"
+                                   name="modules[${moduleId}][lessons][${lessonCount}][is_preview]"
+                                   value="0">
+                            <label class="flex items-start gap-3 cursor-pointer">
+                                <input type="checkbox"
+                                       name="modules[${moduleId}][lessons][${lessonCount}][is_preview]"
+                                       value="1"
+                                       class="lesson-preview-toggle mt-0.5 h-4 w-4 rounded border-emerald-400 bg-white text-emerald-600 focus:ring-emerald-500 dark:border-emerald-400 dark:bg-emerald-950">
+                                <span>
+                                    <span class="inline-flex items-center gap-2 text-xs font-semibold text-emerald-950 dark:text-emerald-100">
+                                        <i class="bi bi-unlock-fill text-emerald-700 dark:text-emerald-300"></i>
+                                        Aula com pre-visualizacao gratuita
+                                    </span>
+                                    <span class="block text-[11px] text-emerald-800 dark:text-emerald-200/90">
+                                        Exibe cadeado aberto na pagina do curso e permite assistir esta aula antes da compra.
+                                    </span>
+                                </span>
+                            </label>
+                        </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-200 mb-1">
@@ -2378,6 +2422,7 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                 const lessonTitle = lessonEl.querySelector('input[name$="[title]"]')?.value?.trim() || `Aula ${lessonIndex + 1}`;
                 const lessonType = lessonEl.querySelector('select[name$="[type]"]')?.value || "text";
                 const lessonDuration = Number(lessonEl.querySelector('input[name$="[duration]"]')?.value || 0);
+                const lessonPreview = lessonEl.querySelector('.lesson-preview-toggle')?.checked || false;
 
                 totalLessons += 1;
                 totalMinutes += lessonDuration > 0 ? lessonDuration : 0;
@@ -2385,7 +2430,8 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                 return {
                     title: lessonTitle,
                     type: lessonType,
-                    duration: lessonDuration
+                    duration: lessonDuration,
+                    isPreview: lessonPreview
                 };
             });
 
@@ -2482,9 +2528,14 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                                     ${lessonIndex + 1}. ${escapeHtml(lesson.title)}
                                 </span>
                             </div>
-                            <span class="text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                                ${lesson.duration > 0 ? `${lesson.duration} min` : "--"}
-                            </span>
+                            <div class="flex items-center gap-2 whitespace-nowrap">
+                                <span class="${lesson.isPreview ? "text-emerald-600 dark:text-emerald-400" : "text-slate-500 dark:text-slate-400"}">
+                                    <i class="bi ${lesson.isPreview ? "bi-unlock-fill" : "bi-lock-fill"}"></i>
+                                </span>
+                                <span class="text-slate-500 dark:text-slate-400">
+                                    ${lesson.duration > 0 ? `${lesson.duration} min` : "--"}
+                                </span>
+                            </div>
                         </div>
                     `).join("")
                     : `<div class="text-xs text-slate-500 dark:text-slate-400">Sem aulas neste módulo.</div>`

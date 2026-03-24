@@ -1,6 +1,132 @@
 <?php
 
 $session = session();
+$checkoutStats = is_array($checkoutStats ?? null) ? $checkoutStats : [];
+$moduleCount = (int) ($checkoutStats['moduleCount'] ?? 0);
+$lessonCount = (int) ($checkoutStats['lessonCount'] ?? 0);
+$projectCount = (int) ($checkoutStats['projectCount'] ?? 0);
+$totalHoursLabel = trim((string) ($checkoutStats['totalHoursLabel'] ?? '0 Horas'));
+$courseTitle = trim((string) ($course->title_course ?? ''));
+$courseSubtitle = trim((string) ($course->subtitle_course ?? ''));
+$isCcnaCourse = preg_match('/\bccna\b/i', $courseTitle) === 1;
+
+$normalizeCheckoutText = static function (?string $value): string {
+  $text = trim((string) $value);
+  if ($text === '') {
+    return '';
+  }
+
+  $text = preg_replace('/<\/(p|div|li|br|h[1-6])\s*>/i', "\n", $text);
+  $text = strip_tags((string) $text);
+  $text = html_entity_decode((string) $text, ENT_QUOTES, 'UTF-8');
+  $text = preg_replace('/\s+/u', ' ', (string) $text);
+
+  return trim((string) $text);
+};
+
+$buildCheckoutExcerpt = static function (?string $value, int $limit = 240) use ($normalizeCheckoutText): string {
+  $text = $normalizeCheckoutText($value);
+  $textLength = function_exists('mb_strlen') ? mb_strlen($text) : strlen($text);
+  if ($text === '' || $textLength <= $limit) {
+    return $text;
+  }
+
+  $excerpt = function_exists('mb_substr')
+    ? mb_substr($text, 0, $limit - 3)
+    : substr($text, 0, $limit - 3);
+
+  return rtrim((string) $excerpt) . '...';
+};
+
+$learningSource = trim((string) ($course->learning_course ?? ($course->what_learn_course ?? '')));
+$learningItems = [];
+
+if ($learningSource !== '' && preg_match_all('/<li\b[^>]*>(.*?)<\/li>/is', $learningSource, $matches)) {
+  foreach (($matches[1] ?? []) as $itemHtml) {
+    $itemText = $normalizeCheckoutText((string) $itemHtml);
+    if ($itemText !== '') {
+      $learningItems[] = $itemText;
+    }
+  }
+}
+
+if (empty($learningItems) && $learningSource !== '') {
+  $plainLearning = preg_replace('/<\/(p|div|li|br)\s*>/i', "\n", $learningSource);
+  $chunks = preg_split('/(?:\r\n|\r|\n|;|\|)+/u', strip_tags((string) $plainLearning)) ?: [];
+
+  foreach ($chunks as $chunk) {
+    $itemText = trim((string) preg_replace('/^[\-\*\x{2022}\s]+/u', '', $chunk));
+    $itemText = $normalizeCheckoutText($itemText);
+    if ($itemText !== '') {
+      $learningItems[] = $itemText;
+    }
+  }
+}
+
+if (empty($learningItems) && $isCcnaCourse) {
+  $learningItems = [
+    'Fundamentos de rede, operacao de redes IPv4 e IPv6 e leitura de topologias',
+    'Configuracao basica de switches, VLANs, trunking e roteadores',
+    'IP connectivity, roteamento estatico e fundamentos de OSPF',
+    'IP services, NAT, DHCP, DNS, acesso remoto e troubleshooting',
+    'Seguranca basica de redes, boas praticas e hardening inicial',
+    'Introducao a automacao e programabilidade em redes modernas',
+  ];
+}
+
+$learningItems = array_values(array_unique(array_filter($learningItems)));
+$learningItems = array_slice($learningItems, 0, 4);
+
+$summarySource = trim((string) ($course->description_course ?? ''));
+if ($summarySource === '' && $courseSubtitle !== '') {
+  $summarySource = $courseSubtitle;
+}
+if ($summarySource === '' && $isCcnaCourse) {
+  $summarySource = 'Formacao focada no CCNA 200-301 para construir base solida em redes, estudar os dominios mais importantes do exame e avancar com um roteiro mais claro.';
+}
+$courseSummary = $buildCheckoutExcerpt($summarySource);
+
+$featureItems = [];
+if ($totalHoursLabel !== '' && $totalHoursLabel !== '0 Horas') {
+  $featureItems[] = $totalHoursLabel . ' de aulas em video para estudar no seu ritmo';
+}
+if ($lessonCount > 0 && $moduleCount > 0) {
+  $featureItems[] = $lessonCount . ' aulas organizadas em ' . $moduleCount . ' modulos';
+} elseif ($lessonCount > 0) {
+  $featureItems[] = $lessonCount . ' aulas com progressao do basico ao avancado';
+} elseif ($moduleCount > 0) {
+  $featureItems[] = $moduleCount . ' modulos com conteudo estruturado';
+}
+if ($projectCount > 0) {
+  $featureItems[] = $projectCount . ' projeto' . ($projectCount > 1 ? 's' : '') . ' ou laboratorios para consolidar a pratica';
+}
+foreach ($learningItems as $learningItem) {
+  $featureItems[] = $learningItem;
+}
+$featureItems[] = 'Acesso pela plataforma no computador e no celular';
+$featureItems[] = 'Certificado digital de conclusao emitido pela plataforma';
+$featureItems = array_slice(array_values(array_unique($featureItems)), 0, 7);
+
+$metricCards = [];
+if ($totalHoursLabel !== '' && $totalHoursLabel !== '0 Horas') {
+  $metricCards[] = ['label' => 'Carga horaria', 'value' => $totalHoursLabel];
+}
+if ($moduleCount > 0) {
+  $metricCards[] = ['label' => 'Modulos', 'value' => (string) $moduleCount];
+}
+if ($lessonCount > 0) {
+  $metricCards[] = ['label' => 'Aulas', 'value' => (string) $lessonCount];
+}
+
+$valueHeading = $isCcnaCourse ? 'Conteudo alinhado ao CCNA 200-301' : 'Conteudo pensado para aplicacao pratica';
+$valueText = $isCcnaCourse
+  ? 'Os topicos destacados aqui seguem os pilares oficiais do CCNA: fundamentos de rede, network access, IP connectivity, IP services, seguranca e automacao. Isso deixa o valor do curso mais claro antes da compra.'
+  : 'Esta pagina agora destaca descricao, estrutura e objetivos reais do curso para a decisao de compra ser baseada em informacao concreta.';
+
+$buyerHeading = $isCcnaCourse ? 'Para quem quer entrar ou evoluir em redes' : 'Compra guiada por informacao real';
+$buyerText = $isCcnaCourse
+  ? 'Se voce quer construir base para suporte, infraestrutura, NOC ou certificacao, este checkout passa a mostrar exatamente o que o aluno vai estudar e praticar.'
+  : 'No lugar de depoimentos genricos, o checkout mostra o que existe de fato no curso e o que o aluno vai conseguir explorar na plataforma.';
 
 ?>
 
@@ -110,6 +236,57 @@ $session = session();
     .testimonial strong {
       display: block;
       margin-top: 0.5rem;
+    }
+
+    .features li::before {
+      content: "\2022";
+    }
+
+    .course-summary {
+      color: #495057;
+      font-size: 1.02rem;
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+    }
+
+    .metric-card {
+      background: #f8f9fa;
+      border: 1px solid #eceef1;
+      border-radius: 12px;
+      height: 100%;
+      padding: 1rem;
+    }
+
+    .metric-label {
+      color: #6c757d;
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.35rem;
+      text-transform: uppercase;
+    }
+
+    .metric-value {
+      color: #111827;
+      font-size: 1.2rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin: 0;
+    }
+
+    .value-card {
+      background: linear-gradient(180deg, #fbfbfb 0%, #f4f7fb 100%);
+      border: 1px solid #e9ecef;
+      border-radius: 14px;
+      margin-top: 1rem;
+      padding: 1.25rem;
+    }
+
+    .value-card p {
+      color: #495057;
+      line-height: 1.65;
+      margin-bottom: 0;
     }
 
     .gradient-bg {
@@ -448,29 +625,43 @@ $session = session();
             <img src="<?= base_url('assets/instructor/img/courses/' . $course->image_course) ?>" alt="<?= esc($course->title_course ?? 'Curso') ?>" class="img-fluid rounded w-100">
           </div>
 
-          <h3 class="fw-bold mb-3"><?= $course->title_course ?></h3>
+          <h3 class="fw-bold mb-3"><?= esc($course->title_course) ?></h3>
+
+          <?php if ($courseSummary !== ''): ?>
+            <p class="course-summary"><?= esc($courseSummary) ?></p>
+          <?php endif; ?>
+
+          <?php if (! empty($metricCards)): ?>
+            <div class="row g-3 mb-3">
+              <?php foreach ($metricCards as $metricCard): ?>
+                <div class="col-sm-4">
+                  <div class="metric-card">
+                    <span class="metric-label"><?= esc($metricCard['label']) ?></span>
+                    <p class="metric-value"><?= esc($metricCard['value']) ?></p>
+                  </div>
+                </div>
+              <?php endforeach; ?>
+            </div>
+          <?php endif; ?>
+
+          <h5 class="fw-bold mt-4 mb-3">O que voce vai encontrar neste curso:</h5>
 
           <ul class="features">
-            <li>37 horas de vídeo sob demanda</li>
-            <li>20+ recursos para download</li>
-            <li>Documentação completa para cada vídeo e todos os códigos</li>
-            <li>Acesso vitalício</li>
-            <li>Acesso via dispositivos móveis e TV</li>
-            <li>Certificado de conclusão</li>
-            <li>Acesso à comunidade no Discord</li>
+            <?php foreach ($featureItems as $featureItem): ?>
+              <li><?= esc($featureItem) ?></li>
+            <?php endforeach; ?>
           </ul>
 
-          <h5 class="fw-bold mt-5 mb-3">O que as pessoas estão dizendo:</h5>
+          <h5 class="fw-bold mt-5 mb-3">Por que esta compra faz sentido:</h5>
 
-          <div class="testimonial">
-            “Conteúdo excelente, tanto para profissionais quanto para iniciantes. Este é mais um exemplo do porquê o Brad é tão bem-sucedido como instrutor.
-            Ouro é difícil de encontrar se você não souber onde procurar nesta área.”
-            <strong>— Benny V.</strong>
+          <div class="value-card">
+            <h6 class="fw-bold mb-2"><?= esc($valueHeading) ?></h6>
+            <p><?= esc($valueText) ?></p>
           </div>
 
-          <div class="testimonial">
-            “Brad é o melhor. Todos os cursos dele são incríveis. A minha parte favorita é o quanto ele é detalhista e nunca se esquece dos iniciantes.”
-            <strong>— Brandon W.</strong>
+          <div class="value-card">
+            <h6 class="fw-bold mb-2"><?= esc($buyerHeading) ?></h6>
+            <p><?= esc($buyerText) ?></p>
           </div>
         </div>
 

@@ -205,6 +205,19 @@ class CourseController extends BaseController
         return false;
     }
 
+    private function lessonPreviewFlag(array $lesson): int
+    {
+        $value = $lesson['is_preview'] ?? 0;
+
+        if (is_bool($value)) {
+            return $value ? 1 : 0;
+        }
+
+        $normalized = strtolower(trim((string) $value));
+
+        return in_array($normalized, ['1', 'true', 'on', 'yes'], true) ? 1 : 0;
+    }
+
     private function lessonIsEmpty(array $lesson): bool
     {
         $title = trim((string) ($lesson['title'] ?? ''));
@@ -415,6 +428,7 @@ class CourseController extends BaseController
                             'duration_lesson' => $lesson['duration'] ?? 0,
                             'position_lesson' => $lIndex + 1,
                             'video_url_lesson' => $lesson['video_url'] ?? null,
+                            'is_preview_lesson' => $this->lessonPreviewFlag($lesson),
                         ];
                         $lessonModel->insert($lessonInsert);
                     }
@@ -682,6 +696,7 @@ class CourseController extends BaseController
                             'attachment_name_lesson' => $attachmentName,
                             'duration_lesson' => (int) ($lesson['duration'] ?? 0),
                             'video_url_lesson' => $lesson['video_url'] ?? null,
+                            'is_preview_lesson' => $this->lessonPreviewFlag($lesson),
                             'position_lesson' => $lIndex + 1,
                         ]);
                     }
@@ -897,6 +912,7 @@ class CourseController extends BaseController
                     'attachment_name_lesson' => $attachmentName,
                     'duration_lesson' => (int) ($lesson['duration'] ?? 0),
                     'video_url_lesson' => $lesson['video_url'] ?? null,
+                    'is_preview_lesson' => $this->lessonPreviewFlag($lesson),
                     'position_lesson' => $lIndex + 1,
                 ]);
                 if (! $lessonInserted) {

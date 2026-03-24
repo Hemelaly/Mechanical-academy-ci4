@@ -12,7 +12,7 @@ class LessonModel extends Model
     protected $returnType       = 'object';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['id_module_lesson', 'title_lesson', 'content_lesson', 'type_lesson', 'duration_lesson', 'position_lesson', 'created_at', 'video_url_lesson', 'attachment_path_lesson', 'attachment_name_lesson'];
+    protected $allowedFields    = ['id_module_lesson', 'title_lesson', 'content_lesson', 'type_lesson', 'duration_lesson', 'position_lesson', 'created_at', 'video_url_lesson', 'is_preview_lesson', 'attachment_path_lesson', 'attachment_name_lesson'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -34,6 +34,7 @@ class LessonModel extends Model
         'content_lesson'     => 'permit_empty|string',
         'position_lesson'       => 'required|integer',
         'video_url_lesson'   => 'permit_empty|valid_url',
+        'is_preview_lesson'  => 'permit_empty|in_list[0,1]',
         'attachment_path_lesson' => 'permit_empty|string|max_length[255]',
         'attachment_name_lesson' => 'permit_empty|string|max_length[255]',
     ];
@@ -53,6 +54,9 @@ class LessonModel extends Model
         ],
         'video_url_lesson'   => [
             'valid_url' => 'Lesson video URL must be a valid URL.',
+        ],
+        'is_preview_lesson' => [
+            'in_list' => 'Lesson preview flag must be 0 or 1.',
         ],
         'attachment_path_lesson' => [
             'string'     => 'Lesson attachment path must be a string.',

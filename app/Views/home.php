@@ -314,18 +314,18 @@ if ($isLoggedIn && $user && !empty($user->img)) {
                     <div class="d-flex flex-column flex-md-row flex-lg-row align-items-center justify-content-center w-100 mt-0 mt-lg-5 text-light">
                         <div class="d-flex flex-column align-items-center justify-content-center mx-5">
                             <i class="fa-solid fa-graduation-cap heading-1"></i>
-                            <h1 class="text-center fw-bold mt-3">5+</h1>
+                            <h1 class="text-center fw-bold mt-3">3+</h1>
                             <p class="text-center">Cursos</p>
                         </div>
                         <div class="d-flex flex-column align-items-center justify-content-center mx-5">
                             <i class="fa-solid fa-clock heading-1"></i>
-                            <h1 class="text-center fw-bold mt-3">250+</h1>
+                            <h1 class="text-center fw-bold mt-3">20+</h1>
                             <p class="text-center">Horas de conteúdo</p>
                         </div>
                         <div class="d-flex flex-column align-items-center justify-content-center mx-5">
                             <i class="fa-solid fa-users heading-1"></i>
-                            <h1 class="text-center fw-bold mt-3">500+</h1>
-                            <p class="text-center">Estudantes por curso</p>
+                            <h1 class="text-center fw-bold mt-3">30+</h1>
+                            <p class="text-center">Estudantes</p>
                         </div>
                     </div>
                 </div>

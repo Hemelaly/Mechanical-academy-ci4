@@ -120,6 +120,28 @@ if (!function_exists('getVimeoId')) {
 
 $overviewVideoId = getVimeoId($overviewVideoUrlRaw);
 $overviewPlayerId = (int) ($course->id_course ?? 0);
+$publicPreviewLessonCount = 0;
+
+foreach ($modules as &$moduleItem) {
+    $moduleItem->previewable_lessons = 0;
+
+    foreach (($moduleItem->lessons ?? []) as &$moduleLesson) {
+        $lessonType = trim((string) ($moduleLesson->type_lesson ?? 'video'));
+        $lessonVideoId = $lessonType === 'video'
+            ? getVimeoId((string) ($moduleLesson->video_url_lesson ?? ''))
+            : null;
+
+        $moduleLesson->preview_video_id = $lessonVideoId;
+        $moduleLesson->is_public_preview = (int) ($moduleLesson->is_preview_lesson ?? 0) === 1 && ! empty($lessonVideoId);
+
+        if ($moduleLesson->is_public_preview) {
+            $publicPreviewLessonCount++;
+            $moduleItem->previewable_lessons++;
+        }
+    }
+    unset($moduleLesson);
+}
+unset($moduleItem);
 ?>
 
 <!doctype html>
@@ -251,17 +273,125 @@ $overviewPlayerId = (int) ($course->id_course ?? 0);
     }
 
     .modules-accordion .module-lesson-item {
-      background: #c5c5c8;
+      background: #dfdfe2ff;
       color: #1f2937;
       padding: 0.9rem 1rem;
       margin-bottom: 0.35rem;
-      border-radius: 0;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
       line-height: 1.35;
       font-size: 1.2rem;
     }
 
     .modules-accordion .module-lesson-item:last-child {
       margin-bottom: 0;
+    }
+
+    .modules-accordion .module-lesson-preview-button {
+      border: 0;
+      text-align: left;
+      transition: transform 0.18s ease, background-color 0.18s ease;
+      width: 100%;
+    }
+
+    .modules-accordion .module-lesson-link {
+      text-decoration: none;
+      transition: transform 0.18s ease, background-color 0.18s ease;
+      width: 100%;
+    }
+
+    .modules-accordion .module-lesson-preview-button:hover {
+      background: #b8d7ff;
+      transform: translateX(2px);
+    }
+
+    .modules-accordion .module-lesson-link:hover {
+      background: #dbeafe;
+      transform: translateX(2px);
+    }
+
+    .modules-accordion .module-lesson-locked {
+      opacity: 0.88;
+    }
+
+    .modules-accordion .lesson-main {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      flex: 1;
+    }
+
+    .modules-accordion .lesson-icon {
+      color: <?= esc($course->color_course) ?>;
+      font-size: 1.15rem;
+      flex: 0 0 auto;
+    }
+
+    .modules-accordion .lesson-copy {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+
+    .modules-accordion .lesson-title {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .modules-accordion .lesson-meta {
+      color: #4b5563;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .modules-accordion .lesson-status {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .modules-accordion .lesson-status-open {
+      color: #15803d;
+    }
+
+    .modules-accordion .lesson-status-locked {
+      color: #475569;
+    }
+
+    .modules-accordion .lesson-status-text {
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .modules-accordion .preview-helper {
+      font-size: 0.95rem;
+      color: #cbd5e1;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .lesson-preview-player {
+      aspect-ratio: 16 / 9;
+      background: #020617;
+      border-radius: 1rem;
+      overflow: hidden;
+    }
+
+    .lesson-preview-player iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
     }
 
     @media (min-width: 992px) {
@@ -669,10 +799,16 @@ $overviewPlayerId = (int) ($course->id_course ?? 0);
 
   <section id="modules" class="bg-blue py-5">
     <div class="container">
+      <p class="preview-helper">
+        <?php if ($publicPreviewLessonCount > 0): ?>
+          Aulas com cadeado aberto podem ser assistidas antes da compra.
+        <?php else: ?>
+          O currículo completo está listado abaixo. As aulas com prévia gratuita aparecerão com cadeado aberto.
+        <?php endif; ?>
+      </p>
       <div class="accordion modules-accordion mx-auto" id="excelAccordion">
 
         <?php foreach ($modules as $key => $module): ?>
-          <?php $isFirstModule = $key === 0; ?>
           <div class="accordion-item mb-3 bg-white border-0 shadow-sm p-2">
             <p class="accordion-header fs-sm">
               <button class="title accordion-button bg-white fw-semibold" type="button" data-bs-toggle="collapse"
@@ -685,8 +821,63 @@ $overviewPlayerId = (int) ($course->id_course ?? 0);
                 <?php if (!empty($module->lessons)): ?>
                   <ul class="list-unstyled mb-0">
                     <?php foreach ($module->lessons as $lessonIndex => $lesson): ?>
-                      <li class="module-lesson-item">
-                        <?= esc($lesson->title_lesson ?? 'Aula sem titulo') ?>
+                      <?php
+                      $lessonType = trim((string) ($lesson->type_lesson ?? 'video'));
+                      $lessonIconClass = match ($lessonType) {
+                        'quiz' => 'bi-patch-question-fill',
+                        'exercise' => 'bi-journal-check',
+                        'text' => 'bi-file-earmark-text-fill',
+                        default => 'bi-play-circle-fill',
+                      };
+                      $isPreviewLesson = !empty($lesson->is_public_preview);
+                      $lessonDuration = (int) ($lesson->duration_lesson ?? 0);
+                      $lessonMeta = $isPreviewLesson ? 'Previa gratuita' : 'Conteudo bloqueado';
+                      if ($lessonDuration > 0) {
+                        $lessonMeta .= ' - ' . $lessonDuration . ' min';
+                      }
+                      $previewSrc = '';
+                      if ($isPreviewLesson && !empty($lesson->preview_video_id)) {
+                        $previewSrc = 'https://player.vimeo.com/video/' . rawurlencode((string) $lesson->preview_video_id)
+                          . '?badge=0&autopause=0&player_id=' . (int) ($lesson->id_lesson ?? 0)
+                          . '&app_id=58479&title=0&byline=0&portrait=0&autoplay=1';
+                      }
+                      ?>
+                      <li>
+                        <?php if ($isPreviewLesson && $previewSrc !== ''): ?>
+                          <button type="button"
+                            class="module-lesson-item module-lesson-preview-button my-2"
+                            data-bs-toggle="modal"
+                            data-bs-target="#lessonPreviewModal"
+                            data-preview-title="<?= esc($lesson->title_lesson ?? 'Aula sem titulo', 'attr') ?>"
+                            data-preview-src="<?= esc($previewSrc, 'attr') ?>">
+                            <span class="lesson-main">
+                              <i class="bi <?= esc($lessonIconClass) ?> lesson-icon"></i>
+                              <span class="lesson-copy">
+                                <span class="lesson-title"><?= esc($lesson->title_lesson ?? 'Aula sem titulo') ?></span>
+                                <span class="lesson-meta"><?= esc($lessonMeta) ?></span>
+                              </span>
+                            </span>
+                            <span class="lesson-status lesson-status-open">
+                              <i class="bi bi-unlock-fill"></i>
+                              <span class="lesson-status-text">Assistir</span>
+                            </span>
+                          </button>
+                        <?php else: ?>
+                          <a href="<?= base_url('/checkout/' . (int) $course->id_course) ?>"
+                            class="module-lesson-item module-lesson-link module-lesson-locked my-2">
+                            <span class="lesson-main">
+                              <i class="bi <?= esc($lessonIconClass) ?> lesson-icon"></i>
+                              <span class="lesson-copy">
+                                <span class="lesson-title"><?= esc($lesson->title_lesson ?? 'Aula sem titulo') ?></span>
+                                <span class="lesson-meta"><?= esc($lessonMeta) ?></span>
+                              </span>
+                            </span>
+                            <span class="lesson-status lesson-status-locked">
+                              <i class="bi bi-lock-fill"></i>
+                              <span class="lesson-status-text">Comprar acesso</span>
+                            </span>
+                          </a>
+                        <?php endif; ?>
                       </li>
                     <?php endforeach; ?>
                   </ul>
@@ -703,6 +894,32 @@ $overviewPlayerId = (int) ($course->id_course ?? 0);
       </div>
     </div>
   </section>
+
+  <div class="modal fade" id="lessonPreviewModal" tabindex="-1" aria-labelledby="lessonPreviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header">
+          <div>
+            <h5 class="modal-title fw-bold" id="lessonPreviewModalLabel">Pre-visualizacao da aula</h5>
+            <small class="text-muted" id="lessonPreviewModalSubtitle">Assista uma aula liberada antes de comprar.</small>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <div class="lesson-preview-player">
+            <iframe id="lessonPreviewFrame"
+              src=""
+              title="Pre-visualizacao da aula"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowfullscreen
+              referrerpolicy="no-referrer"
+              loading="lazy"
+              sandbox="allow-same-origin allow-scripts allow-presentation"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <section id="projects" class="text-center text-white">
     <div class="bg-darkblue pt-5 pb-2">
@@ -778,6 +995,28 @@ $overviewPlayerId = (int) ($course->id_course ?? 0);
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
     crossorigin="anonymous"></script>
+
+  <script>
+    const lessonPreviewModalEl = document.getElementById('lessonPreviewModal');
+    const lessonPreviewFrame = document.getElementById('lessonPreviewFrame');
+    const lessonPreviewModalLabel = document.getElementById('lessonPreviewModalLabel');
+
+    if (lessonPreviewModalEl && lessonPreviewFrame && lessonPreviewModalLabel) {
+      lessonPreviewModalEl.addEventListener('show.bs.modal', (event) => {
+        const trigger = event.relatedTarget;
+        const previewTitle = trigger?.getAttribute('data-preview-title') || 'Pre-visualizacao da aula';
+        const previewSrc = trigger?.getAttribute('data-preview-src') || '';
+
+        lessonPreviewModalLabel.textContent = previewTitle;
+        lessonPreviewFrame.src = previewSrc;
+      });
+
+      lessonPreviewModalEl.addEventListener('hidden.bs.modal', () => {
+        lessonPreviewFrame.src = '';
+      });
+    }
+
+  </script>
 
   <script>
     /**
