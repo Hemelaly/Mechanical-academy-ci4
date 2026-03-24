@@ -38,10 +38,11 @@ class PaymentController extends Controller
 
         // Salvar pagamento vinculado ao pending_user
         $dataPayment = [
-            'pending_user_id'     => $pendingUserId,
+            'id_user_payment'     => $pendingUserId,
             'id_course_payment'   => $idCourse,
             'amount_payment'      => $post['amount_payment'] ?? 0,
             'status_payment'      => 'Pendente',
+            'method_payment'      => 'Comprovativo',
             'proof_file_payment'  => $filePath,
             'created_at'          => date('Y-m-d H:i:s'),
         ];

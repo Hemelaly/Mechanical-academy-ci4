@@ -171,10 +171,15 @@
                     <p class="font-semibold text-slate-800 dark:text-white text-sm sm:text-base truncate">
                       <?= esc($transaction->title_course ?? 'Curso') ?>
                     </p>
-                    <p class="<?= $amountColor ?> font-semibold text-sm">
-                      <?= number_format((float) ($transaction->amount_payment ?? 0), 2, ',', '.') ?> MZN
-                      - <?= esc($transaction->status_payment ?? '') ?>
-                    </p>
+                    <div class="flex flex-wrap items-center gap-2 mt-1">
+                      <p class="<?= $amountColor ?> font-semibold text-sm">
+                        <?= number_format((float) ($transaction->amount_payment ?? 0), 2, ',', '.') ?> MZN
+                        - <?= esc($transaction->status_payment ?? '') ?>
+                      </p>
+                      <span class="inline-flex items-center rounded-full bg-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-700 dark:bg-slate-700 dark:text-slate-200">
+                        <?= esc($transaction->method_payment_label ?? 'Nao informado') ?>
+                      </span>
+                    </div>
                   </div>
                 </div>
                 <div class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 bg-slate-200 dark:bg-slate-700 px-2 sm:px-3 py-1 rounded-lg whitespace-nowrap ml-2">
@@ -256,17 +261,25 @@
       </div>
 
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-        <h4 class="font-bold text-slate-800 dark:text-white mb-4 text-sm sm:text-base">Ações Rápidas</h4>
+        <h4 class="font-bold text-slate-800 dark:text-white mb-4 text-sm sm:text-base">Metodos de Pagamento</h4>
         <div class="space-y-2">
-          <button class="w-full text-left px-3 py-2 text-sm bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors dark:text-white">
-            <i class="bi bi-download mr-2"></i>Exportar Relatório
-          </button>
-          <button class="w-full text-left px-3 py-2 text-sm bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors dark:text-white">
-            <i class="bi bi-receipt mr-2"></i>Ver Extrato
-          </button>
-          <button class="w-full text-left px-3 py-2 text-sm bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors dark:text-white">
-            <i class="bi bi-gear mr-2"></i>Configurações
-          </button>
+          <?php if (!empty($paymentMethods)): ?>
+            <?php foreach ($paymentMethods as $method): ?>
+              <div class="flex items-center justify-between px-3 py-2 text-sm bg-slate-100 dark:bg-slate-700 rounded-lg dark:text-white">
+                <div>
+                  <p class="font-medium"><?= esc($method->method_payment_label ?? 'Nao informado') ?></p>
+                  <p class="text-xs text-slate-500 dark:text-slate-400"><?= (int) ($method->total_transactions ?? 0) ?> transacoes</p>
+                </div>
+                <span class="font-semibold text-slate-800 dark:text-white">
+                  <?= number_format((float) ($method->total_amount ?? 0), 2, ',', '.') ?> MZN
+                </span>
+              </div>
+            <?php endforeach; ?>
+          <?php else: ?>
+            <p class="text-sm text-slate-500 dark:text-slate-400">
+              Ainda nao ha metodos de pagamento registados.
+            </p>
+          <?php endif; ?>
         </div>
       </div>
     </div>

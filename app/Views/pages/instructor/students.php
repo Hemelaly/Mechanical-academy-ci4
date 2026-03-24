@@ -104,6 +104,7 @@
                         <th scope="col" class="px-6 py-3">Aluno</th>
                         <th scope="col" class="px-6 py-3">Curso</th>
                         <th scope="col" class="px-6 py-3">Progresso</th>
+                        <th scope="col" class="px-6 py-3">Data de inscricao</th>
                         <th scope="col" class="px-6 py-3">Último acesso</th>
                         <th scope="col" class="px-6 py-3">Status</th>
                         <th scope="col" class="px-6 py-3 text-right">Ações</th>
@@ -193,6 +194,13 @@
             return date.toLocaleString('pt-BR');
         };
 
+        const formatEnrollmentDate = (value) => {
+            if (!value) return '-';
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return '-';
+            return date.toLocaleDateString('pt-BR');
+        };
+
         const statusBadge = (status) => {
             const normalized = (status || '').toString().toLowerCase();
             const isActive = normalized === 'ativa';
@@ -267,7 +275,7 @@
         const loadEnrollments = () => {
             const enrollBody = getEnrollBody();
             if (!enrollBody) return;
-            enrollBody.innerHTML = '<tr><td colspan="6" class="px-6 py-6 text-center text-slate-500">Carregando...</td></tr>';
+            enrollBody.innerHTML = '<tr><td colspan="7" class="px-6 py-6 text-center text-slate-500">Carregando...</td></tr>';
             const url = new URL(enrollEndpoint, window.location.origin);
             url.searchParams.set('page', stateEnroll.page);
             url.searchParams.set('per_page', stateEnroll.per_page);
@@ -279,7 +287,7 @@
                 .then(data => {
                     const items = data.items || [];
                     if (!items.length) {
-                        enrollBody.innerHTML = '<tr><td colspan="6" class="px-6 py-6 text-center text-slate-500">Nenhum aluno encontrado.</td></tr>';
+                        enrollBody.innerHTML = '<tr><td colspan="7" class="px-6 py-6 text-center text-slate-500">Nenhum aluno encontrado.</td></tr>';
                     } else {
                         enrollBody.innerHTML = items.map(item => {
                             const progress = Math.max(0, Math.min(100, Number(item.progress_enrollment || 0)));
@@ -302,6 +310,7 @@
                                             <span class="text-xs font-medium">${progress}%</span>
                                         </div>
                                     </td>
+                                    <td class="px-6 py-4">${formatEnrollmentDate(item.enrolled_at_enrollment)}</td>
                                     <td class="px-6 py-4">${formatLastActivity(item.last_activity || item.last_enrollment_update)}</td>
                                     <td class="px-6 py-4">${statusBadge(status)}</td>
                                     <td class="px-6 py-4 text-right">
@@ -319,7 +328,7 @@
                 .catch(() => {
                     const errorBody = getEnrollBody();
                     if (errorBody) {
-                        errorBody.innerHTML = '<tr><td colspan="6" class="px-6 py-6 text-center text-slate-500">Erro ao carregar alunos.</td></tr>';
+                        errorBody.innerHTML = '<tr><td colspan="7" class="px-6 py-6 text-center text-slate-500">Erro ao carregar alunos.</td></tr>';
                     }
                     enrollSummary.textContent = 'Erro ao carregar alunos.';
                     enrollPagination.innerHTML = '';

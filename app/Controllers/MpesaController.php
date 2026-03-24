@@ -185,6 +185,7 @@ class MpesaController extends Controller
             'id_enrollment_payment' => 0,
             'amount_payment'        => $amount,
             'status_payment'        => 'Pendente',
+            'method_payment'        => 'M-Pesa',
             'reference_payment'     => $reference,
             'guest_email_payment'   => $isGuestCheckout ? $email : null,
             'guest_name_payment'    => $isGuestCheckout ? $fullName : null,

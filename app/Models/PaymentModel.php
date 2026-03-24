@@ -17,6 +17,7 @@ class PaymentModel extends Model
         'id_course_payment',
         'amount_payment',
         'status_payment',
+        'method_payment',
         'reference_payment',
         'guest_email_payment',
         'guest_name_payment',
@@ -44,6 +45,7 @@ class PaymentModel extends Model
         'id_course_payment'   => 'required|integer',
         'amount_payment'      => 'required|decimal',
         'status_payment'      => 'required|in_list[Pendente,Aprovado,Rejeitado]',
+        'method_payment'      => 'permit_empty|string|max_length[50]',
         'reference_payment'   => 'permit_empty|string|max_length[50]',
         'guest_email_payment' => 'permit_empty|valid_email|max_length[150]',
         'guest_name_payment'  => 'permit_empty|string|max_length[100]',
@@ -66,6 +68,10 @@ class PaymentModel extends Model
         'status_payment' => [
             'required' => 'O status do pagamento e obrigatorio.',
             'in_list'  => 'O status do pagamento deve ser Pendente, Aprovado ou Rejeitado.',
+        ],
+        'method_payment' => [
+            'string'     => 'O metodo de pagamento deve ser uma string.',
+            'max_length' => 'O metodo de pagamento nao pode exceder 50 caracteres.',
         ],
         'reference_payment' => [
             'string'     => 'A referencia do pagamento deve ser uma string.',

@@ -13,6 +13,13 @@ use CodeIgniter\Shield\Models\UserModel as ShieldUserModel;
 
 class CheckoutEnrollmentService
 {
+    private EnrollmentNotificationService $enrollmentNotificationService;
+
+    public function __construct()
+    {
+        $this->enrollmentNotificationService = new EnrollmentNotificationService();
+    }
+
     public function findUserByEmail(string $email): ?object
     {
         $email = trim(strtolower($email));
@@ -108,7 +115,8 @@ class CheckoutEnrollmentService
         $db->transStart();
 
         $user = $this->prepareCheckoutUser($email, $fullName, $authenticatedUser, $preferredUserId);
-        $enrollmentId = $this->ensureEnrollment((int) $user->id, $courseId);
+        $enrollment = $this->ensureEnrollment((int) $user->id, $courseId);
+        $enrollmentId = $enrollment['id'];
 
         $paymentModel = new PaymentModel();
         $updated = $paymentModel->update($paymentId, [
@@ -136,6 +144,10 @@ class CheckoutEnrollmentService
         }
 
         $db->transComplete();
+
+        if ($enrollment['created']) {
+            $this->enrollmentNotificationService->notifyInstructorAboutNewEnrollment($enrollmentId);
+        }
 
         return [
             'user_id'                 => (int) $user->id,
@@ -302,7 +314,8 @@ class CheckoutEnrollmentService
         }
 
         $this->ensureStudentProfile((int) $user->id, (string) $pendingUser->username, (string) $pendingUser->email);
-        $enrollmentId = $this->ensureEnrollment((int) $user->id, (int) $pendingUser->course_id);
+        $enrollment = $this->ensureEnrollment((int) $user->id, (int) $pendingUser->course_id);
+        $enrollmentId = $enrollment['id'];
 
         $updated = $paymentModel->update((int) $payment->id_payment, [
             'id_user_payment'       => (int) $user->id,
@@ -320,6 +333,10 @@ class CheckoutEnrollmentService
         (new PasswordResetModel())->where('user_id', (int) $user->id)->delete();
 
         $db->transComplete();
+
+        if ($enrollment['created']) {
+            $this->enrollmentNotificationService->notifyInstructorAboutNewEnrollment($enrollmentId);
+        }
 
         return [
             'user'          => $user,
@@ -502,7 +519,7 @@ class CheckoutEnrollmentService
         return $row->secret ?? null;
     }
 
-    private function ensureEnrollment(int $userId, int $courseId): int
+    private function ensureEnrollment(int $userId, int $courseId): array
     {
         $enrollmentModel = new EnrollmentModel();
         $enrollment = $enrollmentModel
@@ -527,7 +544,10 @@ class CheckoutEnrollmentService
                 }
             }
 
-            return (int) $enrollment->id_enrollment;
+            return [
+                'id'      => (int) $enrollment->id_enrollment,
+                'created' => false,
+            ];
         }
 
         $inserted = $enrollmentModel->insert([
@@ -541,7 +561,10 @@ class CheckoutEnrollmentService
             throw new \RuntimeException(implode(', ', $enrollmentModel->errors() ?: ['Nao foi possivel criar a matricula.']));
         }
 
-        return (int) $enrollmentModel->getInsertID();
+        return [
+            'id'      => (int) $enrollmentModel->getInsertID(),
+            'created' => true,
+        ];
     }
 
     private function issuePasswordResetToken(int $userId): string

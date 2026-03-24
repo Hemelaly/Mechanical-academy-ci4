@@ -13,6 +13,7 @@ use App\Models\ExtendedUserModel;
 use App\Models\JitsiModel;
 use App\Models\JitsiRecordingModel;
 use App\Models\PendingUserModel;
+use App\Services\EnrollmentNotificationService;
 use App\Libraries\JitsiJwtService;
 use CodeIgniter\Shield\Entities\User;
 use CodeIgniter\Shield\Models\UserModel;
@@ -126,14 +127,270 @@ class Dashboard extends BaseController
         return $prefix . '-' . $slug . '-' . $suffix;
     }
 
+    private function normalizePaymentMethod(?string $value): string
+    {
+        $normalized = strtolower(trim((string) $value));
+
+        return match ($normalized) {
+            '', 'nao informado' => 'Nao informado',
+            'mpesa', 'm-pesa' => 'M-Pesa',
+            'comprovativo', 'comprovativo manual', 'manual', 'transferencia', 'transferência' => 'Comprovativo',
+            default => trim((string) $value),
+        };
+    }
+
+    private function formatDashboardTimestamp(?string $value): string
+    {
+        $value = trim((string) $value);
+        if ($value === '') {
+            return '--';
+        }
+
+        $timestamp = strtotime($value);
+        if ($timestamp === false) {
+            return '--';
+        }
+
+        $day = date('Y-m-d', $timestamp);
+        $today = date('Y-m-d');
+        $yesterday = date('Y-m-d', strtotime('-1 day'));
+        $time = date('H:i', $timestamp);
+
+        if ($day === $today) {
+            return 'Hoje ' . $time;
+        }
+
+        if ($day === $yesterday) {
+            return 'Ontem ' . $time;
+        }
+
+        return date('d/m/Y H:i', $timestamp);
+    }
+
     public function index()
     {
         $user = service('auth')->user();
+        $db = db_connect();
+
+        $monthStart = date('Y-m-01 00:00:00');
+        $nextMonthStart = date('Y-m-01 00:00:00', strtotime('+1 month'));
+        $previousMonthStart = date('Y-m-01 00:00:00', strtotime('-1 month'));
+        $weekStart = date('Y-m-d H:i:s', strtotime('-7 days'));
+
+        $totalCourses = (int) $db->table('courses')
+            ->where('id_instructor_course', $user->id)
+            ->countAllResults();
+
+        $newCoursesThisMonth = (int) $db->table('courses')
+            ->where('id_instructor_course', $user->id)
+            ->where('created_at >=', $monthStart)
+            ->where('created_at <', $nextMonthStart)
+            ->countAllResults();
+
+        $activeCourses = (int) $db->table('courses')
+            ->where('id_instructor_course', $user->id)
+            ->where('status_course', 'Ativo')
+            ->countAllResults();
+
+        $totalStudentsRow = $db->table('enrollments e')
+            ->select('COUNT(DISTINCT e.id_student_enrollment) AS total', false)
+            ->join('courses c', 'c.id_course = e.id_course_enrollment')
+            ->where('c.id_instructor_course', $user->id)
+            ->get()
+            ->getRow();
+
+        $newStudentsThisMonthRow = $db->table('enrollments e')
+            ->select('COUNT(DISTINCT e.id_student_enrollment) AS total', false)
+            ->join('courses c', 'c.id_course = e.id_course_enrollment')
+            ->where('c.id_instructor_course', $user->id)
+            ->where('e.created_at >=', $monthStart)
+            ->where('e.created_at <', $nextMonthStart)
+            ->get()
+            ->getRow();
+
+        $monthRevenueRow = $db->table('payments p')
+            ->selectSum('p.amount_payment', 'total')
+            ->join('courses c', 'c.id_course = p.id_course_payment')
+            ->where('c.id_instructor_course', $user->id)
+            ->where('p.status_payment', 'Aprovado')
+            ->where('p.created_at >=', $monthStart)
+            ->where('p.created_at <', $nextMonthStart)
+            ->get()
+            ->getRow();
+
+        $previousMonthRevenueRow = $db->table('payments p')
+            ->selectSum('p.amount_payment', 'total')
+            ->join('courses c', 'c.id_course = p.id_course_payment')
+            ->where('c.id_instructor_course', $user->id)
+            ->where('p.status_payment', 'Aprovado')
+            ->where('p.created_at >=', $previousMonthStart)
+            ->where('p.created_at <', $monthStart)
+            ->get()
+            ->getRow();
+
+        $pendingRequestsCount = (int) $db->table('payments p')
+            ->join('courses c', 'c.id_course = p.id_course_payment')
+            ->where('c.id_instructor_course', $user->id)
+            ->where('p.status_payment', 'Pendente')
+            ->countAllResults();
+
+        $pendingRequestsThisWeek = (int) $db->table('payments p')
+            ->join('courses c', 'c.id_course = p.id_course_payment')
+            ->where('c.id_instructor_course', $user->id)
+            ->where('p.status_payment', 'Pendente')
+            ->where('p.created_at >=', $weekStart)
+            ->countAllResults();
+
+        $totalEnrollments = (int) $db->table('enrollments e')
+            ->join('courses c', 'c.id_course = e.id_course_enrollment')
+            ->where('c.id_instructor_course', $user->id)
+            ->countAllResults();
+
+        $activeEnrollments = (int) $db->table('enrollments e')
+            ->join('courses c', 'c.id_course = e.id_course_enrollment')
+            ->where('c.id_instructor_course', $user->id)
+            ->where('e.status_enrollment', 'ativa')
+            ->countAllResults();
+
+        $completedEnrollments = (int) $db->table('enrollments e')
+            ->join('courses c', 'c.id_course = e.id_course_enrollment')
+            ->where('c.id_instructor_course', $user->id)
+            ->where('e.progress_enrollment >=', 100)
+            ->countAllResults();
+
+        $featuredCourses = $db->table('courses c')
+            ->select([
+                'c.id_course',
+                'c.title_course',
+                'c.status_course',
+            ])
+            ->select('(SELECT COUNT(*) FROM enrollments e WHERE e.id_course_enrollment = c.id_course) AS student_count', false)
+            ->select('(SELECT ROUND(AVG(COALESCE(e.progress_enrollment, 0)), 0) FROM enrollments e WHERE e.id_course_enrollment = c.id_course) AS avg_progress', false)
+            ->select('(SELECT COUNT(*) FROM enrollments e WHERE e.id_course_enrollment = c.id_course AND COALESCE(e.progress_enrollment, 0) >= 100) AS completed_count', false)
+            ->select('(SELECT COALESCE(SUM(p.amount_payment), 0) FROM payments p WHERE p.id_course_payment = c.id_course AND p.status_payment = "Aprovado") AS revenue_total', false)
+            ->where('c.id_instructor_course', $user->id)
+            ->orderBy('student_count', 'DESC')
+            ->orderBy('revenue_total', 'DESC')
+            ->limit(3)
+            ->get()
+            ->getResult();
+
+        $recentEnrollmentRows = $db->table('enrollments e')
+            ->select([
+                'e.created_at',
+                's.name_student',
+                'c.title_course',
+            ])
+            ->join('courses c', 'c.id_course = e.id_course_enrollment')
+            ->join('students s', 's.id_user_student = e.id_student_enrollment', 'left')
+            ->where('c.id_instructor_course', $user->id)
+            ->orderBy('e.created_at', 'DESC')
+            ->limit(4)
+            ->get()
+            ->getResultArray();
+
+        $recentPaymentRows = $db->table('payments p')
+            ->select([
+                'p.created_at',
+                'p.amount_payment',
+                'p.status_payment',
+                'p.method_payment',
+                'c.title_course',
+            ])
+            ->join('courses c', 'c.id_course = p.id_course_payment')
+            ->where('c.id_instructor_course', $user->id)
+            ->orderBy('p.created_at', 'DESC')
+            ->limit(4)
+            ->get()
+            ->getResultArray();
+
+        $recentActivities = [];
+
+        foreach ($recentEnrollmentRows as $row) {
+            $studentName = trim((string) ($row['name_student'] ?? 'Aluno'));
+            $courseTitle = trim((string) ($row['title_course'] ?? 'um curso'));
+            $recentActivities[] = [
+                'sort_at' => $row['created_at'] ?? null,
+                'icon' => 'bi-person-plus',
+                'icon_bg' => 'bg-blue-100 dark:bg-blue-900',
+                'icon_color' => 'text-blue-600 dark:text-blue-400',
+                'message' => $studentName . ' inscreveu-se em ' . $courseTitle,
+                'time_label' => $this->formatDashboardTimestamp($row['created_at'] ?? null),
+            ];
+        }
+
+        foreach ($recentPaymentRows as $row) {
+            $status = strtolower(trim((string) ($row['status_payment'] ?? '')));
+            $method = $this->normalizePaymentMethod($row['method_payment'] ?? null);
+            $amount = number_format((float) ($row['amount_payment'] ?? 0), 2, ',', '.');
+            $courseTitle = trim((string) ($row['title_course'] ?? 'um curso'));
+
+            $recentActivities[] = [
+                'sort_at' => $row['created_at'] ?? null,
+                'icon' => $status === 'aprovado' ? 'bi-cash-coin' : ($status === 'pendente' ? 'bi-hourglass-split' : 'bi-x-circle'),
+                'icon_bg' => $status === 'aprovado'
+                    ? 'bg-green-100 dark:bg-green-900'
+                    : ($status === 'pendente' ? 'bg-amber-100 dark:bg-amber-900' : 'bg-red-100 dark:bg-red-900'),
+                'icon_color' => $status === 'aprovado'
+                    ? 'text-green-600 dark:text-green-400'
+                    : ($status === 'pendente' ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'),
+                'message' => sprintf(
+                    'Pagamento %s em %s via %s (%s MZN)',
+                    $status !== '' ? $status : 'registado',
+                    $courseTitle,
+                    $method,
+                    $amount
+                ),
+                'time_label' => $this->formatDashboardTimestamp($row['created_at'] ?? null),
+            ];
+        }
+
+        usort($recentActivities, static function (array $a, array $b): int {
+            return strtotime((string) ($b['sort_at'] ?? '')) <=> strtotime((string) ($a['sort_at'] ?? ''));
+        });
+        $recentActivities = array_slice($recentActivities, 0, 6);
+
+        $totalStudents = (int) ($totalStudentsRow->total ?? 0);
+        $newStudentsThisMonth = (int) ($newStudentsThisMonthRow->total ?? 0);
+        $monthRevenue = (float) ($monthRevenueRow->total ?? 0);
+        $previousMonthRevenue = (float) ($previousMonthRevenueRow->total ?? 0);
+        $monthRevenueDelta = $monthRevenue - $previousMonthRevenue;
+        $operationalSummary = [
+            [
+                'title' => 'Cursos ativos',
+                'value' => $activeCourses . ' de ' . $totalCourses,
+                'percent' => $totalCourses > 0 ? (int) round(($activeCourses / $totalCourses) * 100) : 0,
+                'bar_class' => 'bg-gradient-to-r from-blue-500 to-cyan-500',
+            ],
+            [
+                'title' => 'Matriculas ativas',
+                'value' => $activeEnrollments . ' de ' . $totalEnrollments,
+                'percent' => $totalEnrollments > 0 ? (int) round(($activeEnrollments / $totalEnrollments) * 100) : 0,
+                'bar_class' => 'bg-gradient-to-r from-green-500 to-emerald-500',
+            ],
+            [
+                'title' => 'Cursos concluidos',
+                'value' => $completedEnrollments . ' de ' . $totalEnrollments,
+                'percent' => $totalEnrollments > 0 ? (int) round(($completedEnrollments / $totalEnrollments) * 100) : 0,
+                'bar_class' => 'bg-gradient-to-r from-amber-500 to-orange-500',
+            ],
+        ];
 
         return view('pages/instructor/home', [
             'user' => $user,
             'sidebarLinks' => $this->sidebarLinks(),
-            'currentUrl' => current_url()
+            'currentUrl' => current_url(),
+            'totalCourses' => $totalCourses,
+            'newCoursesThisMonth' => $newCoursesThisMonth,
+            'totalStudents' => $totalStudents,
+            'newStudentsThisMonth' => $newStudentsThisMonth,
+            'monthRevenue' => $monthRevenue,
+            'monthRevenueDelta' => $monthRevenueDelta,
+            'pendingRequestsCount' => $pendingRequestsCount,
+            'pendingRequestsThisWeek' => $pendingRequestsThisWeek,
+            'featuredCourses' => $featuredCourses,
+            'recentActivities' => $recentActivities,
+            'operationalSummary' => $operationalSummary,
         ]);
     }
 
@@ -855,6 +1112,7 @@ class Dashboard extends BaseController
                 'e.id_enrollment',
                 'e.status_enrollment',
                 'e.progress_enrollment',
+                'e.enrolled_at_enrollment',
                 'e.updated_at AS last_enrollment_update',
                 's.name_student',
                 's.email_student',
@@ -1086,6 +1344,7 @@ class Dashboard extends BaseController
             p.id_payment,
             p.amount_payment,
             p.status_payment,
+            p.method_payment,
             p.reference_payment,
             p.created_at,
             c.title_course
@@ -1096,6 +1355,25 @@ class Dashboard extends BaseController
             ->limit(8)
             ->get()
             ->getResult();
+
+        foreach ($latestTransactions as $transaction) {
+            $transaction->method_payment_label = $this->normalizePaymentMethod($transaction->method_payment ?? null);
+        }
+
+        $paymentMethods = $db->table('payments p')
+            ->select('COALESCE(NULLIF(p.method_payment, ""), "Nao informado") AS method_payment', false)
+            ->select('COUNT(*) AS total_transactions, SUM(p.amount_payment) AS total_amount', false)
+            ->join('courses c', 'c.id_course = p.id_course_payment')
+            ->where('c.id_instructor_course', $user->id)
+            ->whereIn('p.status_payment', ['Aprovado', 'Pendente'])
+            ->groupBy('method_payment')
+            ->orderBy('total_amount', 'DESC')
+            ->get()
+            ->getResult();
+
+        foreach ($paymentMethods as $method) {
+            $method->method_payment_label = $this->normalizePaymentMethod($method->method_payment ?? null);
+        }
 
         // Cursos mais rentáveis
         $topCourses = $db->table('payments p')
@@ -1148,6 +1426,7 @@ class Dashboard extends BaseController
             'yearTotal' => $yearTotal,
             'nextPayment' => $nextPayment,
             'latestTransactions' => $latestTransactions,
+            'paymentMethods' => $paymentMethods,
             'topCourses' => $topCourses,
             'chartMax' => $chartMax,
             'chartAvg' => $chartAvg,
@@ -1599,6 +1878,7 @@ class Dashboard extends BaseController
         $paymentModel     = new \App\Models\PaymentModel();
         $pendingUserModel = new \App\Models\PendingUserModel();
         $users            = new UserModel();
+        $enrollmentNotificationService = new EnrollmentNotificationService();
 
         $isReject = $this->request->getPost('status_payment') === 'Rejeitado';
         if ($isReject) {
@@ -1692,7 +1972,7 @@ class Dashboard extends BaseController
             }
 
             // Criar nova inscriÃƒÂ§ÃƒÂ£o
-            $enrollmentModel->insert([
+            $newEnrollmentId = $enrollmentModel->insert([
                 'id_course_enrollment'   => $courseId,
                 'id_student_enrollment'  => $existingUser->id,
                 'status_enrollment'      => 'ativa',
@@ -1712,6 +1992,10 @@ class Dashboard extends BaseController
 
             // Remover pending_user
             $pendingUserModel->where('id', $pendingId)->delete();
+
+            if ($newEnrollmentId !== false) {
+                $enrollmentNotificationService->notifyInstructorAboutNewEnrollment((int) $newEnrollmentId);
+            }
 
             $this->auditLogger->write(
                 'instructor.enrollment.approved_existing_user',
@@ -1797,6 +2081,10 @@ class Dashboard extends BaseController
 
         // 7. Remover pending_user
         $pendingUserModel->where('id', $pendingId)->delete();
+
+        if ($result !== false) {
+            $enrollmentNotificationService->notifyInstructorAboutNewEnrollment((int) $result);
+        }
 
         $this->auditLogger->write(
             'instructor.enrollment.approved_new_user',

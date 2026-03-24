@@ -8,6 +8,7 @@ use App\Models\PaymentModel;
 use App\Models\StudentModel;
 use App\Models\EnrollmentModel;
 use App\Models\PendingUserModel;   // para o fluxo antigo
+use App\Services\EnrollmentNotificationService;
 use CodeIgniter\Controller;
 use CodeIgniter\I18n\Time;
 use CodeIgniter\Shield\Entities\User as EntitiesUser;
@@ -42,6 +43,7 @@ class Register extends Controller
         $enrollModel  = new EnrollmentModel();
         $paymentModel = new PaymentModel();
         $pendingModel = new PendingUserModel();
+        $enrollmentNotificationService = new EnrollmentNotificationService();
 
         // 2) Inputs normalizados
         $email        = trim((string)($post['email'] ?? ''));
@@ -240,6 +242,7 @@ class Register extends Controller
                 'id_course_payment'  => $idCourse,
                 'amount_payment'     => $amount,
                 'status_payment'     => 'Aprovado',
+                'method_payment'     => 'M-Pesa',
                 'proof_file_payment' => $filePath,
                 'created_at'         => date('Y-m-d H:i:s'),
             ], true);
@@ -262,6 +265,10 @@ class Register extends Controller
             $db->transComplete();
             if ($db->transStatus() === false) {
                 return redirect()->back()->with('error', 'Falha ao concluir matrícula após pagamento.');
+            }
+
+            if ($enroll !== false) {
+                $enrollmentNotificationService->notifyInstructorAboutNewEnrollment((int) $enroll);
             }
 
             // Log do retorno M-Pesa (opcional)
@@ -321,6 +328,7 @@ class Register extends Controller
             'id_course_payment'  => $idCourse,
             'amount_payment'     => $amount,
             'status_payment'     => $statusPayment,
+            'method_payment'     => 'Comprovativo',
             'proof_file_payment' => $filePath,
             'created_at'         => date('Y-m-d H:i:s'),
         ], true);
