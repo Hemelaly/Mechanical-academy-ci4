@@ -28,11 +28,68 @@ $popularCourses = $popularCourses ?? [
     ['name' => 'UI/UX para iniciantes', 'students' => 156, 'progress' => 54, 'tone' => 'purple'],
 ];
 
+$charts = $charts ?? [
+    'revenue_12m' => ['labels' => [], 'data' => []],
+    'enrollments_14d' => ['labels' => [], 'data' => []],
+];
+
 $quickActions = $quickActions ?? [
     ['label' => 'Novo curso', 'href' => site_url('/admin/dashboard/cursos'), 'icon' => 'bi-plus-circle'],
     ['label' => 'Aprovar usuarios', 'href' => site_url('/admin/dashboard/estudantes'), 'icon' => 'bi-person-check'],
     ['label' => 'Relatorios', 'href' => '#', 'icon' => 'bi-file-earmark-text'],
     ['label' => 'Configuracoes', 'href' => site_url('/admin/dashboard/perfil'), 'icon' => 'bi-gear'],
+];
+
+$tonePalette = [
+    'blue' => [
+        'bg' => 'bg-blue-100',
+        'text' => 'text-blue-600',
+        'darkBg' => 'dark:bg-blue-900/40',
+        'darkText' => 'dark:text-blue-300',
+        'bar' => 'bg-blue-500',
+    ],
+    'emerald' => [
+        'bg' => 'bg-emerald-100',
+        'text' => 'text-emerald-600',
+        'darkBg' => 'dark:bg-emerald-900/40',
+        'darkText' => 'dark:text-emerald-300',
+        'bar' => 'bg-emerald-500',
+    ],
+    'amber' => [
+        'bg' => 'bg-amber-100',
+        'text' => 'text-amber-600',
+        'darkBg' => 'dark:bg-amber-900/40',
+        'darkText' => 'dark:text-amber-300',
+        'bar' => 'bg-amber-500',
+    ],
+    'purple' => [
+        'bg' => 'bg-purple-100',
+        'text' => 'text-purple-600',
+        'darkBg' => 'dark:bg-purple-900/40',
+        'darkText' => 'dark:text-purple-300',
+        'bar' => 'bg-purple-500',
+    ],
+    'indigo' => [
+        'bg' => 'bg-indigo-100',
+        'text' => 'text-indigo-600',
+        'darkBg' => 'dark:bg-indigo-900/40',
+        'darkText' => 'dark:text-indigo-300',
+        'bar' => 'bg-indigo-500',
+    ],
+    'rose' => [
+        'bg' => 'bg-rose-100',
+        'text' => 'text-rose-600',
+        'darkBg' => 'dark:bg-rose-900/40',
+        'darkText' => 'dark:text-rose-300',
+        'bar' => 'bg-rose-500',
+    ],
+    'slate' => [
+        'bg' => 'bg-slate-200',
+        'text' => 'text-slate-700',
+        'darkBg' => 'dark:bg-slate-700',
+        'darkText' => 'dark:text-slate-200',
+        'bar' => 'bg-slate-500',
+    ],
 ];
 ?>
 
@@ -80,14 +137,15 @@ $quickActions = $quickActions ?? [
             $isUp = $delta >= 0;
             $value = $card['value'] ?? 0;
             $prefix = $card['prefix'] ?? '';
-            $tone = $card['tone'] ?? 'blue';
+            $toneKey = $card['tone'] ?? 'blue';
+            $tone = $tonePalette[$toneKey] ?? $tonePalette['blue'];
             $valueFormatted = is_numeric($value)
                 ? number_format((float) $value, $prefix ? 2 : 0, ',', '.')
                 : $value;
             ?>
             <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
                 <div class="flex items-start justify-between">
-                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-<?= esc($tone) ?>-100 text-<?= esc($tone) ?>-600 dark:bg-<?= esc($tone) ?>-900/40 dark:text-<?= esc($tone) ?>-300">
+                    <div class="flex h-11 w-11 items-center justify-center rounded-xl <?= esc($tone['bg']) ?> <?= esc($tone['text']) ?> <?= esc($tone['darkBg']) ?> <?= esc($tone['darkText']) ?>">
                         <i class="bi <?= esc($card['icon']) ?> text-lg"></i>
                     </div>
                     <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium <?= $isUp ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' : 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300' ?>">
@@ -115,11 +173,14 @@ $quickActions = $quickActions ?? [
             </div>
             <ol class="mt-5 space-y-4">
                 <?php foreach ($activity as $item): ?>
-                    <?php $tone = $item['tone'] ?? 'blue'; ?>
+                    <?php
+                    $toneKey = $item['tone'] ?? 'blue';
+                    $tone = $tonePalette[$toneKey] ?? $tonePalette['blue'];
+                    ?>
                     <li class="ml-4">
                         <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900">
                             <div class="flex items-center gap-3">
-                                <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-<?= esc($tone) ?>-100 text-<?= esc($tone) ?>-600 dark:bg-<?= esc($tone) ?>-900/40 dark:text-<?= esc($tone) ?>-300">
+                                <span class="flex h-9 w-9 items-center justify-center rounded-lg <?= esc($tone['bg']) ?> <?= esc($tone['text']) ?> <?= esc($tone['darkBg']) ?> <?= esc($tone['darkText']) ?>">
                                     <i class="bi <?= esc($item['icon']) ?>"></i>
                                 </span>
                                 <div>
@@ -137,39 +198,25 @@ $quickActions = $quickActions ?? [
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800 lg:col-span-2">
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Resumo operacional</h2>
-                <div class="inline-flex rounded-lg border border-slate-200 bg-slate-50 p-1 text-xs font-medium text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
-                    <button class="rounded-md px-3 py-1 text-blue-600 dark:text-blue-400">Usuarios</button>
-                    <button class="rounded-md px-3 py-1 hover:text-slate-900 dark:hover:text-white">Receita</button>
-                    <button class="rounded-md px-3 py-1 hover:text-slate-900 dark:hover:text-white">Engajamento</button>
-                </div>
+                <span class="text-xs text-slate-500 dark:text-slate-400">Atualizado automaticamente</span>
             </div>
-            <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900">
-                    <p class="text-sm text-slate-500 dark:text-slate-400">Taxa de conversao</p>
-                    <p class="mt-2 text-xl font-semibold text-slate-900 dark:text-white">4.8%</p>
-                    <div class="mt-4 h-2 rounded-full bg-slate-200 dark:bg-slate-700">
-                        <div class="h-2 rounded-full bg-blue-500" style="width: 48%;"></div>
+                    <div class="flex items-center justify-between">
+                        <p class="text-sm font-medium text-slate-700 dark:text-slate-200">Receita (12 meses)</p>
+                        <i class="bi bi-graph-up text-slate-400"></i>
+                    </div>
+                    <div class="mt-3">
+                        <canvas id="admin-dashboard-revenue-chart" height="180"></canvas>
                     </div>
                 </div>
                 <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900">
-                    <p class="text-sm text-slate-500 dark:text-slate-400">Cursos com alta demanda</p>
-                    <p class="mt-2 text-xl font-semibold text-slate-900 dark:text-white">12 cursos</p>
-                    <div class="mt-4 h-2 rounded-full bg-slate-200 dark:bg-slate-700">
-                        <div class="h-2 rounded-full bg-emerald-500" style="width: 72%;"></div>
+                    <div class="flex items-center justify-between">
+                        <p class="text-sm font-medium text-slate-700 dark:text-slate-200">Matrículas (14 dias)</p>
+                        <i class="bi bi-bar-chart text-slate-400"></i>
                     </div>
-                </div>
-                <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900">
-                    <p class="text-sm text-slate-500 dark:text-slate-400">Taxa de conclusao</p>
-                    <p class="mt-2 text-xl font-semibold text-slate-900 dark:text-white">68%</p>
-                    <div class="mt-4 h-2 rounded-full bg-slate-200 dark:bg-slate-700">
-                        <div class="h-2 rounded-full bg-purple-500" style="width: 68%;"></div>
-                    </div>
-                </div>
-                <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900">
-                    <p class="text-sm text-slate-500 dark:text-slate-400">Suporte respondido</p>
-                    <p class="mt-2 text-xl font-semibold text-slate-900 dark:text-white">92%</p>
-                    <div class="mt-4 h-2 rounded-full bg-slate-200 dark:bg-slate-700">
-                        <div class="h-2 rounded-full bg-amber-500" style="width: 92%;"></div>
+                    <div class="mt-3">
+                        <canvas id="admin-dashboard-enrollments-chart" height="180"></canvas>
                     </div>
                 </div>
             </div>
@@ -198,7 +245,10 @@ $quickActions = $quickActions ?? [
                     </thead>
                     <tbody>
                         <?php foreach ($popularCourses as $course): ?>
-                            <?php $tone = $course['tone'] ?? 'blue'; ?>
+                            <?php
+                            $toneKey = $course['tone'] ?? 'blue';
+                            $tone = $tonePalette[$toneKey] ?? $tonePalette['blue'];
+                            ?>
                             <tr class="border-t border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800">
                                 <td class="px-4 py-4 font-medium text-slate-900 dark:text-white">
                                     <?= esc($course['name']) ?>
@@ -207,7 +257,7 @@ $quickActions = $quickActions ?? [
                                 <td class="px-4 py-4">
                                     <div class="flex items-center gap-2">
                                         <div class="h-2 w-full rounded-full bg-slate-200 dark:bg-slate-700">
-                                            <div class="h-2 rounded-full bg-<?= esc($tone) ?>-500" style="width: <?= (int) ($course['progress'] ?? 0) ?>%;"></div>
+                                            <div class="h-2 rounded-full <?= esc($tone['bar']) ?>" style="width: <?= (int) ($course['progress'] ?? 0) ?>%;"></div>
                                         </div>
                                         <span class="text-xs text-slate-500 dark:text-slate-400"><?= (int) ($course['progress'] ?? 0) ?>%</span>
                                     </div>
@@ -235,4 +285,83 @@ $quickActions = $quickActions ?? [
     </section>
 </div>
 
+<?= $this->endSection() ?>
+
+<?= $this->section('page_scripts') ?>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script>
+        (function () {
+            const charts = <?= json_encode($charts, JSON_UNESCAPED_UNICODE) ?>;
+            const isDark = () => document.documentElement.classList.contains('dark');
+            const chartText = () => (isDark() ? '#e2e8f0' : '#334155');
+            const gridColor = () => (isDark() ? 'rgba(148,163,184,0.18)' : 'rgba(148,163,184,0.35)');
+
+            let revenueChart = null;
+            let enrollChart = null;
+
+            const renderCharts = () => {
+                const revenueCanvas = document.getElementById('admin-dashboard-revenue-chart');
+                if (revenueChart) {
+                    revenueChart.destroy();
+                    revenueChart = null;
+                }
+
+                if (revenueCanvas && charts?.revenue_12m?.labels?.length) {
+                    revenueChart = new Chart(revenueCanvas, {
+                    type: 'line',
+                    data: {
+                        labels: charts.revenue_12m.labels,
+                        datasets: [{
+                            label: 'Receita (MZN)',
+                            data: charts.revenue_12m.data || [],
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59,130,246,0.15)',
+                            fill: true,
+                            tension: 0.35,
+                            pointRadius: 2,
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            x: { ticks: { color: chartText() }, grid: { display: false } },
+                            y: { ticks: { color: chartText() }, grid: { color: gridColor() } },
+                        },
+                        plugins: { legend: { labels: { color: chartText() } } }
+                    }
+                    });
+                }
+
+                const enrollCanvas = document.getElementById('admin-dashboard-enrollments-chart');
+                if (enrollChart) {
+                    enrollChart.destroy();
+                    enrollChart = null;
+                }
+
+                if (enrollCanvas && charts?.enrollments_14d?.labels?.length) {
+                    enrollChart = new Chart(enrollCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: charts.enrollments_14d.labels,
+                        datasets: [{
+                            label: 'Matrículas',
+                            data: charts.enrollments_14d.data || [],
+                            backgroundColor: '#10b981',
+                            borderRadius: 10,
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            x: { ticks: { color: chartText() }, grid: { display: false } },
+                            y: { ticks: { color: chartText() }, grid: { color: gridColor() } },
+                        },
+                        plugins: { legend: { labels: { color: chartText() } } }
+                    }
+                    });
+                }
+            };
+
+            renderCharts();
+            document.addEventListener('themechange', renderCharts);
+        })();
+    </script>
 <?= $this->endSection() ?>

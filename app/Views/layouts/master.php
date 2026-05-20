@@ -18,6 +18,8 @@
     <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
     <link rel="shortcut icon" href="<?= base_url('assets/img/favicon.png') ?>" width="100%" type="image/x-icon">
 
+    <?= $this->renderSection('page_styles') ?>
+
     <style>
         body {
             font-family: 'Stack Sans Text', sans-serif !important;
@@ -25,9 +27,9 @@
     </style>
 </head>
 
-<body class="bg-slate-50 dark:bg-slate-900 transition-all duration-500 ease-in-out overflow-x-hidden prevent-overflow">
+<body class="bg-slate-50 dark:bg-slate-900 transition-all duration-500 ease-in-out overflow-hidden prevent-overflow">
 
-    <div class="flex h-screen flex-container">
+    <div class="flex h-screen min-h-0 flex-container">
 
         <?php if (isset($user)): ?>
 
@@ -36,12 +38,12 @@
                 <?= $this->include('pages/student/partials/sidebar') ?>
 
                 <!-- CONTEÚDO PRINCIPAL -->
-                <div id="main-content" class="flex min-w-0 flex-1 flex-col transition-all duration-200 prevent-overflow">
+                <div id="main-content" class="flex min-w-0 min-h-0 flex-1 flex-col transition-all duration-200 prevent-overflow">
 
                     <?= $this->include('pages/student/partials/navbar') ?>
 
                     <!-- CONTEÚDO -->
-                    <main class="flex min-w-0 flex-1 flex-col overflow-y-auto p-6 md:p-10 space-y-6 w-full max-w-full overflow-x-hidden pb-6">
+                    <main class="flex min-w-0 min-h-0 flex-1 flex-col overflow-y-auto p-6 md:p-10 space-y-6 w-full max-w-full overflow-x-hidden pb-10">
 
                         <?= $this->renderSection('home_admin') ?>
 
@@ -70,12 +72,12 @@
                 <?= $this->include('pages/instructor/partials/sidebar') ?>
 
                 <!-- CONTEÚDO PRINCIPAL -->
-                <div id="main-content" class="flex min-w-0 flex-1 flex-col transition-all duration-200 prevent-overflow">
+                <div id="main-content" class="flex min-w-0 min-h-0 flex-1 flex-col transition-all duration-200 prevent-overflow">
 
                     <?= $this->include('pages/instructor/partials/navbar') ?>
 
                     <!-- CONTEÚDO -->
-                    <main class="flex min-w-0 flex-1 flex-col overflow-y-auto p-6 md:p-10 space-y-6 w-full max-w-full overflow-x-hidden pb-6">
+                    <main class="flex min-w-0 min-h-0 flex-1 flex-col overflow-y-auto p-6 md:p-10 space-y-6 w-full max-w-full overflow-x-hidden pb-10">
 
                         <?= $this->renderSection('home_instructor') ?>
 
@@ -107,12 +109,12 @@
                 <?= $this->include('pages/admin/partials/sidebar') ?>
 
                 <!-- CONTEÚDO PRINCIPAL -->
-                <div id="main-content" class="flex min-w-0 flex-1 flex-col transition-all duration-200 prevent-overflow">
+                <div id="main-content" class="flex min-w-0 min-h-0 flex-1 flex-col transition-all duration-200 prevent-overflow">
 
                     <?= $this->include('pages/admin/partials/navbar') ?>
 
                     <!-- CONTEÚDO -->
-                    <main class="flex min-w-0 flex-1 flex-col overflow-y-auto p-6 md:p-10 space-y-6 w-full max-w-full overflow-x-hidden">
+                    <main class="flex min-w-0 min-h-0 flex-1 flex-col overflow-y-auto p-6 md:p-10 space-y-6 w-full max-w-full overflow-x-hidden pb-10">
 
                         <?= $this->renderSection('home_admin') ?>
 
@@ -146,7 +148,10 @@
 
     <script src="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3" defer></script>
     <script src="<?= base_url('assets/js/flowbite-datatables.js') ?>" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.js" defer></script>
     <script src="<?= base_url('assets/js/main.js') ?>"></script>
+
+    <?= $this->renderSection('page_scripts') ?>
 
     <?php $swalPayload = session()->getFlashdata('swal') ?? session('swal'); ?>
 

@@ -9,7 +9,7 @@
 <?= $this->section('my_courses') ?>
 
 <!-- Main Content -->
-<div class="min-h-screen bg-slate-50 dark:bg-slate-900">
+<div class="min-w-0">
   <div class="container mx-auto">
 
     <!-- Header Section -->

@@ -21,8 +21,14 @@ $routes->post('reset-password/request', 'ResetPassword::requestReset');
 $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'role:admin'], function ($routes) {
     $routes->get('dashboard', 'Dashboard::index');
     $routes->get('dashboard/cursos', 'Dashboard::courses');
+    $routes->get('dashboard/cursos/export', 'Dashboard::exportCoursesCsv');
+    $routes->post('dashboard/cursos/toggle-status', 'Dashboard::toggleCourseStatus');
+    $routes->get('dashboard/notificacoes', 'Dashboard::notifications');
+    $routes->get('dashboard/notifications/data', 'Dashboard::notificationsData');
     $routes->get('dashboard/estudantes', 'Dashboard::students');
     $routes->get('dashboard/estudantes/data', 'Dashboard::studentsData');
+    $routes->get('dashboard/estudantes/search', 'Dashboard::studentsSearch');
+    $routes->post('dashboard/estudantes/matricular', 'Dashboard::manualEnroll');
     $routes->get('dashboard/instrutores', 'Dashboard::instructors');
     $routes->get('dashboard/instrutores/data', 'Dashboard::instructorsData');
     $routes->post('dashboard/usuarios/toggle', 'Dashboard::toggleUserStatus');
@@ -61,6 +67,7 @@ $routes->group('instructor', ['namespace' => 'App\Controllers\Instructor', 'filt
     $routes->get('dashboard/meus_estudantes/data', 'Dashboard::studentsData');
     $routes->get('dashboard/meus_estudantes/pending', 'Dashboard::pendingPaymentsData');
     $routes->post('dashboard/meus_estudantes/toggle/(:num)', 'Dashboard::toggleEnrollment/$1');
+    $routes->post('dashboard/meus_estudantes/matricular', 'Dashboard::manualEnroll');
     $routes->get('dashboard/financas', 'Dashboard::financial');
     $routes->get('dashboard/financas/data', 'Dashboard::financialData');
     $routes->get('dashboard/logs', 'Dashboard::logs');

@@ -6,7 +6,7 @@
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
 
-<div class="min-h-screen bg-slate-50 dark:bg-slate-900 pb-10">
+<div class="min-w-0">
   <div class="container mx-auto">
 
     <div class="mb-8">
@@ -105,7 +105,7 @@
           </div>
         </div>
 
-        <div id="instructor-finance-chart" class="h-72 sm:h-80"></div>
+        <div id="instructor-finance-chart" class="relative w-full aspect-video"></div>
 
         <div class="grid grid-cols-3 gap-3 mt-4">
           <div class="text-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
@@ -367,13 +367,13 @@
       const labelColor = dark ? '#cbd5e1' : '#475569';
       const gridColor = dark ? 'rgba(148, 163, 184, 0.12)' : 'rgba(148, 163, 184, 0.18)';
 
-      const options = {
-        chart: {
-          type: 'area',
-          height: 320,
-          toolbar: {
-            show: false
-          },
+        const options = {
+          chart: {
+            type: 'area',
+            height: '100%',
+            toolbar: {
+              show: false
+            },
           zoom: {
             enabled: false
           },

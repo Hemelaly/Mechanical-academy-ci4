@@ -14,28 +14,31 @@ const favicon = document.getElementById("favicon");
 
 // --- MOBILE: abrir/fechar drawer ---
 function openMobileSidebar() {
+    if (!sidebar || !backdrop) return;
     sidebar.classList.remove("-translate-x-full");
     backdrop.classList.remove("hidden");
 }
 
 function closeMobileSidebar() {
+    if (!sidebar || !backdrop) return;
     sidebar.classList.add("-translate-x-full");
     backdrop.classList.add("hidden");
 }
 
-openSidebarBtn.addEventListener("click", openMobileSidebar);
-closeSidebarBtn.addEventListener("click", closeMobileSidebar);
-backdrop.addEventListener("click", closeMobileSidebar);
+openSidebarBtn?.addEventListener("click", openMobileSidebar);
+closeSidebarBtn?.addEventListener("click", closeMobileSidebar);
+backdrop?.addEventListener("click", closeMobileSidebar);
 
 // --- DESKTOP: colapsar/expandir (mini vs full) ---
 let isCollapsed = false;
 
-collapseDesktopBtn.addEventListener("click", () => {
+collapseDesktopBtn?.addEventListener("click", () => {
+    if (!sidebar) return;
     isCollapsed = !isCollapsed;
 
-    sidebar.classList.toggle("lg:w-70", !isCollapsed);
+    sidebar.classList.toggle("lg:w-80", !isCollapsed);
     sidebar.classList.toggle("lg:w-20", isCollapsed);
-    favicon.classList.toggle("hidden", !isCollapsed);
+    favicon?.classList.toggle("hidden", !isCollapsed);
 
     navlink.forEach(link => {
         link.classList.toggle("gap-2", !isCollapsed);
@@ -47,12 +50,13 @@ collapseDesktopBtn.addEventListener("click", () => {
         label.classList.toggle("hidden", isCollapsed);
     });
 
-    logoText.classList.toggle("hidden", isCollapsed);
-    collapseIcon.classList.toggle("rotate-180", isCollapsed);
+    logoText?.classList.toggle("hidden", isCollapsed);
+    collapseIcon?.classList.toggle("rotate-180", isCollapsed);
 });
 
 // Garantir que no desktop o sidebar não fique escondido
 function handleResize() {
+    if (!sidebar || !backdrop) return;
     if (window.innerWidth >= 1024) {
         sidebar.classList.remove("-translate-x-full");
         backdrop.classList.add("hidden");
@@ -86,18 +90,20 @@ function applyTheme(theme) {
 
     if (theme === "dark") {
         root.classList.add("dark");
-        themeToggleIcon.classList.remove("bi-sun");
-        themeToggleIcon.classList.add("bi-moon-stars");
+        themeToggleIcon?.classList.remove("bi-sun");
+        themeToggleIcon?.classList.add("bi-moon-stars");
     } else {
         root.classList.remove("dark");
-        themeToggleIcon.classList.remove("bi-moon-stars");
-        themeToggleIcon.classList.add("bi-sun");
+        themeToggleIcon?.classList.remove("bi-moon-stars");
+        themeToggleIcon?.classList.add("bi-sun");
     }
 
     // atualiza logo conforme tema
     updateLogo(theme);
 
     localStorage.setItem("theme", theme);
+
+    document.dispatchEvent(new CustomEvent('themechange', { detail: { theme } }));
 }
 
 // Detecta preferência inicial
@@ -120,38 +126,6 @@ if (themeToggleBtn) {
         applyTheme(isDark ? "light" : "dark");
     });
 }
-
-document.addEventListener('DOMContentLoaded', function () {
-    const links = document.querySelectorAll('#sidebar .side-link');
-    const currentPage = window.location.pathname.split('/').pop(); // ex: "index.php"
-
-    links.forEach(link => {
-        const href = link.getAttribute('href');
-
-        // Verifica se o href termina com o nome do ficheiro atual
-        if (href.endsWith(currentPage)) {
-            link.classList.add(
-                'bg-slate-200/60',
-                'dark:bg-slate-700/60',
-                'text-blue-500'
-            );
-        }
-
-        // (Opcional) se quiser que clicar já troque o ativo sem recarregar
-        link.addEventListener('click', () => {
-            links.forEach(l => l.classList.remove(
-                'bg-slate-200/60',
-                'dark:bg-slate-700/60',
-                'text-blue-500'
-            ));
-            link.classList.add(
-                'bg-slate-200/60',
-                'dark:bg-slate-700/60',
-                'text-blue-500'
-            );
-        });
-    });
-});
 
 // Controle do Dropdown de Notificações
 document.addEventListener('DOMContentLoaded', function () {

@@ -37,7 +37,7 @@ if (! (bool) ($aula->screenshare_jitsi ?? 1)) {
 }
 ?>
 
-<div class="min-h-screen flex bg-slate-50 dark:bg-slate-900 rounded-md overflow-hidden">
+<div class="min-w-0 flex bg-slate-50 dark:bg-slate-900 rounded-md overflow-hidden">
     <div class="flex-1 flex flex-col min-w-0">
         <div class="p-4 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3">
             <div class="min-w-0">

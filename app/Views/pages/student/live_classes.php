@@ -8,7 +8,7 @@ $classes = $classes ?? [];
 $recordingsByClass = $recordingsByClass ?? [];
 ?>
 
-<div class="min-h-screen bg-slate-50 dark:bg-slate-900">
+<div class="min-w-0">
     <div class="container mx-auto space-y-6">
         <div class="flex flex-col gap-2">
             <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Aulas ao Vivo</h1>

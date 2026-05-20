@@ -1074,6 +1074,14 @@ class Dashboard extends BaseController
     {
         $user = service('auth')->user();
 
+        $db = db_connect();
+        $courses = $db->table('courses')
+            ->select('id_course, title_course')
+            ->where('id_instructor_course', $user->id)
+            ->orderBy('title_course', 'ASC')
+            ->get()
+            ->getResultArray();
+
         $enrollmentModel = new \App\Models\EnrollmentModel();
 
         $enrollments = $enrollmentModel
@@ -1088,9 +1096,127 @@ class Dashboard extends BaseController
             'payments' => $payments,
             'enrollments' => $enrollments,
             'pager' => $enrollmentModel->pager,
+            'courses' => $courses,
             'sidebarLinks' => $this->sidebarLinks(),
             'currentUrl' => current_url(),
         ]);
+    }
+
+    public function manualEnroll()
+    {
+        $actualUser = service('auth')->user();
+        $db = db_connect();
+
+        $courseId = (int) $this->request->getPost('course_id');
+        $studentLookup = trim((string) $this->request->getPost('student'));
+
+        if ($courseId <= 0 || $studentLookup === '') {
+            return $this->jsonMessage('Informe o curso e o aluno.', 422);
+        }
+
+        $course = $db->table('courses')
+            ->select('id_course, id_instructor_course')
+            ->where('id_course', $courseId)
+            ->get()
+            ->getRow();
+
+        if (! $course || (int) ($course->id_instructor_course ?? 0) !== (int) $actualUser->id) {
+            $this->auditLogger->write(
+                'instructor.enrollment.manual_denied',
+                'warning',
+                'Tentativa de matricular aluno em curso fora do instrutor.',
+                ['course_id' => $courseId, 'student_lookup' => $studentLookup]
+            );
+            return $this->jsonMessage('Curso invalido ou sem permissao.', 403);
+        }
+
+        $userId = null;
+        if (ctype_digit($studentLookup)) {
+            $userId = (int) $studentLookup;
+        } else {
+            $studentRow = $db->table('students')
+                ->select('id_user_student')
+                ->where('email_student', $studentLookup)
+                ->get()
+                ->getRow();
+
+            if ($studentRow) {
+                $userId = (int) $studentRow->id_user_student;
+            } else {
+                $identity = $db->table('auth_identities')
+                    ->select('user_id')
+                    ->where('type', 'email_password')
+                    ->where('secret', $studentLookup)
+                    ->get()
+                    ->getRow();
+
+                if ($identity) {
+                    $userId = (int) $identity->user_id;
+                }
+            }
+        }
+
+        if (! $userId) {
+            return $this->jsonMessage('Aluno nao encontrado (use email ou ID do aluno).', 404);
+        }
+
+        $userRow = $db->table('users')->select('id, role')->where('id', $userId)->get()->getRow();
+        if (! $userRow || strtolower((string) ($userRow->role ?? '')) !== 'student') {
+            return $this->jsonMessage('O usuario informado nao e um estudante.', 422);
+        }
+
+        $enrollmentModel = new \App\Models\EnrollmentModel();
+        $existing = $enrollmentModel
+            ->where('id_student_enrollment', $userId)
+            ->where('id_course_enrollment', $courseId)
+            ->first();
+
+        if ($existing) {
+            $updates = [];
+            if (strtolower((string) ($existing->status_enrollment ?? '')) !== 'ativa') {
+                $updates['status_enrollment'] = 'ativa';
+            }
+            if (empty($existing->enrolled_at_enrollment)) {
+                $updates['enrolled_at_enrollment'] = date('Y-m-d');
+            }
+
+            if ($updates !== []) {
+                $enrollmentModel->update((int) $existing->id_enrollment, $updates);
+            }
+
+            $this->auditLogger->write(
+                'instructor.enrollment.manual_exists',
+                'info',
+                'Matricula manual solicitada para aluno ja matriculado.',
+                ['course_id' => $courseId, 'student_id' => $userId, 'enrollment_id' => (int) $existing->id_enrollment]
+            );
+
+            return $this->jsonMessage('Aluno ja estava matriculado (matricula reativada se necessario).');
+        }
+
+        $inserted = $enrollmentModel->insert([
+            'id_course_enrollment'   => $courseId,
+            'id_student_enrollment'  => $userId,
+            'status_enrollment'      => 'ativa',
+            'progress_enrollment'    => 0,
+            'enrolled_at_enrollment' => date('Y-m-d'),
+            'is_manual_enrollment'   => 1,
+        ], true);
+
+        if ($inserted === false) {
+            return $this->jsonMessage(implode(', ', $enrollmentModel->errors() ?: ['Falha ao criar matricula.']), 422);
+        }
+
+        $enrollmentId = (int) $enrollmentModel->getInsertID();
+
+        $this->auditLogger->write(
+            'instructor.enrollment.manual_created',
+            'info',
+            'Matricula manual criada pelo instrutor.',
+            ['course_id' => $courseId, 'student_id' => $userId, 'enrollment_id' => $enrollmentId]
+        );
+
+        return $this->jsonMessage('Aluno matriculado com sucesso.');
     }
 
     public function studentsData()

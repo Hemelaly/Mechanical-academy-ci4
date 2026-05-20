@@ -12,7 +12,15 @@ class EnrollmentModel extends Model
     protected $returnType       = 'object';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['id_student_enrollment', 'id_course_enrollment', 'enrolled_at_enrollment', 'status_enrollment', 'id_course_enrollment'];
+    protected $allowedFields    = [
+        'id_student_enrollment',
+        'id_course_enrollment',
+        'status_enrollment',
+        'progress_enrollment',
+        'completed_enrollment',
+        'enrolled_at_enrollment',
+        'is_manual_enrollment',
+    ];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -33,6 +41,7 @@ class EnrollmentModel extends Model
         'id_course_enrollment'    => 'required|integer|is_not_unique[courses.id_course]',
         'enrolled_at_enrollment'  => 'required|valid_date',
         'status_enrollment'       => 'required|in_list[ativa,pendente,cancelada]',
+        'is_manual_enrollment'    => 'permit_empty|in_list[0,1]',
     ];
     protected $validationMessages   = [
         'id_student_enrollment' => [

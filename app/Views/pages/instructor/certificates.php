@@ -126,7 +126,7 @@
 </style>
 
 <div class="h-full text-slate-800 dark:text-white transition-colors duration-300">
-    <div class="min-h-screen flex flex-col">
+    <div class="min-w-0 flex flex-col">
         <main class="flex-grow container mx-auto py-4 px-4">
 
             <!-- Cabeçalho -->
@@ -314,7 +314,7 @@
 
     <!-- Modal de Upload (NOVO: curso + aluno + nº + data + PDF) -->
     <div id="upload-modal" tabindex="-1" aria-hidden="true" class="hidden fixed inset-0 z-50 overflow-y-auto overflow-x-hidden">
-        <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="flex items-center justify-center p-4">
             <div class="relative w-full max-w-4xl">
                 <div class="fixed inset-0 bg-black bg-opacity-60" id="modal-overlay"></div>
 

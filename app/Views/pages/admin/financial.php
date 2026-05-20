@@ -3,7 +3,7 @@
 <?= $this->section('title') ?>Financas<?= $this->endSection() ?>
 
 <?= $this->section('financial') ?>
-<div class="min-h-screen bg-slate-50 dark:bg-slate-900">
+<div class="min-w-0">
   <div class="container mx-auto">
     <div class="mb-8">
       <h1 class="text-2xl lg:text-3xl font-bold text-slate-800 dark:text-white mb-2">
@@ -66,8 +66,8 @@
         </select>
       </div>
 
-      <div class="h-64 sm:h-72">
-        <canvas id="admin-finance-chart"></canvas>
+    <div class="relative w-full aspect-video">
+        <canvas id="admin-finance-chart" class="absolute inset-0 h-full w-full"></canvas>
       </div>
     </div>
   </div>

@@ -16,6 +16,49 @@ use CodeIgniter\Events\Events;
 
 class Dashboard extends BaseController
 {
+    private function getAdminEmails(): array
+    {
+        $db = db_connect();
+        $rows = $db->table('users u')
+            ->select('ai.secret AS email')
+            ->join('auth_identities ai', 'ai.user_id = u.id AND ai.type = "email_password"', 'left')
+            ->where('u.role', 'admin')
+            ->where('ai.secret IS NOT NULL', null, false)
+            ->get()
+            ->getResultArray();
+
+        $emails = [];
+        foreach ($rows as $row) {
+            $email = trim((string) ($row['email'] ?? ''));
+            if ($email !== '' && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $emails[] = $email;
+            }
+        }
+
+        return array_values(array_unique($emails));
+    }
+
+    private function notifyAdmins(string $subject, string $htmlMessage): void
+    {
+        $emails = $this->getAdminEmails();
+        if ($emails === []) {
+            return;
+        }
+
+        try {
+            $mail = Services::email();
+            $mail->setTo($emails[0]);
+            if (count($emails) > 1) {
+                $mail->setBCC(array_slice($emails, 1));
+            }
+            $mail->setSubject($subject);
+            $mail->setMessage($htmlMessage);
+            $mail->send();
+        } catch (\Throwable $e) {
+            log_message('error', 'Falha ao enviar email de notificação para admins: {error}', ['error' => $e->getMessage()]);
+        }
+    }
+
     private function sidebarLinks()
     {
         return [
@@ -24,7 +67,8 @@ class Dashboard extends BaseController
             ['label' => 'Estudantes', 'icon' => 'bi-people', 'url' => '/admin/dashboard/estudantes'],
             ['label' => 'Instrutores', 'icon' => 'bi-people', 'url' => '/admin/dashboard/instrutores'],
             ['label' => 'Finanças', 'icon' => 'bi-cash-coin', 'url' => '/admin/dashboard/financas'],
-            ['label' => 'User Profile', 'icon' => 'bi-person-circle', 'url' => '/admin/dashboard/perfil'],
+            ['label' => 'Notificações', 'icon' => 'bi-bell', 'url' => '/admin/dashboard/notificacoes'],
+            ['label' => 'Perfil', 'icon' => 'bi-person-circle', 'url' => '/admin/dashboard/perfil'],
         ];
     }
 
@@ -32,10 +76,271 @@ class Dashboard extends BaseController
     {
         $user = service('auth')->user();
 
+        $db = db_connect();
+        $now = time();
+        $since30 = date('Y-m-d H:i:s', $now - (30 * 24 * 60 * 60));
+        $sincePrev30 = date('Y-m-d H:i:s', $now - (60 * 24 * 60 * 60));
+        $untilPrev30 = date('Y-m-d H:i:s', $now - (30 * 24 * 60 * 60));
+
+        $monthStart = date('Y-m-01 00:00:00', $now);
+        $nextMonthStart = date('Y-m-01 00:00:00', strtotime('first day of next month', $now));
+        $prevMonthStart = date('Y-m-01 00:00:00', strtotime('first day of previous month', $now));
+
+        $percentDelta = static function (float $current, float $previous): float {
+            if ($previous <= 0.0) {
+                return $current > 0.0 ? 100.0 : 0.0;
+            }
+            return (($current - $previous) / $previous) * 100.0;
+        };
+
+        $activeUsers = 0;
+        $enrollmentsLast30 = 0;
+        $enrollmentsPrev30 = 0;
+        $revenueMonth = 0.0;
+        $revenuePrevMonth = 0.0;
+        $activeCourses = 0;
+        $popularCourses = [];
+        $activity = [];
+
+        try {
+            $activeUsers = (int) $db->table('users')->where('active', 1)->countAllResults();
+        } catch (\Throwable $e) {
+            $activeUsers = 0;
+        }
+
+        try {
+            $enrollmentsLast30 = (int) $db->table('enrollments')
+                ->where('created_at >=', $since30)
+                ->countAllResults();
+            $enrollmentsPrev30 = (int) $db->table('enrollments')
+                ->where('created_at >=', $sincePrev30)
+                ->where('created_at <', $untilPrev30)
+                ->countAllResults();
+        } catch (\Throwable $e) {
+            $enrollmentsLast30 = 0;
+            $enrollmentsPrev30 = 0;
+        }
+
+        try {
+            $row = $db->table('payments')
+                ->selectSum('amount_payment', 'total')
+                ->where('status_payment', 'Aprovado')
+                ->where('created_at >=', $monthStart)
+                ->where('created_at <', $nextMonthStart)
+                ->get()
+                ->getRowArray();
+            $revenueMonth = (float) ($row['total'] ?? 0);
+        } catch (\Throwable $e) {
+            $revenueMonth = 0.0;
+        }
+
+        try {
+            $row = $db->table('payments')
+                ->selectSum('amount_payment', 'total')
+                ->where('status_payment', 'Aprovado')
+                ->where('created_at >=', $prevMonthStart)
+                ->where('created_at <', $monthStart)
+                ->get()
+                ->getRowArray();
+            $revenuePrevMonth = (float) ($row['total'] ?? 0);
+        } catch (\Throwable $e) {
+            $revenuePrevMonth = 0.0;
+        }
+
+        try {
+            $activeCourses = (int) $db->table('courses')->where('status_course', 'Ativo')->countAllResults();
+        } catch (\Throwable $e) {
+            $activeCourses = 0;
+        }
+
+        try {
+            $rows = $db->table('courses c')
+                ->select('c.id_course, c.title_course AS name, COUNT(DISTINCT e.id_student_enrollment) AS students, AVG(e.progress_enrollment) AS progress', false)
+                ->join('enrollments e', 'e.id_course_enrollment = c.id_course AND e.status_enrollment = "ativa"', 'left', false)
+                ->groupBy('c.id_course')
+                ->orderBy('students', 'DESC')
+                ->limit(5)
+                ->get()
+                ->getResultArray();
+
+            $tones = ['blue', 'emerald', 'purple', 'amber', 'indigo'];
+            foreach ($rows as $idx => $r) {
+                $popularCourses[] = [
+                    'name' => (string) ($r['name'] ?? ''),
+                    'students' => (int) ($r['students'] ?? 0),
+                    'progress' => (int) round((float) ($r['progress'] ?? 0)),
+                    'tone' => $tones[$idx % count($tones)],
+                ];
+            }
+        } catch (\Throwable $e) {
+            $popularCourses = [];
+        }
+
+        try {
+            $logs = $db->table('audit_logs')
+                ->select('event_audit_log, level_audit_log, message_audit_log, created_at')
+                ->orderBy('created_at', 'DESC')
+                ->limit(6)
+                ->get()
+                ->getResultArray();
+
+            foreach ($logs as $log) {
+                $level = strtolower((string) ($log['level_audit_log'] ?? 'info'));
+                $tone = 'blue';
+                $icon = 'bi-activity';
+                if (in_array($level, ['error', 'critical', 'alert', 'emergency'], true)) {
+                    $tone = 'rose';
+                    $icon = 'bi-exclamation-triangle';
+                } elseif ($level === 'warning') {
+                    $tone = 'amber';
+                    $icon = 'bi-exclamation-circle';
+                } elseif ($level === 'debug') {
+                    $tone = 'slate';
+                    $icon = 'bi-bug';
+                } elseif ($level === 'notice') {
+                    $tone = 'indigo';
+                    $icon = 'bi-info-circle';
+                }
+
+                $createdAt = (string) ($log['created_at'] ?? '');
+                $timeLabel = $createdAt;
+                if ($createdAt !== '') {
+                    $ts = strtotime($createdAt);
+                    if ($ts !== false) {
+                        $timeLabel = date('d/m/Y H:i', $ts);
+                    }
+                }
+
+                $activity[] = [
+                    'title' => (string) ($log['message_audit_log'] ?: $log['event_audit_log'] ?: 'Evento'),
+                    'time' => $timeLabel,
+                    'level' => $level ?: 'info',
+                    'tone' => $tone,
+                    'icon' => $icon,
+                ];
+            }
+        } catch (\Throwable $e) {
+            $activity = [];
+        }
+
+        $stats = [
+            [
+                'label' => 'Usuários ativos',
+                'value' => $activeUsers,
+                'delta' => 0.0,
+                'icon' => 'bi-people',
+                'tone' => 'blue',
+            ],
+            [
+                'label' => 'Novas inscrições (30 dias)',
+                'value' => $enrollmentsLast30,
+                'delta' => $percentDelta((float) $enrollmentsLast30, (float) $enrollmentsPrev30),
+                'icon' => 'bi-journal-check',
+                'tone' => 'emerald',
+            ],
+            [
+                'label' => 'Receita do mês',
+                'value' => $revenueMonth,
+                'delta' => $percentDelta($revenueMonth, $revenuePrevMonth),
+                'icon' => 'bi-cash-coin',
+                'tone' => 'amber',
+                'prefix' => 'MZN ',
+            ],
+            [
+                'label' => 'Cursos ativos',
+                'value' => $activeCourses,
+                'delta' => 0.0,
+                'icon' => 'bi-book',
+                'tone' => 'purple',
+            ],
+        ];
+
+        // Gráficos (últimos 12 meses / últimos 14 dias)
+        $revenueChart = ['labels' => [], 'data' => []];
+        $enrollmentChart = ['labels' => [], 'data' => []];
+
+        try {
+            $startMonth = strtotime('first day of this month', $now);
+            $start12 = strtotime('-11 months', $startMonth);
+            $start12Dt = date('Y-m-01 00:00:00', $start12);
+
+            $revRows = $db->table('payments')
+                ->select('DATE_FORMAT(created_at, "%Y-%m") AS ym, SUM(amount_payment) AS total', false)
+                ->where('status_payment', 'Aprovado')
+                ->where('created_at >=', $start12Dt)
+                ->groupBy('ym')
+                ->orderBy('ym', 'ASC')
+                ->get()
+                ->getResultArray();
+
+            $revMap = [];
+            foreach ($revRows as $r) {
+                $ym = (string) ($r['ym'] ?? '');
+                if ($ym !== '') {
+                    $revMap[$ym] = (float) ($r['total'] ?? 0);
+                }
+            }
+
+            for ($i = 0; $i < 12; $i++) {
+                $ts = strtotime("+$i months", $start12);
+                $ym = date('Y-m', $ts);
+                $revenueChart['labels'][] = date('M/y', $ts);
+                $revenueChart['data'][] = (float) ($revMap[$ym] ?? 0);
+            }
+        } catch (\Throwable $e) {
+            $revenueChart = ['labels' => [], 'data' => []];
+        }
+
+        try {
+            $since14 = date('Y-m-d 00:00:00', $now - (14 * 24 * 60 * 60));
+            $enRows = $db->table('enrollments')
+                ->select('DATE(created_at) AS d, COUNT(*) AS total', false)
+                ->where('created_at >=', $since14)
+                ->groupBy('d')
+                ->orderBy('d', 'ASC')
+                ->get()
+                ->getResultArray();
+
+            $enMap = [];
+            foreach ($enRows as $r) {
+                $d = (string) ($r['d'] ?? '');
+                if ($d !== '') {
+                    $enMap[$d] = (int) ($r['total'] ?? 0);
+                }
+            }
+
+            for ($i = 13; $i >= 0; $i--) {
+                $ts = strtotime('-' . $i . ' days', $now);
+                $d = date('Y-m-d', $ts);
+                $enrollmentChart['labels'][] = date('d/m', $ts);
+                $enrollmentChart['data'][] = (int) ($enMap[$d] ?? 0);
+            }
+        } catch (\Throwable $e) {
+            $enrollmentChart = ['labels' => [], 'data' => []];
+        }
+
         return view('pages/admin/home', [
             'user' => $user,
+            'stats' => $stats,
+            'popularCourses' => $popularCourses,
+            'activity' => $activity,
+            'charts' => [
+                'revenue_12m' => $revenueChart,
+                'enrollments_14d' => $enrollmentChart,
+            ],
             'sidebarLinks' => $this->sidebarLinks(),
             'currentUrl' => current_url()
+        ]);
+    }
+
+    public function notifications()
+    {
+        $user = service('auth')->user();
+
+        return view('pages/admin/notifications', [
+            'user' => $user,
+            'sidebarLinks' => $this->sidebarLinks(),
+            'currentUrl' => current_url(),
         ]);
     }
 
@@ -46,12 +351,46 @@ class Dashboard extends BaseController
         $db           = \Config\Database::connect();
 
         $user    = service('auth')->user();
-        $courses = $courseModel->findAll();
+        $q = trim((string) $this->request->getGet('q'));
+        $status = trim((string) $this->request->getGet('status'));
+        $page = (int) $this->request->getGet('page');
+        if ($page <= 0) {
+            $page = 1;
+        }
+        $perPage = (int) $this->request->getGet('per_page');
+        if ($perPage <= 0) {
+            $perPage = 10;
+        }
+        $perPage = min(max($perPage, 5), 50);
+        $offset = ($page - 1) * $perPage;
 
         // TOTAL DE AULAS (todas)
         $totalLessonsAll = $lessonsModel
             ->join('modules m', 'm.id_module = lessons.id_module_lesson')
             ->countAllResults();
+
+        // Métricas de cursos
+        $totalCourses = (int) $db->table('courses')->countAllResults();
+        $activeCourses = (int) $db->table('courses')->where('status_course', 'Ativo')->countAllResults();
+        $draftCourses = (int) $db->table('courses')->where('status_course', 'Rascunho')->countAllResults();
+        $archivedCourses = (int) $db->table('courses')->where('status_course', 'Arquivado')->countAllResults();
+
+        // Receita do mês (pagamentos aprovados)
+        $now = time();
+        $monthStart = date('Y-m-01 00:00:00', $now);
+        $nextMonthStart = date('Y-m-01 00:00:00', strtotime('first day of next month', $now));
+        $revenueRow = $db->table('payments')
+            ->selectSum('amount_payment', 'total')
+            ->where('status_payment', 'Aprovado')
+            ->where('created_at >=', $monthStart)
+            ->where('created_at <', $nextMonthStart)
+            ->get()
+            ->getRowArray();
+        $revenueMonth = (float) ($revenueRow['total'] ?? 0);
+
+        // Novas matrículas (30 dias)
+        $since30 = date('Y-m-d H:i:s', $now - (30 * 24 * 60 * 60));
+        $newEnrollments30 = (int) $db->table('enrollments')->where('created_at >=', $since30)->countAllResults();
 
         // CONTAGEM DE INSCRITOS POR CURSO (considerando status_enrollment = 'ativa')
         $rows = $db->table('courses c')
@@ -74,24 +413,296 @@ class Dashboard extends BaseController
             $totalEnrolledAll += $qtd;
         }
 
-        $courses2 = $db->table('courses c')
-            ->select('c.id_course, c.title_course AS course_title, u.id AS instructor_id, u.username AS instructor_name')
-            ->join('users u', 'u.id = c.id_instructor_course', 'left') // left para cursos sem instrutor
-            ->orderBy('c.title_course', 'ASC')
-            ->get()->getResult();
+        // Lista de cursos (paginada)
+        $listBuilder = $db->table('courses c')
+            ->select('c.id_course, c.title_course, c.status_course, c.price_course, c.created_at, u.username AS instructor_name, COUNT(DISTINCT e.id_student_enrollment) AS enrolled, SUM(CASE WHEN p.status_payment = \'Aprovado\' THEN p.amount_payment ELSE 0 END) AS revenue_total', false)
+            ->join('users u', 'u.id = c.id_instructor_course', 'left')
+            ->join('enrollments e', 'e.id_course_enrollment = c.id_course AND e.status_enrollment = "ativa"', 'left', false)
+            ->join('payments p', 'p.id_course_payment = c.id_course', 'left')
+            ->groupBy('c.id_course');
 
-        $activeCourses = $courseModel->where('status_course', 'Ativo')->countAllResults();
+        if ($q !== '') {
+            $listBuilder->groupStart()
+                ->like('c.title_course', $q)
+                ->orLike('u.username', $q);
+            if (ctype_digit($q)) {
+                $listBuilder->orWhere('c.id_course', (int) $q);
+            }
+            $listBuilder->groupEnd();
+        }
+
+        if ($status !== '' && in_array($status, ['Ativo', 'Rascunho', 'Arquivado'], true)) {
+            $listBuilder->where('c.status_course', $status);
+        }
+
+        $courses = $listBuilder
+            ->orderBy('c.created_at', 'DESC')
+            ->limit($perPage, $offset)
+            ->get()
+            ->getResultArray();
+
+        // Total para paginação (sem join)
+        $countBuilder = $db->table('courses c')
+            ->select('COUNT(*) AS total', false)
+            ->join('users u', 'u.id = c.id_instructor_course', 'left');
+        if ($q !== '') {
+            $countBuilder->groupStart()
+                ->like('c.title_course', $q)
+                ->orLike('u.username', $q);
+            if (ctype_digit($q)) {
+                $countBuilder->orWhere('c.id_course', (int) $q);
+            }
+            $countBuilder->groupEnd();
+        }
+        if ($status !== '' && in_array($status, ['Ativo', 'Rascunho', 'Arquivado'], true)) {
+            $countBuilder->where('c.status_course', $status);
+        }
+        $totalFiltered = (int) (($countBuilder->get()->getRowArray()['total'] ?? 0));
+        $totalPages = (int) ceil($totalFiltered / max($perPage, 1));
+        $totalPages = max($totalPages, 1);
+
+        // Dados para gráficos
+        $statusRows = $db->table('courses')
+            ->select('status_course, COUNT(*) AS total', false)
+            ->groupBy('status_course')
+            ->get()
+            ->getResultArray();
+        $statusCounts = ['Ativo' => 0, 'Rascunho' => 0, 'Arquivado' => 0];
+        foreach ($statusRows as $r) {
+            $key = (string) ($r['status_course'] ?? '');
+            if (isset($statusCounts[$key])) {
+                $statusCounts[$key] = (int) ($r['total'] ?? 0);
+            }
+        }
+
+        $topCoursesRows = $db->table('courses c')
+            ->select('c.title_course AS title, COUNT(DISTINCT e.id_student_enrollment) AS students', false)
+            ->join('enrollments e', 'e.id_course_enrollment = c.id_course AND e.status_enrollment = "ativa"', 'left', false)
+            ->groupBy('c.id_course')
+            ->orderBy('students', 'DESC')
+            ->limit(6)
+            ->get()
+            ->getResultArray();
+
+        $topRevenueRows = $db->table('courses c')
+            ->select('c.title_course AS title, SUM(CASE WHEN p.status_payment = \'Aprovado\' THEN p.amount_payment ELSE 0 END) AS revenue', false)
+            ->join('payments p', 'p.id_course_payment = c.id_course', 'left')
+            ->groupBy('c.id_course')
+            ->orderBy('revenue', 'DESC')
+            ->limit(6)
+            ->get()
+            ->getResultArray();
 
         return view('pages/admin/courses', [
             'user'          => $user,
             'courses'       => $courses,
-            'courses2'       => $courses2,
-            'activeCourses' => $activeCourses,
+            'filters'       => [
+                'q' => $q,
+                'status' => $status,
+                'page' => $page,
+                'per_page' => $perPage,
+            ],
+            'pagination' => [
+                'total' => $totalFiltered,
+                'total_pages' => $totalPages,
+                'page' => $page,
+                'per_page' => $perPage,
+            ],
+            'metrics' => [
+                'total_courses' => $totalCourses,
+                'active_courses' => $activeCourses,
+                'draft_courses' => $draftCourses,
+                'archived_courses' => $archivedCourses,
+                'total_lessons' => (int) $totalLessonsAll,
+                'total_enrolled' => $totalEnrolledAll,
+                'revenue_month' => $revenueMonth,
+                'new_enrollments_30' => $newEnrollments30,
+            ],
+            'charts' => [
+                'status_counts' => $statusCounts,
+                'top_courses' => $topCoursesRows,
+                'top_revenue' => $topRevenueRows,
+            ],
             'totalLessons'  => $totalLessonsAll,
             'enrolledCounts' => $enrolledCounts, // uso no card/lista por curso
             'totalEnrolled' => $totalEnrolledAll, // total geral (opcional)
             'sidebarLinks'  => $this->sidebarLinks(),
             'currentUrl'    => current_url(),
+        ]);
+    }
+
+    public function toggleCourseStatus()
+    {
+        $id = (int) $this->request->getPost('id');
+        $status = trim((string) $this->request->getPost('status'));
+
+        if ($id <= 0 || ! in_array($status, ['Ativo', 'Rascunho', 'Arquivado'], true)) {
+            return $this->response->setStatusCode(400)->setJSON([
+                'message' => 'Dados inválidos.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        $courseModel = new CourseModel();
+        $course = $courseModel->find($id);
+        if (! $course) {
+            return $this->response->setStatusCode(404)->setJSON([
+                'message' => 'Curso não encontrado.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        $current = (string) ($course->status_course ?? '');
+        if ($current === $status) {
+            return $this->response->setJSON([
+                'message' => 'Nenhuma alteração necessária.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        $ok = $courseModel->update($id, [
+            'status_course' => $status,
+        ]);
+
+        if (! $ok) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'message' => implode(', ', $courseModel->errors() ?: ['Falha ao atualizar status.']),
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        $this->auditLogger->write(
+            'admin.course.status_changed',
+            'info',
+            'Status de curso atualizado.',
+            ['course_id' => $id, 'from' => $current, 'to' => $status]
+        );
+
+        $this->notifyAdmins(
+            'Curso: status atualizado',
+            '<p>Status do curso <strong>#' . (int) $id . '</strong> alterado de <strong>' . esc($current) . '</strong> para <strong>' . esc($status) . '</strong>.</p>'
+        );
+
+        return $this->response->setJSON([
+            'message' => 'Status atualizado.',
+            'csrf' => csrf_hash(),
+        ]);
+    }
+
+    public function exportCoursesCsv()
+    {
+        $db = db_connect();
+
+        $rows = $db->table('courses c')
+            ->select('c.id_course, c.title_course, c.status_course, c.price_course, c.created_at, u.username AS instructor_name, COUNT(DISTINCT e.id_student_enrollment) AS enrolled', false)
+            ->join('users u', 'u.id = c.id_instructor_course', 'left')
+            ->join('enrollments e', 'e.id_course_enrollment = c.id_course AND e.status_enrollment = "ativa"', 'left', false)
+            ->groupBy('c.id_course')
+            ->orderBy('c.id_course', 'ASC')
+            ->get()
+            ->getResultArray();
+
+        $handle = fopen('php://temp', 'r+');
+        if ($handle === false) {
+            return $this->response->setStatusCode(500)->setBody('Falha ao gerar CSV.');
+        }
+
+        fputcsv($handle, ['id', 'title', 'status', 'price', 'enrolled_active', 'instructor', 'created_at']);
+        foreach ($rows as $row) {
+            fputcsv($handle, [
+                (int) ($row['id_course'] ?? 0),
+                (string) ($row['title_course'] ?? ''),
+                (string) ($row['status_course'] ?? ''),
+                (string) ($row['price_course'] ?? ''),
+                (int) ($row['enrolled'] ?? 0),
+                (string) ($row['instructor_name'] ?? ''),
+                (string) ($row['created_at'] ?? ''),
+            ]);
+        }
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
+
+        $filename = 'courses_' . date('Y-m-d') . '.csv';
+
+        return $this->response
+            ->setHeader('Content-Type', 'text/csv; charset=utf-8')
+            ->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"')
+            ->setBody($csv ?: '');
+    }
+
+    public function notificationsData()
+    {
+        $db = db_connect();
+        $limit = (int) $this->request->getGet('limit');
+        if ($limit <= 0) {
+            $limit = 10;
+        }
+        $limit = min($limit, 20);
+
+        $since = trim((string) $this->request->getGet('since'));
+        $sinceDt = null;
+        if ($since !== '') {
+            $ts = strtotime($since);
+            if ($ts !== false) {
+                $sinceDt = date('Y-m-d H:i:s', $ts);
+            }
+        }
+
+        $base = $db->table('audit_logs')
+            ->select('id_audit_log, event_audit_log, level_audit_log, message_audit_log, created_at')
+            ->orderBy('created_at', 'DESC');
+
+        $rows = $base->limit($limit)->get()->getResultArray();
+
+        $unread = 0;
+        if ($sinceDt) {
+            $unread = (int) $db->table('audit_logs')->where('created_at >', $sinceDt)->countAllResults();
+        }
+
+        $items = [];
+        foreach ($rows as $log) {
+            $level = strtolower((string) ($log['level_audit_log'] ?? 'info'));
+            $tone = 'blue';
+            $icon = 'bi-activity';
+            if (in_array($level, ['error', 'critical', 'alert', 'emergency'], true)) {
+                $tone = 'rose';
+                $icon = 'bi-exclamation-triangle';
+            } elseif ($level === 'warning') {
+                $tone = 'amber';
+                $icon = 'bi-exclamation-circle';
+            } elseif ($level === 'debug') {
+                $tone = 'slate';
+                $icon = 'bi-bug';
+            } elseif ($level === 'notice') {
+                $tone = 'indigo';
+                $icon = 'bi-info-circle';
+            }
+
+            $createdAt = (string) ($log['created_at'] ?? '');
+            $timeLabel = $createdAt;
+            if ($createdAt !== '') {
+                $ts = strtotime($createdAt);
+                if ($ts !== false) {
+                    $timeLabel = date('d/m/Y H:i', $ts);
+                }
+            }
+
+            $title = (string) ($log['message_audit_log'] ?: $log['event_audit_log'] ?: 'Evento');
+
+            $items[] = [
+                'id' => (int) ($log['id_audit_log'] ?? 0),
+                'title' => $title,
+                'time' => $timeLabel,
+                'level' => $level ?: 'info',
+                'tone' => $tone,
+                'icon' => $icon,
+            ];
+        }
+
+        return $this->response->setJSON([
+            'items' => $items,
+            'unread' => $unread,
         ]);
     }
 
@@ -110,17 +721,236 @@ class Dashboard extends BaseController
     public function students()
     {
         $user = service('auth')->user();
+        $db = db_connect();
+        $courses = $db->table('courses')
+            ->select('id_course, title_course')
+            ->orderBy('title_course', 'ASC')
+            ->get()
+            ->getResultArray();
 
         return view('pages/admin/students', [
             'user' => $user,
+            'courses' => $courses,
             'sidebarLinks' => $this->sidebarLinks(),
             'currentUrl' => current_url()
+        ]);
+    }
+
+    public function manualEnroll()
+    {
+        $actualUser = service('auth')->user();
+        $db = db_connect();
+
+        $courseId = (int) $this->request->getPost('course_id');
+        $studentIdRaw = trim((string) $this->request->getPost('student_id'));
+        $studentLookup = trim((string) $this->request->getPost('student'));
+
+        if ($courseId <= 0 || ($studentIdRaw === '' && $studentLookup === '')) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'message' => 'Informe o curso e o aluno.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        $course = $db->table('courses')
+            ->select('id_course')
+            ->where('id_course', $courseId)
+            ->get()
+            ->getRow();
+
+        if (! $course) {
+            return $this->response->setStatusCode(404)->setJSON([
+                'message' => 'Curso nao encontrado.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        $userId = null;
+        if ($studentIdRaw !== '') {
+            if (! ctype_digit($studentIdRaw)) {
+                return $this->response->setStatusCode(422)->setJSON([
+                    'message' => 'Aluno inválido.',
+                    'csrf' => csrf_hash(),
+                ]);
+            }
+            $userId = (int) $studentIdRaw;
+        } elseif (ctype_digit($studentLookup)) {
+            $userId = (int) $studentLookup;
+        } else {
+            $studentRow = $db->table('students')
+                ->select('id_user_student')
+                ->where('email_student', $studentLookup)
+                ->get()
+                ->getRow();
+
+            if ($studentRow) {
+                $userId = (int) $studentRow->id_user_student;
+            } else {
+                $identity = $db->table('auth_identities')
+                    ->select('user_id')
+                    ->where('type', 'email_password')
+                    ->where('secret', $studentLookup)
+                    ->get()
+                    ->getRow();
+
+                if ($identity) {
+                    $userId = (int) $identity->user_id;
+                }
+            }
+        }
+
+        if (! $userId) {
+            return $this->response->setStatusCode(404)->setJSON([
+                'message' => 'Aluno nao encontrado (use email ou ID do aluno).',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        $userRow = $db->table('users')->select('id, role')->where('id', $userId)->get()->getRow();
+        if (! $userRow || strtolower((string) ($userRow->role ?? '')) !== 'student') {
+            return $this->response->setStatusCode(422)->setJSON([
+                'message' => 'O usuario informado nao e um estudante.',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        $enrollmentModel = new \App\Models\EnrollmentModel();
+        $existing = $enrollmentModel
+            ->where('id_student_enrollment', $userId)
+            ->where('id_course_enrollment', $courseId)
+            ->first();
+
+        if ($existing) {
+            $updates = [];
+            if (strtolower((string) ($existing->status_enrollment ?? '')) !== 'ativa') {
+                $updates['status_enrollment'] = 'ativa';
+            }
+            if (empty($existing->enrolled_at_enrollment)) {
+                $updates['enrolled_at_enrollment'] = date('Y-m-d');
+            }
+            if ($updates !== []) {
+                $enrollmentModel->update((int) $existing->id_enrollment, $updates);
+            }
+
+            $this->auditLogger->write(
+                'admin.enrollment.manual_exists',
+                'info',
+                'Matricula manual solicitada para aluno ja matriculado.',
+                ['course_id' => $courseId, 'student_id' => $userId, 'enrollment_id' => (int) $existing->id_enrollment]
+            );
+
+            $this->notifyAdmins(
+                'Matrícula manual (já existia)',
+                '<p>Foi solicitada matrícula manual para o aluno <strong>#' . (int) $userId . '</strong> no curso <strong>#' . (int) $courseId . '</strong>. A matrícula já existia (reativada se necessário).</p>'
+            );
+
+            return $this->response->setJSON([
+                'message' => 'Aluno ja estava matriculado (matricula reativada se necessario).',
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        $inserted = $enrollmentModel->insert([
+            'id_course_enrollment'   => $courseId,
+            'id_student_enrollment'  => $userId,
+            'status_enrollment'      => 'ativa',
+            'progress_enrollment'    => 0,
+            'enrolled_at_enrollment' => date('Y-m-d'),
+            'is_manual_enrollment'   => 1,
+        ], true);
+
+        if ($inserted === false) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'message' => implode(', ', $enrollmentModel->errors() ?: ['Falha ao criar matricula.']),
+                'csrf' => csrf_hash(),
+            ]);
+        }
+
+        $enrollmentId = (int) $enrollmentModel->getInsertID();
+        $this->auditLogger->write(
+            'admin.enrollment.manual_created',
+            'info',
+            'Matricula manual criada pelo admin.',
+            ['course_id' => $courseId, 'student_id' => $userId, 'enrollment_id' => $enrollmentId]
+        );
+
+        $this->notifyAdmins(
+            'Matrícula manual criada',
+            '<p>Nova matrícula manual criada para o aluno <strong>#' . (int) $userId . '</strong> no curso <strong>#' . (int) $courseId . '</strong> (matrícula #' . (int) $enrollmentId . ').</p>'
+        );
+
+        return $this->response->setJSON([
+            'message' => 'Aluno matriculado com sucesso.',
+            'csrf' => csrf_hash(),
         ]);
     }
 
     public function studentsData()
     {
         return $this->usersDataResponse('student');
+    }
+
+    public function studentsSearch()
+    {
+        $db = db_connect();
+        $q = trim((string) $this->request->getGet('q'));
+        $limit = (int) $this->request->getGet('limit');
+        if ($limit <= 0) {
+            $limit = 20;
+        }
+        $limit = min($limit, 50);
+
+        $builder = $db->table('students s')
+            ->select([
+                's.id_user_student as id',
+                's.name_student as name',
+                's.email_student as email',
+            ])
+            ->join('users u', 'u.id = s.id_user_student', 'inner')
+            ->where('u.role', 'student');
+
+        if ($q !== '') {
+            $builder->groupStart();
+            if (ctype_digit($q)) {
+                $id = (int) $q;
+                $builder->orWhere('s.id_user_student', $id);
+                $builder->orWhere('u.id', $id);
+            }
+            $builder->orLike('s.name_student', $q);
+            $builder->orLike('s.email_student', $q);
+            $builder->groupEnd();
+        }
+
+        $rows = $builder
+            ->orderBy('s.name_student', 'ASC')
+            ->limit($limit)
+            ->get()
+            ->getResultArray();
+
+        $items = array_map(static function (array $row): array {
+            $id = (string) ($row['id'] ?? '');
+            $name = (string) ($row['name'] ?? '');
+            $email = (string) ($row['email'] ?? '');
+
+            $label = trim($name ?: $email);
+            if ($email && $label !== $email) {
+                $label .= ' — ' . $email;
+            }
+            if ($id !== '') {
+                $label .= ' (#' . $id . ')';
+            }
+
+            return [
+                'id' => $id,
+                'name' => $name,
+                'email' => $email,
+                'text' => $label,
+            ];
+        }, $rows);
+
+        return $this->response->setJSON([
+            'items' => $items,
+        ]);
     }
 
     public function instructors()

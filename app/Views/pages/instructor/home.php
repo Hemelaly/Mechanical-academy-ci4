@@ -21,7 +21,7 @@ $pendingLabel = (int) ($pendingRequestsThisWeek ?? 0) > 0
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
 
-<div class="min-h-screen bg-slate-50 dark:bg-slate-900">
+<div class="min-w-0">
     <div class="container mx-auto">
         <div class="bg-gradient-to-r from-blue-500 to-blue-900 rounded-2xl p-6 md:p-8 mb-8 text-white shadow-lg">
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">

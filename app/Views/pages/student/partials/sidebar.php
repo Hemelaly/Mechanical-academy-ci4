@@ -18,21 +18,17 @@ use Faker\Provider\Base;
             </div>
 
             <div id="logo-text" class="flex flex-col">
-                <!-- Logo para tema claro -->
                 <span id="logo-light" class="font-semibold leading-tight w-36">
                     <img src="<?= base_url('assets/img/logo.png') ?>" alt="">
                 </span>
 
-                <!-- Logo para tema escuro -->
                 <span id="logo-dark" class="font-semibold leading-tight w-36 hidden">
                     <img src="<?= base_url('assets/img/logo-blue.png') ?>" alt="">
                 </span>
             </div>
-
         </div>
 
         <div class="flex items-center gap-2">
-            <!-- FECHAR MOBILE -->
             <button
                 id="close-sidebar"
                 class="inline-flex lg:hidden h-8 w-8 items-center justify-center rounded-lg hover:bg-slate-800">
@@ -42,17 +38,13 @@ use Faker\Provider\Base;
     </div>
 
     <!-- SCROLL ÁREA -->
-    <div class="flex-1 overflow-y-auto py-3 prevent-overflow">
-
-        <!-- SEÇÃO DASHBOARD -->
+    <div class="flex min-h-0 flex-1 overflow-y-auto py-3 prevent-overflow">
         <div class="px-3 mt-6">
-            <p
-                class="sidebar-label mb-1 px-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+            <p class="sidebar-label mb-1 px-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500">
                 Menu
             </p>
 
             <nav class="space-y-1">
-
                 <?php foreach ($sidebarLinks as $link): ?>
                     <?php
                     $currentPath = rtrim(parse_url(current_url(), PHP_URL_PATH) ?? '', '/');
@@ -63,10 +55,8 @@ use Faker\Provider\Base;
                         $base = rtrim(parse_url(site_url(rtrim($pattern, '*')), PHP_URL_PATH) ?? '', '/');
                         $isActive = $base !== '' && strpos($currentPath, $base) === 0;
                     }
-
                     ?>
 
-                    <!-- LINKS -->
                     <a
                         href="<?= site_url($link['url']) ?>"
                         data-pattern="<?= esc($pattern) ?>"
@@ -79,40 +69,39 @@ use Faker\Provider\Base;
                             <span class="text-xs font-medium"><?= $link['label'] ?></span>
                         </div>
                     </a>
-
                 <?php endforeach; ?>
-
-                <!-- LINKS FIXOS -->
-
-                <?php $isHome = rtrim(current_url(), '/') === rtrim(site_url('/'), '/'); ?>
-                <div class="absolute bottom-2 left-0 w-full px-3">
-                    <a
-                        href="#"
-                        id="logoutBtn"
-                        data-href="/logout/"
-                        class="side-link flex w-full items-center rounded-lg px-2 py-2 text-red-500 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-white transition">
-                        <span class="flex h-8 w-8 items-center justify-center">
-                            <i class="bi bi-box-arrow-left"></i>
-                        </span>
-                        <div class="sidebar-label flex flex-col ml-2">
-                            <span class="text-xs font-medium">Sair da conta</span>
-                        </div>
-                    </a>
-
-                    <a
-                        href="/"
-                        id="side-link"
-                        class="side-link flex w-full <?= $isHome ? 'active bg-slate-200/60 dark:bg-slate-700/60 text-blue-600 dark:text-blue-400 font-semibold' : 'text-slate-500 dark:text-slate-400' ?> items-center rounded-lg px-2 py-2 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-white transition">
-                        <span class="flex h-8 w-8 items-center justify-center">
-                            <i class="bi bi-box-arrow-left"></i>
-                        </span>
-                        <div class="sidebar-label flex flex-col ml-2">
-                            <span class="text-xs font-medium">Ir para página inicial</span>
-                        </div>
-                    </a>
-                </div>
             </nav>
         </div>
+    </div>
+
+    <!-- LINKS FIXOS -->
+    <?php $isHome = rtrim(current_url(), '/') === rtrim(site_url('/'), '/'); ?>
+    <div class="shrink-0 px-3 pb-3 pt-2">
+        <div class="h-px bg-slate-200/60 dark:bg-slate-700/60 mb-2"></div>
+        <a
+            href="#"
+            id="logoutBtn"
+            data-href="/logout/"
+            class="side-link flex w-full items-center rounded-lg px-2 py-2 text-red-500 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-white transition">
+            <span class="flex h-8 w-8 items-center justify-center">
+                <i class="bi bi-box-arrow-left"></i>
+            </span>
+            <div class="sidebar-label flex flex-col ml-2">
+                <span class="text-xs font-medium">Sair da conta</span>
+            </div>
+        </a>
+
+        <a
+            href="/"
+            id="side-link"
+            class="side-link flex w-full <?= $isHome ? 'active bg-slate-200/60 dark:bg-slate-700/60 text-blue-600 dark:text-blue-400 font-semibold' : 'text-slate-500 dark:text-slate-400' ?> items-center rounded-lg px-2 py-2 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-white transition">
+            <span class="flex h-8 w-8 items-center justify-center">
+                <i class="bi bi-box-arrow-left"></i>
+            </span>
+            <div class="sidebar-label flex flex-col ml-2">
+                <span class="text-xs font-medium">Ir para página inicial</span>
+            </div>
+        </a>
     </div>
 </aside>
 
@@ -198,3 +187,4 @@ use Faker\Provider\Base;
         });
     });
 </script>
+

@@ -236,7 +236,7 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.css">
 
-<div class="min-h-screen bg-slate-50 dark:bg-slate-900 py-6">
+<div class="min-w-0 bg-slate-50 dark:bg-slate-900 py-6">
     <div class="container mx-auto px-4">
 
         <!-- Header -->

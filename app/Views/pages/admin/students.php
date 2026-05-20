@@ -10,8 +10,11 @@
             <p class="text-sm text-slate-500 dark:text-slate-400">Gerencie estudantes com carregamento dinamico.</p>
         </div>
         <div class="flex flex-wrap gap-2">
-            <button id="open-student-create" type="button" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 cursor-pointer">
+            <button id="open-student-create" type="button" class="btn btn-primary">
                 <i class="bi bi-person-plus"></i>Novo estudante
+            </button>
+            <button id="open-admin-manual-enroll" type="button" class="btn btn-success">
+                <i class="bi bi-journal-plus"></i>Matricular em curso
             </button>
         </div>
     </div>
@@ -70,6 +73,43 @@
             <div id="students-summary">Carregando...</div>
             <div id="students-pagination" class="flex flex-wrap gap-2"></div>
         </div>
+    </div>
+</div>
+
+<div id="adminManualEnrollModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4">
+    <div class="w-full max-w-md rounded-2xl bg-white shadow-xl dark:bg-slate-800">
+        <div class="flex items-center justify-between border-b border-slate-200 p-4 dark:border-slate-700">
+            <div>
+                <h4 class="text-sm font-semibold text-slate-800 dark:text-white">Matrícula manual</h4>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Esta matrícula não gera pagamento e não entra no financeiro.</p>
+            </div>
+            <button type="button" id="adminManualEnrollClose" class="text-slate-500 hover:text-slate-700 dark:text-slate-300">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <form id="adminManualEnrollForm" class="space-y-4 p-4">
+            <div>
+                <label for="adminManualEnrollStudentSelect" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Aluno</label>
+                <select id="adminManualEnrollStudentSelect" name="student_id" required class="mt-1 block w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                    <option value="" selected>Pesquisar aluno...</option>
+                </select>
+                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Pesquise por nome, email ou ID do aluno.</p>
+            </div>
+            <div>
+                <label for="adminManualEnrollCourse" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Curso</label>
+                <select id="adminManualEnrollCourse" name="course_id" required
+                    class="mt-1 block w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                    <option value="" selected disabled>Selecione...</option>
+                    <?php foreach (($courses ?? []) as $course): ?>
+                        <option value="<?= (int) ($course['id_course'] ?? 0) ?>"><?= esc($course['title_course'] ?? '') ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="flex justify-end gap-2 pt-1">
+                <button type="button" id="adminManualEnrollCancel" class="btn btn-outline">Cancelar</button>
+                <button type="submit" class="btn btn-success">Matricular</button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -248,10 +288,96 @@
     </div>
 </aside>
 
-<script>
+<?= $this->endSection() ?>
+
+<?= $this->section('page_styles') ?>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.5.1/dist/css/tom-select.default.min.css">
+    <style>
+        .ts-wrapper .ts-control {
+            border-radius: 0.5rem;
+            border: 1px solid rgb(203 213 225) !important;
+            background: rgb(248 250 252) !important;
+            padding: 0.625rem 0.75rem;
+            min-height: 42px;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+        }
+
+        .ts-wrapper {
+            width: 100%;
+        }
+
+        .ts-wrapper .ts-control,
+        .ts-wrapper .ts-control input {
+            color: rgb(15 23 42) !important;
+        }
+
+        .ts-wrapper .ts-control input {
+            background: transparent !important;
+        }
+
+        .ts-wrapper .ts-control .placeholder {
+            color: rgb(100 116 139) !important;
+        }
+
+        .ts-wrapper.focus .ts-control {
+            border-color: rgb(59 130 246);
+            box-shadow: 0 0 0 1px rgb(59 130 246);
+        }
+
+        .ts-dropdown {
+            border-radius: 0.75rem;
+            border: 1px solid rgb(226 232 240) !important;
+            background: rgb(255 255 255) !important;
+            overflow: hidden;
+            z-index: 60;
+        }
+
+        .ts-dropdown .option {
+            padding: 0.5rem 0.75rem;
+        }
+
+        .ts-dropdown .option.active {
+            background: rgb(239 246 255);
+            color: rgb(30 64 175);
+        }
+
+        .dark .ts-wrapper .ts-control {
+            border-color: rgb(71 85 105) !important;
+            background: rgb(51 65 85) !important;
+            color: rgb(248 250 252) !important;
+        }
+
+        .dark .ts-wrapper .ts-control,
+        .dark .ts-wrapper .ts-control input {
+            color: rgb(248 250 252) !important;
+        }
+
+        .dark .ts-wrapper .ts-control .placeholder {
+            color: rgb(148 163 184) !important;
+        }
+
+        .dark .ts-dropdown {
+            border-color: rgb(71 85 105) !important;
+            background: rgb(30 41 59) !important;
+            color: rgb(226 232 240) !important;
+        }
+
+        .dark .ts-dropdown .option.active {
+            background: rgb(51 65 85);
+            color: rgb(226 232 240);
+        }
+    </style>
+<?= $this->endSection() ?>
+
+<?= $this->section('page_scripts') ?>
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.5.1/dist/js/tom-select.complete.min.js"></script>
+    <script>
     (function () {
         const endpoint = <?= json_encode(site_url('admin/dashboard/estudantes/data')) ?>;
         const updateEndpoint = <?= json_encode(site_url('admin/dashboard/usuarios/update')) ?>;
+        const manualEnrollEndpoint = <?= json_encode(site_url('admin/dashboard/estudantes/matricular')) ?>;
+        const studentsSearchEndpoint = <?= json_encode(site_url('admin/dashboard/estudantes/search')) ?>;
         const studentsTable = document.getElementById('admin-students-table');
         const getTableBody = () => studentsTable?.querySelector('tbody');
         const summary = document.getElementById('students-summary');
@@ -263,6 +389,13 @@
         const drawerBackdrop = document.getElementById('student-drawer-backdrop');
         const drawerClose = document.getElementById('student-drawer-close');
         const createButton = document.getElementById('open-student-create');
+        const manualEnrollOpen = document.getElementById('open-admin-manual-enroll');
+        const manualEnrollModal = document.getElementById('adminManualEnrollModal');
+        const manualEnrollClose = document.getElementById('adminManualEnrollClose');
+        const manualEnrollCancel = document.getElementById('adminManualEnrollCancel');
+        const manualEnrollForm = document.getElementById('adminManualEnrollForm');
+        const manualEnrollStudentSelect = document.getElementById('adminManualEnrollStudentSelect');
+        const manualEnrollCourse = document.getElementById('adminManualEnrollCourse');
         const createDrawer = document.getElementById('student-create-drawer');
         const createBackdrop = document.getElementById('student-create-backdrop');
         const createClose = document.getElementById('student-create-close');
@@ -290,6 +423,8 @@
         const studentAvatarFallback = <?= json_encode(base_url('assets/img/user-default.png')) ?>;
         const csrfName = <?= json_encode(csrf_token()) ?>;
         let csrfHash = <?= json_encode(csrf_hash()) ?>;
+
+        let manualEnrollStudentTs = null;
 
         const state = {
             page: 1,
@@ -344,6 +479,52 @@
                     }
                     return data;
                 });
+        };
+
+        const openManualModal = () => {
+            if (!manualEnrollModal) return;
+            manualEnrollModal.classList.remove('hidden');
+            manualEnrollModal.classList.add('flex');
+            initManualEnrollStudentSelect();
+            setTimeout(() => manualEnrollStudentTs?.focus(), 0);
+        };
+
+        const closeManualModal = () => {
+            if (!manualEnrollModal) return;
+            manualEnrollModal.classList.add('hidden');
+            manualEnrollModal.classList.remove('flex');
+            manualEnrollForm?.reset();
+            if (manualEnrollStudentTs) {
+                manualEnrollStudentTs.clear(true);
+                manualEnrollStudentTs.clearOptions();
+            }
+        };
+
+        const initManualEnrollStudentSelect = () => {
+            if (!manualEnrollStudentSelect) return;
+            if (manualEnrollStudentTs) return;
+            if (typeof TomSelect === 'undefined') return;
+
+            manualEnrollStudentTs = new TomSelect(manualEnrollStudentSelect, {
+                valueField: 'id',
+                labelField: 'text',
+                searchField: ['name', 'email', 'id', 'text'],
+                create: false,
+                maxOptions: 30,
+                preload: true,
+                shouldLoad: () => true,
+                allowEmptyOption: true,
+                closeAfterSelect: true,
+                load: function (query, callback) {
+                    const url = new URL(studentsSearchEndpoint, window.location.origin);
+                    if (query) url.searchParams.set('q', query);
+                    url.searchParams.set('limit', '30');
+                    fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                        .then((res) => res.json())
+                        .then((json) => callback(json?.items || []))
+                        .catch(() => callback());
+                },
+            });
         };
 
         const postActionFormData = (url, formData) => {
@@ -737,6 +918,33 @@
             }
         });
 
+        manualEnrollOpen?.addEventListener('click', openManualModal);
+        manualEnrollClose?.addEventListener('click', closeManualModal);
+        manualEnrollCancel?.addEventListener('click', closeManualModal);
+        manualEnrollModal?.addEventListener('click', (e) => {
+            if (e.target === manualEnrollModal) closeManualModal();
+        });
+
+        manualEnrollForm?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const studentId = String(manualEnrollStudentTs?.getValue() || manualEnrollStudentSelect?.value || '').trim();
+            const courseId = Number(manualEnrollCourse?.value || 0);
+            if (!studentId || !/^\d+$/.test(studentId) || !courseId) {
+                Swal?.fire({ icon: 'warning', title: 'Dados incompletos', text: 'Selecione um aluno e um curso.' });
+                return;
+            }
+
+            postAction(manualEnrollEndpoint, { student_id: studentId, course_id: courseId })
+                .then((data) => {
+                    Swal?.fire({ icon: 'success', title: 'Sucesso', text: data.message || 'Aluno matriculado.' });
+                    closeManualModal();
+                })
+                .catch((err) => {
+                    const msg = err?.message || 'Falha ao matricular aluno.';
+                    Swal?.fire({ icon: 'error', title: 'Erro', text: msg });
+                });
+        });
+
         let searchTimer = null;
         searchInput.addEventListener('input', () => {
             clearTimeout(searchTimer);
@@ -770,7 +978,7 @@
 
         loadData();
     })();
-</script>
+    </script>
 <?= $this->endSection() ?>
 
 

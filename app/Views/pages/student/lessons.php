@@ -178,7 +178,7 @@ $nextModuleUrl = !empty($nextModuleLessonId)
 $enrollmentStatus = strtolower((string) ($enrollment->status_enrollment ?? ''));
 $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada');
 ?>
-<div class="min-h-screen text-gray-900 dark:text-gray-100 transition-colors duration-300 <?= ($accessBlocked || (bool) session('blocked_access')) ? 'blocked-access' : '' ?>">
+<div class="min-w-0 text-gray-900 dark:text-gray-100 transition-colors duration-300 <?= ($accessBlocked || (bool) session('blocked_access')) ? 'blocked-access' : '' ?>">
     <div class="container mx-auto" data-enrollment-id="<?= (int)($enrollment->id_enrollment) ?>" data-enrollment-status="<?= esc($enrollmentStatus) ?>">
 
         <?php if ($accessBlocked || (bool) session('blocked_access')) : ?>

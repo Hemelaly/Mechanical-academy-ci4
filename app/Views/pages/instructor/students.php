@@ -9,6 +9,12 @@
             <h1 class="text-2xl font-semibold text-slate-900 dark:text-white">Estudantes</h1>
             <p class="text-sm text-slate-500 dark:text-slate-400">Acompanhe alunos, acessos e pagamentos com dados em tempo real.</p>
         </div>
+        <div class="flex flex-wrap gap-2">
+            <button id="open-manual-enroll" type="button" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 cursor-pointer">
+                <i class="bi bi-person-plus"></i>
+                Matricular aluno
+            </button>
+        </div>
     </div>
 
     <div class="min-w-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl">
@@ -120,6 +126,42 @@
     </div>
 </div>
 
+<div id="manualEnrollModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4">
+    <div class="w-full max-w-xl rounded-2xl bg-white shadow-xl dark:bg-slate-800">
+        <div class="flex items-center justify-between border-b border-slate-200 p-4 dark:border-slate-700">
+            <div>
+                <h4 class="text-sm font-semibold text-slate-800 dark:text-white">MatrÃ­cula manual</h4>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Esta matrÃ­cula nÃ£o gera pagamento e nÃ£o entra no financeiro.</p>
+            </div>
+            <button type="button" id="manualEnrollClose" class="text-slate-500 hover:text-slate-700 dark:text-slate-300">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <form id="manualEnrollForm" class="space-y-4 p-4">
+            <div>
+                <label for="manualEnrollStudent" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Aluno (email ou ID)</label>
+                <input id="manualEnrollStudent" name="student" type="text" required
+                    class="mt-1 block w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+                    placeholder="ex: aluno@email.com ou 15">
+            </div>
+            <div>
+                <label for="manualEnrollCourse" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Curso</label>
+                <select id="manualEnrollCourse" name="course_id" required
+                    class="mt-1 block w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                    <option value="" selected disabled>Selecione...</option>
+                    <?php foreach (($courses ?? []) as $course): ?>
+                        <option value="<?= (int) ($course['id_course'] ?? 0) ?>"><?= esc($course['title_course'] ?? '') ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="flex justify-end gap-2 pt-1">
+                <button type="button" id="manualEnrollCancel" class="rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-700">Cancelar</button>
+                <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Matricular</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div id="proofModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4">
     <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl max-w-2xl w-full">
         <div class="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
@@ -141,8 +183,17 @@
         const pendingEndpoint = <?= json_encode(site_url('instructor/dashboard/meus_estudantes/pending')) ?>;
         const toggleEndpointBase = <?= json_encode(site_url('instructor/dashboard/meus_estudantes/toggle')) ?>;
         const approveBase = <?= json_encode(site_url('instructor/dashboard/meus_estudantes')) ?>;
+        const manualEnrollEndpoint = <?= json_encode(site_url('instructor/dashboard/meus_estudantes/matricular')) ?>;
         const csrfName = <?= json_encode(csrf_token()) ?>;
         let csrfHash = <?= json_encode(csrf_hash()) ?>;
+
+        const manualEnrollModal = document.getElementById('manualEnrollModal');
+        const manualEnrollOpen = document.getElementById('open-manual-enroll');
+        const manualEnrollClose = document.getElementById('manualEnrollClose');
+        const manualEnrollCancel = document.getElementById('manualEnrollCancel');
+        const manualEnrollForm = document.getElementById('manualEnrollForm');
+        const manualEnrollStudent = document.getElementById('manualEnrollStudent');
+        const manualEnrollCourse = document.getElementById('manualEnrollCourse');
 
         const enrollTable = document.getElementById('instructor-enrollments-table');
         const getEnrollBody = () => enrollTable?.querySelector('tbody');
@@ -227,6 +278,20 @@
                 if (!res.ok) throw data;
                 return data;
             });
+        };
+
+        const openManualModal = () => {
+            if (!manualEnrollModal) return;
+            manualEnrollModal.classList.remove('hidden');
+            manualEnrollModal.classList.add('flex');
+            setTimeout(() => manualEnrollStudent?.focus(), 0);
+        };
+
+        const closeManualModal = () => {
+            if (!manualEnrollModal) return;
+            manualEnrollModal.classList.add('hidden');
+            manualEnrollModal.classList.remove('flex');
+            manualEnrollForm?.reset();
         };
 
         const renderPagination = (paginationData, container, onPage) => {
@@ -450,6 +515,35 @@
         proofModalClose?.addEventListener('click', closeProofModal);
         proofModal?.addEventListener('click', (e) => {
             if (e.target === proofModal) closeProofModal();
+        });
+
+        manualEnrollOpen?.addEventListener('click', openManualModal);
+        manualEnrollClose?.addEventListener('click', closeManualModal);
+        manualEnrollCancel?.addEventListener('click', closeManualModal);
+        manualEnrollModal?.addEventListener('click', (e) => {
+            if (e.target === manualEnrollModal) closeManualModal();
+        });
+
+        manualEnrollForm?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const student = (manualEnrollStudent?.value || '').trim();
+            const courseId = Number(manualEnrollCourse?.value || 0);
+            if (!student || !courseId) {
+                Swal?.fire({ icon: 'warning', title: 'Dados incompletos', text: 'Informe o aluno e selecione um curso.' });
+                return;
+            }
+
+            postAction(manualEnrollEndpoint, { student, course_id: courseId })
+                .then((data) => {
+                    Swal?.fire({ icon: 'success', title: 'Sucesso', text: data.message || 'Aluno matriculado.' });
+                    closeManualModal();
+                    stateEnroll.page = 1;
+                    loadEnrollments();
+                })
+                .catch((err) => {
+                    const msg = err?.message || 'Falha ao matricular aluno.';
+                    Swal?.fire({ icon: 'error', title: 'Erro', text: msg });
+                });
         });
 
         let searchTimer = null;
