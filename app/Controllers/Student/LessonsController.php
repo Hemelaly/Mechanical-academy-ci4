@@ -48,12 +48,27 @@ class LessonsController extends BaseController
 
         $completedAtIso = null;
         $availableAtIso = null;
+        $pdfReady = false;
+        $certificateOk = true;
+        $certificateMessage = null;
 
         if ($percent >= 100) {
-            $certificateService = new CertificateService($db);
-            $result = $certificateService->ensureForEnrollment($idEnrollment, (int) auth()->id());
-            $completedAtIso = $result['completed_at'] ?? null;
-            $availableAtIso = $result['available_at'] ?? null;
+            try {
+                $certificateService = new CertificateService($db);
+                $result = $certificateService->ensureForEnrollment($idEnrollment, (int) auth()->id());
+                $completedAtIso = $result['completed_at'] ?? null;
+                $availableAtIso = $result['available_at'] ?? null;
+                $pdfReady = !empty($result['pdf_ready']);
+                $certificateOk = !empty($result['ok']);
+                $certificateMessage = $result['message'] ?? null;
+            } catch (\Throwable $e) {
+                // A conclusão da aula não pode falhar por causa do PDF/certificado.
+                log_message('error', 'Falha ao preparar certificado no complete da aula: {message}', [
+                    'message' => $e->getMessage(),
+                ]);
+                $certificateOk = false;
+                $certificateMessage = 'Curso concluído, mas o certificado ainda não pôde ser gerado.';
+            }
         }
 
         return $this->response->setHeader('X-CSRF-Hash', csrf_hash())
@@ -62,6 +77,9 @@ class LessonsController extends BaseController
                 'progress'     => $percent,
                 'completed_at' => $completedAtIso,
                 'available_at' => $availableAtIso,
+                'pdf_ready'    => $pdfReady,
+                'certificate_ok' => $certificateOk,
+                'certificate_message' => $certificateMessage,
             ]);
     }
 

@@ -68,36 +68,66 @@ class CertificateService
         $certificateId = 0;
         $created = false;
 
-        if ($existing) {
-            $certificateId = (int) $existing['id_certificate'];
-            $this->certificateModel->update($certificateId, [
-                'avaiable_at_certificate' => $availableAt,
-                'updated_at'              => date('Y-m-d H:i:s'),
-            ]);
-        } else {
-            $uuid = bin2hex(random_bytes(16));
-            $hash = hash('sha256', $uuid . '|' . $row['id_student_enrollment'] . '|' . $row['id_course_enrollment']);
-            $now = date('Y-m-d H:i:s');
+        try {
+            if ($existing) {
+                $certificateId = (int) $existing['id_certificate'];
+                $this->certificateModel->update($certificateId, $this->filterCertificateFields([
+                    'avaiable_at_certificate' => $availableAt,
+                    'updated_at'              => date('Y-m-d H:i:s'),
+                ]));
+            } else {
+                $uuid = bin2hex(random_bytes(16));
+                $hash = hash('sha256', $uuid . '|' . $row['id_student_enrollment'] . '|' . $row['id_course_enrollment']);
+                $now = date('Y-m-d H:i:s');
 
-            $certificateId = (int) $this->certificateModel->insert([
-                'id_user_certificate'    => (int) $row['id_student_enrollment'],
-                'id_course_certificate'  => (int) $row['id_course_enrollment'],
-                'uuid_certificate'       => $uuid,
-                // Evita colisÃ£o na UNIQUE KEY quando o nÃºmero ainda nÃ£o foi emitido
-                'number_certificate'     => null,
-                'hash_certificate'       => $hash,
-                'avaiable_at_certificate'=> $availableAt,
-                'created_at'             => $now,
-                'updated_at'             => $now,
-            ]);
+                // Em produção a coluna number_certificate ainda pode ser NOT NULL
+                // (migration não aplicada). Gera o número já no insert.
+                $courseTitle = $this->db->table('courses')
+                    ->select('title_course')
+                    ->where('id_course', (int) $row['id_course_enrollment'])
+                    ->get()
+                    ->getRowArray();
+                $courseNameForNumber = trim((string) ($courseTitle['title_course'] ?? '')) ?: 'Curso';
+                $yearForNumber = (int) date('Y', strtotime($completedAt) ?: time());
+                $numberOnCreate = $this->generateCertificateNumber($courseNameForNumber, $yearForNumber);
 
-            $created = true;
+                $certificateId = (int) $this->certificateModel->insert($this->filterCertificateFields([
+                    'id_user_certificate'     => (int) $row['id_student_enrollment'],
+                    'id_course_certificate'   => (int) $row['id_course_enrollment'],
+                    'uuid_certificate'        => $uuid,
+                    'number_certificate'      => $numberOnCreate,
+                    'hash_certificate'        => $hash,
+                    'avaiable_at_certificate' => $availableAt,
+                    'created_at'              => $now,
+                    'updated_at'              => $now,
+                ]));
+
+                $created = true;
+            }
+        } catch (\Throwable $e) {
+            log_message('error', 'Falha ao criar/atualizar registo de certificado: ' . $e->getMessage());
+
+            return [
+                'ok'             => false,
+                'created'        => false,
+                'certificate_id' => null,
+                'completed_at'   => $completedAt ? date('c', strtotime($completedAt)) : null,
+                'available_at'   => date('c', strtotime($availableAt)),
+                'pdf_ready'      => false,
+                'message'        => 'Não foi possível preparar o certificado.',
+                'code'           => 'certificate_db',
+                'status'         => 500,
+            ];
         }
 
         $certificateRow = $this->certificateModel->find($certificateId);
         if ($certificateRow) {
-            $this->ensureCertificatePdf($certificateRow, $row, $enrollmentId, $completedAt, $actorId);
-            $certificateRow = $this->certificateModel->find($certificateId);
+            try {
+                $this->ensureCertificatePdf($certificateRow, $row, $enrollmentId, $completedAt, $actorId);
+            } catch (\Throwable $e) {
+                log_message('error', 'Falha ao gerar PDF do certificado: ' . $e->getMessage());
+            }
+            $certificateRow = $this->certificateModel->find($certificateId) ?: $certificateRow;
         }
 
         $availableAtResponse = $certificateRow['avaiable_at_certificate'] ?? $availableAt;
@@ -112,6 +142,7 @@ class CertificateService
             'completed_at'   => $completedAt ? date('c', strtotime($completedAt)) : null,
             'available_at'   => $availableAtIso,
             'pdf_ready'      => $pdfReady,
+            'message'        => $pdfReady ? null : 'Certificado registado; PDF ainda não disponível.',
         ];
     }
 
@@ -226,46 +257,88 @@ class CertificateService
         }
 
         if (!$generated) {
-            // Fallback: gera via HTML/Dompdf (mantÃ©m compatibilidade)
-            $html = view('certificates/pdf', [
-                'studentName'              => $studentName,
-                'courseName'               => $courseName,
-                'workloadHours'            => $workloadHours,
-                'issuedDate'               => $issuedDate,
-                'certificateNumber'        => $number,
-                'uuid'                     => $uuid,
-                'verifyUrl'                => $verifyUrl,
-                'directorName'             => $directorName,
-                'directorTitle'            => $directorTitle,
-                'directorSignaturePath'    => $directorSignaturePath,
-                'instructorName'           => $instructorName,
-                'instructorTitle'          => $instructorTitle,
-                'instructorSignaturePath'  => $instructorSignaturePath,
-                'studentNameFontCssUrl'    => $studentNameFontCssUrl,
-            ]);
+            try {
+                // Fallback: gera via HTML/Dompdf (mantém compatibilidade)
+                $html = view('certificates/pdf', [
+                    'studentName'              => $studentName,
+                    'courseName'               => $courseName,
+                    'workloadHours'            => $workloadHours,
+                    'issuedDate'               => $issuedDate,
+                    'certificateNumber'        => $number,
+                    'uuid'                     => $uuid,
+                    'verifyUrl'                => $verifyUrl,
+                    'directorName'             => $directorName,
+                    'directorTitle'            => $directorTitle,
+                    'directorSignaturePath'    => $directorSignaturePath,
+                    'instructorName'           => $instructorName,
+                    'instructorTitle'          => $instructorTitle,
+                    'instructorSignaturePath'  => $instructorSignaturePath,
+                    'studentNameFontCssUrl'    => $studentNameFontCssUrl,
+                ]);
 
-            $options = new Options();
-            $options->set('isRemoteEnabled', true);
-            $options->set('isHtml5ParserEnabled', true);
-            $dompdf = new Dompdf($options);
-            $dompdf->loadHtml($html);
-            $dompdf->setPaper([0, 0, 595.28, 419.53], 'landscape');
-            $dompdf->render();
-            file_put_contents($outputPath, $dompdf->output());
+                $options = new Options();
+                $options->set('isRemoteEnabled', true);
+                $options->set('isHtml5ParserEnabled', true);
+                $dompdf = new Dompdf($options);
+                $dompdf->loadHtml($html);
+                $dompdf->setPaper([0, 0, 595.28, 419.53], 'landscape');
+                $dompdf->render();
+                file_put_contents($outputPath, $dompdf->output());
+                $generated = is_file($outputPath) && filesize($outputPath) > 0;
+            } catch (\Throwable $e) {
+                log_message('error', 'Fallback Dompdf do certificado falhou: ' . $e->getMessage());
+                $generated = false;
+            }
+        }
+
+        if (!$generated) {
+            log_message('error', 'Certificado sem PDF gerado. Verifique o template em: ' . $templatePath);
+            return;
         }
 
         $actorId = $actorId ?? (function_exists('auth') ? auth()->id() : null);
 
-        $this->certificateModel->update($verifyId, [
-            'pdf_path_certificate'    => 'certificates/' . $fileName,
-            'number_certificate'      => $number,
-            'issued_at_certificate'   => $issuedAtDb,
-            'status_certificate'      => 'available',
-            'available_at_certificate'=> $issuedAtDb,
-            'avaiable_at_certificate' => $issuedAtDb,
-            'uploaded_by_certificate' => $actorId,
-            'updated_at'              => date('Y-m-d H:i:s'),
-        ]);
+        $this->certificateModel->update($verifyId, $this->filterCertificateFields([
+            'pdf_path_certificate'     => 'certificates/' . $fileName,
+            'number_certificate'       => $number,
+            'issued_at_certificate'    => $issuedAtDb,
+            'status_certificate'       => 'available',
+            'available_at_certificate' => $issuedAtDb,
+            'avaiable_at_certificate'  => $issuedAtDb,
+            'uploaded_by_certificate'  => $actorId,
+            'updated_at'               => date('Y-m-d H:i:s'),
+        ]));
+    }
+
+    /**
+     * Remove campos inexistentes na tabela certificates para evitar 500 em produção
+     * quando alguma migration ainda não foi aplicada.
+     *
+     * @param array<string, mixed> $fields
+     * @return array<string, mixed>
+     */
+    private function filterCertificateFields(array $fields): array
+    {
+        static $columns = null;
+
+        try {
+            if ($columns === null) {
+                $columns = array_flip($this->db->getFieldNames('certificates') ?: []);
+            }
+        } catch (\Throwable $e) {
+            log_message('error', 'Não foi possível ler colunas de certificates: ' . $e->getMessage());
+            return $fields;
+        }
+
+        if ($columns === []) {
+            return $fields;
+        }
+
+        return array_filter(
+            $fields,
+            static fn ($key) => isset($columns[$key]),
+            ARRAY_FILTER_USE_KEY
+        );
     }
 
     /**

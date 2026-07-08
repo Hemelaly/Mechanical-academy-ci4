@@ -1209,7 +1209,13 @@ class Dashboard extends BaseController
         if (!empty($pending)) {
             $svc = new \App\Services\CertificateService($db);
             foreach ($pending as $row) {
-                $svc->ensureForEnrollment((int) ($row['id_enrollment'] ?? 0), (int) $user->id);
+                try {
+                    $svc->ensureForEnrollment((int) ($row['id_enrollment'] ?? 0), (int) $user->id);
+                } catch (\Throwable $e) {
+                    log_message('error', 'Falha ao preparar certificado na página de certificados: {message}', [
+                        'message' => $e->getMessage(),
+                    ]);
+                }
             }
         }
 

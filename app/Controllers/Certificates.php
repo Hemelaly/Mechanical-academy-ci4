@@ -47,7 +47,20 @@ class Certificates extends BaseController
             return $respond(['ok' => false, 'message' => 'Matrícula inválida.'], 400);
         }
 
-        $result = $this->certificateService->ensureForEnrollment($enrollmentId, (int) $user->id);
+        try {
+            $result = $this->certificateService->ensureForEnrollment($enrollmentId, (int) $user->id);
+        } catch (\Throwable $e) {
+            log_message('error', 'Falha ao emitir certificado pendente: {message}', [
+                'message' => $e->getMessage(),
+            ]);
+
+            return $respond([
+                'ok'      => false,
+                'message' => 'Não foi possível gerar o certificado neste momento.',
+                'code'    => 'certificate_error',
+            ], 500);
+        }
+
         if (! $result['ok']) {
             return $respond([
                 'ok'      => false,
@@ -63,6 +76,7 @@ class Certificates extends BaseController
             'available_at'   => $result['available_at'] ?? null,
             'completed_at'   => $result['completed_at'] ?? null,
             'pdf_ready'      => $result['pdf_ready'] ?? false,
+            'message'        => $result['message'] ?? null,
         ]);
     }
 
