@@ -123,6 +123,7 @@ $routes->post('checkout/(:num)', 'PaymentController::createPayment/$1');
 $routes->post('certificados/emitir/(:num)', 'Certificates::emitir/$1');
 // $routes->get('certificados/gerar/(:segment)', 'Certificates::gerarPdf/$1');
 $routes->get('certificados/download/(:num)', 'Certificates::download/$1');
-$routes->get('certificados/verificar/(:num)', 'Certificates::verificar/$1');
+$routes->get('certificados/verificar', 'Certificates::verificar');
+$routes->get('certificados/verificar/(:segment)', 'Certificates::verificar/$1');
 
 

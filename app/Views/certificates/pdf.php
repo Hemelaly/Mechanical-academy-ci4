@@ -1,81 +1,105 @@
 <!doctype html>
-<html>
+<html lang="pt">
 
 <head>
     <meta charset="utf-8">
     <style>
+        <?php if (!empty($studentNameFontCssUrl)): ?>
+        @import url('<?= esc($studentNameFontCssUrl) ?>');
+        <?php endif; ?>
+
+        @page {
+            margin: 0;
+            size: 210mm 148mm landscape;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
+            margin: 0;
+            padding: 0;
+            width: 210mm;
+            height: 148mm;
             font-family: DejaVu Sans, sans-serif;
+            color: #1a1a1a;
         }
 
-        .page {
-            width: 100%;
-            height: 100%;
-            padding: 60px;
-            border: 12px solid #111827;
+        .sheet {
             position: relative;
+            width: 210mm;
+            height: 148mm;
+            overflow: hidden;
         }
 
-        .title {
-            font-size: 42px;
-            font-weight: 700;
-            text-align: center;
-            margin-top: 40px;
-        }
-
-        .name {
-            font-size: 34px;
-            font-weight: 700;
-            text-align: center;
-            margin: 30px 0;
-        }
-
-        .meta {
-            text-align: center;
-            font-size: 16px;
-            color: #111827;
-        }
-
-        .footer {
+        .bg {
             position: absolute;
-            bottom: 40px;
-            left: 60px;
-            right: 60px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
+            top: 0;
+            left: 0;
+            width: 210mm;
+            height: 148mm;
         }
 
-        .badge {
-            font-size: 12px;
-            padding: 6px 10px;
-            border: 1px solid #111827;
-            border-radius: 999px;
+        .field {
+            position: absolute;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            overflow: hidden;
+            line-height: 1;
+        }
+
+        .field-date {
+            left: 10mm;
+            top: 27mm;
+            width: 46mm;
+            height: 4.5mm;
+            font-size: 8.5pt;
+        }
+
+        .field-student {
+            left: 37mm;
+            top: 72mm;
+            width: 136mm;
+            height: 12.5mm;
+            font-size: 20pt;
+            font-family: "Playwrite England Joined", "Great Vibes", "Ms Madi", DejaVu Sans, cursive;
+            overflow: visible;
+        }
+
+        .field-course {
+            left: 34mm;
+            top: 96mm;
+            width: 142mm;
+            height: 12.5mm;
+            font-size: 15pt;
+            font-family: "Playwrite England Joined", "Great Vibes", "Ms Madi", DejaVu Sans, cursive;
+            overflow: visible;
+        }
+
+        .field-instructor {
+            left: 44mm;
+            top: 123mm;
+            width: 52mm;
+            height: 7.5mm;
+            font-size: 11pt;
+            font-family: "Ms Madi", "Great Vibes", DejaVu Sans, cursive;
+            overflow: visible;
         }
     </style>
 </head>
 
 <body>
-    <div class="page">
-        <div class="title">Certificado de Conclusão</div>
+    <div class="sheet">
+        <img class="bg" src="<?= esc(base_url('assets/certificado/certificado-bg.png')) ?>" alt="">
 
-        <div class="meta">Certificamos que</div>
-        <div class="name"><?= esc($studentName) ?></div>
-
-        <div class="meta">
-            concluiu com sucesso o curso <b><?= esc($courseName) ?></b><br>
-            em <?= esc($issuedDate) ?>.
-        </div>
-
-        <div class="footer">
-            <div>
-                Nº: <b><?= esc($certificateNumber) ?></b><br>
-                Código: <b><?= esc($uuid) ?></b>
-            </div>
-            <div class="badge">
-                Verificar: <?= esc($verifyUrl) ?>
-            </div>
-        </div>
+        <div class="field field-date"><?= esc($issuedDate ?? '') ?></div>
+        <div class="field field-student"><?= esc($studentName ?? '') ?></div>
+        <div class="field field-course"><?= esc($courseName ?? '') ?></div>
+        <?php if (!empty($instructorName)): ?>
+            <div class="field field-instructor"><?= esc($instructorName) ?></div>
+        <?php endif; ?>
     </div>
 </body>
 

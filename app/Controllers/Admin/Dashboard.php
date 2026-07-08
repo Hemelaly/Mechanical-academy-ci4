@@ -640,25 +640,242 @@ class Dashboard extends BaseController
         }
         $limit = min($limit, 20);
 
+        $page = (int) $this->request->getGet('page');
+        if ($page <= 0) {
+            $page = 1;
+        }
+        $offset = ($page - 1) * $limit;
+
+        $levelFilter = strtolower(trim((string) $this->request->getGet('level')));
+        $allowedLevels = ['emergency', 'alert', 'critical', 'error', 'warning', 'notice', 'info', 'debug'];
+        if (! in_array($levelFilter, $allowedLevels, true)) {
+            $levelFilter = '';
+        }
+
         $since = trim((string) $this->request->getGet('since'));
         $sinceDt = null;
+        $sinceIso = '';
         if ($since !== '') {
             $ts = strtotime($since);
             if ($ts !== false) {
                 $sinceDt = date('Y-m-d H:i:s', $ts);
+                $sinceIso = date(DATE_ATOM, $ts);
             }
         }
 
         $base = $db->table('audit_logs')
-            ->select('id_audit_log, event_audit_log, level_audit_log, message_audit_log, created_at')
+            ->select('id_audit_log, event_audit_log, level_audit_log, message_audit_log, actor_user_id, context_audit_log, created_at')
             ->orderBy('created_at', 'DESC');
 
-        $rows = $base->limit($limit)->get()->getResultArray();
+        if ($levelFilter !== '') {
+            $base->where('level_audit_log', $levelFilter);
+        }
+
+        $rows = $base->limit($limit, $offset)->get()->getResultArray();
+
+        $totalBuilder = $db->table('audit_logs');
+        if ($levelFilter !== '') {
+            $totalBuilder->where('level_audit_log', $levelFilter);
+        }
+        $total = (int) $totalBuilder->countAllResults();
+        $totalPages = (int) max(1, (int) ceil($total / max(1, $limit)));
+        if ($page > $totalPages) {
+            $page = $totalPages;
+        }
 
         $unread = 0;
         if ($sinceDt) {
             $unread = (int) $db->table('audit_logs')->where('created_at >', $sinceDt)->countAllResults();
         }
+
+        $userCache = [];
+        $studentCache = [];
+        $courseCache = [];
+        $pendingUserCache = [];
+
+        $getUser = static function (int $userId) use ($db, &$userCache): array {
+            if ($userId <= 0) {
+                return [];
+            }
+            if (array_key_exists($userId, $userCache)) {
+                return $userCache[$userId];
+            }
+            $row = $db->table('users')
+                ->select('id, username, role')
+                ->where('id', $userId)
+                ->get()
+                ->getRowArray();
+            $userCache[$userId] = $row ? [
+                'id' => (int) ($row['id'] ?? 0),
+                'username' => (string) ($row['username'] ?? ''),
+                'role' => (string) ($row['role'] ?? ''),
+            ] : [];
+            return $userCache[$userId];
+        };
+
+        $getStudent = static function (int $userId) use ($db, &$studentCache): array {
+            if ($userId <= 0) {
+                return [];
+            }
+            if (array_key_exists($userId, $studentCache)) {
+                return $studentCache[$userId];
+            }
+            $row = $db->table('students')
+                ->select('id_user_student, name_student, email_student')
+                ->where('id_user_student', $userId)
+                ->get()
+                ->getRowArray();
+            $studentCache[$userId] = $row ? [
+                'id_user_student' => (int) ($row['id_user_student'] ?? 0),
+                'name' => (string) ($row['name_student'] ?? ''),
+                'email' => (string) ($row['email_student'] ?? ''),
+            ] : [];
+            return $studentCache[$userId];
+        };
+
+        $getCourse = static function (int $courseId) use ($db, &$courseCache): array {
+            if ($courseId <= 0) {
+                return [];
+            }
+            if (array_key_exists($courseId, $courseCache)) {
+                return $courseCache[$courseId];
+            }
+            $row = $db->table('courses')
+                ->select('id_course, title_course')
+                ->where('id_course', $courseId)
+                ->get()
+                ->getRowArray();
+            $courseCache[$courseId] = $row ? [
+                'id_course' => (int) ($row['id_course'] ?? 0),
+                'title' => (string) ($row['title_course'] ?? ''),
+            ] : [];
+            return $courseCache[$courseId];
+        };
+
+        $getPendingUser = static function (int $pendingId) use ($db, &$pendingUserCache): array {
+            if ($pendingId <= 0) {
+                return [];
+            }
+            if (array_key_exists($pendingId, $pendingUserCache)) {
+                return $pendingUserCache[$pendingId];
+            }
+            $row = $db->table('pending_users')
+                ->select('id, username, email')
+                ->where('id', $pendingId)
+                ->get()
+                ->getRowArray();
+            $pendingUserCache[$pendingId] = $row ? [
+                'id' => (int) ($row['id'] ?? 0),
+                'name' => (string) ($row['username'] ?? ''),
+                'email' => (string) ($row['email'] ?? ''),
+            ] : [];
+            return $pendingUserCache[$pendingId];
+        };
+
+        $decodeContext = static function (?string $json): array {
+            if (! $json) {
+                return [];
+            }
+            $data = json_decode($json, true);
+            return is_array($data) ? $data : [];
+        };
+
+        $actorLabel = static function (int $actorId) use ($getUser): string {
+            if ($actorId <= 0) {
+                return 'Alguém';
+            }
+            $user = $getUser($actorId);
+            $name = trim((string) ($user['username'] ?? ''));
+            if ($name !== '') {
+                return $name;
+            }
+            return 'Usuário #' . $actorId;
+        };
+
+        $studentLabel = static function (int $studentUserId) use ($getStudent): string {
+            if ($studentUserId <= 0) {
+                return 'Aluno';
+            }
+            $student = $getStudent($studentUserId);
+            $name = trim((string) ($student['name'] ?? ''));
+            if ($name !== '') {
+                return $name;
+            }
+            return 'Aluno #' . $studentUserId;
+        };
+
+        $courseLabel = static function (int $courseId) use ($getCourse): string {
+            if ($courseId <= 0) {
+                return 'curso';
+            }
+            $course = $getCourse($courseId);
+            $title = trim((string) ($course['title'] ?? ''));
+            if ($title !== '') {
+                return $title;
+            }
+            return 'Curso #' . $courseId;
+        };
+
+        $formatTitle = static function (string $event, array $ctx, int $actorId) use ($actorLabel, $studentLabel, $courseLabel, $getPendingUser): ?string {
+            // Admin enrollment
+            if ($event === 'admin.enrollment.manual_created') {
+                $courseId = (int) ($ctx['course_id'] ?? 0);
+                $studentId = (int) ($ctx['student_id'] ?? 0);
+                $enrollmentId = (int) ($ctx['enrollment_id'] ?? 0);
+                return 'O admin ' . $actorLabel($actorId) . ' matriculou ' . $studentLabel($studentId) . ' no curso ' . $courseLabel($courseId) . ($enrollmentId > 0 ? ' (matrícula #' . $enrollmentId . ')' : '') . '.';
+            }
+            if ($event === 'admin.enrollment.manual_exists') {
+                $courseId = (int) ($ctx['course_id'] ?? 0);
+                $studentId = (int) ($ctx['student_id'] ?? 0);
+                return 'O admin ' . $actorLabel($actorId) . ' tentou matricular ' . $studentLabel($studentId) . ' no curso ' . $courseLabel($courseId) . ', mas a matrícula já existia.';
+            }
+            if ($event === 'admin.course.status_changed') {
+                $courseId = (int) ($ctx['course_id'] ?? 0);
+                $from = (string) ($ctx['from'] ?? '');
+                $to = (string) ($ctx['to'] ?? '');
+                $suffix = ($from !== '' && $to !== '') ? ' de "' . $from . '" para "' . $to . '".' : '.';
+                return 'O admin ' . $actorLabel($actorId) . ' alterou o status do curso ' . $courseLabel($courseId) . $suffix;
+            }
+
+            // Instructor enrollment
+            if ($event === 'instructor.enrollment.manual_created') {
+                $courseId = (int) ($ctx['course_id'] ?? 0);
+                $studentId = (int) ($ctx['student_id'] ?? 0);
+                return 'O instrutor ' . $actorLabel($actorId) . ' matriculou ' . $studentLabel($studentId) . ' no curso ' . $courseLabel($courseId) . '.';
+            }
+            if ($event === 'instructor.enrollment.manual_exists') {
+                $courseId = (int) ($ctx['course_id'] ?? 0);
+                $studentId = (int) ($ctx['student_id'] ?? 0);
+                return 'O instrutor ' . $actorLabel($actorId) . ' tentou matricular ' . $studentLabel($studentId) . ' no curso ' . $courseLabel($courseId) . ', mas a matrícula já existia.';
+            }
+            if ($event === 'instructor.enrollment.toggled') {
+                $courseId = (int) ($ctx['course_id'] ?? 0);
+                $studentId = (int) ($ctx['student_id'] ?? 0);
+                $to = (string) ($ctx['to'] ?? '');
+                $label = $to !== '' ? $to : 'atualizado';
+                return 'O instrutor ' . $actorLabel($actorId) . ' alterou o status da matrícula de ' . $studentLabel($studentId) . ' no curso ' . $courseLabel($courseId) . ' para "' . $label . '".';
+            }
+
+            // Instructor payment/enrollment approvals
+            if ($event === 'instructor.payment.rejected') {
+                $courseId = (int) ($ctx['course_id'] ?? 0);
+                $pendingId = (int) ($ctx['pending_user_id'] ?? 0);
+                $pending = $pendingId > 0 ? $getPendingUser($pendingId) : [];
+                $who = trim((string) ($pending['name'] ?? ''));
+                if ($who === '') {
+                    $who = $pendingId > 0 ? ('Usuário pendente #' . $pendingId) : 'usuário pendente';
+                }
+                return 'O instrutor ' . $actorLabel($actorId) . ' rejeitou o pagamento de ' . $who . ' no curso ' . $courseLabel($courseId) . '.';
+            }
+
+            // Jitsi
+            if ($event === 'instructor.jitsi.deleted') {
+                $jitsiId = (int) ($ctx['jitsi_id'] ?? 0);
+                return 'O instrutor ' . $actorLabel($actorId) . ' removeu uma aula ao vivo' . ($jitsiId > 0 ? ' (#' . $jitsiId . ')' : '') . '.';
+            }
+
+            return null;
+        };
 
         $items = [];
         foreach ($rows as $log) {
@@ -680,6 +897,13 @@ class Dashboard extends BaseController
             }
 
             $createdAt = (string) ($log['created_at'] ?? '');
+            $createdAtIso = '';
+            if ($createdAt !== '') {
+                $createdTs = strtotime($createdAt);
+                if ($createdTs !== false) {
+                    $createdAtIso = date(DATE_ATOM, $createdTs);
+                }
+            }
             $timeLabel = $createdAt;
             if ($createdAt !== '') {
                 $ts = strtotime($createdAt);
@@ -688,21 +912,45 @@ class Dashboard extends BaseController
                 }
             }
 
-            $title = (string) ($log['message_audit_log'] ?: $log['event_audit_log'] ?: 'Evento');
+            $event = (string) ($log['event_audit_log'] ?? '');
+            $ctx = $decodeContext($log['context_audit_log'] ?? null);
+            $actorId = (int) ($log['actor_user_id'] ?? 0);
+            $title = (string) ($log['message_audit_log'] ?: $event ?: 'Evento');
+            $pretty = $formatTitle($event, $ctx, $actorId);
+            if ($pretty) {
+                $title = $pretty;
+            } elseif (preg_match('/[ÃâÂ�]/u', $title) === 1) {
+                // Avoid showing mojibake in the notification UI; fall back to the event key.
+                $title = $actorLabel($actorId) . ' realizou: ' . ($event !== '' ? $event : 'evento');
+            }
+            $isUnread = false;
+            if ($sinceDt && $createdAt !== '') {
+                $isUnread = $createdAt > $sinceDt;
+            }
 
             $items[] = [
                 'id' => (int) ($log['id_audit_log'] ?? 0),
                 'title' => $title,
                 'time' => $timeLabel,
+                'created_at' => $createdAt,
+                'created_at_iso' => $createdAtIso,
                 'level' => $level ?: 'info',
                 'tone' => $tone,
                 'icon' => $icon,
+                'is_unread' => $isUnread,
             ];
         }
 
         return $this->response->setJSON([
             'items' => $items,
             'unread' => $unread,
+            'since' => $sinceDt,
+            'since_iso' => $sinceIso,
+            'page' => $page,
+            'per_page' => $limit,
+            'total' => $total,
+            'total_pages' => $totalPages,
+            'level' => $levelFilter,
         ]);
     }
 

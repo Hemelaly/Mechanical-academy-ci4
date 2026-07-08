@@ -1,4 +1,4 @@
-<?= $this->extend('layouts/master') ?>
+﻿<?= $this->extend('layouts/master') ?>
 
 <?= $this->section('title') ?>Dashboard - Cursos<?= $this->endSection() ?>
 
@@ -82,13 +82,13 @@ $topRevenue = $charts['top_revenue'] ?? [];
     </section>
 
     <!-- Charts -->
-    <section class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800 lg:col-span-1">
+    <section class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
             <div class="flex items-center justify-between">
                 <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Status dos cursos</h2>
             </div>
-            <div class="mt-4">
-                <canvas id="admin-courses-status-chart" height="220"></canvas>
+            <div class="mt-4 h-52">
+                <canvas id="admin-courses-status-chart" class="h-full w-full"></canvas>
             </div>
             <div class="mt-4 grid grid-cols-3 gap-2 text-xs text-slate-500 dark:text-slate-400">
                 <div><span class="font-medium text-slate-700 dark:text-slate-200">Ativo:</span> <?= (int)($statusCounts['Ativo'] ?? 0) ?></div>
@@ -97,23 +97,33 @@ $topRevenue = $charts['top_revenue'] ?? [];
             </div>
         </div>
 
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800 lg:col-span-2">
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
             <div class="flex items-center justify-between">
                 <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Top cursos (matrículas ativas)</h2>
             </div>
-            <div class="mt-4">
-                <canvas id="admin-courses-top-chart" height="220"></canvas>
+            <div class="mt-4 h-52">
+                <canvas id="admin-courses-top-chart" class="h-full w-full"></canvas>
+            </div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+            <div class="flex items-center justify-between gap-3">
+                <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Top faturação</h2>
+                <span class="text-xs text-slate-500 dark:text-slate-400">Aprovado</span>
+            </div>
+            <div class="mt-4 h-52">
+                <canvas id="admin-courses-revenue-chart" class="h-full w-full"></canvas>
             </div>
         </div>
     </section>
 
-    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+    <section class="hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
         <div class="flex items-center justify-between">
             <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Top faturação (aprovado)</h2>
             <span class="text-xs text-slate-500 dark:text-slate-400">Total por curso</span>
         </div>
         <div class="mt-4">
-            <canvas id="admin-courses-revenue-chart" height="220"></canvas>
+            <canvas id="admin-courses-revenue-chart-legacy" height="220"></canvas>
         </div>
     </section>
 
@@ -185,10 +195,10 @@ $topRevenue = $charts['top_revenue'] ?? [];
                                     <p class="font-medium text-slate-900 dark:text-white"><?= esc($c['title_course'] ?? '') ?></p>
                                     <p class="text-xs text-slate-500 dark:text-slate-400">#<?= (int)($c['id_course'] ?? 0) ?></p>
                                 </td>
-                                <td class="px-6 py-4"><?= esc($c['instructor_name'] ?? '—') ?></td>
+                                <td class="px-6 py-4"><?= esc($c['instructor_name'] ?? 'â€”') ?></td>
                                 <td class="px-6 py-4">
                                     <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium <?= esc($badge) ?>">
-                                        <?= esc($status ?: '—') ?>
+                                        <?= esc($status ?: 'â€”') ?>
                                     </span>
                                 </td>
                                 <td class="px-6 py-4"><?= number_format((int)($c['enrolled'] ?? 0), 0, ',', '.') ?></td>
@@ -321,6 +331,8 @@ $topRevenue = $charts['top_revenue'] ?? [];
                         }]
                     },
                     options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
                         plugins: {
                             legend: { labels: { color: chartText() } }
                         }
@@ -341,11 +353,14 @@ $topRevenue = $charts['top_revenue'] ?? [];
                     type: 'bar',
                     data: { labels, datasets: [{ label: 'Matrículas', data: values, backgroundColor: '#3b82f6', borderRadius: 10 }] },
                     options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
                         scales: {
-                            x: { ticks: { color: chartText() }, grid: { display: false } },
-                            y: { ticks: { color: chartText() }, grid: { color: gridColor() } },
+                            x: { ticks: { color: chartText() }, grid: { color: gridColor() } },
+                            y: { ticks: { color: chartText() }, grid: { display: false } },
                         },
-                        plugins: { legend: { labels: { color: chartText() } } }
+                        plugins: { legend: { display: false } }
                     }
                     });
                 }
@@ -363,11 +378,14 @@ $topRevenue = $charts['top_revenue'] ?? [];
                     type: 'bar',
                     data: { labels, datasets: [{ label: 'Faturação (MZN)', data: values, backgroundColor: '#f59e0b', borderRadius: 10 }] },
                     options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
                         scales: {
-                            x: { ticks: { color: chartText() }, grid: { display: false } },
-                            y: { ticks: { color: chartText() }, grid: { color: gridColor() } },
+                            x: { ticks: { color: chartText() }, grid: { color: gridColor() } },
+                            y: { ticks: { color: chartText() }, grid: { display: false } },
                         },
-                        plugins: { legend: { labels: { color: chartText() } } }
+                        plugins: { legend: { display: false } }
                     }
                     });
                 }
@@ -457,3 +475,4 @@ $topRevenue = $charts['top_revenue'] ?? [];
         })();
     </script>
 <?= $this->endSection() ?>
+

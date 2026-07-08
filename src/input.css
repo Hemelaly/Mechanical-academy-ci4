@@ -1,12 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import "bootstrap-icons/font/bootstrap-icons.css";
+/* choose one of the following */
+@import "flowbite/src/themes/default";
+
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
-
-@import "bootstrap-icons/font/bootstrap-icons.css";
-/* choose one of the following */
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-@import "flowbite/src/themes/default";
 
 /* MINIMAL THEME
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
@@ -30,7 +29,30 @@
 @plugin "flowbite/plugin";
 @source "../node_modules/flowbite";
 
+@layer base {
+    a,
+    button,
+    [role='button'],
+    input[type='button'],
+    input[type='submit'] {
+        @apply cursor-pointer;
+    }
+
+    button:disabled,
+    input:disabled,
+    [aria-disabled='true'] {
+        @apply cursor-not-allowed;
+    }
+}
+
 @layer components {
+    .truncate-2 {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+    }
+
     .btn {
         @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors;
     }

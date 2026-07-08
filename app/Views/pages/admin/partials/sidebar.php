@@ -30,15 +30,15 @@
             <button
                 id="close-sidebar"
                 class="inline-flex lg:hidden h-8 w-8 items-center justify-center rounded-lg hover:bg-slate-800">
-                ✕
+                <i class="bi bi-x-lg"></i>
             </button>
         </div>
     </div>
 
-    <!-- SCROLL ÁREA -->
+    <!-- SCROLL AREA -->
     <div class="flex-1 overflow-y-auto py-3 prevent-overflow">
 
-        <!-- SEÇÃO DASHBOARD -->
+        <!-- SECAO DASHBOARD -->
         <div class="px-3 mt-6">
             <p
                 class="sidebar-label mb-1 px-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500">
@@ -59,10 +59,15 @@
                     <a
                         href="<?= site_url($link['url']) ?>"
                         class="side-link flex <?= $isActive ? 'active bg-slate-200/60 dark:bg-slate-700/60 text-slate-800 dark:text-white font-semibold' : 'text-slate-500 dark:text-slate-400' ?> items-center rounded-lg px-2 py-2 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-blue-500 transition">
-                        <span class="flex h-8 w-8 items-center justify-center">
+                        <span class="relative flex h-8 w-8 items-center justify-center">
                             <i class="bi <?= $link['icon'] ?>"></i>
+                            <?php if (($link['url'] ?? '') === '/admin/dashboard/notificacoes'): ?>
+                                <span id="admin-notifications-sidebar-badge" class="absolute -top-1 -right-1 hidden inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-600 px-1.5 text-[10px] font-semibold leading-none text-white shadow ring-2 ring-white dark:ring-slate-900">
+                                    0
+                                </span>
+                            <?php endif; ?>
                         </span>
-                        <div class="sidebar-label flex flex-col ml-2">
+                        <div class="sidebar-label ml-2 flex flex-1 items-center gap-2">
                             <span class="text-xs font-medium"><?= $link['label'] ?></span>
                         </div>
                     </a>
@@ -74,7 +79,7 @@
 
     <!-- Ações fixas (rodapé) -->
     <?php $isHome = rtrim(current_url(), '/') === rtrim(site_url('/'), '/'); ?>
-    <div class="border-t border-slate-200 px-3 py-3 dark:border-slate-800">
+    <div class="px-3 py-3 flex flex-col-reverse gap-1">
         <a
             href="#"
             id="logoutBtn"
@@ -83,18 +88,18 @@
             <span class="flex h-8 w-8 items-center justify-center">
                 <i class="bi bi-box-arrow-left"></i>
             </span>
-            <div class="sidebar-label ml-2 flex flex-col">
+            <div class="sidebar-label ml-2 flex flex-1 items-center gap-2">
                 <span class="text-xs font-medium">Sair da conta</span>
             </div>
         </a>
 
         <a
             href="/"
-            class="side-link mt-1 flex w-full <?= $isHome ? 'active bg-slate-200/60 dark:bg-slate-700/60 text-blue-600 dark:text-blue-400 font-semibold' : 'text-slate-500 dark:text-slate-400' ?> items-center rounded-lg px-2 py-2 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-blue-500 transition">
+            class="side-link flex w-full <?= $isHome ? 'active bg-slate-200/60 dark:bg-slate-700/60 text-blue-600 dark:text-blue-400 font-semibold' : 'text-slate-500 dark:text-slate-400' ?> items-center rounded-lg px-2 py-2 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-blue-500 transition">
             <span class="flex h-8 w-8 items-center justify-center">
                 <i class="bi bi-house-door"></i>
             </span>
-            <div class="sidebar-label ml-2 flex flex-col">
+            <div class="sidebar-label ml-2 flex flex-1 items-center gap-2">
                 <span class="text-xs font-medium">Ir para página inicial</span>
             </div>
         </a>

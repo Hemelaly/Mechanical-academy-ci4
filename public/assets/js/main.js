@@ -12,6 +12,17 @@ const collapseIcon = document.getElementById("collapse-icon");
 const navlink = document.querySelectorAll(".side-link");
 const favicon = document.getElementById("favicon");
 
+function getCookie(name) {
+    const parts = (`; ${document.cookie}`).split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(";").shift();
+    return null;
+}
+
+function setCookie(name, value, maxAgeSeconds = 31536000) {
+    // Fallback para persistÃªncia quando localStorage nÃ£o estiver disponÃ­vel (ex.: sandbox/iframe).
+    document.cookie = `${name}=${value}; Path=/; Max-Age=${maxAgeSeconds}; SameSite=Lax`;
+}
+
 // --- MOBILE: abrir/fechar drawer ---
 function openMobileSidebar() {
     if (!sidebar || !backdrop) return;
@@ -30,40 +41,80 @@ closeSidebarBtn?.addEventListener("click", closeMobileSidebar);
 backdrop?.addEventListener("click", closeMobileSidebar);
 
 // --- DESKTOP: colapsar/expandir (mini vs full) ---
+const SIDEBAR_COLLAPSE_KEY = "sidebar_collapsed";
 let isCollapsed = false;
+const cookieCollapsed = getCookie(SIDEBAR_COLLAPSE_KEY);
+if (cookieCollapsed === "1") isCollapsed = true;
+try {
+    const stored = localStorage.getItem(SIDEBAR_COLLAPSE_KEY);
+    if (stored === "1") isCollapsed = true;
+    else if (stored === "0") isCollapsed = false;
+} catch (_) {
+    // ignore
+}
+setCookie(SIDEBAR_COLLAPSE_KEY, isCollapsed ? "1" : "0");
+
+function applyCollapsedState() {
+    if (!sidebar) return;
+
+    const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
+    const effectiveCollapsed = isCollapsed && isDesktop;
+
+    sidebar.classList.toggle("lg:w-80", !effectiveCollapsed);
+    // Usar width exato no modo colapsado (75px), sem depender de classes Tailwind custom
+    if (effectiveCollapsed) {
+        sidebar.style.width = "75px";
+    } else {
+        sidebar.style.width = "";
+    }
+    // Mantido por compatibilidade caso existam estilos antigos no build
+    sidebar.classList.remove("lg:w-20");
+    favicon?.classList.toggle("hidden", !effectiveCollapsed);
+
+    navlink.forEach(link => {
+        link.classList.toggle("gap-2", !effectiveCollapsed);
+        link.classList.toggle("gap-0", effectiveCollapsed);
+        link.classList.toggle("justify-center", effectiveCollapsed);
+    });
+
+    labels.forEach((label) => {
+        label.classList.toggle("hidden", effectiveCollapsed);
+    });
+
+    logoText?.classList.toggle("hidden", effectiveCollapsed);
+    collapseIcon?.classList.toggle("rotate-180", effectiveCollapsed);
+}
 
 collapseDesktopBtn?.addEventListener("click", () => {
     if (!sidebar) return;
     isCollapsed = !isCollapsed;
+    try {
+        localStorage.setItem(SIDEBAR_COLLAPSE_KEY, isCollapsed ? "1" : "0");
+    } catch (_) {
+        // ignore
+    }
+    setCookie(SIDEBAR_COLLAPSE_KEY, isCollapsed ? "1" : "0");
 
-    sidebar.classList.toggle("lg:w-80", !isCollapsed);
-    sidebar.classList.toggle("lg:w-20", isCollapsed);
-    favicon?.classList.toggle("hidden", !isCollapsed);
-
-    navlink.forEach(link => {
-        link.classList.toggle("gap-2", !isCollapsed);
-        link.classList.toggle("gap-0", isCollapsed);
-        link.classList.toggle("justify-center", isCollapsed);
-    });
-
-    labels.forEach((label) => {
-        label.classList.toggle("hidden", isCollapsed);
-    });
-
-    logoText?.classList.toggle("hidden", isCollapsed);
-    collapseIcon?.classList.toggle("rotate-180", isCollapsed);
+    applyCollapsedState();
 });
 
 // Garantir que no desktop o sidebar não fique escondido
 function handleResize() {
     if (!sidebar || !backdrop) return;
-    if (window.innerWidth >= 1024) {
+    if (window.matchMedia("(min-width: 1024px)").matches) {
         sidebar.classList.remove("-translate-x-full");
         backdrop.classList.add("hidden");
+    } else {
+        // No mobile, nÃ£o queremos um sidebar "mini" com width fixo
+        sidebar.style.width = "";
     }
+
+    applyCollapsedState();
 }
 
 window.addEventListener("resize", handleResize);
+applyCollapsedState();
+handleResize();
 
 // ---------- THEME SWITCHER ----------
 
@@ -101,14 +152,23 @@ function applyTheme(theme) {
     // atualiza logo conforme tema
     updateLogo(theme);
 
-    localStorage.setItem("theme", theme);
+    try {
+        localStorage.setItem("theme", theme);
+    } catch (_) {
+        // ignore
+    }
 
     document.dispatchEvent(new CustomEvent('themechange', { detail: { theme } }));
 }
 
 // Detecta preferência inicial
 (function initTheme() {
-    const stored = localStorage.getItem("theme");
+    let stored = null;
+    try {
+        stored = localStorage.getItem("theme");
+    } catch (_) {
+        stored = null;
+    }
     if (stored === "dark" || stored === "light") {
         applyTheme(stored);
     } else {

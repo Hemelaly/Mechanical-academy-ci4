@@ -16,7 +16,21 @@ class App extends BaseConfig
      *
      * E.g., http://example.com/
      */
-    public string $baseURL = 'http://localhost:8080';
+    public string $baseURL = 'http://localhost/';
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        // In dev environments (like Laragon), the hostname/port can change.
+        // Build the base URL dynamically when running under HTTP.
+        if (PHP_SAPI !== 'cli' && isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] !== '') {
+            $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+            $host = (string) $_SERVER['HTTP_HOST'];
+            $host = preg_replace('/[\\s\\x00-\\x1F\\x7F]+/', '', $host) ?: $host;
+            $this->baseURL = rtrim($scheme . '://' . $host, '/') . '/';
+        }
+    }
 
     /**
      * Allowed Hostnames in the Site URL other than the hostname in the baseURL.

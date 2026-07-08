@@ -22,7 +22,9 @@ class CertificateModel extends Model
         'created_at',
         'updated_at',
         'avaiable_at_certificate',
-        'uploaded_by_certificate'
+        'uploaded_by_certificate',
+        'status_certificate',
+        'available_at_certificate'
     ];
 
     /**

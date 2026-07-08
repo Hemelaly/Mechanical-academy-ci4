@@ -8,8 +8,9 @@
 
 <?= $this->section('home_student') ?>
 
+<div class="space-y-6">
 <!-- Banner Hero -->
-<div class="relative bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-8 rounded-3xl text-white mb-8 overflow-hidden">
+<div class="relative bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-8 rounded-3xl text-white overflow-hidden">
     <!-- Background Pattern -->
     <div class="absolute inset-0 opacity-10">
         <div class="absolute top-0 right-0 w-64 h-64 bg-white rounded-full -translate-y-32 translate-x-32"></div>
@@ -46,7 +47,7 @@
 </div>
 
 <!-- Stats Cards -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
     <div class="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
         <div class="flex items-center justify-between">
             <div>
@@ -214,7 +215,7 @@
 </div>
 
 <!-- Quick Actions -->
-<div class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
     <a href="/student/dashboard/inscricoes" 
         class="p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300 group text-center">
         <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
@@ -246,6 +247,9 @@
         </div>
         <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Configurações</span>
     </a>
+</div>
+
+
 </div>
 
 <?= $this->endSection() ?>

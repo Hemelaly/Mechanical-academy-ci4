@@ -43,8 +43,9 @@ $user = service('auth')->user();
         <div class="relative">
             <button class="relative inline-flex overflow-visible px-[12px] py-1.5 cursor-pointer items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-400 text-lg hover:bg-slate-50 dark:hover:bg-slate-800 dropdown-toggle">
                 <i class="bi bi-bell"></i>
-                <span id="admin-notifications-badge" class="absolute -right-1 -top-1 hidden min-w-5 rounded-full bg-rose-600 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-white shadow">
-                    0
+                <span id="admin-notifications-dot" class="absolute -top-1 -right-1 hidden h-3 w-3 pointer-events-none">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span class="relative inline-flex h-3 w-3 rounded-full bg-red-500"></span>
                 </span>
             </button>
 
@@ -92,10 +93,11 @@ $user = service('auth')->user();
 <script>
     (function () {
         const endpoint = <?= json_encode(site_url('admin/dashboard/notifications/data')) ?>;
-        const badge = document.getElementById('admin-notifications-badge');
+        const dot = document.getElementById('admin-notifications-dot');
         const countBadge = document.getElementById('admin-notifications-count');
         const list = document.getElementById('admin-notifications-list');
         const markRead = document.getElementById('admin-notifications-mark-read');
+        const sidebarBadge = document.getElementById('admin-notifications-sidebar-badge');
 
         const toneClass = (tone) => {
             switch (tone) {
@@ -108,9 +110,25 @@ $user = service('auth')->user();
             }
         };
 
+        const levelBadgeClass = (level) => {
+            const lv = String(level || '').toLowerCase();
+            if (['error', 'critical', 'alert', 'emergency'].includes(lv)) return 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-200';
+            if (lv === 'warning') return 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200';
+            if (lv === 'debug') return 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200';
+            if (lv === 'notice') return 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200';
+            return 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200';
+        };
+
         const lastSeenKey = 'admin_notifications_last_seen';
         const getLastSeen = () => localStorage.getItem(lastSeenKey) || '';
         const setLastSeenNow = () => localStorage.setItem(lastSeenKey, new Date().toISOString());
+
+        const readIdsKey = 'admin_notifications_read_ids';
+        const getReadIds = () => {
+            try { return JSON.parse(localStorage.getItem(readIdsKey) || '{}') || {}; } catch { return {}; }
+        };
+        const setReadIds = (map) => localStorage.setItem(readIdsKey, JSON.stringify(map || {}));
+        const clearReadIds = () => localStorage.removeItem(readIdsKey);
 
         const escapeHtml = (value) => {
             if (value === null || value === undefined) return '';
@@ -122,6 +140,35 @@ $user = service('auth')->user();
                 .replace(/'/g, '&#039;');
         };
 
+        const formatWhen = (iso) => {
+            if (!iso) return '';
+            const d = new Date(iso);
+            if (Number.isNaN(d.getTime())) return '';
+            const now = new Date();
+            const isSameDay = (a, b) =>
+                a.getFullYear() === b.getFullYear() &&
+                a.getMonth() === b.getMonth() &&
+                a.getDate() === b.getDate();
+            const diffMs = now - d;
+            const diffMin = Math.floor(diffMs / 60000);
+            if (diffMin <= 0) return 'agora';
+            const pad = (n) => String(n).padStart(2, '0');
+            const time = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
+            const yesterday = new Date(now);
+            yesterday.setDate(now.getDate() - 1);
+            if (isSameDay(d, yesterday)) return `ontem às ${time}`;
+            if (diffMin < 60) return `há ${diffMin}min`;
+            const diffH = Math.floor(diffMin / 60);
+            if (diffH < 24) return `há ${diffH}h`;
+            const diffD = Math.floor(diffH / 24);
+            if (diffD < 7) {
+                const weekdays = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
+                return `${weekdays[d.getDay()]} às ${time}`;
+            }
+            return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${time}`;
+        };
+
         const render = (items) => {
             if (!list) return;
             if (!items || !items.length) {
@@ -129,22 +176,35 @@ $user = service('auth')->user();
                 return;
             }
 
+            const readIds = getReadIds();
             list.innerHTML = items.map((it) => {
                 const cls = toneClass(it.tone);
+                const id = Number(it.id || 0);
+                const isUnread = Boolean(it.is_unread) && !readIds[String(id)];
+                const wrapperCls = isUnread
+                    ? 'bg-indigo-50/60 dark:bg-slate-900/40 border-l-4 border-indigo-500 pl-3'
+                    : 'bg-transparent border-l-4 border-transparent';
+                const titleCls = isUnread ? 'font-semibold' : 'font-medium';
+                const when = formatWhen(it.created_at_iso || '');
                 return `
-                    <div class="p-4 border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900/60 transition-colors duration-150">
-                        <div class="flex gap-3">
+                    <div class="p-4 border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900/60 transition-colors duration-150 ${wrapperCls}">
+                        <div class="flex gap-3 items-start">
                             <div class="w-10 h-10 rounded-full ${cls} flex items-center justify-center flex-shrink-0">
                                 <i class="bi ${escapeHtml(it.icon || 'bi-activity')}"></i>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <p class="text-sm font-medium text-slate-800 dark:text-white">
+                                <p class="truncate-2 text-sm leading-snug ${titleCls} text-slate-800 dark:text-white">
                                     ${escapeHtml(it.title || 'Evento')}
                                 </p>
-                                <span class="inline-block mt-2 text-xs text-slate-500 dark:text-slate-400">
-                                    ${escapeHtml(it.time || '')}
-                                </span>
+                                <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ${levelBadgeClass(it.level)}">${escapeHtml(it.level || 'info')}</span>
+                                    ${isUnread ? `<span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200">Nova</span>` : ``}
+                                    <span class="inline-block">${escapeHtml(when || it.time || '')}</span>
+                                </div>
                             </div>
+                            <button type="button" class="admin-notification-item-read inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white ${isUnread ? '' : 'opacity-40 pointer-events-none'}" data-id="${id}" data-iso="${escapeHtml(it.created_at_iso || '')}" title="Marcar como lida">
+                                <i class="bi bi-check2"></i>
+                            </button>
                         </div>
                     </div>
                 `;
@@ -160,14 +220,24 @@ $user = service('auth')->user();
             fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
                 .then(r => r.json())
                 .then((data) => {
-                    const unread = Number(data?.unread || 0);
-                    if (badge) {
-                        badge.classList.toggle('hidden', unread <= 0);
-                        badge.textContent = unread > 99 ? '99+' : String(unread);
+                    const unreadServer = Number(data?.unread || 0);
+                    const sinceIso = String(data?.since_iso || '');
+                    const readIds = getReadIds();
+                    let readSinceCount = 0;
+                    if (sinceIso) {
+                        for (const iso of Object.values(readIds)) {
+                            if (typeof iso === 'string' && iso > sinceIso) readSinceCount++;
+                        }
                     }
+                    const unread = Math.max(0, unreadServer - readSinceCount);
+                    if (dot) dot.classList.toggle('hidden', unread <= 0);
                     if (countBadge) {
                         countBadge.classList.toggle('hidden', unread <= 0);
                         countBadge.textContent = `${unread} novas`;
+                    }
+                    if (sidebarBadge) {
+                        sidebarBadge.classList.toggle('hidden', unread <= 0);
+                        sidebarBadge.textContent = unread > 99 ? '99+' : String(unread);
                     }
                     render(data?.items || []);
                 })
@@ -176,8 +246,21 @@ $user = service('auth')->user();
                 });
         };
 
+        list?.addEventListener('click', (ev) => {
+            const btn = ev.target?.closest?.('.admin-notification-item-read');
+            if (!btn) return;
+            const id = Number(btn.getAttribute('data-id') || 0);
+            if (!id) return;
+            const iso = String(btn.getAttribute('data-iso') || '') || new Date().toISOString();
+            const readIds = getReadIds();
+            readIds[String(id)] = iso;
+            setReadIds(readIds);
+            refresh();
+        });
+
         markRead?.addEventListener('click', () => {
             setLastSeenNow();
+            clearReadIds();
             refresh();
         });
 
@@ -185,7 +268,12 @@ $user = service('auth')->user();
         document.addEventListener('DOMContentLoaded', () => {
             if (!getLastSeen()) setLastSeenNow();
             refresh();
-            setInterval(refresh, 60000);
+            setInterval(refresh, 15000);
         });
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') refresh();
+        });
+        window.addEventListener('focus', refresh);
     })();
 </script>

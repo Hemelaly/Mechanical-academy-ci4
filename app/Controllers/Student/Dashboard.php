@@ -577,10 +577,11 @@ class Dashboard extends BaseController
         }
         $availableAt = $certificate['avaiable_at_certificate'] ?? null;
         if (empty($availableAt) && !empty($completedAt)) {
-            $availableAt = date('Y-m-d H:i:s', strtotime($completedAt . ' +48 hours'));
+            // Disponibiliza imediatamente apÃ³s a conclusÃ£o.
+            $availableAt = $completedAt;
         }
         $availableAtTs = $availableAt ? strtotime($availableAt) : null;
-        $pdfReady = !empty($certificate['pdf_path_certificate']) && $availableAtTs && time() >= $availableAtTs;
+        $pdfReady = !empty($certificate['pdf_path_certificate']) && (!$availableAtTs || time() >= $availableAtTs);
 
         return view('pages/student/lessons', [
             'course'             => $course,
@@ -1183,11 +1184,35 @@ class Dashboard extends BaseController
         ]);
     }
 
-        public function certificate()
+    public function certificate()
     {
         $certificateModel = new CertificateModel();
 
         $user = service('auth')->user();
+
+        // Garante que certificados de cursos concluÃ­dos fiquem disponÃ­veis imediatamente.
+        // Isso cobre casos em que o aluno concluiu o curso mas nÃ£o disparou a geraÃ§Ã£o do PDF.
+        $db = db_connect();
+        $pending = $db->table('enrollments e')
+            ->select('e.id_enrollment')
+            ->join('certificates cert', 'cert.id_user_certificate = e.id_student_enrollment AND cert.id_course_certificate = e.id_course_enrollment', 'left')
+            ->where('e.id_student_enrollment', (int) $user->id)
+            ->where('e.progress_enrollment >=', 100)
+            ->groupStart()
+                ->where('cert.id_certificate IS NULL', null, false)
+                ->orWhere('cert.pdf_path_certificate IS NULL', null, false)
+                ->orWhere('cert.pdf_path_certificate', '')
+            ->groupEnd()
+            ->get()
+            ->getResultArray();
+
+        if (!empty($pending)) {
+            $svc = new \App\Services\CertificateService($db);
+            foreach ($pending as $row) {
+                $svc->ensureForEnrollment((int) ($row['id_enrollment'] ?? 0), (int) $user->id);
+            }
+        }
+
         $certificates = $certificateModel->getForStudent($user->id);
 
         return view('pages/student/certificates', [

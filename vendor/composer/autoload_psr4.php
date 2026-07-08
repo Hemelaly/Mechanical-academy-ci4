@@ -6,6 +6,7 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'setasign\\Fpdi\\' => array($vendorDir . '/setasign/fpdi/src'),
     'emagombe\\' => array($vendorDir . '/emagombe/mpesa-api/src'),
     'Tests\\Support\\' => array($baseDir . '/tests/_support'),
     'Svg\\' => array($vendorDir . '/dompdf/php-svg-lib/src/Svg'),

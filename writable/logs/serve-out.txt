@@ -1,0 +1,5 @@
+
+CodeIgniter v4.6.3 Command Line Tool - Server Time: 2026-05-20 14:04:42 UTC+00:00
+
+CodeIgniter development server started on http://localhost:8080
+Press Control-C to stop.

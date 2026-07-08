@@ -166,7 +166,7 @@ class Certificates extends BaseController
         $certificateModel = new CertificateModel();
         $db = \Config\Database::connect();
 
-        $enrollmentId = (int)$enrollmentId;
+        $enrollmentId = (int) $enrollmentId;
 
         // âœ… Valida ownership do aluno: enrollment deve ser do usuÃ¡rio logado
         $row = $db->table('enrollments')
@@ -196,7 +196,7 @@ class Certificates extends BaseController
         $now = time();
         $availableAt = strtotime($cert['avaiable_at_certificate'] ?? '1970-01-01');
 
-        if (empty($cert['pdf_path_certificate']) || $now < $availableAt) {
+        if (empty($cert['pdf_path_certificate'])) {
             return redirect()->back()->with('error', 'Seu certificado ainda nÃ£o estÃ¡ disponÃ­vel.');
         }
 
@@ -274,4 +274,57 @@ class Certificates extends BaseController
 
         return redirect()->back()->with('success', 'Certificado excluÃ­do com sucesso.');
     }
+
+    /**
+     * Página pública de verificação de autenticidade do certificado.
+     * Aceita o número/código do certificado usado no QR Code.
+     * Exemplo: /certificados/verificar/MT-2026-EXCEL-001
+     */
+    public function verificar(?string $number = null)
+    {
+        helper('url');
+
+        $number = trim((string) ($number ?? $this->request->getGet('codigo') ?? ''));
+        $number = rawurldecode($number);
+
+        $data = [
+            'searchedCode' => $number,
+            'cert'         => null,
+            'isValid'      => false,
+            'message'      => '',
+        ];
+
+        if ($number === '') {
+            $data['message'] = 'Informe o código do certificado para verificar a autenticidade.';
+            return view('certificates/verify', $data);
+        }
+
+        $db = \Config\Database::connect();
+        $cert = $db->table('certificates cert')
+            ->select('cert.id_certificate, cert.id_user_certificate, cert.id_course_certificate, cert.uuid_certificate, cert.number_certificate, cert.hash_certificate, cert.issued_at_certificate, cert.pdf_path_certificate, cert.revoked_at_certificate, cert.created_at, c.title_course, COALESCE(s.name_student, u.username) AS student_name', false)
+            ->join('courses c', 'c.id_course = cert.id_course_certificate', 'left')
+            ->join('users u', 'u.id = cert.id_user_certificate', 'left')
+            ->join('students s', 's.id_user_student = u.id', 'left')
+            ->where('cert.number_certificate', $number)
+            ->get()
+            ->getRowArray();
+
+        if (!$cert) {
+            $data['message'] = 'Certificado não encontrado.';
+            return view('certificates/verify', $data);
+        }
+
+        $expectedHash = hash('sha256', ($cert['uuid_certificate'] ?? '') . '|' . (int) $cert['id_user_certificate'] . '|' . (int) $cert['id_course_certificate']);
+        $hashOk = hash_equals((string) ($cert['hash_certificate'] ?? ''), $expectedHash);
+        $notRevoked = empty($cert['revoked_at_certificate']);
+
+        $data['cert'] = $cert;
+        $data['isValid'] = $hashOk && $notRevoked;
+        $data['message'] = $data['isValid']
+            ? 'Certificado válido e emitido pela Mechanical Academy.'
+            : ($notRevoked ? 'Certificado encontrado, mas a validação interna falhou.' : 'Este certificado foi revogado.');
+
+        return view('certificates/verify', $data);
+    }
+
 }
