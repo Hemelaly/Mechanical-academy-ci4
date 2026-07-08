@@ -63,18 +63,18 @@
             top: 72mm;
             width: 136mm;
             height: 12.5mm;
-            font-size: 20pt;
-            font-family: "Playwrite England Joined", "Great Vibes", "Ms Madi", DejaVu Sans, cursive;
+            font-size: 26pt;
+            font-family: "Allura", "Great Vibes", DejaVu Sans, cursive;
             overflow: visible;
         }
 
         .field-course {
             left: 34mm;
-            top: 96mm;
+            top: 93mm;
             width: 142mm;
             height: 12.5mm;
-            font-size: 15pt;
-            font-family: "Playwrite England Joined", "Great Vibes", "Ms Madi", DejaVu Sans, cursive;
+            font-size: 20pt;
+            font-family: "Allura", "Great Vibes", DejaVu Sans, cursive;
             overflow: visible;
         }
 

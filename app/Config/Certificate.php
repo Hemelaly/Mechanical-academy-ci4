@@ -46,10 +46,9 @@ class Certificate extends BaseConfig
     public string $instructorSignaturePath = '';
 
     /**
-     * Fonte manuscrita (Google Fonts) para o nome do aluno no PDF.
-     * Requer Dompdf com isRemoteEnabled=true.
+     * Fontes Google (fallback HTML/Dompdf) para nome e título do curso.
      */
-    public string $studentNameFontCssUrl = 'https://fonts.googleapis.com/css2?family=Playwrite+England+Joined&display=swap';
+    public string $studentNameFontCssUrl = 'https://fonts.googleapis.com/css2?family=Allura&family=Playfair+Display:ital@1&display=swap';
 
     /**
      * Template PDF base (public/) e posições em mm.
@@ -64,15 +63,14 @@ class Certificate extends BaseConfig
     public string $academyUrl = '';
 
     /**
-     * Fonte TTF usada para o nome do estudante. Caminho relativo a public/.
+     * Fonte TTF para o nome do estudante (caligrafia elegante).
      */
-    public string $studentNameTtfPath = 'assets/fonts/GreatVibes-Regular.ttf';
+    public string $studentNameTtfPath = 'assets/fonts/Allura-Regular.ttf';
 
     /**
-     * Fonte TTF para o título do curso no certificado.
-     * Por padrão usa a mesma fonte manuscrita do nome do estudante.
+     * Fonte TTF para o título do curso (mesma caligrafia do nome do estudante).
      */
-    public string $courseNameTtfPath = 'assets/fonts/GreatVibes-Regular.ttf';
+    public string $courseNameTtfPath = 'assets/fonts/Allura-Regular.ttf';
 
     /**
      * Fonte TTF para nomes nas assinaturas. Deve parecer assinatura manuscrita.
@@ -98,10 +96,10 @@ class Certificate extends BaseConfig
         'concluded_date' => ['x' => 10.0, 'y' => 27.0, 'w' => 46.0, 'h' => 4.5, 'size' => 8.5, 'align' => 'C', 'valign' => 'B'],
 
         // Nome do formando — linha pontilhada central (~y 84.5 mm).
-        'student_name' => ['x' => 37.0, 'y' => 76.0, 'w' => 136.0, 'h' => 8.5, 'size' => 20.0, 'align' => 'C', 'min_size' => 11.0, 'font_role' => 'student', 'valign' => 'B'],
+        'student_name' => ['x' => 37.0, 'y' => 76.0, 'w' => 136.0, 'h' => 8.5, 'size' => 24.0, 'align' => 'C', 'min_size' => 14.0, 'font_role' => 'student', 'valign' => 'B'],
 
         // Nome do curso — segunda linha pontilhada central (~y 108.5 mm).
-        'course_name' => ['x' => 34.0, 'y' => 100.0, 'w' => 142.0, 'h' => 8.5, 'size' => 15.0, 'align' => 'C', 'min_size' => 10.0, 'font_role' => 'course', 'valign' => 'B'],
+        'course_name' => ['x' => 34.0, 'y' => 97.0, 'w' => 142.0, 'h' => 8.5, 'size' => 14.0, 'align' => 'C', 'min_size' => 10.0, 'font_role' => 'course', 'valign' => 'B'],
 
         // Formador — linha pontilhada inferior esquerda (~y 130.5 mm).
         'instructor_name' => ['x' => 44.0, 'y' => 123.0, 'w' => 52.0, 'h' => 7.5, 'size' => 11.0, 'align' => 'C', 'font_role' => 'signature', 'valign' => 'B'],
