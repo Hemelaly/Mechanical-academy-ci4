@@ -423,15 +423,76 @@ class Dashboard extends BaseController
             ->first();
 
         if (! $enrollment) {
-            return redirect()->to('/student/dashboard/checkout/' . (int) $course->id_course)
-                ->with('warning', 'VocÃª precisa estar inscrito neste curso.');
+            $commerce = new \App\Services\CourseCommerceService();
+            $freeCount = $commerce->getFreeLessonsCount($course);
+            if ($freeCount > 0) {
+                $enrollmentId = $enrollmentModel->insert([
+                    'id_student_enrollment'  => (int) $userId,
+                    'id_course_enrollment'   => (int) $course->id_course,
+                    'status_enrollment'      => 'pendente',
+                    'progress_enrollment'    => 0,
+                    'enrolled_at_enrollment' => date('Y-m-d'),
+                    'is_manual_enrollment'   => 0,
+                ]);
+                $enrollment = $enrollmentModel->find($enrollmentId);
+            }
         }
 
-        $accessBlocked = strtolower((string) ($enrollment->status_enrollment ?? '')) === 'cancelada';
+        if (! $enrollment) {
+            return redirect()->to('/student/dashboard/checkout/' . (int) $course->id_course)
+                ->with('warning', 'Você precisa estar inscrito neste curso.');
+        }
+
+        $enrollmentStatus = strtolower((string) ($enrollment->status_enrollment ?? ''));
+        $accessBlocked = $enrollmentStatus === 'cancelada';
+        $paywallRequired = false;
+        $freeLessonsAllowed = 0;
+        $commerce = new \App\Services\CourseCommerceService();
+        $demoService = new \App\Services\DemoEnrollmentService();
+        $isDemoAccess = $demoService->isDemo($enrollment);
+        $demoExpiresAt = null;
+        $demoRemainingSeconds = 0;
+
+        // Acesso demo (não pago): relógio inicia no primeiro acesso; depois de 2h → paywall.
+        if ($isDemoAccess) {
+            $enrollment = $demoService->startClockIfNeeded($enrollment);
+            $demoExpiresAt = $enrollment->demo_expires_at ?? null;
+            $demoRemainingSeconds = $demoService->remainingSeconds($enrollment);
+
+            if ($demoService->isExpired($enrollment)) {
+                $accessBlocked = true;
+                $paywallRequired = true;
+            }
+        } elseif ($enrollmentStatus === 'pendente') {
+            $freeLessonsAllowed = $commerce->getFreeLessonsCount($course);
+            if ($freeLessonsAllowed < 1) {
+                return redirect()->to('/checkout/' . (int) $course->id_course)
+                    ->with('warning', 'Conclua o pagamento para aceder ao curso.');
+            }
+        }
 
         $moduleList = $moduleModel->where('id_course_module', $course->id_course)
             ->orderBy('position_module')
             ->findAll();
+
+        // Ordem global das aulas (usada no paywall de teste).
+        $orderedLessonIds = [];
+        foreach ($moduleList as $modRow) {
+            $modLessons = $lessonModel->where('id_module_lesson', $modRow->id_module)
+                ->orderBy('position_lesson')
+                ->findAll();
+            foreach ($modLessons as $modLesson) {
+                $orderedLessonIds[] = (int) $modLesson->id_lesson;
+            }
+        }
+
+        if (! $isDemoAccess && $enrollmentStatus === 'pendente' && $freeLessonsAllowed > 0) {
+            $lessonIndex = array_search((int) $lesson->id_lesson, $orderedLessonIds, true);
+            if ($lessonIndex === false || $lessonIndex >= $freeLessonsAllowed) {
+                $accessBlocked = true;
+                $paywallRequired = true;
+            }
+        }
 
         // Bloqueia o mÃ³dulo seguinte atÃ© atingir a nota mÃ­nima no quiz do mÃ³dulo anterior
         $moduleIndex = null;
@@ -587,6 +648,16 @@ class Dashboard extends BaseController
             'course'             => $course,
             'enrollment'         => (object) $enrollment,
             'accessBlocked'      => $accessBlocked ?? false,
+            'paywallRequired'    => $paywallRequired ?? false,
+            'freeLessonsAllowed' => $freeLessonsAllowed ?? 0,
+            'isDemoAccess'       => $isDemoAccess ?? false,
+            'demoExpiresAt'      => $demoExpiresAt ?? null,
+            'demoRemainingSeconds' => $demoRemainingSeconds ?? 0,
+            'whatsappUrl'        => (new \App\Services\CourseCommerceService())->buildWhatsappUrl(
+                $course,
+                'Olá! Já experimentei o curso "' . trim((string) ($course->title_course ?? '')) . '" e quero concluir o pagamento para continuar.'
+            ),
+            'checkoutUrl'        => site_url('checkout/' . (int) $course->id_course),
             'modules'            => $modules,
             'lesson'             => $lesson,
             'prevLesson'         => $prevLesson,

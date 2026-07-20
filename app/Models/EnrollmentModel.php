@@ -20,6 +20,9 @@ class EnrollmentModel extends Model
         'completed_enrollment',
         'enrolled_at_enrollment',
         'is_manual_enrollment',
+        'is_demo_enrollment',
+        'demo_started_at',
+        'demo_expires_at',
     ];
 
     protected bool $allowEmptyInserts = false;

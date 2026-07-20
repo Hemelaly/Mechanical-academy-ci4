@@ -441,16 +441,21 @@ class Auth extends ShieldAuth
      */
     public function loginRedirect(): string
     {
+        $session = session();
+        $before  = $session->getTempdata('beforeLoginUrl');
+        if (is_string($before) && trim($before) !== '') {
+            return $this->getUrl(trim($before));
+        }
+
         $user = auth()->user();
-        if ($user && !empty($user->role)) {
+        if ($user && ! empty($user->role)) {
             $role = trim((string) $user->role);
             if ($role !== '') {
                 return $this->getUrl($role . '/dashboard');
             }
         }
 
-        $session = session();
-        $url     = $session->getTempdata('beforeLoginUrl') ?? setting('Auth.redirects')['login'];
+        $url = setting('Auth.redirects')['login'];
 
         return $this->getUrl($url);
     }

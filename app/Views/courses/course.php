@@ -142,182 +142,614 @@ foreach ($modules as &$moduleItem) {
     unset($moduleLesson);
 }
 unset($moduleItem);
+
+$accentColor = trim((string) ($course->color_course ?? '')) ?: '#0d6efd';
+
+if (!function_exists('mechHexToRgba')) {
+    function mechHexToRgba(string $hex, float $alpha = 1): string
+    {
+        $hex = ltrim(trim($hex), '#');
+        if (strlen($hex) === 3) {
+            $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+        }
+        if (strlen($hex) !== 6 || !ctype_xdigit($hex)) {
+            return "rgba(26, 95, 122, {$alpha})";
+        }
+        $r = hexdec(substr($hex, 0, 2));
+        $g = hexdec(substr($hex, 2, 2));
+        $b = hexdec(substr($hex, 4, 2));
+
+        return "rgba({$r}, {$g}, {$b}, {$alpha})";
+    }
+}
+
+$accentSoft   = mechHexToRgba($accentColor, 0.16);
+$accentBorder = mechHexToRgba($accentColor, 0.38);
+$accentGlow   = mechHexToRgba($accentColor, 0.28);
+
+$learnPreviewItems = array_slice($normalizedLearningItems, 0, 6);
+$learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewItems));
 ?>
 
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR">
 
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title><?= esc($course->title_course) ?></title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+  <title><?= esc($course->title_course) ?> · Mechanical Academy</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-  <!-- Bootstrap Icons CDN -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <link rel="shortcut icon" href="<?= base_url('assets/img/favicon.png') ?>" width="100%" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"></noscript>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="shortcut icon" href="<?= base_url('assets/img/favicon.png') ?>" type="image/x-icon">
+
   <style>
-    .bg-primary {
-      background: <?= esc($course->color_course) ?> !important;
+    :root {
+      --ink: #f5f7fa;
+      --ink-soft: rgba(245, 247, 250, 0.62);
+      --page-bg: #050505;
+      --surface: #141414;
+      --line: rgba(255, 255, 255, 0.09);
+      --accent: <?= esc($accentColor) ?>;
+      --accent-soft: <?= esc($accentSoft) ?>;
+      --accent-border: <?= esc($accentBorder) ?>;
+      --accent-glow: <?= esc($accentGlow) ?>;
     }
 
-    .text-primary {
-      color: <?= esc($course->color_course) ?> !important;
+    * {
+      box-sizing: border-box;
     }
 
-    .btn-primary {
-      background: <?= esc($course->color_course) ?> !important;
-      border: 0;
+    html {
+      scroll-behavior: smooth;
     }
 
-    .bg-yellow {
-      background: rgba(226, 226, 128, 1);
+    body {
+      font-family: 'Sora', sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1100px 480px at 88% 0%, var(--accent-glow) 0%, transparent 55%),
+        radial-gradient(900px 420px at 4% 30%, rgba(13, 110, 253, 0.06) 0%, transparent 55%),
+        var(--page-bg);
+      -webkit-font-smoothing: antialiased;
     }
 
-    .bg-darkblue {
-      background: #161e2a;
+    a {
+      color: inherit;
     }
 
-    .bg-blue {
-      background: #1b232f;
+    .container-mech {
+      width: 100%;
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
     }
 
-    .check-icon {
-      color: <?= esc($course->color_course) ?>;
+    /* ---------- Nav ---------- */
+    .site-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(18, 21, 26, 0.82);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      transition: background 0.25s ease, box-shadow 0.25s ease;
     }
 
-    .feature-bold {
-      font-weight: 700;
+    .site-nav.is-scrolled {
+      background: rgba(18, 21, 26, 0.94);
+      box-shadow: 0 8px 28px -18px rgba(0, 0, 0, 0.45);
     }
 
-    .feature-text li {
+    .site-nav__inner {
       display: flex;
-      align-items: flex-start;
-      gap: 0.75rem;
-      margin-bottom: 0.75rem;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.9rem 0;
     }
 
-    .feature-text li:last-child {
-      margin-bottom: 0;
+    .site-nav__brand {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
     }
 
-    .feature-text li span {
+    .site-nav__brand img {
+      height: 42px;
+      width: auto;
       display: block;
-      line-height: 1.55;
+    }
+
+    .site-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 1.6rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .site-nav__links a {
+      color: rgba(255, 255, 255, 0.82);
+      text-decoration: none;
+      font-size: 0.92rem;
+      font-weight: 500;
+      transition: color 0.15s ease;
+    }
+
+    .site-nav__links a:hover {
+      color: #fff;
+    }
+
+    .site-nav__cta {
+      color: #fff !important;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 999px;
+      padding: 0.5rem 1.15rem !important;
+    }
+
+    .site-nav__cta:hover {
+      border-color: rgba(255, 255, 255, 0.6);
     }
 
     .nav-avatar {
-      width: 35px;
-      height: 35px;
-      min-width: 35px;
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
       border-radius: 50%;
       object-fit: cover;
       object-position: center;
       display: block;
-      background: #111827;
-      border: 1px solid rgba(255, 255, 255, 0.24);
+      background: #1c2028;
+      border: 1px solid rgba(255, 255, 255, 0.22);
     }
 
-    .purchase-box-sticky {
-      position: sticky;
-      top: 96px;
-      z-index: 20;
+    .site-nav__toggle {
+      display: none;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 8px;
+      color: #fff;
+      padding: 0.4rem 0.6rem;
+      font-size: 1.05rem;
     }
 
-    .video-area {
+    /* ---------- Buttons ---------- */
+    .btn-mech {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.55rem;
+      border-radius: 999px;
+      padding: 0.85rem 1.75rem;
+      font-weight: 600;
+      font-size: 0.98rem;
+      text-decoration: none;
+      border: 1px solid transparent;
+      transition: transform 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+      cursor: pointer;
+      line-height: 1.2;
+    }
+
+    .btn-mech-primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 8px 20px -10px rgba(18, 21, 26, 0.28);
+    }
+
+    .btn-mech-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px -10px rgba(18, 21, 26, 0.32);
+      color: #fff;
+    }
+
+    .btn-mech-outline-invert {
+      background: transparent;
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .btn-mech-outline-invert:hover {
+      border-color: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.06);
+      color: #fff;
+    }
+
+    .btn-mech-outline {
+      background: transparent;
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.22);
+    }
+
+    .btn-mech-outline:hover {
+      border-color: rgba(255, 255, 255, 0.55);
+      background: rgba(255, 255, 255, 0.06);
+      color: #fff;
+    }
+
+    .btn-mech-block {
       width: 100%;
-      max-width: 980px;
-      aspect-ratio: 16 / 9;
     }
 
-    .video-area iframe,
-    .video-area .video-fallback {
+    .btn-mech-sm {
+      padding: 0.65rem 1.2rem;
+      font-size: 0.88rem;
+    }
+
+    /* ---------- Hero ---------- */
+    .hero {
+      position: relative;
+      min-height: 92vh;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      color: #fff;
+    }
+
+    .hero__media {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      transform: scale(1.02);
+    }
+
+    .hero__gradient {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(880px 620px at 82% 8%, var(--accent-glow) 0%, transparent 58%),
+        linear-gradient(180deg, rgba(18, 21, 26, 0.55) 0%, rgba(18, 21, 26, 0.78) 55%, rgba(18, 21, 26, 0.96) 100%);
+    }
+
+    .hero__inner {
+      position: relative;
+      z-index: 2;
+      padding: 7.5rem 0 4.5rem;
+      width: 100%;
+    }
+
+    .hero__content {
+      max-width: 720px;
+    }
+
+    .hero__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      border: 1px solid var(--accent-border);
+      background: rgba(255, 255, 255, 0.04);
+      color: rgba(255, 255, 255, 0.92);
+      border-radius: 999px;
+      padding: 0.4rem 0.9rem 0.4rem 0.7rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      margin-bottom: 1.75rem;
+    }
+
+    .hero__badge .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: inline-block;
+    }
+
+    .hero__kicker {
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.55);
+      margin-bottom: 1.1rem;
+    }
+
+    .hero__title {
+      font-weight: 700;
+      font-size: clamp(2.1rem, 4.6vw, 3.4rem);
+      line-height: 1.12;
+      letter-spacing: -0.01em;
+      margin-bottom: 1.15rem;
+    }
+
+    .hero__subtitle {
+      font-size: clamp(1rem, 1.6vw, 1.2rem);
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.78);
+      font-weight: 400;
+      max-width: 560px;
+      margin-bottom: 2.2rem;
+    }
+
+    .hero__cta {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.9rem;
+      margin-bottom: 1.9rem;
+    }
+
+    .hero__whatsapp {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: rgba(255, 255, 255, 0.68);
+      text-decoration: none;
+      font-size: 0.92rem;
+      font-weight: 500;
+      border-bottom: 1px solid transparent;
+      transition: color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .hero__whatsapp:hover {
+      color: #fff;
+      border-bottom-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .hero__meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.55rem 1.1rem;
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 0.92rem;
+      font-weight: 500;
+      padding-top: 1.6rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .hero__meta span.item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      white-space: nowrap;
+    }
+
+    .hero__meta .sep {
+      color: rgba(255, 255, 255, 0.3);
+    }
+
+    .hero__meta i {
+      color: var(--accent);
+      font-size: 1rem;
+    }
+
+    /* ---------- Sections ---------- */
+    .section {
+      padding: 5.5rem 0;
+    }
+
+    .section-tight {
+      padding: 3.5rem 0;
+    }
+
+    .section-heading {
+      max-width: 620px;
+      margin-bottom: 3rem;
+    }
+
+    .section-heading.centered {
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+    }
+
+    .kicker {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.85rem;
+    }
+
+    .section-heading h2 {
+      font-weight: 700;
+      font-size: clamp(1.6rem, 3vw, 2.15rem);
+      letter-spacing: -0.01em;
+      color: var(--ink);
+      margin-bottom: 0;
+    }
+
+    .section-lead {
+      color: var(--ink-soft);
+      font-size: 1.02rem;
+      line-height: 1.75;
+      max-width: 640px;
+      margin-bottom: 3rem;
+    }
+
+    .section-lead p {
+      margin-bottom: 0.9rem;
+    }
+
+    .section-lead p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* ---------- Learning checklist ---------- */
+    .learn-grid {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem 2.5rem;
+    }
+
+    .learn-grid li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.85rem;
+      padding: 1.1rem 0;
+      border-bottom: 1px solid var(--line);
+      line-height: 1.5;
+      color: var(--ink);
+      font-size: 0.98rem;
+    }
+
+    .learn-grid li i {
+      flex: 0 0 auto;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      color: var(--accent);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      margin-top: 0.05rem;
+    }
+
+    .learn-more-note {
+      margin-top: 1.5rem;
+      font-size: 0.92rem;
+      color: var(--ink-soft);
+    }
+
+    /* ---------- Overview video ---------- */
+    .video-frame {
+      width: 100%;
+      max-width: 860px;
+      aspect-ratio: 16 / 9;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #05070b;
+      box-shadow: 0 30px 70px -30px rgba(18, 21, 26, 0.35);
+    }
+
+    .video-frame iframe,
+    .video-frame .video-fallback {
       width: 100%;
       height: 100%;
       display: block;
+      border: 0;
     }
 
-    .modules-accordion {
-      width: 100%;
-      max-width: 980px;
+    /* ---------- Curriculum layout ---------- */
+    .curriculum-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 2.5rem;
+      align-items: stretch;
     }
 
-    .modules-accordion .accordion-item {
-      background: #d4d4d8;
-      border-radius: 8px;
+    @media (min-width: 992px) {
+      .curriculum-layout {
+        grid-template-columns: minmax(0, 1fr) 340px;
+      }
+
+      .curriculum-layout > aside.purchase-aside {
+        align-self: stretch;
+        height: 100%;
+        position: relative;
+      }
+    }
+
+    .preview-helper {
+      font-size: 0.92rem;
+      color: var(--ink-soft);
+      margin-bottom: 1.5rem;
+    }
+
+    .preview-helper i {
+      color: var(--accent);
+      margin-right: 0.4rem;
+    }
+
+    .accordion-mech .accordion-item {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 14px !important;
       overflow: hidden;
+      margin-bottom: 0.9rem;
     }
 
-    .modules-accordion .accordion-button {
-      background: #d4d4d8;
-      font-size: 1.2rem;
-      color: #111827;
+    .accordion-mech .accordion-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .accordion-mech .accordion-button {
+      background: var(--surface);
+      font-family: 'Sora', sans-serif;
+      font-weight: 600;
+      font-size: 1.02rem;
+      color: var(--ink);
       box-shadow: none;
+      padding: 1.15rem 1.35rem;
     }
 
-    .modules-accordion .accordion-button:not(.collapsed) {
-      color: #111827;
-      background: #d4d4d8;
+    .accordion-mech .accordion-button::after {
+      background-size: 1.1rem;
+      filter: invert(1) brightness(1.4);
     }
 
-    .modules-accordion .accordion-body {
-      background: #d4d4d8;
-      padding-top: 0.35rem;
+    .accordion-mech .accordion-button:not(.collapsed) {
+      color: var(--ink);
+      background: var(--surface);
     }
 
-    .modules-accordion .module-lesson-item {
-      background: #dfdfe2ff;
-      color: #1f2937;
-      padding: 0.9rem 1rem;
-      margin-bottom: 0.35rem;
-      border-radius: 5px;
+    .accordion-mech .accordion-button:focus {
+      box-shadow: none;
+      border-color: var(--line);
+    }
+
+    .accordion-mech .module-index {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      min-width: 28px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-right: 0.9rem;
+    }
+
+    .accordion-mech .accordion-body {
+      padding: 0 1.1rem 1.1rem;
+    }
+
+    .module-lesson-item {
+      background: transparent;
+      color: var(--ink);
+      padding: 0.85rem 0.6rem;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
       line-height: 1.35;
-      font-size: 1.2rem;
-    }
-
-    .modules-accordion .module-lesson-item:last-child {
-      margin-bottom: 0;
-    }
-
-    .modules-accordion .module-lesson-preview-button {
+      font-size: 0.94rem;
       border: 0;
+      width: 100%;
       text-align: left;
-      transition: transform 0.18s ease, background-color 0.18s ease;
-      width: 100%;
-    }
-
-    .modules-accordion .module-lesson-link {
       text-decoration: none;
-      transition: transform 0.18s ease, background-color 0.18s ease;
-      width: 100%;
+      transition: background-color 0.16s ease;
     }
 
-    .modules-accordion .module-lesson-preview-button:hover {
-      background: #b8d7ff;
-      transform: translateX(2px);
+    .module-lesson-item:hover {
+      background: var(--accent-soft);
     }
 
-    .modules-accordion .module-lesson-link:hover {
-      background: #dbeafe;
-      transform: translateX(2px);
+    .module-lesson-locked {
+      opacity: 0.82;
     }
 
-    .modules-accordion .module-lesson-locked {
-      opacity: 0.88;
-    }
-
-    .modules-accordion .lesson-main {
+    .lesson-main {
       min-width: 0;
       display: flex;
       align-items: center;
@@ -325,61 +757,223 @@ unset($moduleItem);
       flex: 1;
     }
 
-    .modules-accordion .lesson-icon {
-      color: <?= esc($course->color_course) ?>;
-      font-size: 1.15rem;
+    .lesson-icon {
+      color: var(--accent);
+      font-size: 1.05rem;
       flex: 0 0 auto;
     }
 
-    .modules-accordion .lesson-copy {
+    .lesson-copy {
       min-width: 0;
       display: flex;
       flex-direction: column;
       gap: 0.1rem;
     }
 
-    .modules-accordion .lesson-title {
+    .lesson-title {
       display: block;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
-    .modules-accordion .lesson-meta {
-      color: #4b5563;
-      font-size: 0.78rem;
-      font-weight: 600;
+    .lesson-meta {
+      color: var(--ink-soft);
+      font-size: 0.76rem;
+      font-weight: 500;
     }
 
-    .modules-accordion .lesson-status {
+    .lesson-status {
       flex: 0 0 auto;
       display: inline-flex;
       align-items: center;
-      gap: 0.45rem;
-      font-size: 0.9rem;
-      font-weight: 700;
+      gap: 0.4rem;
+      font-size: 0.82rem;
+      font-weight: 600;
     }
 
-    .modules-accordion .lesson-status-open {
+    .lesson-status-open {
       color: #15803d;
     }
 
-    .modules-accordion .lesson-status-locked {
-      color: #475569;
+    .lesson-status-locked {
+      color: var(--ink-soft);
     }
 
-    .modules-accordion .lesson-status-text {
-      font-size: 0.8rem;
+    .module-lessons {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    /* ---------- Purchase card ---------- */
+    .purchase-card {
+      position: -webkit-sticky;
+      position: sticky;
+      top: 5.5rem;
+      z-index: 30;
+      background: #161616;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 1.75rem;
+      box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.65);
+    }
+
+    @media (max-width: 991.98px) {
+      .purchase-card {
+        position: static;
+        top: auto;
+        z-index: auto;
+      }
+    }
+
+    .purchase-card__title {
       font-weight: 700;
+      font-size: 1.08rem;
+      margin-bottom: 1.1rem;
+      line-height: 1.35;
+      color: #fff;
     }
 
-    .modules-accordion .preview-helper {
+    .purchase-card__price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.3rem;
+    }
+
+    .purchase-card__price {
+      font-weight: 700;
+      font-size: 2rem;
+      letter-spacing: -0.01em;
+      color: #fff;
+    }
+
+    .purchase-card__price-unit {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--ink-soft);
+    }
+
+    .purchase-card__list-price {
+      text-decoration: line-through;
+      color: var(--ink-soft);
       font-size: 0.95rem;
-      color: #cbd5e1;
-      text-align: center;
-      margin-bottom: 1.5rem;
     }
 
+    .purchase-card__badge {
+      display: inline-flex;
+      background: rgba(220, 53, 69, 0.18);
+      color: #ff8a95;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.15rem 0.55rem;
+      border-radius: 999px;
+    }
+
+    .purchase-card__promo-note {
+      color: #ff8a95;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1.1rem;
+    }
+
+    .purchase-card__single {
+      color: var(--ink-soft);
+      font-size: 0.84rem;
+      margin: 0.9rem 0 1.1rem;
+      text-align: center;
+    }
+
+    .purchase-card__actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .purchase-card__facts {
+      list-style: none;
+      margin: 1.35rem 0 0;
+      padding: 1.2rem 0 0;
+      border-top: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .purchase-card__facts li {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.86rem;
+      color: var(--ink-soft);
+    }
+
+    .purchase-card__facts i {
+      color: var(--accent);
+      width: 18px;
+      text-align: center;
+    }
+
+    .purchase-card__rating {
+      color: var(--ink-soft);
+      font-size: 0.85rem;
+      margin-top: 0.9rem;
+    }
+
+    .purchase-card__rating .stars {
+      color: #fbbf24;
+      margin-right: 0.35rem;
+    }
+
+    /* ---------- Mobile sticky CTA ---------- */
+    .mobile-sticky-cta {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 900;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      background: rgba(10, 10, 10, 0.94);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--line);
+      padding: 0.75rem 1rem;
+      box-shadow: 0 -12px 30px -20px rgba(0, 0, 0, 0.65);
+    }
+
+    .mobile-sticky-cta .price {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--ink);
+      line-height: 1.15;
+    }
+
+    .mobile-sticky-cta .price small {
+      display: block;
+      font-weight: 500;
+      font-size: 0.72rem;
+      color: var(--ink-soft);
+      text-decoration: none;
+    }
+
+    @media (max-width: 991.98px) {
+      .mobile-sticky-cta {
+        display: flex;
+      }
+
+      body {
+        padding-bottom: 76px;
+      }
+    }
+
+    /* ---------- Preview modal ---------- */
     .lesson-preview-player {
       aspect-ratio: 16 / 9;
       background: #020617;
@@ -394,510 +988,460 @@ unset($moduleItem);
       display: block;
     }
 
-    @media (min-width: 992px) {
-      .video-area {
-        width: 65%;
-      }
-
-      .modules-accordion {
-        width: 75%;
-      }
+    /* ---------- Footer ---------- */
+    .site-footer {
+      background: #000;
+      color: rgba(255, 255, 255, 0.65);
+      padding: 2.75rem 0;
+      border-top: 1px solid var(--line);
     }
 
-    @media (max-width: 991.98px) {
-      .purchase-box-sticky {
-        position: static;
-        top: auto;
+    .site-footer__row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.25rem;
+    }
+
+    .site-footer img {
+      height: 40px;
+      width: auto;
+    }
+
+    .site-footer small {
+      font-size: 0.82rem;
+    }
+
+    .site-footer__social {
+      display: flex;
+      gap: 1.1rem;
+    }
+
+    .site-footer__social a {
+      color: rgba(255, 255, 255, 0.65);
+      font-size: 1.05rem;
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+
+    .site-footer__social a:hover {
+      color: #fff;
+    }
+
+    /* ---------- Motion (Apple-like restraint) ---------- */
+    :root {
+      --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+      --ease-spring: cubic-bezier(0.34, 1.3, 0.64, 1);
+    }
+
+    .btn-mech:active {
+      transform: scale(0.97);
+    }
+
+    .hero__media {
+      animation: heroKen 18s ease-out forwards;
+    }
+
+    .hero-anim > * {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: riseIn 0.8s var(--ease-out) forwards;
+    }
+
+    .hero-anim > *:nth-child(1) { animation-delay: 0.06s; }
+    .hero-anim > *:nth-child(2) { animation-delay: 0.14s; }
+    .hero-anim > *:nth-child(3) { animation-delay: 0.22s; }
+    .hero-anim > *:nth-child(4) { animation-delay: 0.3s; }
+    .hero-anim > *:nth-child(5) { animation-delay: 0.38s; }
+    .hero-anim > *:nth-child(6) { animation-delay: 0.46s; }
+    .hero-anim > *:nth-child(7) { animation-delay: 0.54s; }
+
+    @keyframes riseIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes heroKen {
+      from { transform: scale(1.04); }
+      to { transform: scale(1); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+      transition-delay: var(--d, 0ms);
+    }
+
+    .reveal.is-in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .learn-grid li {
+      transition: transform 0.22s var(--ease-out), background-color 0.22s ease;
+    }
+
+    .learn-grid li:hover {
+      transform: translateX(4px);
+    }
+
+    .module-item,
+    .accordion-item {
+      transition: border-color 0.2s ease, box-shadow 0.25s ease, transform 0.25s var(--ease-spring);
+    }
+
+    .buy-bar,
+    .sticky-cta {
+      transition: transform 0.28s var(--ease-out), opacity 0.28s ease;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reveal,
+      .hero-anim > *,
+      .hero__media {
+        animation: none !important;
+        transition: none !important;
+        opacity: 1 !important;
+        transform: none !important;
       }
     }
 
     @media (max-width: 767.98px) {
-      #video .container {
-        padding-left: 1rem;
-        padding-right: 1rem;
+      .hero {
+        min-height: 100vh;
       }
 
-      #video .title {
-        font-size: 1.75rem !important;
+      .hero__inner {
+        padding: 6.5rem 0 3rem;
       }
 
-      .video-area {
-        max-width: 100%;
+      .section {
+        padding: 3.75rem 0;
       }
 
-      .modules-accordion .accordion-button {
-        font-size: 1rem;
-        line-height: 1.35;
+      .learn-grid {
+        grid-template-columns: 1fr;
       }
 
-      .modules-accordion .module-lesson-item {
-        font-size: 1rem;
-        padding: 0.8rem 0.85rem;
-      }
-    }
-
-    .title {
-      font-family: 'Fira Sans' !important;
-    }
-
-    :root {
-      --pre-bg: #0b0f19;
-      --pre-fg: #fff;
-      --pre-accent: #7c5cff;
-      --pre-z: 9999;
-      --fade-ms: 360ms;
-    }
-
-    #preloader {
-      position: fixed;
-      inset: 0;
-      z-index: var(--pre-z);
-      display: grid;
-      place-items: center;
-      color: var(--pre-fg);
-      background:
-        radial-gradient(1000px 700px at 10% 10%, #11162a 0%, transparent 60%),
-        radial-gradient(1000px 700px at 90% 90%, #0e1330 0%, transparent 60%),
-        var(--pre-bg);
-      transition: opacity var(--fade-ms) ease, visibility var(--fade-ms) ease;
-    }
-
-    #preloader.is-hidden {
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-    }
-
-    .preloader__inner {
-      display: grid;
-      gap: 14px;
-      place-items: center;
-      text-align: center;
-    }
-
-    .preloader__logo {
-      width: 84px;
-      height: auto;
-      filter: drop-shadow(0 2px 10px rgba(0, 0, 0, .35));
-    }
-
-    .preloader__spinner {
-      width: 56px;
-      height: 56px;
-    }
-
-    .preloader__track {
-      fill: none;
-      stroke: rgba(255, 255, 255, .18);
-      stroke-width: 6;
-    }
-
-    .preloader__arc {
-      fill: none;
-      stroke: var(--pre-accent);
-      stroke-linecap: round;
-      stroke-width: 6;
-      stroke-dasharray: 110 126;
-      transform-origin: 50% 50%;
-      animation: spin 1.05s linear infinite, dash 1.5s ease-in-out infinite;
-    }
-
-    .preloader__bar {
-      width: min(320px, 70vw);
-      height: 8px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, .15);
-      overflow: hidden;
-    }
-
-    .preloader__bar__fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, var(--pre-accent), #9a7bff 60%, var(--pre-accent));
-      border-radius: 999px;
-      transform: translateZ(0);
-    }
-
-    .preloader__text {
-      font: 600 .95rem/1.2 system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial;
-      opacity: .9;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    @keyframes dash {
-      0% {
-        stroke-dasharray: 1 235;
-        stroke-dashoffset: 0;
-      }
-
-      50% {
-        stroke-dasharray: 120 115;
-        stroke-dashoffset: -25;
-      }
-
-      100% {
-        stroke-dasharray: 1 235;
-        stroke-dashoffset: -235;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .preloader__arc {
-        animation: none;
+      .site-nav__links {
+        display: none;
       }
     }
   </style>
 </head>
 
-<body style="font-family: 'Open Sans';">
+<body>
 
-  <!-- PRELOADER -->
-  <div id="preloader" role="status" aria-live="polite" aria-label="Carregando conteúdo">
-    <div class="preloader__inner">
-      <!-- opcional: seu logotipo -->
-      <img src="<?= base_url('assets/img/logo.png') ?>" alt="Minha Marca" class="preloader__logo h-auto w-50" />
+  <?= view('partials/promo_urgency', [
+      'hasPromo' => !empty($hasPromo),
+      'promoRemainingSeconds' => (int) ($promoRemainingSeconds ?? 0),
+      'discountPercent' => (int) ($discountPercent ?? 0),
+      'promoEndsAt' => $promoEndsAt ?? null,
+      'listPrice' => $listPrice ?? null,
+      'promoPrice' => $promoPrice ?? null,
+      'courseTitle' => $course->title_course ?? '',
+      'promoCtaHref' => site_url('checkout/' . (int) ($course->id_course ?? 0)),
+      'promoCtaLabel' => 'Inscrever-me agora',
+  ]) ?>
 
-
-      <div class="preloader__bar">
-        <div class="preloader__bar__fill" id="preloaderFill" style="width:0%"></div>
-      </div>
-      <p class="preloader__text"><span id="preloaderPct">0</span>%</p>
-    </div>
-  </div>
-
-  <nav class="navbar navbar-expand-lg sticky-top bg-black navbar-dark py-3">
-    <div class="container">
-      <a class="navbar-brand" href="<?= base_url('/') ?>">
-        <img src="<?= base_url('./assets/img/logo.png') ?>" alt="Logo" style="width: 150px;">
+  <nav class="site-nav">
+    <div class="container-mech site-nav__inner">
+      <a class="site-nav__brand" href="<?= base_url('/') ?>">
+        <img src="<?= base_url('assets/img/logo.png') ?>" alt="Mechanical Academy">
       </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-        data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-        aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
-          <?php if ($isLoggedIn): ?>
-            <li class="nav-item me-3">
-              <a class="nav-link active" href="<?= base_url($user->role . '/dashboard/meus_cursos') ?>">Meus Cursos</a>
-            </li>
-            <li class="nav-item me-3">
-              <a class="nav-link active" href="https://www.youtube.com/@MechanicalTecnologia" target="_blank" rel="noopener noreferrer">Youtube</a>
-            </li>
-            <li class="nav-item d-flex align-items-center">
-              <a href="<?= base_url($user->role . '/dashboard/perfil') ?>" class="d-flex align-items-center text-decoration-none">
-                <img src="<?= esc($userAvatarUrl) ?>" alt="User" class="nav-avatar me-2" onerror="this.onerror=null;this.src='<?= esc($defaultAvatarUrl) ?>';">
-                <span class="text-white fw-semibold text-nowrap"><?= $user->username ?></span>
-              </a>
-            </li>
-          <?php else: ?>
-            <li class="nav-item me-3">
-              <a class="nav-link active" href="<?= base_url('/') ?>#cursos">Cursos</a>
-            </li>
-            <li class="nav-item me-3">
-              <a class="nav-link active" href="https://www.youtube.com/@MechanicalTecnologia" target="_blank" rel="noopener noreferrer">Youtube</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link active" href="<?= base_url('login') ?>">Entrar</a>
-            </li>
-          <?php endif; ?>
-        </ul>
-      </div>
+      <ul class="site-nav__links">
+        <?php if ($isLoggedIn): ?>
+          <li><a href="<?= base_url($user->role . '/dashboard/meus_cursos') ?>">Meus cursos</a></li>
+          <li><a href="https://www.youtube.com/@MechanicalTecnologia" target="_blank" rel="noopener noreferrer">Youtube</a></li>
+          <li>
+            <a href="<?= base_url($user->role . '/dashboard/perfil') ?>" class="d-flex align-items-center gap-2 text-decoration-none">
+              <img src="<?= esc($userAvatarUrl) ?>" alt="User" class="nav-avatar" onerror="this.onerror=null;this.src='<?= esc($defaultAvatarUrl) ?>';">
+              <span class="text-white fw-semibold text-nowrap"><?= esc($user->username) ?></span>
+            </a>
+          </li>
+        <?php else: ?>
+          <li><a href="<?= base_url('/') ?>#cursos">Cursos</a></li>
+          <li><a href="https://www.youtube.com/@MechanicalTecnologia" target="_blank" rel="noopener noreferrer">Youtube</a></li>
+          <li><a class="site-nav__cta" href="<?= base_url('login') ?>">Entrar</a></li>
+        <?php endif; ?>
+      </ul>
     </div>
   </nav>
 
-  <section id="banner"
-    style="background-image: url('<?= base_url('assets/img/' . ($course->bg_course ?? 'bg.webp')) ?>'); height:100%; width:100%; background-size:cover; background-position:center center; background-repeat:no-repeat;">
-    <div class="overlay" style="background: rgba(0, 0, 0, 0.9); height: 100%; width: 100%;">
-      <div class="container py-5">
-        <div class="content text-center py-3">
-          <div class="badged d-flex justify-content-center">
-            <p class="text-dark bg-yellow px-3 rounded">Curso mais vendido e recém-renovado</p>
-          </div>
-          <div class="title d-flex justify-content-center">
-            <p class="title fs-1 fw-bold text-white">Curso de <?= esc($course->title_course) ?></p>
-          </div>
-          <div class="course-image d-flex justify-content-center">
-            <img src="<?= base_url('assets/instructor/img/courses/' . $course->image_course) ?>" class="img-fluid rounded h-auto" width="500px" alt="">
-          </div>
-          <div class="description text-center mt-3">
-            <p class="title fs-2 fw-bold text-white"><?= $heroSubtitle ?></p>
-            <p class="text-white" style="margin-top: -0.8rem;"><?= esc($course->description_course) ?></p>
-            <a href="<?= base_url('/checkout/' . $course->id_course) ?>" class="title btn btn-primary py-3 px-5 fw-bold">Compre Agora</a>
-          </div>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero__media" style="background-image:url('<?= base_url('assets/img/' . ($course->bg_course ?? 'bg.webp')) ?>');"></div>
+    <div class="hero__gradient"></div>
+    <div class="container-mech hero__inner">
+      <div class="hero__content hero-anim">
+        <span class="hero__badge"><span class="dot"></span> Curso mais vendido &middot; conteúdo atualizado</span>
+        <p class="hero__kicker">MECHANICAL</p>
+        <h1 class="hero__title">Curso de <?= esc($course->title_course) ?></h1>
+        <p class="hero__subtitle"><?= $heroSubtitle ?></p>
+
+        <div class="hero__cta">
+          <a href="<?= base_url('/checkout/' . $course->id_course) ?>" class="btn-mech btn-mech-primary">
+            Comprar curso <i class="bi bi-arrow-right"></i>
+          </a>
+
+          <?php if (!empty($freeLessonsCount)): ?>
+            <a href="<?= site_url('courses/' . (int) $course->id_course . '/trial') ?>" class="btn-mech btn-mech-outline-invert">
+              Experimentar <?= (int) $freeLessonsCount ?> aula<?= $freeLessonsCount > 1 ? 's' : '' ?> grátis
+            </a>
+          <?php endif; ?>
         </div>
-      </div>
-    </div>
-  </section>
 
-  <section id="numbers" class="bg-darkblue">
-    <div class="container py-4">
-      <div class="content">
-        <div class="row">
-          <div class="col-md-3">
-            <div class="info-box text-center">
-              <div class="icon">
-                <i class="fa-solid fa-user-graduate text-primary" style="font-size: 3rem;"></i>
-              </div>
-              <p class="title fs-3 my-2 fw-bold text-white"><?= number_format($studentCount) ?></p>
-              <p class="text-white">Alunos matriculados</p>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="info-box text-center">
-              <div class="icon">
-                <i class="fa-solid fa-clock text-primary" style="font-size: 3rem;"></i>
-              </div>
-              <p class="title fs-3 my-2 fw-bold text-white"><?= number_format($courseHours ?? 0, 1, ',', '.') ?>h</p>
-              <p class="text-white">Horas do curso</p>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="info-box text-center">
-              <div class="icon">
-                <i class="fa-solid fa-book text-primary" style="font-size: 3rem;"></i>
-              </div>
-              <p class="title fs-3 my-2 fw-bold text-white"><?= $lessonCount ?> </p>
-              <p class="text-white">Total de aulas</p>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="info-box text-center">
-              <div class="icon">
-                <i class="fa-solid fa-diagram-project text-primary" style="font-size: 3rem;"></i>
-              </div>
-              <p class="title fs-3 my-2 fw-bold text-white"><?= $projectCount ?> </p>
-              <p class="text-white">Projetos</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+        <?php if (!empty($whatsappUrl)): ?>
+          <a href="<?= esc($whatsappUrl) ?>" target="_blank" rel="noopener" class="hero__whatsapp mb-4 d-inline-flex">
+            <i class="bi bi-whatsapp"></i> Falar com a equipa comercial no WhatsApp
+          </a>
+        <?php endif; ?>
 
-  <section id="video" class="bg-blue">
-    <div class="container py-lg-5 py-0">
-      <div class="content py-lg-4 py-0">
-        <p class="title fs-2 fw-bold text-center text-white">Vídeo de visão geral do curso</p>
-
-        <div class="video-area mx-auto mt-lg-3 mt-0">
-          <?php if ($overviewVideoId): ?>
-            <iframe id="vimeoPlayerOverview"
-              title="Vimeo player"
-              class="rounded mt-lg-3 mt-0"
-              src="https://player.vimeo.com/video/<?= esc($overviewVideoId) ?>?badge=0&autopause=0&player_id=<?= esc($overviewPlayerId) ?>&app_id=58479&title=0&byline=0&portrait=0&autoplay=0"
-              width="100%"
-              height="100%"
-              frameborder="0"
-              allow="autoplay; fullscreen; picture-in-picture"
-              allowfullscreen
-              referrerpolicy="no-referrer"
-              loading="lazy"
-              sandbox="allow-same-origin allow-scripts allow-presentation"
-              oncontextmenu="return false"></iframe>
-          <?php else: ?>
-            <div class="video-fallback rounded mt-lg-3 mt-0 d-flex align-items-center justify-content-center text-white text-center px-4" style="background:#111827;">
-              <div>
-                <i class="bi bi-exclamation-triangle fs-1 text-warning"></i>
-                <p class="mb-1 fw-semibold">Link de vídeo inválido.</p>
-                <small class="text-light opacity-75">Use um link do Vimeo suportado.</small>
-              </div>
-            </div>
+        <div class="hero__meta">
+          <span class="item"><i class="bi bi-clock"></i> <?= esc($hoursLabel ?? (number_format($courseHours ?? 0, 1, ',', '.') . 'h')) ?> de conteúdo</span>
+          <span class="sep">&middot;</span>
+          <span class="item"><i class="bi bi-collection"></i> <?= (int) $moduleCount ?> módulos</span>
+          <span class="sep">&middot;</span>
+          <span class="item"><i class="bi bi-play-circle"></i> <?= (int) $lessonCount ?> aulas</span>
+          <?php if (!empty($studentCount)): ?>
+            <span class="sep">&middot;</span>
+            <span class="item"><i class="bi bi-people"></i> <?= number_format($studentCount) ?> alunos</span>
+          <?php endif; ?>
+          <?php if (!empty($ratingSummary['total'])): ?>
+            <span class="sep">&middot;</span>
+            <span class="item"><i class="bi bi-star-fill"></i> <?= number_format((float) $ratingSummary['average'], 1, ',', '.') ?> (<?= (int) $ratingSummary['total'] ?>)</span>
           <?php endif; ?>
         </div>
       </div>
-  </section>
-
-  <section id="features" class="bg-darkblue py-5">
-    <div class="container">
-      <div class="content">
-        <div class="row row-cols-1 row-cols-md-4 g-4 align-items-stretch">
-          <div class="col">
-            <div class="card h-100 bg-transparent border p-4 text-center d-flex flex-direction-col justify-content-center align-items center">
-              <div class="icon">
-                <i class="fa-solid fa-photo-film text-primary" style="font-size: 3rem;"></i>
-              </div>
-              <p class="text-white mt-4"><?= $lessonCount ?> aulas sob demanda</p>
-            </div>
-          </div>
-          <div class="col">
-            <div class="card h-100 bg-transparent border p-4 text-center d-flex flex-direction-col justify-content-center align-items center">
-              <div class="icon">
-                <i class="fa-solid fa-download text-primary" style="font-size: 3rem;"></i>
-              </div>
-              <p class="text-white mt-4"><?= $projectCount ?> recursos e arquivos para download</p>
-            </div>
-          </div>
-          <div class="col">
-            <div class="card h-100 bg-transparent border p-4 text-center d-flex flex-direction-col justify-content-center align-items center">
-              <div class="icon">
-                <i class="fa-solid fa-calendar-days text-primary" style="font-size: 3rem;"></i>
-              </div>
-              <p class="text-white mt-4"><?= $moduleCount ?> módulos com acesso vitalício</p>
-            </div>
-          </div>
-          <div class="col">
-            <div class="card h-100 bg-transparent border p-4 text-center d-flex flex-direction-col justify-content-center align-items center">
-              <div class="icon">
-                <i class="fa-solid fa-graduation-cap text-primary" style="font-size: 3rem;"></i>
-              </div>
-              <p class="text-white mt-4">Certificado de conclusão</p>
-            </div>
-          </div>
-        </div>
-
-      </div>
     </div>
   </section>
 
-  <section id="details" class="py-5">
-    <div class="container">
-      <div class="row justify-content-center align-items-center">
-        <!-- Lista de aprendizado -->
-        <div class="col-lg-8 mb-4">
-          <div class="bg-white shadow rounded-3 p-4 p-md-5 h-100">
-            <h2 class="title fw-bold text-primary mb-4 text-center">O que você aprenderá</h2>
-            <ul class="list-unstyled feature-text">
-              <?= $learningHtml ?>
+  <!-- O QUE VAI APRENDER -->
+  <section id="learn" class="section">
+    <div class="container-mech">
+      <div class="section-heading reveal">
+        <p class="kicker">O que você vai aprender</p>
+        <h2>Habilidades práticas, do início ao avançado</h2>
+      </div>
+
+      <?php if ($descriptionHtml !== ''): ?>
+        <div class="section-lead reveal" style="--d:80ms"><?= $descriptionHtml ?></div>
+      <?php endif; ?>
+
+      <ul class="learn-grid reveal" style="--d:140ms">
+        <?php foreach ($learnPreviewItems as $itemText): ?>
+          <li><i class="bi bi-check-lg"></i><span><?= esc($itemText) ?></span></li>
+        <?php endforeach; ?>
+      </ul>
+
+      <?php if ($learnMoreCount > 0): ?>
+        <p class="learn-more-note">+ <?= $learnMoreCount ?> tópico<?= $learnMoreCount > 1 ? 's' : '' ?> adicional<?= $learnMoreCount > 1 ? 'ais' : '' ?> no currículo completo abaixo.</p>
+      <?php endif; ?>
+    </div>
+  </section>
+
+  <!-- VIDEO DE VISÃO GERAL -->
+  <?php if ($overviewVideoId): ?>
+    <section id="overview" class="section section-tight" style="background:var(--surface); border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
+      <div class="container-mech text-center">
+        <div class="section-heading centered reveal">
+          <p class="kicker">Aula de apresentação</p>
+          <h2>Conheça o curso antes de comprar</h2>
+        </div>
+        <div class="video-frame mx-auto reveal" style="--d:100ms">
+          <iframe id="vimeoPlayerOverview"
+            title="Vimeo player"
+            src="https://player.vimeo.com/video/<?= esc($overviewVideoId) ?>?badge=0&autopause=0&player_id=<?= esc($overviewPlayerId) ?>&app_id=58479&title=0&byline=0&portrait=0&autoplay=0"
+            frameborder="0"
+            allow="autoplay; fullscreen; picture-in-picture"
+            allowfullscreen
+            referrerpolicy="no-referrer"
+            loading="lazy"
+            sandbox="allow-same-origin allow-scripts allow-presentation"
+            oncontextmenu="return false"></iframe>
+        </div>
+      </div>
+    </section>
+  <?php endif; ?>
+
+  <!-- CONTEÚDO DO CURSO -->
+  <section id="curriculum" class="section">
+    <div class="container-mech">
+      <div class="section-heading reveal">
+        <p class="kicker">Currículo completo</p>
+        <h2>Conteúdo do curso</h2>
+      </div>
+
+      <div class="curriculum-layout">
+        <div class="reveal" style="--d:80ms">
+          <p class="preview-helper">
+            <?php if ($publicPreviewLessonCount > 0): ?>
+              <i class="bi bi-unlock"></i>Aulas com cadeado aberto podem ser assistidas antes da compra.
+            <?php else: ?>
+              <i class="bi bi-info-circle"></i>O currículo completo está listado abaixo.
+            <?php endif; ?>
+          </p>
+
+          <div class="accordion accordion-mech" id="excelAccordion">
+            <?php foreach ($modules as $key => $module): ?>
+              <div class="accordion-item">
+                <h3 class="accordion-header">
+                  <button class="accordion-button <?= $key === 0 ? '' : 'collapsed' ?>" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#mod<?= $module->id_module ?>">
+                    <span class="module-index"><?= $key + 1 ?></span>
+                    <?= esc($module->title_module) ?>
+                  </button>
+                </h3>
+                <div id="mod<?= $module->id_module ?>" class="accordion-collapse collapse <?= $key === 0 ? 'show' : '' ?>" data-bs-parent="#excelAccordion">
+                  <div class="accordion-body">
+                    <?php if (!empty($module->lessons)): ?>
+                      <ul class="module-lessons">
+                        <?php foreach ($module->lessons as $lessonIndex => $lesson): ?>
+                          <?php
+                          $lessonType = trim((string) ($lesson->type_lesson ?? 'video'));
+                          $lessonIconClass = match ($lessonType) {
+                            'quiz' => 'bi-patch-question-fill',
+                            'exercise' => 'bi-journal-check',
+                            'text' => 'bi-file-earmark-text-fill',
+                            default => 'bi-play-circle-fill',
+                          };
+                          $isPreviewLesson = !empty($lesson->is_public_preview);
+                          $lessonDuration = (int) ($lesson->duration_lesson ?? 0);
+                          $lessonMeta = $isPreviewLesson ? 'Previa gratuita' : 'Conteudo bloqueado';
+                          if ($lessonDuration > 0) {
+                            $lessonMeta .= ' - ' . $lessonDuration . ' min';
+                          }
+                          $previewSrc = '';
+                          if ($isPreviewLesson && !empty($lesson->preview_video_id)) {
+                            $previewSrc = 'https://player.vimeo.com/video/' . rawurlencode((string) $lesson->preview_video_id)
+                              . '?badge=0&autopause=0&player_id=' . (int) ($lesson->id_lesson ?? 0)
+                              . '&app_id=58479&title=0&byline=0&portrait=0&autoplay=1';
+                          }
+                          ?>
+                          <li>
+                            <?php if ($isPreviewLesson && $previewSrc !== ''): ?>
+                              <button type="button"
+                                class="module-lesson-item module-lesson-preview-button"
+                                data-bs-toggle="modal"
+                                data-bs-target="#lessonPreviewModal"
+                                data-preview-title="<?= esc($lesson->title_lesson ?? 'Aula sem titulo', 'attr') ?>"
+                                data-preview-src="<?= esc($previewSrc, 'attr') ?>">
+                                <span class="lesson-main">
+                                  <i class="bi <?= esc($lessonIconClass) ?> lesson-icon"></i>
+                                  <span class="lesson-copy">
+                                    <span class="lesson-title"><?= esc($lesson->title_lesson ?? 'Aula sem titulo') ?></span>
+                                    <span class="lesson-meta"><?= esc($lessonMeta) ?></span>
+                                  </span>
+                                </span>
+                                <span class="lesson-status lesson-status-open">
+                                  <i class="bi bi-unlock-fill"></i>
+                                  <span class="lesson-status-text">Assistir</span>
+                                </span>
+                              </button>
+                            <?php else: ?>
+                              <a href="<?= base_url('/checkout/' . (int) $course->id_course) ?>"
+                                class="module-lesson-item module-lesson-link module-lesson-locked">
+                                <span class="lesson-main">
+                                  <i class="bi <?= esc($lessonIconClass) ?> lesson-icon"></i>
+                                  <span class="lesson-copy">
+                                    <span class="lesson-title"><?= esc($lesson->title_lesson ?? 'Aula sem titulo') ?></span>
+                                    <span class="lesson-meta"><?= esc($lessonMeta) ?></span>
+                                  </span>
+                                </span>
+                                <span class="lesson-status lesson-status-locked">
+                                  <i class="bi bi-lock-fill"></i>
+                                  <span class="lesson-status-text">Comprar acesso</span>
+                                </span>
+                              </a>
+                            <?php endif; ?>
+                          </li>
+                        <?php endforeach; ?>
+                      </ul>
+                    <?php else: ?>
+                      <p class="mb-0" style="color:var(--ink-soft)">
+                        <?= esc($module->description_module ?: 'Sem aulas adicionadas neste modulo.') ?>
+                      </p>
+                    <?php endif; ?>
+                  </div>
+                </div>
+              </div>
+            <?php endforeach; ?>
+          </div>
+        </div>
+
+        <aside class="purchase-aside">
+          <div class="purchase-card">
+            <p class="purchase-card__title"><?= esc($course->title_course) ?></p>
+
+            <div class="purchase-card__price-row">
+              <?php if (!empty($hasPromo)): ?>
+                <span class="purchase-card__list-price"><?= number_format((float) $listPrice, 2, ',', '.') ?> MZN</span>
+                <span class="purchase-card__badge">-<?= (int) $discountPercent ?>%</span>
+              <?php endif; ?>
+            </div>
+            <div class="purchase-card__price-row">
+              <span class="purchase-card__price"><?= number_format((float) ($effectivePrice ?? $course->price_course), 2, ',', '.') ?></span>
+              <span class="purchase-card__price-unit">MZN</span>
+            </div>
+            <?php if (!empty($hasPromo)): ?>
+              <?php if (!empty($promoRemainingSeconds) && (int) $promoRemainingSeconds > 0): ?>
+                <p class="purchase-card__promo-note">Oferta expira em <strong class="js-promo-inline-countdown" data-left="<?= (int) $promoRemainingSeconds ?>">--:--:--</strong></p>
+              <?php else: ?>
+                <p class="purchase-card__promo-note">Preço promocional por tempo limitado</p>
+              <?php endif; ?>
+            <?php endif; ?>
+
+            <p class="purchase-card__single">Pagamento único &middot; acesso vitalício</p>
+
+            <div class="purchase-card__actions">
+              <a href="<?= site_url('checkout/' . (int) $course->id_course) ?>" class="btn-mech btn-mech-primary btn-mech-block">
+                Inscrever-me agora
+              </a>
+              <?php if (!empty($freeLessonsCount)): ?>
+                <a href="<?= site_url('courses/' . (int) $course->id_course . '/trial') ?>" class="btn-mech btn-mech-outline btn-mech-block">
+                  Experimentar <?= (int) $freeLessonsCount ?> aula<?= $freeLessonsCount > 1 ? 's' : '' ?> grátis
+                </a>
+              <?php endif; ?>
+              <?php if (!empty($whatsappUrl)): ?>
+                <a href="<?= esc($whatsappUrl) ?>" target="_blank" rel="noopener" class="btn-mech btn-mech-outline btn-mech-block">
+                  <i class="bi bi-whatsapp"></i> Falar no WhatsApp
+                </a>
+              <?php endif; ?>
+            </div>
+
+            <?php if (!empty($ratingSummary['total'])): ?>
+              <p class="purchase-card__rating">
+                <span class="stars">★★★★★</span><?= number_format((float) $ratingSummary['average'], 1, ',', '.') ?> &middot; <?= (int) $ratingSummary['total'] ?> avaliações
+              </p>
+            <?php endif; ?>
+
+            <ul class="purchase-card__facts">
+              <li><i class="bi bi-infinity"></i> Acesso vitalício ao conteúdo</li>
+              <li><i class="bi bi-phone"></i> Estude no computador e no celular</li>
+              <li><i class="bi bi-mortarboard"></i> Certificado digital de conclusão</li>
             </ul>
           </div>
-        </div>
-
-        <!-- Card de compra -->
-        <div class="col-lg-4">
-          <div class="bg-white shadow rounded-3 p-4 text-center purchase-box-sticky">
-            <h4 class="title fw-bold text-primary mb-3"><?= esc($course->title_course) ?></h4>
-            <span class="title fw-bold display-6 mb-2"><?= number_format(esc($course->price_course), 2, ",", ".") ?></span><sub class="fw-bold">MZN</sub>
-            <p class="text-muted mb-4">Compra única</p>
-            <a href="<?= base_url('/checkout/' . $course->id_course) ?>" class="title btn btn-primary btn-lg fw-bold px-4">Compre Agora</a>
-          </div>
-        </div>
+        </aside>
       </div>
     </div>
   </section>
 
-  <section id="description" class="py-5 text-white bg-darkblue">
-    <div class="container text-center">
-      <h2 class="title fw-bold mb-4">Descrição do Curso</h2>
-      <?= $descriptionHtml ?>
-      <p class="fw-bold fs-5">Confira o currículo abaixo!</p>
-
-      <div class="bg-blue text-white rounded p-4 mt-5 mx-auto" style="max-width: 1000px;">
-        <p class="fs-5 mb-0">
-          <strong>BÔNUS:</strong> Os alunos que adquirirem este curso receberão documentação detalhada com
-          exemplos práticos, planilhas-modelo e exercícios organizados por módulo.
-          Você poderá baixar e consultar todos os materiais para revisar cada tema facilmente durante o curso.
-        </p>
-      </div>
+  <!-- MOBILE STICKY CTA -->
+  <div class="mobile-sticky-cta">
+    <div class="price">
+      <?= number_format((float) ($effectivePrice ?? $course->price_course), 2, ',', '.') ?> MZN
+      <?php if (!empty($hasPromo)): ?>
+        <small class="text-decoration-line-through"><?= number_format((float) $listPrice, 2, ',', '.') ?> MZN</small>
+      <?php endif; ?>
     </div>
-  </section>
+    <a href="<?= site_url('checkout/' . (int) $course->id_course) ?>" class="btn-mech btn-mech-primary btn-mech-sm">Comprar</a>
+  </div>
 
-  <section id="modules" class="bg-blue py-5">
-    <div class="container">
-      <p class="preview-helper">
-        <?php if ($publicPreviewLessonCount > 0): ?>
-          Aulas com cadeado aberto podem ser assistidas antes da compra.
-        <?php else: ?>
-          O currículo completo está listado abaixo. As aulas com prévia gratuita aparecerão com cadeado aberto.
-        <?php endif; ?>
-      </p>
-      <div class="accordion modules-accordion mx-auto" id="excelAccordion">
-
-        <?php foreach ($modules as $key => $module): ?>
-          <div class="accordion-item mb-3 bg-white border-0 shadow-sm p-2">
-            <p class="accordion-header fs-sm">
-              <button class="title accordion-button bg-white fw-semibold" type="button" data-bs-toggle="collapse"
-                data-bs-target="#mod<?= $module->id_module ?>">
-                <?= 'Modulo ' . ($key + 1) . ': ' . esc($module->title_module) ?>
-              </button>
-            </p>
-            <div id="mod<?= $module->id_module ?>" class="accordion-collapse collapse" data-bs-parent="#excelAccordion">
-              <div class="accordion-body bg-white">
-                <?php if (!empty($module->lessons)): ?>
-                  <ul class="list-unstyled mb-0">
-                    <?php foreach ($module->lessons as $lessonIndex => $lesson): ?>
-                      <?php
-                      $lessonType = trim((string) ($lesson->type_lesson ?? 'video'));
-                      $lessonIconClass = match ($lessonType) {
-                        'quiz' => 'bi-patch-question-fill',
-                        'exercise' => 'bi-journal-check',
-                        'text' => 'bi-file-earmark-text-fill',
-                        default => 'bi-play-circle-fill',
-                      };
-                      $isPreviewLesson = !empty($lesson->is_public_preview);
-                      $lessonDuration = (int) ($lesson->duration_lesson ?? 0);
-                      $lessonMeta = $isPreviewLesson ? 'Previa gratuita' : 'Conteudo bloqueado';
-                      if ($lessonDuration > 0) {
-                        $lessonMeta .= ' - ' . $lessonDuration . ' min';
-                      }
-                      $previewSrc = '';
-                      if ($isPreviewLesson && !empty($lesson->preview_video_id)) {
-                        $previewSrc = 'https://player.vimeo.com/video/' . rawurlencode((string) $lesson->preview_video_id)
-                          . '?badge=0&autopause=0&player_id=' . (int) ($lesson->id_lesson ?? 0)
-                          . '&app_id=58479&title=0&byline=0&portrait=0&autoplay=1';
-                      }
-                      ?>
-                      <li>
-                        <?php if ($isPreviewLesson && $previewSrc !== ''): ?>
-                          <button type="button"
-                            class="module-lesson-item module-lesson-preview-button my-2"
-                            data-bs-toggle="modal"
-                            data-bs-target="#lessonPreviewModal"
-                            data-preview-title="<?= esc($lesson->title_lesson ?? 'Aula sem titulo', 'attr') ?>"
-                            data-preview-src="<?= esc($previewSrc, 'attr') ?>">
-                            <span class="lesson-main">
-                              <i class="bi <?= esc($lessonIconClass) ?> lesson-icon"></i>
-                              <span class="lesson-copy">
-                                <span class="lesson-title"><?= esc($lesson->title_lesson ?? 'Aula sem titulo') ?></span>
-                                <span class="lesson-meta"><?= esc($lessonMeta) ?></span>
-                              </span>
-                            </span>
-                            <span class="lesson-status lesson-status-open">
-                              <i class="bi bi-unlock-fill"></i>
-                              <span class="lesson-status-text">Assistir</span>
-                            </span>
-                          </button>
-                        <?php else: ?>
-                          <a href="<?= base_url('/checkout/' . (int) $course->id_course) ?>"
-                            class="module-lesson-item module-lesson-link module-lesson-locked my-2">
-                            <span class="lesson-main">
-                              <i class="bi <?= esc($lessonIconClass) ?> lesson-icon"></i>
-                              <span class="lesson-copy">
-                                <span class="lesson-title"><?= esc($lesson->title_lesson ?? 'Aula sem titulo') ?></span>
-                                <span class="lesson-meta"><?= esc($lessonMeta) ?></span>
-                              </span>
-                            </span>
-                            <span class="lesson-status lesson-status-locked">
-                              <i class="bi bi-lock-fill"></i>
-                              <span class="lesson-status-text">Comprar acesso</span>
-                            </span>
-                          </a>
-                        <?php endif; ?>
-                      </li>
-                    <?php endforeach; ?>
-                  </ul>
-                <?php else: ?>
-                  <p class="mb-0 text-dark">
-                    <?= esc($module->description_module ?: 'Sem aulas adicionadas neste modulo.') ?>
-                  </p>
-                <?php endif; ?>
-              </div>
-            </div>
-          </div>
-        <?php endforeach ?>
-
-      </div>
-    </div>
-  </section>
-
+  <!-- LESSON PREVIEW MODAL -->
   <div class="modal fade" id="lessonPreviewModal" tabindex="-1" aria-labelledby="lessonPreviewModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
-      <div class="modal-content border-0 shadow-lg">
+      <div class="modal-content border-0 shadow-lg" style="font-family:'Sora',sans-serif;">
         <div class="modal-header">
           <div>
             <h5 class="modal-title fw-bold" id="lessonPreviewModalLabel">Pre-visualizacao da aula</h5>
@@ -921,80 +1465,23 @@ unset($moduleItem);
     </div>
   </div>
 
-  <section id="projects" class="text-center text-white">
-    <div class="bg-darkblue pt-5 pb-2">
-      <h2 class="title fw-bold mb-2">Projetos de Curso</h2>
-      <p class="fs-5 mb-5">Vamos dar uma olhada em alguns dos projetos práticos desenvolvidos durante o curso
-      </p>
-    </div>
-
-    <div class="py-5" style="background: #eee;">
-      <div class="container pb-3">
-        <div class="row g-4">
-
-          <?php if (!empty($projects)): ?>
-            <?php foreach ($projects as $key => $project): ?>
-              <div class="col-md-4">
-                <div class="bg-white text-dark px-4 py-4 rounded h-100">
-                  <img src="<?= base_url('assets/img/' . $project->img_project) ?>" alt="<?= esc($project->title_project) ?>" class="img-fluid rounded mb-3">
-                  <h5 class="fw-bold fs-4"><?= esc($project->title_project) ?></h5>
-                  <p class="mb-0 text-muted">
-                    <?= esc($project->description_project) ?>
-                  </p>
-                </div>
-              </div>
-            <?php endforeach ?>
-          <?php else: ?>
-            <div class="col-md-4 mx-auto">
-              <div class="bg-white text-dark px-4 py-4 rounded h-100">
-                <h5 class="fw-bold fs-4">Sem projetos</h5>
-                <p class="mb-0 text-muted">
-                  Nao foram adicionados projectos a este curso.
-                </p>
-              </div>
-            </div>
-          <?php endif; ?>
-
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <footer class="py-3 text-white" style="background-color:#111827;">
-    <div
-      class="container d-flex flex-column flex-md-row justify-content-between align-items-center text-center text-md-start">
-
-      <!-- Logotipo circular -->
-      <div class="mb-3 mb-md-0">
-        <div class="" style="width:150px; height:auto;">
-          <a href="">
-            <img src="<?= base_url('assets/img/logo.png') ?>" class="img-fluid h-auto" width="100%" alt="">
-          </a>
-        </div>
-      </div>
-
-      <!-- Texto central -->
-      <div class="mb-3 mb-md-0">
-        <small>© 2025 Mechanical Academy. Todos os direitos reservados</small>
-      </div>
-
-      <!-- Ícones sociais -->
-      <div>
-        <a href="#" class="text-white me-3"><i class="bi bi-twitter-x"></i></a>
-        <a href="#" class="text-white me-3"><i class="bi bi-instagram"></i></a>
-        <a href="#" class="text-white me-3"><i class="bi bi-youtube"></i></a>
-        <a href="#" class="text-white me-3"><i class="bi bi-github"></i></a>
-        <a href="#" class="text-white"><i class="bi bi-linkedin"></i></a>
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="container-mech site-footer__row">
+      <a href="<?= base_url('/') ?>">
+        <img src="<?= base_url('assets/img/logo.png') ?>" alt="Mechanical Academy">
+      </a>
+      <small>&copy; <?= date('Y') ?> Mechanical Academy. Todos os direitos reservados.</small>
+      <div class="site-footer__social">
+        <a href="#" aria-label="X"><i class="bi bi-twitter-x"></i></a>
+        <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+        <a href="https://www.youtube.com/@MechanicalTecnologia" target="_blank" rel="noopener noreferrer" aria-label="Youtube"><i class="bi bi-youtube"></i></a>
+        <a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
       </div>
     </div>
   </footer>
 
-
-
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
-    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
     const lessonPreviewModalEl = document.getElementById('lessonPreviewModal');
@@ -1016,167 +1503,29 @@ unset($moduleItem);
       });
     }
 
-  </script>
-
-  <script>
-    /**
-     * PRELOADER com percentagem em:
-     *  - #preloaderFill   (largura da barra)
-     *  - #preloaderPct    (texto 0–100)
-     *
-     * Mantém:
-     *  - MIN_PRELOAD_TIME (mínimo visível)
-     *  - Esconde após window.load respeitando o mínimo
-     *  - Fallback de segurança (MIN + 1000)
-     */
-    function initPreloader() {
-      const MIN_PRELOAD_TIME = 2000; // 2s mínimo
-      const startTime = Date.now();
-
-      const preloader = document.getElementById('preloader');
-      const fillEl = document.getElementById('preloaderFill');
-      const pctEl = document.getElementById('preloaderPct');
-      if (!preloader || !fillEl || !pctEl) return;
-
-      // (opcional) bloquear rolagem enquanto o preloader está visível
-      const lockScroll = () => {
-        document.documentElement.style.overflow = 'hidden';
-      };
-      const unlockScroll = () => {
-        document.documentElement.style.overflow = '';
-      };
-      lockScroll();
-
-      // ---- Medição de progresso (realista) ----
-      const WEIGHTS = {
-        dom: 20,
-        fonts: 10,
-        images: 60,
-        load: 10
-      };
-      let target = 0; // alvo calculado pelos eventos
-      let current = 0; // valor exibido (animação)
-      let rafId = 0;
-      let doneFlag = false;
-
-      const clamp = () => {
-        if (target < 0) target = 0;
-        if (target > 100) target = 100;
-      };
-      const render = () => {
-        const pct = Math.round(current);
-        fillEl.style.width = pct + '%';
-        pctEl.textContent = pct;
-      };
-      const tick = () => {
-        // easing suave em direção ao alvo
-        current += (target - current) * 0.12;
-        render();
-        if (!doneFlag) rafId = requestAnimationFrame(tick);
-      };
-
-      // 1) DOM pronto
-      const bumpDom = () => {
-        target += WEIGHTS.dom;
-        clamp();
-      };
-      if (document.readyState === 'interactive' || document.readyState === 'complete') bumpDom();
-      else document.addEventListener('DOMContentLoaded', bumpDom, {
-        once: true
-      });
-
-      // 2) Fontes
-      if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(() => {
-          target += WEIGHTS.fonts;
-          clamp();
-        }).catch(() => {
-          target += Math.floor(WEIGHTS.fonts * 0.6);
-          clamp();
-        });
+    (function () {
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!reduce && 'IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-in');
+              io.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+        document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
       } else {
-        target += Math.floor(WEIGHTS.fonts * 0.6);
-        clamp();
+        document.querySelectorAll('.reveal').forEach((el) => el.classList.add('is-in'));
       }
 
-      // 3) Imagens (<img> do DOM)
-      const imgs = Array.from(document.images || []);
-      const total = imgs.length;
-      let loaded = 0;
-      const onImgDone = () => {
-        loaded++;
-        const frac = total ? loaded / total : 1;
-        const imgProgress = WEIGHTS.images * frac;
-        const base = Math.min(target, WEIGHTS.dom + WEIGHTS.fonts);
-        target = base + imgProgress;
-        clamp();
-      };
-      if (total === 0) {
-        target += WEIGHTS.images;
-        clamp();
-      } else {
-        imgs.forEach(img => {
-          if (img.complete) onImgDone();
-          else {
-            img.addEventListener('load', onImgDone, {
-              once: true
-            });
-            img.addEventListener('error', onImgDone, {
-              once: true
-            });
-          }
-        });
+      const nav = document.querySelector('.site-nav');
+      if (nav) {
+        const onScroll = () => nav.classList.toggle('is-scrolled', window.scrollY > 12);
+        onScroll();
+        window.addEventListener('scroll', onScroll, { passive: true });
       }
-
-      // 4) load = fecha a conta (vamos a 100, mas respeitando o mínimo)
-      function hidePreloader() {
-        if (doneFlag) return;
-        doneFlag = true;
-
-        target = 100;
-        current = 100;
-        render(); // garante 100% visual
-
-        preloader.style.opacity = '0';
-        preloader.addEventListener('transitionend', () => {
-          preloader.style.display = 'none';
-          unlockScroll();
-        }, {
-          once: true
-        });
-
-        if (rafId) cancelAnimationFrame(rafId);
-      }
-
-      // fallback: força esconder após MIN + 1000 (se algo travar)
-      const forceHideTimeout = setTimeout(hidePreloader, MIN_PRELOAD_TIME + 1000);
-
-      window.addEventListener('load', () => {
-        // soma o peso do load para o indicador
-        target += WEIGHTS.load;
-        clamp();
-
-        const elapsed = Date.now() - startTime;
-        const remainingTime = Math.max(0, MIN_PRELOAD_TIME - elapsed);
-
-        clearTimeout(forceHideTimeout);
-        setTimeout(hidePreloader, remainingTime);
-      }, {
-        once: true
-      });
-
-      // inicia a animação do indicador
-      rafId = requestAnimationFrame(tick);
-    }
-
-    // iniciar quando o DOM estiver pronto
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initPreloader, {
-        once: true
-      });
-    } else {
-      initPreloader();
-    }
+    })();
   </script>
 </body>
 

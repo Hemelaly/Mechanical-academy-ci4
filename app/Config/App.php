@@ -22,13 +22,20 @@ class App extends BaseConfig
     {
         parent::__construct();
 
-        // In dev environments (like Laragon), the hostname/port can change.
+        // In dev environments (like Laragon), hostname/port/subdir can change.
         // Build the base URL dynamically when running under HTTP.
         if (PHP_SAPI !== 'cli' && isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] !== '') {
-            $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-            $host = (string) $_SERVER['HTTP_HOST'];
-            $host = preg_replace('/[\\s\\x00-\\x1F\\x7F]+/', '', $host) ?: $host;
-            $this->baseURL = rtrim($scheme . '://' . $host, '/') . '/';
+            $scheme = (! empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+            $host   = (string) $_SERVER['HTTP_HOST'];
+            $host   = preg_replace('/[\s\x00-\x1F\x7F]+/', '', $host) ?: $host;
+
+            $scriptName = str_replace('\\', '/', (string) ($_SERVER['SCRIPT_NAME'] ?? ''));
+            $basePath  = rtrim(str_replace('\\', '/', dirname($scriptName)), '/');
+            if ($basePath === '/' || $basePath === '.' || $basePath === '\\') {
+                $basePath = '';
+            }
+
+            $this->baseURL = $scheme . '://' . $host . $basePath . '/';
         }
     }
 

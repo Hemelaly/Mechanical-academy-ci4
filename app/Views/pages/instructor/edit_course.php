@@ -462,8 +462,13 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
                                 </div>
                                 <div>
                                     <h3 class="text-2xl font-bold text-slate-800 dark:text-white">Estrutura do Conteúdo</h3>
-                                    <p class="text-slate-600 dark:text-slate-400 text-sm">Organize seu curso em módulos e aulas</p>
+                                    <p class="text-slate-600 dark:text-slate-400 text-sm">Organize por módulos (ex.: “Mês 1”, “Mês 2”). Em cada aula pode anexar PDF/ZIP e marcar preview.</p>
                                 </div>
+                            </div>
+                            <div class="mt-3 text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 rounded-xl p-3">
+                                Dica: use títulos como <strong>Mês 1 — Fundamentos</strong> para organizar o calendário.
+                                Em quizzes, use o importador HTML com <code>data-q</code>, <code>data-points</code> e <code>li[data-correct]</code>.
+                                Ficheiros da aula ficam em <code>assets/instructor/lesson_files/</code> e aparecem no player do aluno.
                             </div>
                         </div>
 
@@ -618,11 +623,18 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
                                                         <div class="quiz-questions space-y-2">
                                                             <?php foreach ($quizQuestions as $qIndex => $question): ?>
                                                                 <div class="quiz-question grid grid-cols-1 md:grid-cols-2 gap-2 items-center">
+                                                                    <div class="space-y-2">
                                                                     <input type="text"
                                                                         name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][quiz][<?= $qIndex ?>][question]"
-                                                                        class="px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                                                        class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
                                                                         placeholder="Pergunta"
                                                                         value="<?= esc($question['question'] ?? '') ?>">
+                                                                    <input type="number" min="0.5" step="0.5"
+                                                                        name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][quiz][<?= $qIndex ?>][points]"
+                                                                        class="w-28 px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-xs"
+                                                                        placeholder="Pontos"
+                                                                        value="<?= esc($question['points'] ?? 1) ?>">
+                                                                    </div>
                                                                     <div class="flex flex-col gap-2">
                                                                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                                                             <?php for ($opt = 0; $opt < 4; $opt++): ?>
@@ -652,6 +664,14 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
                                                                 </div>
                                                             <?php endforeach; ?>
                                                         </div>
+                                                        <details class="mt-3 bg-white/70 dark:bg-slate-800/70 rounded-lg p-3">
+                                                            <summary class="text-xs font-semibold cursor-pointer text-slate-700 dark:text-slate-200">Importar quiz por HTML</summary>
+                                                            <p class="text-[11px] text-slate-500 mt-2 mb-2">
+                                                                Cole HTML com <code>data-q</code>, opções em <code>li</code> e marque a correta com <code>data-correct</code>. Pontuação: <code>data-points="2"</code>.
+                                                            </p>
+                                                            <textarea class="quiz-html-import w-full text-[11px] px-2 py-2 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900" rows="5" placeholder='<div data-q data-points="2"><p>Pergunta?</p><ul><li data-correct>Certa</li><li>Errada</li><li>Errada</li><li>Errada</li></ul></div>'></textarea>
+                                                            <button type="button" class="btn-import-quiz-html mt-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] rounded-lg">Importar HTML</button>
+                                                        </details>
                                                     </div>
                                                 </div>
                                             <?php endforeach; ?>
@@ -707,13 +727,124 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
                                     </div>
                                 </div>
 
-                                <div id="price-settings" class="space-y-2 <?= $course->price_course > 0 ? '' : 'hidden' ?>">
+                                <div id="price-settings" class="space-y-4 <?= $course->price_course > 0 ? '' : 'hidden' ?>">
+                                    <div class="rounded-2xl border border-blue-200 dark:border-blue-900/50 bg-blue-50/70 dark:bg-blue-950/30 p-4 space-y-4">
+                                        <div class="flex items-start gap-3">
+                                            <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shrink-0">
+                                                <i class="bi bi-tags text-white text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="text-sm font-bold text-slate-800 dark:text-white">Preço e promoção</h4>
+                                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Defina o preço normal, o desconto e até quando a oferta é válida. A contagem regressiva aparece na home, na página do curso e no checkout.</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div class="space-y-2">
+                                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                                    Preço normal (MZN)
+                                                </label>
+                                                <input type="number" id="coursePrice" name="price_course" min="0" step="0.01"
+                                                    value="<?= esc($course->price_course) ?>"
+                                                    class="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm">
+                                            </div>
+                                            <div class="space-y-2">
+                                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                                    Preço promocional (opcional)
+                                                </label>
+                                                <input type="number" id="coursePromoPrice" name="promo_price_course" min="0" step="0.01"
+                                                    value="<?= esc($course->promo_price_course ?? '') ?>"
+                                                    placeholder="Ex.: menor que o preço normal"
+                                                    class="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm">
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div class="space-y-2">
+                                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                                    Promoção válida até
+                                                </label>
+                                                <input type="datetime-local" name="promo_ends_at_course" id="coursePromoEndsAt"
+                                                    value="<?= !empty($course->promo_ends_at_course) ? esc(date('Y-m-d\TH:i', strtotime((string) $course->promo_ends_at_course))) : '' ?>"
+                                                    class="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm">
+                                                <p class="text-xs text-slate-500">Sem data = promoção sem contagem regressiva.</p>
+                                            </div>
+                                            <div class="space-y-2">
+                                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                                    Pré-visualização
+                                                </label>
+                                                <?php
+                                                $editPromoLeft = 0;
+                                                if (! empty($course->promo_price_course) && ! empty($course->promo_ends_at_course)) {
+                                                    $editPromoLeft = max(0, strtotime((string) $course->promo_ends_at_course) - time());
+                                                }
+                                                ?>
+                                                <div id="promoPreviewBox" class="px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-dashed border-blue-300 dark:border-blue-800 text-sm text-slate-600 dark:text-slate-300 min-h-[52px] flex items-center">
+                                                    <?php if ($editPromoLeft > 0): ?>
+                                                        <span><i class="bi bi-hourglass-split text-blue-600 me-1"></i> Oferta activa · termina em <strong class="js-instructor-promo-preview" data-left="<?= (int) $editPromoLeft ?>">--:--:--</strong></span>
+                                                    <?php else: ?>
+                                                        <span class="text-slate-400">Preencha preço promo + data para ver o timer.</span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="space-y-2">
+                                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                                Aulas grátis antes do pagamento
+                                            </label>
+                                            <input type="number" name="free_lessons_count_course" min="0" step="1"
+                                                value="<?= esc((int) ($course->free_lessons_count_course ?? 0)) ?>"
+                                                class="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm">
+                                            <p class="text-xs text-slate-500">Ex.: 3 = o aluno pode ver as 3 primeiras aulas; depois o sistema pede pagamento.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-3 pt-2 border-t border-slate-200 dark:border-slate-700">
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Carga horária</label>
+                                    <div class="flex flex-wrap gap-4">
+                                        <label class="inline-flex items-center">
+                                            <input type="radio" name="hours_mode_course" value="auto" class="text-blue-500"
+                                                <?= (($course->hours_mode_course ?? 'auto') !== 'manual') ? 'checked' : '' ?>>
+                                            <span class="ml-2 text-sm text-slate-700 dark:text-slate-300">Automática (soma das aulas)</span>
+                                        </label>
+                                        <label class="inline-flex items-center">
+                                            <input type="radio" name="hours_mode_course" value="manual" class="text-blue-500"
+                                                <?= (($course->hours_mode_course ?? '') === 'manual') ? 'checked' : '' ?>>
+                                            <span class="ml-2 text-sm text-slate-700 dark:text-slate-300">Manual</span>
+                                        </label>
+                                    </div>
+                                    <?php
+                                    $hoursModeUi = (string) ($course->hours_mode_course ?? 'auto');
+                                    $hoursManualRaw = $course->hours_manual_course ?? null;
+                                    $hoursCourseRaw = $course->hours_course ?? null;
+                                    $isManualHoursUi = $hoursModeUi === 'manual' || (int) $hoursManualRaw === 1;
+                                    if ($hoursCourseRaw !== null && $hoursCourseRaw !== '') {
+                                        $hoursInputValue = $hoursCourseRaw;
+                                    } elseif ($isManualHoursUi && $hoursManualRaw !== null && (float) $hoursManualRaw > 1) {
+                                        $hoursInputValue = $hoursManualRaw;
+                                    } elseif ($hoursModeUi === 'manual' && $hoursManualRaw !== null && $hoursManualRaw !== '' && (int) $hoursManualRaw !== 1) {
+                                        $hoursInputValue = $hoursManualRaw;
+                                    } else {
+                                        $hoursInputValue = '';
+                                    }
+                                    ?>
+                                    <input type="number" name="hours_manual_course" min="0" step="0.5"
+                                        value="<?= esc($hoursInputValue) ?>"
+                                        placeholder="Ex.: 40"
+                                        class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white text-sm">
+                                    <p class="text-xs text-slate-500">Usado no certificado e na página do curso quando o modo for Manual.</p>
+                                </div>
+
+                                <div class="space-y-2">
                                     <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                                        Preço do Curso
+                                        WhatsApp comercial (opcional)
                                     </label>
-                                    <input type="number" id="coursePrice" name="price_course" min="0" step="0.01"
-                                        value="<?= esc($course->price_course) ?>"
-                                        class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm">
+                                    <input type="text" name="whatsapp_contact_course"
+                                        value="<?= esc($course->whatsapp_contact_course ?? $course->whatsapp_course ?? '258842627671') ?>"
+                                        placeholder="258842627671"
+                                        class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white text-sm">
                                 </div>
 
                                 <div class="space-y-2">
@@ -1529,10 +1660,16 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
 
             const questionHtml = `
                 <div class="quiz-question grid grid-cols-1 md:grid-cols-2 gap-2 items-center">
+                    <div class="space-y-2">
                     <input type="text"
                            name="modules[${moduleId}][lessons][${lessonIndex}][quiz][${index}][question]"
-                           class="px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                           class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
                            placeholder="Pergunta">
+                    <input type="number" min="0.5" step="0.5"
+                           name="modules[${moduleId}][lessons][${lessonIndex}][quiz][${index}][points]"
+                           class="w-28 px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-xs"
+                           placeholder="Pontos" value="1">
+                    </div>
                     <div class="flex flex-col gap-2">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             ${[0,1,2,3].map(opt => `
@@ -1560,6 +1697,50 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
             `;
 
             questionsContainer.insertAdjacentHTML("beforeend", questionHtml);
+        }
+
+        function importQuizHtml(lessonEl) {
+            const textarea = lessonEl.querySelector(".quiz-html-import");
+            const html = textarea?.value?.trim() || "";
+            if (!html) {
+                alert("Cole o HTML do quiz primeiro.");
+                return;
+            }
+            const wrap = document.createElement("div");
+            wrap.innerHTML = html;
+            const blocks = wrap.querySelectorAll("[data-q], .quiz-question-html, question");
+            const sources = blocks.length ? blocks : wrap.querySelectorAll("div");
+            let imported = 0;
+            sources.forEach((block) => {
+                const questionText = (block.querySelector("p, .question, h4, h5")?.textContent || block.getAttribute("data-question") || "").trim();
+                const lis = Array.from(block.querySelectorAll("li"));
+                if (!questionText || lis.length < 2) return;
+                addQuizQuestion(lessonEl);
+                const questions = lessonEl.querySelectorAll(".quiz-question");
+                const last = questions[questions.length - 1];
+                if (!last) return;
+                last.querySelector('input[name*="[question]"]').value = questionText;
+                const points = parseFloat(block.getAttribute("data-points") || block.getAttribute("points") || "1") || 1;
+                const pointsInput = last.querySelector('input[name*="[points]"]');
+                if (pointsInput) pointsInput.value = points;
+                let correct = 0;
+                lis.slice(0, 4).forEach((li, idx) => {
+                    const optInput = last.querySelector(`input[name*="[options][${idx}]"]`);
+                    if (optInput) optInput.value = (li.textContent || "").trim();
+                    if (li.hasAttribute("data-correct") || li.classList.contains("correct") || li.getAttribute("data-answer") === "1") {
+                        correct = idx;
+                    }
+                });
+                const select = last.querySelector('select[name*="[correct]"]');
+                if (select) select.value = String(correct);
+                imported++;
+            });
+            if (!imported) {
+                alert("Nenhuma pergunta válida encontrada. Use data-q + li[data-correct].");
+                return;
+            }
+            if (textarea) textarea.value = "";
+            alert(imported + " pergunta(s) importada(s).");
         }
 
         function addModule(moduleData = null) {
@@ -1737,6 +1918,11 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
             if (e.target.closest(".btn-add-quiz-question")) {
                 const lessonEl = e.target.closest(".lesson-item");
                 addQuizQuestion(lessonEl);
+                scheduleAutoSave();
+            }
+            if (e.target.closest(".btn-import-quiz-html")) {
+                const lessonEl = e.target.closest(".lesson-item");
+                importQuizHtml(lessonEl);
                 scheduleAutoSave();
             }
             // Remove quiz question
@@ -2346,6 +2532,29 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
         renderPreviewModules();
         renderPreviewProjects();
     }
+</script>
+<script>
+(function () {
+  const el = document.querySelector('.js-instructor-promo-preview');
+  if (!el) return;
+  let left = parseInt(el.getAttribute('data-left') || '0', 10);
+  const pad = (n) => String(n).padStart(2, '0');
+  const fmt = (secs) => {
+    const d = Math.floor(secs / 86400);
+    const h = Math.floor((secs % 86400) / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    const s = secs % 60;
+    if (d > 0) return d + 'd ' + pad(h) + ':' + pad(m) + ':' + pad(s);
+    return pad(h) + ':' + pad(m) + ':' + pad(s);
+  };
+  const tick = () => {
+    el.textContent = fmt(Math.max(0, left));
+    if (left <= 0) return;
+    left -= 1;
+    setTimeout(tick, 1000);
+  };
+  tick();
+})();
 </script>
 
 <?= $this->endSection() ?>

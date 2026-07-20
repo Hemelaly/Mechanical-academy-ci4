@@ -177,26 +177,72 @@ $nextModuleUrl = !empty($nextModuleLessonId)
 <?php
 $enrollmentStatus = strtolower((string) ($enrollment->status_enrollment ?? ''));
 $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada');
+$paywallRequired = (bool) ($paywallRequired ?? false);
+$freeLessonsAllowed = (int) ($freeLessonsAllowed ?? 0);
+$isDemoAccess = (bool) ($isDemoAccess ?? false);
+$demoRemainingSeconds = (int) ($demoRemainingSeconds ?? 0);
+$demoExpired = $isDemoAccess && $paywallRequired && $accessBlocked;
+$checkoutUrl = (string) ($checkoutUrl ?? site_url('checkout/' . (int) ($course->id_course ?? 0)));
+$whatsappUrl = (string) ($whatsappUrl ?? '#');
 ?>
 <div class="min-w-0 text-gray-900 dark:text-gray-100 transition-colors duration-300 <?= ($accessBlocked || (bool) session('blocked_access')) ? 'blocked-access' : '' ?>">
     <div class="container mx-auto" data-enrollment-id="<?= (int)($enrollment->id_enrollment) ?>" data-enrollment-status="<?= esc($enrollmentStatus) ?>">
 
+        <?php if (! $accessBlocked && $isDemoAccess && $demoRemainingSeconds > 0): ?>
+            <div class="mb-4 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-200 flex flex-wrap items-center justify-between gap-2">
+                <span><i class="bi bi-clock-history me-1"></i> Acesso demo — expira em <strong id="demoCountdown"><?= esc(gmdate('H:i:s', $demoRemainingSeconds)) ?></strong></span>
+                <a href="<?= esc($checkoutUrl) ?>" class="font-semibold underline">Comprar acesso completo</a>
+            </div>
+            <script>
+                (function () {
+                    let left = <?= (int) $demoRemainingSeconds ?>;
+                    const el = document.getElementById('demoCountdown');
+                    if (!el) return;
+                    const tick = () => {
+                        if (left <= 0) { window.location.reload(); return; }
+                        const h = String(Math.floor(left / 3600)).padStart(2, '0');
+                        const m = String(Math.floor((left % 3600) / 60)).padStart(2, '0');
+                        const s = String(left % 60).padStart(2, '0');
+                        el.textContent = h + ':' + m + ':' + s;
+                        left -= 1;
+                    };
+                    tick();
+                    setInterval(tick, 1000);
+                })();
+            </script>
+        <?php endif; ?>
+
         <?php if ($accessBlocked || (bool) session('blocked_access')) : ?>
-            <div id="blockedAccessModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+            <div id="blockedAccessModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md mx-4 shadow-xl">
                     <div class="text-center">
-                        <div class="w-16 h-16 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i class="bi bi-lock-fill text-2xl text-red-600 dark:text-red-400"></i>
+                        <div class="w-16 h-16 <?= $paywallRequired ? 'bg-amber-100 dark:bg-amber-900' : 'bg-red-100 dark:bg-red-900' ?> rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="bi <?= $paywallRequired ? 'bi-credit-card' : 'bi-lock-fill' ?> text-2xl <?= $paywallRequired ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400' ?>"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Acesso bloqueado</h3>
-                        <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm">
-                            Você foi bloqueado pelo instrutor do curso. Entre em contato com o instrutor para mais detalhes.
-                        </p>
-                        <div class="flex justify-center">
-                            <button id="blockedOkBtn" type="button" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm" onclick="window.location.href=document.referrer || '<?= site_url('student/dashboard/meus_cursos') ?>'">
-                                OK
-                            </button>
-                        </div>
+                        <?php if ($paywallRequired): ?>
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2"><?= !empty($demoExpired) ? 'Acesso demo expirado' : 'Aulas de teste concluídas' ?></h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+                                <?php if (!empty($demoExpired)): ?>
+                                    O seu acesso demo de 2 horas terminou. Conclua o pagamento para continuar ou fale com a equipa comercial.
+                                <?php else: ?>
+                                    Já utilizou as <?= $freeLessonsAllowed ?> aulas grátis. Conclua o pagamento para continuar ou fale com a equipa comercial.
+                                <?php endif; ?>
+                            </p>
+                            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                                <a href="<?= esc($checkoutUrl) ?>" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm">Pagar agora</a>
+                                <a href="<?= esc($whatsappUrl) ?>" target="_blank" rel="noopener" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm">WhatsApp</a>
+                            </div>
+                        <?php else: ?>
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Acesso bloqueado</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+                                Você foi bloqueado pelo instrutor do curso. Entre em contato com o instrutor para mais detalhes.
+                            </p>
+                            <div class="flex justify-center">
+                                <button id="blockedOkBtn" type="button" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm">
+                                    OK
+                                </button>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -214,7 +260,7 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
                 };
                 blockedBtn?.addEventListener('click', goBack);
                 blockedModal?.addEventListener('click', (e) => {
-                    if (e.target === blockedModal) goBack();
+                    if (e.target === blockedModal && !<?= $paywallRequired ? 'true' : 'false' ?>) goBack();
                 });
             </script>
         <?php endif; ?>
@@ -394,6 +440,59 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
                                     <?= esc($lesson->attachment_name_lesson ?? 'Baixar anexo') ?>
                                 </a>
                             </div>
+                        <?php endif; ?>
+
+                        <?php if (!$previewMode && !$accessBlocked && strtolower((string) ($enrollment->status_enrollment ?? '')) === 'ativa'): ?>
+                            <div class="mt-6 p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
+                                <h4 class="text-sm font-semibold text-slate-800 dark:text-white mb-2">Avaliar este curso</h4>
+                                <div class="flex flex-wrap gap-2 mb-2" id="course-rating-stars">
+                                    <?php for ($s = 1; $s <= 5; $s++): ?>
+                                        <button type="button" data-score="<?= $s ?>" class="rating-star px-2 py-1 text-lg text-amber-400 hover:scale-110 transition">★</button>
+                                    <?php endfor; ?>
+                                </div>
+                                <textarea id="course-rating-comment" rows="2" class="w-full text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 mb-2" placeholder="Comentário opcional"></textarea>
+                                <button type="button" id="course-rating-submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg">Enviar avaliação</button>
+                                <p id="course-rating-msg" class="text-xs text-slate-500 mt-2"></p>
+                            </div>
+                            <script>
+                                (function() {
+                                    let selectedScore = 0;
+                                    const stars = document.querySelectorAll('#course-rating-stars .rating-star');
+                                    stars.forEach((btn) => {
+                                        btn.addEventListener('click', () => {
+                                            selectedScore = Number(btn.dataset.score || 0);
+                                            stars.forEach((s, idx) => {
+                                                s.classList.toggle('opacity-40', idx >= selectedScore);
+                                            });
+                                        });
+                                    });
+                                    document.getElementById('course-rating-submit')?.addEventListener('click', async () => {
+                                        const msg = document.getElementById('course-rating-msg');
+                                        if (selectedScore < 1) {
+                                            msg.textContent = 'Escolha de 1 a 5 estrelas.';
+                                            return;
+                                        }
+                                        try {
+                                            const res = await fetch('<?= site_url('student/courses/' . (int) $course->id_course . '/rate') ?>', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    'X-Requested-With': 'XMLHttpRequest',
+                                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '<?= csrf_hash() ?>'
+                                                },
+                                                body: JSON.stringify({
+                                                    score: selectedScore,
+                                                    comment: document.getElementById('course-rating-comment')?.value || ''
+                                                })
+                                            });
+                                            const data = await res.json();
+                                            msg.textContent = data.message || (data.ok ? 'Avaliação guardada.' : 'Não foi possível guardar.');
+                                        } catch (e) {
+                                            msg.textContent = 'Erro de rede ao enviar avaliação.';
+                                        }
+                                    });
+                                })();
+                            </script>
                         <?php endif; ?>
                     </div>
 
@@ -1197,13 +1296,18 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
         const total = quizQuestionsData.length;
         const wrongAnswers = [];
         let correct = 0;
+        let earnedPoints = 0;
+        let totalPoints = 0;
 
         quizQuestionsData.forEach((question, idx) => {
             const selected = quizSelections[idx];
+            const points = Math.max(0.5, parseFloat(question.points ?? question.score ?? 1) || 1);
+            totalPoints += points;
             if (selected === null) return;
             const correctIndex = parseInt(question.correct ?? 0, 10);
             if (parseInt(selected, 10) === correctIndex) {
                 correct++;
+                earnedPoints += points;
                 return;
             }
             wrongAnswers.push({
@@ -1213,7 +1317,7 @@ $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada'
             });
         });
 
-        const score = Math.round((correct / total) * 100);
+        const score = totalPoints > 0 ? Math.round((earnedPoints / totalPoints) * 100) : Math.round((correct / total) * 100);
         const data = await submitQuizScore(score);
         if (!data) return;
 

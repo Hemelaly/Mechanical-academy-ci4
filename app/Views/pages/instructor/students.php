@@ -130,8 +130,8 @@
     <div class="w-full max-w-xl rounded-2xl bg-white shadow-xl dark:bg-slate-800">
         <div class="flex items-center justify-between border-b border-slate-200 p-4 dark:border-slate-700">
             <div>
-                <h4 class="text-sm font-semibold text-slate-800 dark:text-white">MatrÃ­cula manual</h4>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Esta matrÃ­cula nÃ£o gera pagamento e nÃ£o entra no financeiro.</p>
+                <h4 class="text-sm font-semibold text-slate-800 dark:text-white">Matrícula / acesso demo</h4>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Matrícula completa não gera pagamento. Demo (2h) é acesso não pago que começa ao entrar nas aulas.</p>
             </div>
             <button type="button" id="manualEnrollClose" class="text-slate-500 hover:text-slate-700 dark:text-slate-300">
                 <i class="bi bi-x-lg"></i>
@@ -150,13 +150,14 @@
                     class="mt-1 block w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
                     <option value="" selected disabled>Selecione...</option>
                     <?php foreach (($courses ?? []) as $course): ?>
-                        <option value="<?= (int) ($course['id_course'] ?? 0) ?>"><?= esc($course['title_course'] ?? '') ?></option>
+                        <option value="<?= (int) ($course['id_course'] ?? 0) ?>" data-price="<?= (float) ($course['price_course'] ?? $course['price'] ?? 0) ?>"><?= esc($course['title_course'] ?? '') ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="flex justify-end gap-2 pt-1">
+            <div class="flex flex-wrap justify-end gap-2 pt-1">
                 <button type="button" id="manualEnrollCancel" class="rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-700">Cancelar</button>
-                <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Matricular</button>
+                <button type="button" id="grantDemoBtn" class="rounded-lg border border-amber-500 px-4 py-2 text-sm font-medium text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/30">Acesso demo (2h)</button>
+                <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Matricular completo</button>
             </div>
         </form>
     </div>
@@ -184,6 +185,7 @@
         const toggleEndpointBase = <?= json_encode(site_url('instructor/dashboard/meus_estudantes/toggle')) ?>;
         const approveBase = <?= json_encode(site_url('instructor/dashboard/meus_estudantes')) ?>;
         const manualEnrollEndpoint = <?= json_encode(site_url('instructor/dashboard/meus_estudantes/matricular')) ?>;
+        const demoEndpoint = <?= json_encode(site_url('instructor/dashboard/meus_estudantes/demo')) ?>;
         const csrfName = <?= json_encode(csrf_token()) ?>;
         let csrfHash = <?= json_encode(csrf_hash()) ?>;
 
@@ -194,6 +196,7 @@
         const manualEnrollForm = document.getElementById('manualEnrollForm');
         const manualEnrollStudent = document.getElementById('manualEnrollStudent');
         const manualEnrollCourse = document.getElementById('manualEnrollCourse');
+        const grantDemoBtn = document.getElementById('grantDemoBtn');
 
         const enrollTable = document.getElementById('instructor-enrollments-table');
         const getEnrollBody = () => enrollTable?.querySelector('tbody');
@@ -252,13 +255,26 @@
             return date.toLocaleDateString('pt-BR');
         };
 
-        const statusBadge = (status) => {
-            const normalized = (status || '').toString().toLowerCase();
-            const isActive = normalized === 'ativa';
+        const statusBadge = (item) => {
+            const status = (item.status_enrollment || '').toString().toLowerCase();
+            const isDemo = Number(item.is_demo_enrollment || 0) === 1;
+            if (isDemo) {
+                const expired = item.demo_expires_at && (new Date(item.demo_expires_at).getTime() <= Date.now());
+                const started = !!item.demo_started_at;
+                const label = expired ? 'Demo expirada' : (started ? 'Demo ativa' : 'Demo (aguarda acesso)');
+                const classes = expired
+                    ? 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
+                    : 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200';
+                return `<span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${classes}">${label}</span>`;
+            }
+            const isActive = status === 'ativa';
+            const isPending = status === 'pendente';
             const classes = isActive
                 ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200'
-                : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200';
-            const label = isActive ? 'Ativa' : 'Bloqueada';
+                : (isPending
+                    ? 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-200'
+                    : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200');
+            const label = isActive ? 'Ativa' : (isPending ? 'Pendente' : 'Bloqueada');
             return `<span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${classes}">${label}</span>`;
         };
 
@@ -358,6 +374,9 @@
                             const progress = Math.max(0, Math.min(100, Number(item.progress_enrollment || 0)));
                             const status = item.status_enrollment || 'ativa';
                             const isActive = (status || '').toString().toLowerCase() === 'ativa';
+                            const isDemo = Number(item.is_demo_enrollment || 0) === 1;
+                            const price = Number(item.price_course || 0);
+                            const canGrantDemo = price > 0 && (!isActive || isDemo);
                             return `
                                 <tr class="border-b border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800">
                                     <td class="px-6 py-4">
@@ -377,12 +396,15 @@
                                     </td>
                                     <td class="px-6 py-4">${formatEnrollmentDate(item.enrolled_at_enrollment)}</td>
                                     <td class="px-6 py-4">${formatLastActivity(item.last_activity || item.last_enrollment_update)}</td>
-                                    <td class="px-6 py-4">${statusBadge(status)}</td>
+                                    <td class="px-6 py-4">${statusBadge(item)}</td>
                                     <td class="px-6 py-4 text-right">
-                                        <button type="button" class="toggle-access inline-flex items-center gap-2 px-3 py-1.5 ${isActive ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'} text-white font-medium rounded-lg text-xs" data-id="${item.id_enrollment}" data-status="${status}">
-                                            <i class="bi ${isActive ? 'bi-lock' : 'bi-unlock'}"></i>
-                                            ${isActive ? 'Bloquear' : 'Permitir'}
-                                        </button>
+                                        <div class="inline-flex flex-wrap items-center justify-end gap-2">
+                                            ${canGrantDemo ? `<button type="button" class="grant-demo inline-flex items-center gap-1 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-lg text-xs" data-id="${item.id_enrollment}" title="Acesso demo 2h (não pago)"><i class="bi bi-clock-history"></i>Demo</button>` : ''}
+                                            <button type="button" class="toggle-access inline-flex items-center gap-2 px-3 py-1.5 ${isActive ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'} text-white font-medium rounded-lg text-xs" data-id="${item.id_enrollment}" data-status="${status}">
+                                                <i class="bi ${isActive ? 'bi-lock' : 'bi-unlock'}"></i>
+                                                ${isActive ? 'Bloquear' : 'Permitir'}
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>`;
                         }).join('');
@@ -461,6 +483,21 @@
         };
 
         enrollTable?.addEventListener('click', (event) => {
+            const demoBtn = event.target.closest('.grant-demo');
+            if (demoBtn) {
+                const id = demoBtn.dataset.id;
+                if (!id) return;
+                postAction(demoEndpoint, { enrollment_id: id })
+                    .then((data) => {
+                        Swal?.fire({ icon: 'success', title: 'Demo', text: data.message || 'Acesso demo concedido.' });
+                        loadEnrollments();
+                    })
+                    .catch((err) => {
+                        Swal?.fire({ icon: 'error', title: 'Erro', text: err?.message || 'Falha ao conceder demo.' });
+                    });
+                return;
+            }
+
             const btn = event.target.closest('.toggle-access');
             if (!btn) return;
             const id = btn.dataset.id;
@@ -468,6 +505,25 @@
             postAction(`${toggleEndpointBase}/${id}`, {})
                 .then(() => loadEnrollments())
                 .catch(() => loadEnrollments());
+        });
+
+        grantDemoBtn?.addEventListener('click', () => {
+            const student = (manualEnrollStudent?.value || '').trim();
+            const courseId = Number(manualEnrollCourse?.value || 0);
+            if (!student || !courseId) {
+                Swal?.fire({ icon: 'warning', title: 'Dados incompletos', text: 'Informe o aluno e selecione um curso.' });
+                return;
+            }
+            postAction(demoEndpoint, { student, course_id: courseId })
+                .then((data) => {
+                    Swal?.fire({ icon: 'success', title: 'Demo', text: data.message || 'Acesso demo concedido.' });
+                    closeManualModal();
+                    stateEnroll.page = 1;
+                    loadEnrollments();
+                })
+                .catch((err) => {
+                    Swal?.fire({ icon: 'error', title: 'Erro', text: err?.message || 'Falha ao conceder demo.' });
+                });
         });
 
         pendingTable?.addEventListener('click', (event) => {

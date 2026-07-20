@@ -175,7 +175,7 @@ class MpesaController extends Controller
             ]);
         }
 
-        $amount = (float) $course->price_course;
+        $amount = (new \App\Services\CourseCommerceService())->getEffectivePrice($course);
         $now = date('Y-m-d H:i:s');
         $reference = $this->buildReference($courseId, $targetUserId);
 

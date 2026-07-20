@@ -528,20 +528,20 @@ class CheckoutEnrollmentService
             ->first();
 
         if ($enrollment) {
-            $updates = [];
-            if (strtolower((string) ($enrollment->status_enrollment ?? '')) !== 'ativa') {
-                $updates['status_enrollment'] = 'ativa';
-            }
+            $updates = [
+                'status_enrollment'  => 'ativa',
+                'is_demo_enrollment' => 0,
+                'demo_started_at'    => null,
+                'demo_expires_at'    => null,
+            ];
 
             if (empty($enrollment->enrolled_at_enrollment)) {
                 $updates['enrolled_at_enrollment'] = date('Y-m-d');
             }
 
-            if ($updates !== []) {
-                $updated = $enrollmentModel->update((int) $enrollment->id_enrollment, $updates);
-                if (! $updated) {
-                    throw new \RuntimeException(implode(', ', $enrollmentModel->errors() ?: ['Nao foi possivel reativar a matricula.']));
-                }
+            $updated = $enrollmentModel->update((int) $enrollment->id_enrollment, $updates);
+            if (! $updated) {
+                throw new \RuntimeException(implode(', ', $enrollmentModel->errors() ?: ['Nao foi possivel reativar a matricula.']));
             }
 
             return [
@@ -555,6 +555,7 @@ class CheckoutEnrollmentService
             'id_course_enrollment'   => $courseId,
             'status_enrollment'      => 'ativa',
             'enrolled_at_enrollment' => date('Y-m-d'),
+            'is_demo_enrollment'     => 0,
         ], true);
 
         if ($inserted === false) {

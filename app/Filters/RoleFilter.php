@@ -17,13 +17,13 @@ class RoleFilter implements FilterInterface
 
         if (!$user) {
             $session->setFlashdata('error', 'Você precisa estar logado para acessar esta página.');
-            return redirect()->to('/login');
+            return redirect()->to(site_url('login'));
         }
 
         // Verifica se a role do usuário está nos argumentos do filtro
         if (!in_array($user->role, $arguments)) {
             $session->setFlashdata('error', 'Acesso negado. Você não tem permissão para acessar esta página.');
-            return redirect()->to('/');
+            return redirect()->to(site_url('/'));
         }
     }
 

@@ -798,26 +798,80 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                                         </label>
                                     </div>
 
-                                    <div id="price-settings" class="mt-3 <?= !empty($draft->price_course) && $draft->price_course > 0 ? '' : 'hidden' ?>">
-                                        <label for="price_course" class="block text-sm font-semibold text-slate-800 dark:text-white mb-2">
-                                            Preço do curso
-                                        </label>
-                                        <div class="flex gap-2 items-center">
-                                            <span class="px-3 py-2 rounded-l-xl bg-slate-200 dark:bg-slate-700 text-sm text-slate-800 dark:text-slate-100">
-                                                $
-                                            </span>
-                                            <input type="number"
-                                                step="0.01"
-                                                min="0"
-                                                id="price_course"
-                                                name="price_course"
-                                                value="<?= esc($draft->price_course ?? '') ?>"
-                                                class="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-r-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                                                placeholder="Ex: 49.90">
+                                    <div id="price-settings" class="mt-3 space-y-3 <?= !empty($draft->price_course) && $draft->price_course > 0 ? '' : 'hidden' ?>">
+                                        <div class="rounded-2xl border border-blue-200 dark:border-blue-900/50 bg-blue-50/70 dark:bg-blue-950/20 p-4 space-y-3">
+                                            <div>
+                                                <h5 class="text-sm font-bold text-slate-800 dark:text-white">Preço e promoção</h5>
+                                                <p class="text-xs text-slate-500 mt-0.5">O timer de promoção aparece na home e nas páginas do curso quando houver data de fim.</p>
+                                            </div>
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                <div>
+                                                    <label for="price_course" class="block text-sm font-semibold text-slate-800 dark:text-white mb-2">
+                                                        Preço normal (MZN)
+                                                    </label>
+                                                    <input type="number" step="0.01" min="0" id="price_course" name="price_course"
+                                                        value="<?= esc($draft->price_course ?? '') ?>"
+                                                        class="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl text-sm"
+                                                        placeholder="Ex: 4990">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-semibold text-slate-800 dark:text-white mb-2">Preço promocional</label>
+                                                    <input type="number" step="0.01" min="0" name="promo_price_course"
+                                                        value="<?= esc($draft->promo_price_course ?? '') ?>"
+                                                        class="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl text-sm"
+                                                        placeholder="Opcional">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-semibold text-slate-800 dark:text-white mb-2">Promoção válida até</label>
+                                                    <input type="datetime-local" name="promo_ends_at_course"
+                                                        value="<?= !empty($draft->promo_ends_at_course) ? esc(date('Y-m-d\TH:i', strtotime((string) $draft->promo_ends_at_course))) : '' ?>"
+                                                        class="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl text-sm">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-semibold text-slate-800 dark:text-white mb-2">Aulas grátis antes do pagamento</label>
+                                                    <input type="number" min="0" step="1" name="free_lessons_count_course"
+                                                        value="<?= esc((int) ($draft->free_lessons_count_course ?? 0)) ?>"
+                                                        class="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-xl text-sm">
+                                                </div>
+                                            </div>
                                         </div>
-                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                            O preço será aplicado apenas se o curso for marcado como pago.
-                                        </p>
+                                    </div>
+
+                                    <div class="mt-4 space-y-2">
+                                        <label class="block text-sm font-semibold text-slate-800 dark:text-white">Carga horária</label>
+                                        <div class="flex flex-wrap gap-4">
+                                            <label class="inline-flex items-center gap-2 text-sm">
+                                                <input type="radio" name="hours_mode_course" value="auto" <?= (($draft->hours_mode_course ?? 'auto') !== 'manual') ? 'checked' : '' ?>>
+                                                Automática
+                                            </label>
+                                            <label class="inline-flex items-center gap-2 text-sm">
+                                                <input type="radio" name="hours_mode_course" value="manual" <?= (($draft->hours_mode_course ?? '') === 'manual') ? 'checked' : '' ?>>
+                                                Manual
+                                            </label>
+                                        </div>
+                                        <?php
+                                        $draftHoursMode = (string) ($draft->hours_mode_course ?? 'auto');
+                                        $draftHoursManual = $draft->hours_manual_course ?? null;
+                                        $draftHoursCourse = $draft->hours_course ?? null;
+                                        $draftIsManual = $draftHoursMode === 'manual' || (int) $draftHoursManual === 1;
+                                        if ($draftHoursCourse !== null && $draftHoursCourse !== '') {
+                                            $draftHoursInput = $draftHoursCourse;
+                                        } elseif ($draftIsManual && $draftHoursManual !== null && (float) $draftHoursManual > 1) {
+                                            $draftHoursInput = $draftHoursManual;
+                                        } elseif ($draftHoursMode === 'manual' && $draftHoursManual !== null && $draftHoursManual !== '' && (int) $draftHoursManual !== 1) {
+                                            $draftHoursInput = $draftHoursManual;
+                                        } else {
+                                            $draftHoursInput = '';
+                                        }
+                                        ?>
+                                        <input type="number" min="0" step="0.5" name="hours_manual_course"
+                                            value="<?= esc($draftHoursInput) ?>"
+                                            placeholder="Horas manuais"
+                                            class="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-sm">
+                                        <input type="text" name="whatsapp_contact_course"
+                                            value="<?= esc($draft->whatsapp_contact_course ?? $draft->whatsapp_course ?? '258842627671') ?>"
+                                            placeholder="WhatsApp comercial"
+                                            class="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-sm">
                                     </div>
                                 </div>
 

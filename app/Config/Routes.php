@@ -68,6 +68,7 @@ $routes->group('instructor', ['namespace' => 'App\Controllers\Instructor', 'filt
     $routes->get('dashboard/meus_estudantes/pending', 'Dashboard::pendingPaymentsData');
     $routes->post('dashboard/meus_estudantes/toggle/(:num)', 'Dashboard::toggleEnrollment/$1');
     $routes->post('dashboard/meus_estudantes/matricular', 'Dashboard::manualEnroll');
+    $routes->post('dashboard/meus_estudantes/demo', 'Dashboard::grantDemoAccess');
     $routes->get('dashboard/financas', 'Dashboard::financial');
     $routes->get('dashboard/financas/data', 'Dashboard::financialData');
     $routes->get('dashboard/logs', 'Dashboard::logs');
@@ -105,8 +106,10 @@ $routes->group('student', ['namespace' => 'App\Controllers\Student', 'filter' =>
 
 // Rotas de Cursos
 $routes->get('/courses/(:num)', 'PageController::coursePage/$1');
+$routes->match(['get', 'post'], 'courses/(:num)/trial', 'PageController::startTrial/$1');
 $routes->get('checkout/(:num)', 'PageController::index/$1');
 $routes->post('checkout/pending/(:num)', 'Register::createPendingUser/$1');
+$routes->post('student/courses/(:num)/rate', 'Student\CourseRatings::store/$1', ['filter' => 'session']);
 
 // Pagamentos
 // Pagamentos

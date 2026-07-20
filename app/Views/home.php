@@ -1,6 +1,6 @@
 <?php
 
-$isLoggedIn   = auth()->loggedIn();
+$isLoggedIn = auth()->loggedIn();
 $user = service('auth')->user();
 $defaultAvatarUrl = base_url('assets/img/user-default.png');
 $userAvatarUrl = $defaultAvatarUrl;
@@ -13,685 +13,1421 @@ if ($isLoggedIn && $user && !empty($user->img)) {
     }
 }
 
-// dd(base_url('./assets/img/logo.png'))
-
-
+$courses = $courses ?? [];
+$courseCount = count($courses);
+$formatMzn = static function ($value): string {
+    return number_format((float) $value, 0, ',', '.') . ' MT';
+};
 ?>
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Mechanical Academy</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous" />
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
-        rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
-        integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="shortcut icon" href="<?= base_url('assets/img/favicon.png') ?>" width="100%" type="image/x-icon">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mechanical Academy</title>
 
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
 
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"></noscript>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="shortcut icon" href="<?= base_url('assets/img/favicon.png') ?>" type="image/x-icon">
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <style>
+    :root {
+      --ink: #f5f7fa;
+      --ink-soft: rgba(245, 247, 250, 0.62);
+      --page-bg: #050505;
+      --surface: #141414;
+      --surface-2: #1c1c1c;
+      --line: rgba(255, 255, 255, 0.09);
+      --accent: #0d6efd;
+      --accent-soft: rgba(13, 110, 253, 0.14);
+      --accent-border: rgba(13, 110, 253, 0.38);
+      --accent-glow: rgba(13, 110, 253, 0.28);
+      --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+      --ease-spring: cubic-bezier(0.34, 1.3, 0.64, 1);
+    }
 
-        body {
-            font-family: 'Poppins', sans-serif !important;
-        }
+    * { box-sizing: border-box; }
 
-        .nav-avatar {
-            width: 35px;
-            height: 35px;
-            min-width: 35px;
-            border-radius: 50%;
-            object-fit: cover;
-            object-position: center;
-            display: block;
-            background: #111827;
-            border: 1px solid rgba(255, 255, 255, 0.24);
-        }
+    html { scroll-behavior: smooth; }
 
-        #banner {
-            width: 100%;
-            background: url(<?= base_url('./assets/img/banner.jpeg') ?>) no-repeat center center/cover;
-        }
+    body {
+      font-family: 'Sora', sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(900px 520px at 85% -10%, var(--accent-glow) 0%, transparent 55%),
+        radial-gradient(700px 420px at 0% 40%, rgba(13, 110, 253, 0.08) 0%, transparent 50%),
+        var(--page-bg);
+      -webkit-font-smoothing: antialiased;
+      margin: 0;
+    }
 
-        .overlay {
-            width: 100%;
-            height: 100% !important;
-            background-color: rgba(0, 0, 0, 0.63);
-        }
+    a { color: inherit; }
 
-        .heading-1 {
-            font-size: 70px;
-        }
+    .container-mech {
+      width: 100%;
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
 
-        @media (min-width: 992px) {
-            .btn-newsletter {
-                width: 230px;
-            }
-        }
+    /* ---------- Preloader ---------- */
+    #preloader {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: grid;
+      place-items: center;
+      background: #12151a;
+      transition: opacity 0.42s var(--ease-out), visibility 0.42s var(--ease-out);
+    }
 
-        @media (max-width: 768px) {
-            .heading-1 {
-                font-size: 50px;
-            }
-        }
+    #preloader.is-hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
 
-        @media (max-width: 576px) {
-            .heading-1 {
-                font-size: 30px;
-            }
-        }
+    .preloader__inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.25rem;
+      width: min(280px, 70vw);
+    }
 
-        .card-bg {
-            background-color: #222222;
-        }
+    .preloader__logo {
+      width: 160px;
+      height: auto;
+      opacity: 0.95;
+      animation: brandPulse 1.6s var(--ease-out) infinite;
+    }
 
-        .card-border {
-            border: 1px solid rgb(63, 62, 62);
-        }
+    .preloader__bar {
+      width: 100%;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      overflow: hidden;
+    }
 
-        #youtube-bg {
-            background: url(<?= base_url('./assets/img/youtube.png') ?>) no-repeat center center/cover;
-        }
+    .preloader__bar__fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), #4d8fff);
+      border-radius: 999px;
+      transition: width 0.2s linear;
+    }
 
-        .m-600 {
-            width: 100%;
-            max-width: 900px !important;
-        }
+    .preloader__text {
+      margin: 0;
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      color: rgba(255, 255, 255, 0.55);
+    }
 
-        .m-500 {
-            width: 100%;
-            max-width: 800px !important;
-        }
+    @keyframes brandPulse {
+      0%, 100% { opacity: 0.7; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.015); }
+    }
 
-        .patterns {
-            background: url(<?= base_url('./assets/img/pattern.png') ?>);
-        }
+    /* ---------- Nav ---------- */
+    .site-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(18, 21, 26, 0.82);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      transition: background 0.25s ease, box-shadow 0.25s ease;
+    }
 
-        :root {
-            --pre-bg: #0b0f19;
-            --pre-fg: #fff;
-            --pre-accent: #7c5cff;
-            --pre-z: 9999;
-            --fade-ms: 360ms;
-        }
+    .site-nav.is-scrolled {
+      background: rgba(18, 21, 26, 0.94);
+      box-shadow: 0 8px 28px -18px rgba(0, 0, 0, 0.45);
+    }
 
-        #preloader {
-            position: fixed;
-            inset: 0;
-            z-index: var(--pre-z);
-            display: grid;
-            place-items: center;
-            color: var(--pre-fg);
-            background:
-                radial-gradient(1000px 700px at 10% 10%, #11162a 0%, transparent 60%),
-                radial-gradient(1000px 700px at 90% 90%, #0e1330 0%, transparent 60%),
-                var(--pre-bg);
-            transition: opacity var(--fade-ms) ease, visibility var(--fade-ms) ease;
-        }
+    .site-nav__inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.9rem 0;
+    }
 
-        #preloader.is-hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
+    .site-nav__brand {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
 
-        .preloader__inner {
-            display: grid;
-            gap: 14px;
-            place-items: center;
-            text-align: center;
-        }
+    .site-nav__brand img {
+      height: 42px;
+      width: auto;
+      display: block;
+    }
 
-        .preloader__logo {
-            width: 84px;
-            height: auto;
-            filter: drop-shadow(0 2px 10px rgba(0, 0, 0, .35));
-        }
+    .site-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 1.6rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
 
-        .preloader__spinner {
-            width: 56px;
-            height: 56px;
-        }
+    .site-nav__links a {
+      color: rgba(255, 255, 255, 0.82);
+      text-decoration: none;
+      font-size: 0.92rem;
+      font-weight: 500;
+      transition: color 0.15s ease;
+    }
 
-        .preloader__track {
-            fill: none;
-            stroke: rgba(255, 255, 255, .18);
-            stroke-width: 6;
-        }
+    .site-nav__links a:hover { color: #fff; }
 
-        .preloader__arc {
-            fill: none;
-            stroke: var(--pre-accent);
-            stroke-linecap: round;
-            stroke-width: 6;
-            stroke-dasharray: 110 126;
-            transform-origin: 50% 50%;
-            animation: spin 1.05s linear infinite, dash 1.5s ease-in-out infinite;
-        }
+    .site-nav__cta {
+      color: #fff !important;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 999px;
+      padding: 0.5rem 1.15rem !important;
+      transition: border-color 0.15s ease, background 0.15s ease, transform 0.2s var(--ease-spring) !important;
+    }
 
-        .preloader__bar {
-            width: min(320px, 70vw);
-            height: 8px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, .15);
-            overflow: hidden;
-        }
+    .site-nav__cta:hover {
+      border-color: rgba(255, 255, 255, 0.6);
+      transform: translateY(-1px);
+    }
 
-        .preloader__bar__fill {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, var(--pre-accent), #9a7bff 60%, var(--pre-accent));
-            border-radius: 999px;
-            transform: translateZ(0);
-        }
+    .nav-avatar {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      background: #1c2028;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+    }
 
-        .preloader__text {
-            font: 600 .95rem/1.2 system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial;
-            opacity: .9;
-        }
+    .site-nav__toggle {
+      display: none;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 8px;
+      color: #fff;
+      padding: 0.4rem 0.6rem;
+      font-size: 1.05rem;
+    }
 
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
+    .site-nav__user {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
 
-        @keyframes dash {
-            0% {
-                stroke-dasharray: 1 235;
-                stroke-dashoffset: 0;
-            }
+    /* ---------- Buttons ---------- */
+    .btn-mech {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.55rem;
+      border-radius: 999px;
+      padding: 0.9rem 1.85rem;
+      font-weight: 600;
+      font-size: 0.98rem;
+      text-decoration: none;
+      border: 1px solid transparent;
+      transition:
+        transform 0.22s var(--ease-spring),
+        box-shadow 0.22s ease,
+        background-color 0.18s ease,
+        border-color 0.18s ease,
+        color 0.18s ease;
+      cursor: pointer;
+      line-height: 1.2;
+    }
 
-            50% {
-                stroke-dasharray: 120 115;
-                stroke-dashoffset: -25;
-            }
+    .btn-mech:active { transform: scale(0.97); }
 
-            100% {
-                stroke-dasharray: 1 235;
-                stroke-dashoffset: -235;
-            }
-        }
+    .btn-mech-primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 10px 28px -12px rgba(13, 110, 253, 0.65);
+    }
 
-        @media (prefers-reduced-motion: reduce) {
-            .preloader__arc {
-                animation: none;
-            }
-        }
-    </style>
+    .btn-mech-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 32px -12px rgba(13, 110, 253, 0.7);
+      color: #fff;
+      filter: brightness(1.06);
+    }
 
+    .btn-mech-outline-invert {
+      background: transparent;
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.35);
+    }
+
+    .btn-mech-outline-invert:hover {
+      border-color: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.06);
+      color: #fff;
+      transform: translateY(-2px);
+    }
+
+    .btn-mech-light {
+      background: #fff;
+      color: #0a0a0a;
+    }
+
+    .btn-mech-light:hover {
+      transform: translateY(-2px);
+      color: #0a0a0a;
+      box-shadow: 0 12px 28px -14px rgba(255, 255, 255, 0.25);
+    }
+
+    .btn-mech-dark {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-mech-dark:hover {
+      transform: translateY(-2px);
+      color: #fff;
+      filter: brightness(1.08);
+      box-shadow: 0 12px 28px -14px rgba(13, 110, 253, 0.55);
+    }
+
+    /* ---------- Hero ---------- */
+    .hero {
+      position: relative;
+      min-height: 92vh;
+      display: flex;
+      align-items: flex-end;
+      overflow: hidden;
+      color: #fff;
+    }
+
+    .hero__media {
+      position: absolute;
+      inset: 0;
+      background: url(<?= base_url('assets/img/banner.jpeg') ?>) center / cover no-repeat;
+      transform: scale(1.04);
+      animation: heroKen 18s ease-out forwards;
+    }
+
+    .hero__gradient {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(880px 620px at 78% 12%, var(--accent-glow) 0%, transparent 58%),
+        linear-gradient(180deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.72) 48%, rgba(5, 5, 5, 0.98) 100%);
+    }
+
+    .hero__inner {
+      position: relative;
+      z-index: 2;
+      padding: 8rem 0 4.75rem;
+      width: 100%;
+    }
+
+    .hero__content { max-width: 720px; }
+
+    .hero__brand {
+      margin: 0 0 1.1rem;
+      font-size: clamp(0.78rem, 1.4vw, 0.88rem);
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.78);
+    }
+
+    .hero__title {
+      margin: 0 0 1.15rem;
+      font-size: clamp(2.35rem, 5.6vw, 4.15rem);
+      font-weight: 700;
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+    }
+
+    .hero__title span { color: #6ea8fe; }
+
+    .hero__lead {
+      margin: 0 0 2rem;
+      max-width: 34rem;
+      font-size: clamp(1rem, 1.6vw, 1.15rem);
+      line-height: 1.65;
+      color: rgba(255, 255, 255, 0.78);
+      font-weight: 400;
+    }
+
+    .hero__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.85rem;
+    }
+
+    .hero-anim > * {
+      opacity: 0;
+      transform: translateY(22px);
+      animation: riseIn 0.85s var(--ease-out) forwards;
+    }
+
+    .hero-anim > *:nth-child(1) { animation-delay: 0.08s; }
+    .hero-anim > *:nth-child(2) { animation-delay: 0.2s; }
+    .hero-anim > *:nth-child(3) { animation-delay: 0.32s; }
+    .hero-anim > *:nth-child(4) { animation-delay: 0.44s; }
+
+    @keyframes riseIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes heroKen {
+      to { transform: scale(1); }
+    }
+
+    /* ---------- Sections ---------- */
+    .section {
+      padding: 5.5rem 0;
+    }
+
+    .section-ink {
+      background: #0a0a0a;
+      color: #fff;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .section-blue {
+      background:
+        radial-gradient(900px 420px at 10% 0%, rgba(255, 255, 255, 0.14) 0%, transparent 55%),
+        linear-gradient(145deg, #0b5ed7 0%, #0d6efd 48%, #0a58ca 100%);
+      color: #fff;
+    }
+
+    .section-blue .section__eyebrow {
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    .section-blue .section__title,
+    .section-blue .step__title {
+      color: #fff;
+    }
+
+    .section-blue .section__lead,
+    .section-blue .step__text {
+      color: rgba(255, 255, 255, 0.82);
+    }
+
+    .section__eyebrow {
+      margin: 0 0 0.75rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .section-ink .section__eyebrow { color: #6ea8fe; }
+
+    .section__title {
+      margin: 0 0 0.85rem;
+      font-size: clamp(1.75rem, 3.4vw, 2.45rem);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.15;
+      color: #fff;
+    }
+
+    .section__lead {
+      margin: 0;
+      max-width: 36rem;
+      color: var(--ink-soft);
+      font-size: 1.05rem;
+      line-height: 1.65;
+    }
+
+    .section-ink .section__lead { color: rgba(255, 255, 255, 0.68); }
+
+    .section__head {
+      margin-bottom: 2.75rem;
+    }
+
+    /* ---------- Trust strip ---------- */
+    .trust {
+      padding: 2.25rem 0;
+      border-bottom: 1px solid var(--line);
+      background: rgba(20, 20, 20, 0.85);
+      backdrop-filter: blur(10px);
+    }
+
+    .trust__grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .trust__item {
+      text-align: center;
+    }
+
+    .trust__value {
+      margin: 0;
+      font-size: 1.65rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+
+    .trust__label {
+      margin: 0.25rem 0 0;
+      font-size: 0.88rem;
+      color: var(--ink-soft);
+    }
+
+    /* ---------- Course grid (compact dark cards) ---------- */
+    .course-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+    }
+
+    .course-tile {
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+      padding: 1.45rem 1.4rem 1.35rem;
+      background: #161616;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      text-decoration: none;
+      color: inherit;
+      transition:
+        transform 0.28s var(--ease-spring),
+        box-shadow 0.28s ease,
+        border-color 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .course-tile::before {
+      content: '';
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 3px;
+      background: var(--tile-accent, var(--accent));
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      z-index: 2;
+    }
+
+    .course-tile:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 28px 48px -28px rgba(0, 0, 0, 0.75);
+      border-color: rgba(13, 110, 253, 0.35);
+      color: inherit;
+    }
+
+    .course-tile:hover::before { opacity: 1; }
+
+    .course-tile__top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .course-tile__meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-bottom: 0;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.28rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      background: var(--accent-soft);
+      color: #8bb9ff;
+      border: 1px solid var(--accent-border);
+    }
+
+    .pill-muted {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--ink-soft);
+      border-color: var(--line);
+    }
+
+    .course-tile__icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      object-fit: cover;
+      background: #222;
+      flex-shrink: 0;
+      border: 1px solid var(--line);
+    }
+
+    .course-tile__title {
+      margin: 0 0 0.85rem;
+      font-size: 1.15rem;
+      font-weight: 650;
+      letter-spacing: -0.02em;
+      line-height: 1.3;
+      color: #fff;
+    }
+
+    .course-tile__price {
+      margin-top: auto;
+      display: flex;
+      align-items: baseline;
+      gap: 0.55rem;
+      flex-wrap: wrap;
+    }
+
+    .course-tile__price-now {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+
+    .course-tile__price-was {
+      font-size: 0.88rem;
+      color: var(--ink-soft);
+      text-decoration: line-through;
+    }
+
+    .course-tile__promo-time {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-top: 0.55rem;
+      padding: 0.28rem 0.55rem;
+      border-radius: 999px;
+      background: rgba(13, 110, 253, 0.14);
+      border: 1px solid rgba(13, 110, 253, 0.35);
+      color: #9ec5fe;
+      font-size: 0.72rem;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      width: fit-content;
+    }
+
+    .course-tile__cta {
+      margin-top: 1rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #6ea8fe;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: gap 0.2s ease;
+    }
+
+    .course-tile:hover .course-tile__cta { gap: 0.55rem; }
+
+    /* ---------- Steps (illustrative) ---------- */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      counter-reset: step;
+      position: relative;
+    }
+
+    .step {
+      counter-increment: step;
+      position: relative;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 20px;
+      padding: 1.6rem 1.4rem 1.5rem;
+      backdrop-filter: blur(8px);
+      transition: transform 0.28s var(--ease-spring), background 0.2s ease;
+    }
+
+    .step:hover {
+      transform: translateY(-4px);
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .step__visual {
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 1.15rem;
+      background: rgba(255, 255, 255, 0.16);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      color: #fff;
+      font-size: 1.55rem;
+    }
+
+    .step__num {
+      display: block;
+      margin-bottom: 0.55rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      color: rgba(255, 255, 255, 0.78);
+    }
+
+    .step__num::before {
+      content: "PASSO 0" counter(step);
+    }
+
+    .step__title {
+      margin: 0 0 0.55rem;
+      font-size: 1.2rem;
+      font-weight: 650;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+
+    .step__text {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.82);
+      line-height: 1.65;
+      font-size: 0.95rem;
+    }
+
+    /* ---------- YouTube ---------- */
+    .yt {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 3rem;
+      align-items: center;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .yt__visual {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      aspect-ratio: 16 / 10;
+      width: 100%;
+      background: #0d1014 url(<?= base_url('assets/img/youtube.png') ?>) center / cover no-repeat;
+      box-shadow: 0 30px 60px -36px rgba(0, 0, 0, 0.55);
+      transition: transform 0.4s var(--ease-out);
+    }
+
+    .yt__visual:hover { transform: scale(1.015); }
+
+    .yt__visual img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      mix-blend-mode: luminosity;
+      opacity: 0.92;
+    }
+
+    .yt__play {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background: rgba(0, 0, 0, 0.28);
+      text-decoration: none;
+    }
+
+    .yt__play-btn {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: #fff;
+      color: #0a0a0a;
+      display: grid;
+      place-items: center;
+      font-size: 1.45rem;
+      box-shadow: 0 16px 40px -16px rgba(0, 0, 0, 0.45);
+      transition: transform 0.28s var(--ease-spring);
+    }
+
+    .yt__play:hover .yt__play-btn { transform: scale(1.08); }
+
+    .yt__copy { min-width: 0; }
+
+    .yt__stats {
+      display: flex;
+      gap: 2rem;
+      margin: 1.75rem 0 2rem;
+      flex-wrap: wrap;
+    }
+
+    .yt__stat strong {
+      display: block;
+      font-size: 1.45rem;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+
+    .yt__stat span {
+      font-size: 0.88rem;
+      color: rgba(255, 255, 255, 0.62);
+    }
+
+    /* ---------- FAQ ---------- */
+    .faq-wrap { max-width: 760px; margin: 0 auto; }
+
+    .faq-item {
+      border-bottom: 1px solid var(--line);
+    }
+
+    .faq-item summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 1.25rem 2.2rem 1.25rem 0;
+      font-weight: 600;
+      font-size: 1.02rem;
+      position: relative;
+      transition: color 0.15s ease;
+      color: #fff;
+    }
+
+    .faq-item summary::-webkit-details-marker { display: none; }
+
+    .faq-item summary::after {
+      content: '+';
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.35rem;
+      font-weight: 400;
+      color: var(--ink-soft);
+      transition: transform 0.25s var(--ease-out), color 0.15s ease;
+    }
+
+    .faq-item[open] summary::after {
+      content: '−';
+      color: var(--accent);
+    }
+
+    .faq-item summary:hover { color: #6ea8fe; }
+
+    .faq-item__body {
+      padding: 0 0 1.35rem;
+      color: var(--ink-soft);
+      line-height: 1.7;
+      font-size: 0.98rem;
+      max-width: 62ch;
+    }
+
+    .faq-item__body a {
+      color: #6ea8fe;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    /* ---------- Newsletter ---------- */
+    .news {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: center;
+      padding: 2.5rem;
+      background: linear-gradient(135deg, rgba(13, 110, 253, 0.16) 0%, rgba(20, 20, 20, 0.95) 45%), var(--surface);
+      border: 1px solid rgba(13, 110, 253, 0.28);
+      border-radius: 22px;
+    }
+
+    .news__form {
+      display: flex;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+
+    .news__input {
+      flex: 1 1 180px;
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0.85rem 1.2rem;
+      font-family: inherit;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+      background: #0a0a0a;
+      color: #fff;
+    }
+
+    .news__input::placeholder { color: rgba(255, 255, 255, 0.4); }
+
+    .news__input:focus {
+      border-color: var(--accent-border);
+      box-shadow: 0 0 0 4px var(--accent-soft);
+    }
+
+    /* ---------- Footer ---------- */
+    .site-footer {
+      background: #000;
+      color: rgba(255, 255, 255, 0.7);
+      padding: 2.5rem 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .site-footer__inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .site-footer__brand img {
+      height: 40px;
+      width: auto;
+    }
+
+    .site-footer__copy {
+      margin: 0;
+      font-size: 0.88rem;
+    }
+
+    .site-footer__social {
+      display: flex;
+      gap: 0.85rem;
+    }
+
+    .site-footer__social a {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 1.1rem;
+      transition: color 0.15s ease, transform 0.2s var(--ease-spring);
+      text-decoration: none;
+    }
+
+    .site-footer__social a:hover {
+      color: #fff;
+      transform: translateY(-2px);
+    }
+
+    /* ---------- Motion system ---------- */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition:
+        opacity 0.7s var(--ease-out),
+        transform 0.7s var(--ease-out);
+      transition-delay: var(--d, 0ms);
+    }
+
+    .reveal.is-in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .reveal,
+      .hero-anim > *,
+      .hero__media,
+      .preloader__logo {
+        animation: none !important;
+        transition: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+      }
+    }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 991px) {
+      .site-nav__toggle { display: inline-flex; }
+
+      .site-nav__links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        padding: 0.75rem 1.5rem 1.1rem;
+        background: rgba(18, 21, 26, 0.97);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .site-nav__links.is-open { display: flex; }
+
+      .site-nav__links li { padding: 0.65rem 0; }
+
+      .hero { min-height: 86vh; align-items: center; }
+      .hero__inner { padding: 6.5rem 0 3.5rem; }
+
+      .course-grid,
+      .steps,
+      .trust__grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .yt,
+      .news {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .course-grid,
+      .steps,
+      .trust__grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero__actions { flex-direction: column; align-items: stretch; }
+      .btn-mech { width: 100%; }
+
+      .news { padding: 1.5rem; }
+      .site-footer__inner { justify-content: center; text-align: center; }
+      .site-footer__social { width: 100%; justify-content: center; }
+    }
+  </style>
 </head>
 
 <body>
-    <!-- PRELOADER -->
-    <div id="preloader" role="status" aria-live="polite" aria-label="Carregando conteúdo">
-        <div class="preloader__inner">
-            <!-- opcional: seu logotipo -->
-            <img src="<?= base_url('assets/img/logo.png') ?>" alt="Minha Marca" class="preloader__logo h-auto w-50" />
-
-
-            <div class="preloader__bar">
-                <div class="preloader__bar__fill" id="preloaderFill" style="width:0%"></div>
-            </div>
-            <p class="preloader__text"><span id="preloaderPct">0</span>%</p>
-        </div>
+  <div id="preloader" role="status" aria-live="polite" aria-label="Carregando">
+    <div class="preloader__inner">
+      <img src="<?= base_url('assets/img/logo.png') ?>" alt="Mechanical Academy" class="preloader__logo">
+      <div class="preloader__bar">
+        <div class="preloader__bar__fill" id="preloaderFill"></div>
+      </div>
+      <p class="preloader__text"><span id="preloaderPct">0</span>%</p>
     </div>
+  </div>
 
-    <nav class="navbar navbar-expand-lg sticky-top bg-black navbar-dark py-3">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <img src="<?= base_url('./assets/img/logo.png') ?>" alt="Logo" style="width: 150px;">
+  <nav class="site-nav" id="siteNav">
+    <div class="container-mech site-nav__inner">
+      <a class="site-nav__brand" href="<?= base_url('/') ?>">
+        <img src="<?= base_url('assets/img/logo.png') ?>" alt="Mechanical Academy">
+      </a>
+
+      <button class="site-nav__toggle" type="button" id="navToggle" aria-label="Abrir menu" aria-expanded="false">
+        <i class="bi bi-list"></i>
+      </button>
+
+      <ul class="site-nav__links" id="navLinks">
+        <?php if ($isLoggedIn && $user): ?>
+          <li><a href="<?= base_url($user->role . '/dashboard/meus_cursos') ?>">Meus Cursos</a></li>
+          <li><a href="https://www.youtube.com/@MechanicalTecnologia" target="_blank" rel="noopener noreferrer">YouTube</a></li>
+          <li>
+            <a class="site-nav__user" href="<?= base_url($user->role . '/dashboard/perfil') ?>">
+              <img src="<?= esc($userAvatarUrl) ?>" alt="" class="nav-avatar" onerror="this.onerror=null;this.src='<?= esc($defaultAvatarUrl) ?>';">
+              <span><?= esc($user->username) ?></span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-                aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
-                    <?php if ($isLoggedIn): ?>
-                        <li class="nav-item me-3">
-                            <a class="nav-link active" href="<?= base_url($user->role . '/dashboard/meus_cursos') ?>">Meus Cursos</a>
-                        </li>
-                        <li class="nav-item me-3">
-                            <a class="nav-link active" href="https://www.youtube.com/@MechanicalTecnologia" target="_blank" rel="noopener noreferrer">Youtube</a>
-                        </li>
-                        <li class="nav-item d-flex align-items-center">
-                            <a href="<?= base_url($user->role . '/dashboard/perfil') ?>" class="d-flex align-items-center text-decoration-none">
-                                <img src="<?= esc($userAvatarUrl) ?>" alt="User" class="nav-avatar me-2" onerror="this.onerror=null;this.src='<?= esc($defaultAvatarUrl) ?>';">
-                                <span class="text-white fw-semibold text-nowrap"><?= $user->username ?></span>
-                            </a>
-                        </li>
-                    <?php else: ?>
-                        <li class="nav-item me-3">
-                            <a class="nav-link active" href="#cursos">Cursos</a>
-                        </li>
-                        <li class="nav-item me-3">
-                            <a class="nav-link active" href="https://www.youtube.com/@MechanicalTecnologia" target="_blank" rel="noopener noreferrer">Youtube</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active" href="<?= base_url('login') ?>">Entrar</a>
-                        </li>
-                    <?php endif; ?>
-                </ul>
-            </div>
+          </li>
+        <?php else: ?>
+          <li><a href="#cursos">Cursos</a></li>
+          <li><a href="#como-funciona">Como funciona</a></li>
+          <li><a href="https://www.youtube.com/@MechanicalTecnologia" target="_blank" rel="noopener noreferrer">YouTube</a></li>
+          <li><a class="site-nav__cta" href="<?= base_url('login') ?>">Entrar</a></li>
+        <?php endif; ?>
+      </ul>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="hero__media" aria-hidden="true"></div>
+    <div class="hero__gradient" aria-hidden="true"></div>
+    <div class="container-mech hero__inner">
+      <div class="hero__content hero-anim">
+        <p class="hero__brand">Mechanical Academy</p>
+        <h1 class="hero__title">Aprenda a fazer do jeito <span>certo</span>.</h1>
+        <p class="hero__lead">Cursos práticos, baseados em projectos reais — claros, objectivos e sem enrolação.</p>
+        <div class="hero__actions">
+          <a href="#cursos" class="btn-mech btn-mech-primary">Explorar cursos</a>
+          <a href="#como-funciona" class="btn-mech btn-mech-outline-invert">Como funciona</a>
         </div>
-    </nav>
+      </div>
+    </div>
+  </header>
 
-
-    <section id="banner">
-        <div class="overlay w-100 h-100 py-5 py-sm-0">
-            <div class="container w-100 h-100 py-5">
-                <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center">
-                    <p class="text-primary fw-bold fs-4 mt-sm-5">Mechanical Academy</p>
-                    <h1 class="text-light heading-1 fw-bold text-center my-3">Aprenda a Fazer do <br> Jeito <span
-                            class="text-primary">Certo</span></h1>
-                    <p class="text-center text-light">Cursos práticos baseados em projetos que são fáceis de
-                        entender e
-                        <br> direto ao ponto, SEM ENROLAÇÃO
-                    </p>
-
-                    <div class="d-flex align-items-center gap-3 mt-3 mb-5">
-                        <a href="#cursos" class="py-3 px-4 btn btn-primary">Ver todos cursos</a>
-                    </div>
-
-                    <div class="d-flex flex-column flex-md-row flex-lg-row align-items-center justify-content-center w-100 mt-0 mt-lg-5 text-light">
-                        <div class="d-flex flex-column align-items-center justify-content-center mx-5">
-                            <i class="fa-solid fa-graduation-cap heading-1"></i>
-                            <h1 class="text-center fw-bold mt-3">3+</h1>
-                            <p class="text-center">Cursos</p>
-                        </div>
-                        <div class="d-flex flex-column align-items-center justify-content-center mx-5">
-                            <i class="fa-solid fa-clock heading-1"></i>
-                            <h1 class="text-center fw-bold mt-3">20+</h1>
-                            <p class="text-center">Horas de conteúdo</p>
-                        </div>
-                        <div class="d-flex flex-column align-items-center justify-content-center mx-5">
-                            <i class="fa-solid fa-users heading-1"></i>
-                            <h1 class="text-center fw-bold mt-3">30+</h1>
-                            <p class="text-center">Estudantes</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+  <section class="trust">
+    <div class="container-mech">
+      <div class="trust__grid">
+        <div class="trust__item reveal">
+          <p class="trust__value"><?= max($courseCount, 3) ?>+</p>
+          <p class="trust__label">Cursos activos</p>
         </div>
-    </section>
-
-    <section class="py-5 bg-primary">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-6 col-md-6 col-sm-12 d-flex align-items-center mb-3 mb-md-0 mb-lg-0">
-                    <h1 class="fw-bold text-uppercase text-light fs-3 mb-0 text-center text-md-start text-lg-start">Notifique-me de novos cursos</h1>
-                </div>
-                <div class="col-lg-6 col-md-6 col-sm-12">
-                    <form class="d-flex flex-column flex-md-column flex-lg-row gap-1" role="search">
-                        <input class="form-control py-2" type="email" placeholder="Email" aria-label="email" />
-                        <button class="btn btn-dark text-uppercase btn-newsletter py-2 fw-semibold"
-                            type="submit">Notifique-me</button>
-                    </form>
-                </div>
-            </div>
+        <div class="trust__item reveal" style="--d:80ms">
+          <p class="trust__value">20+</p>
+          <p class="trust__label">Horas de conteúdo</p>
         </div>
-    </section>
-
-    <section class="bg-black py-5 patterns" id="cursos">
-        <div class="container py-5">
-            <h2 class="text-primary text-center fw-bold fs-1 mb-5">Cursos mais <span class="text-light">recentes</span>
-            </h2>
-
-            <div class="row mt-4">
-                <?php foreach ($courses as $key => $course): ?>
-                    <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
-                        <div class="card card-bg text-light W-100 h-100 p-1 card-border">
-                            <div class="card-body d-flex justify-content-between ">
-                                <div>
-                                    <h5 class="fs-6"><i class="fa fa-clock"></i> <?= esc($course->total_hours_label ?? '0 Horas') ?></h5>
-                                    <div class="mt-4 p-3" w-100>
-                                        <h6 class="card-subtitle mb-2 text-primary fw-light text-uppercase fs-6">Todos os
-                                            níveis</h6>
-                                        <p class="card-text fs-5 text-white fw-semibold mb-3"><?= esc($course->title_course) ?></p>
-                                        <a href="<?= base_url('./courses/' . $course->id_course) ?>"
-                                            class="card-link text-decoration-none text-primary fw-light fs-6 py-4 stretched-link">Ver
-                                            Curso</a>
-                                    </div>
-                                </div>
-                                <?php
-                                $iconPath = !empty($course->icon_course)
-                                    ? base_url('assets/img/' . $course->icon_course)
-                                    : base_url('assets/instructor/img/courses/' . ($course->image_course ?? ''));
-                                ?>
-                                <div><img src="<?= $iconPath ?>" style="width: 50px;" alt=""></div>
-                            </div>
-                        </div>
-                    </div>
-                <?php endforeach ?>
-            </div>
+        <div class="trust__item reveal" style="--d:160ms">
+          <p class="trust__value">Certificado</p>
+          <p class="trust__label">Ao concluir cada curso</p>
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 
-    <section class="py-5" id="youtube-bg">
-        <div class="container py-5">
-            <div class="row">
-                <div class="col-lg-6 col-md-6 col-sm-12 mb-4 mb-md-0 mb-lg-0">
-                    <img src="<?= base_url('./assets/img/frame-youtube.png') ?>" alt="" class="w-100">
+  <section class="section" id="cursos">
+    <div class="container-mech">
+      <div class="section__head reveal">
+        <p class="section__eyebrow">Catálogo</p>
+        <h2 class="section__title">Cursos para aprender com profundidade</h2>
+        <p class="section__lead">Escolha um curso, veja o programa completo e comece — com aulas gratuitas quando disponíveis.</p>
+      </div>
+
+      <?php if (empty($courses)): ?>
+        <p class="reveal" style="color:var(--ink-soft)">Em breve novos cursos.</p>
+      <?php else: ?>
+        <div class="course-grid">
+          <?php foreach ($courses as $i => $course): ?>
+            <?php
+              $accent = trim((string) ($course->color_course ?? '')) ?: '#0d6efd';
+              $iconPath = !empty($course->icon_course)
+                  ? base_url('assets/img/' . $course->icon_course)
+                  : base_url('assets/instructor/img/courses/' . ($course->image_course ?? ''));
+              $freeLessons = (int) ($course->free_lessons ?? 0);
+              $delay = ($i % 3) * 80;
+            ?>
+            <a
+              href="<?= base_url('courses/' . $course->id_course) ?>"
+              class="course-tile reveal"
+              style="--tile-accent: <?= esc($accent) ?>; --d: <?= (int) $delay ?>ms"
+            >
+              <div class="course-tile__top">
+                <div class="course-tile__meta">
+                  <span class="pill pill-muted"><i class="bi bi-clock"></i> <?= esc($course->total_hours_label ?? '0 Horas') ?></span>
+                  <?php if ($freeLessons > 0): ?>
+                    <span class="pill"><?= $freeLessons ?> aulas grátis</span>
+                  <?php endif; ?>
                 </div>
-                <div class="col-lg-6 col-md-6 col-sm-12 d-flex flex-column align-items-center justify-content-center">
-                    <h2 class="text-light fw-bold text-center">Mechanical Tecnologia no YouTube</h2>
-                    <p class="text-center text-light">Nosso canal no YouTube tem mais de <span class="fw-bold">2 milhões
-                            de assinantes</span> com <span class="fw-bold">1000+</span> tutoriais gratuitos e cursos
-                        intensivos.</p>
-                    <a href="https://www.youtube.com/@MechanicalTecnologia" class="py-3 px-5 btn btn-dark fw-bold"
-                        target="_blank">Ver Canal</a>
+                <img class="course-tile__icon" src="<?= esc($iconPath) ?>" alt="" loading="lazy">
+              </div>
+              <h3 class="course-tile__title"><?= esc($course->title_course) ?></h3>
+              <div class="course-tile__price">
+                <?php if (!empty($course->has_promo)): ?>
+                  <span class="course-tile__price-now"><?= esc($formatMzn($course->effective_price)) ?></span>
+                  <span class="course-tile__price-was"><?= esc($formatMzn($course->list_price)) ?></span>
+                  <?php if (!empty($course->discount_percent)): ?>
+                    <span class="pill">−<?= (int) $course->discount_percent ?>%</span>
+                  <?php endif; ?>
+                <?php else: ?>
+                  <span class="course-tile__price-now"><?= esc($formatMzn($course->effective_price ?? $course->price_course ?? 0)) ?></span>
+                <?php endif; ?>
+              </div>
+              <?php if (!empty($course->has_promo) && (int) ($course->promo_remaining_seconds ?? 0) > 0): ?>
+                <div class="course-tile__promo-time">
+                  <i class="bi bi-hourglass-split"></i>
+                  Oferta termina em
+                  <span class="js-home-promo-countdown" data-left="<?= (int) $course->promo_remaining_seconds ?>">--:--:--</span>
                 </div>
-            </div>
+              <?php endif; ?>
+              <span class="course-tile__cta">Ver curso <i class="bi bi-arrow-right"></i></span>
+            </a>
+          <?php endforeach; ?>
         </div>
-    </section>
+      <?php endif; ?>
+    </div>
+  </section>
 
-    <section class="py-5 bg-black patterns">
-        <div class="container py-5 d-flex flex-column align-items-center justify-content-center">
-            <h2 class="text-light text-center fw-bold">Perguntas Frequentes sobre a Mechanical Academy</h2>
-            <p class="text-light text-center m-500 mb-4">Se você tem alguma questão, confira abaixo as respostas que
-                preparamos especialmente para facilitar sua experiência de aprendizado.</p>
-            <div class="m-600 mt-3">
-                <div class="accordion accordion-flush d-flex flex-column gap-2 w-100" id="accordionFlushExample">
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#flush-collapseOne" aria-expanded="false"
-                                aria-controls="flush-collapseOne">
-                                O que é Mechanical Academy?
-                            </button>
-                        </h2>
-                        <div id="flush-collapseOne" class="accordion-collapse collapse"
-                            data-bs-parent="#accordionFlushExample">
-                            <div class="accordion-body">É uma plataforma de ensino online desenvolvido pela <a href="https://mechanical.co.mz" class="text-decoration-none" target="_blank">Mechanical Tecnologia</a>, onde
-                                oferecemos cursos exclusivos lecionados pelos nossos especialistas. O aluno tem acesso
-                                a conteúdos atualizados, atividades práticas e suporte direto com a nossa equipe.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#flush-collapseTwo" aria-expanded="false"
-                                aria-controls="flush-collapseTwo">
-                                Como posso me inscrever em um curso?
-                            </button>
-                        </h2>
-                        <div id="flush-collapseTwo" class="accordion-collapse collapse"
-                            data-bs-parent="#accordionFlushExample">
-                            <div class="accordion-body">Basta acessar a página do curso desejado, clicar em
-                                “Inscreva-se”, preencher os dados solicitados e efetuar o pagamento. Após a confirmação,
-                                o acesso ao conteúdo será liberado automaticamente.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#flush-collapseThree" aria-expanded="false"
-                                aria-controls="flush-collapseThree">
-                                Quais dispositivos posso usar para acessar os cursos?
-                            </button>
-                        </h2>
-                        <div id="flush-collapseThree" class="accordion-collapse collapse"
-                            data-bs-parent="#accordionFlushExample">
-                            <div class="accordion-body">A plataforma é 100% responsiva. Você pode acessar pelo
-                                computador, tablet ou celular, utilizando qualquer navegador moderno (Google Chrome,
-                                Edge, Safari, Firefox).</div>
-                        </div>
-                    </div>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#flush-collapse4" aria-expanded="false" aria-controls="flush-collapse4">
-                                Os cursos têm certificado?
-                            </button>
-                        </h2>
-                        <div id="flush-collapse4" class="accordion-collapse collapse"
-                            data-bs-parent="#accordionFlushExample">
-                            <div class="accordion-body">Sim. Ao concluir o curso e realizar todas as atividades
-                                obrigatórias, você poderá emitir seu certificado digital de conclusão diretamente pela
-                                plataforma.</div>
-                        </div>
-                    </div>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#flush-collapse5" aria-expanded="false" aria-controls="flush-collapse5">
-                                Como funciona o suporte ao aluno?
-                            </button>
-                        </h2>
-                        <div id="flush-collapse5" class="accordion-collapse collapse"
-                            data-bs-parent="#accordionFlushExample">
-                            <div class="accordion-body">Dentro da plataforma, você terá acesso a uma área de mensagens e
-                                fórum, onde pode tirar dúvidas diretamente com os instrutores e interagir com outros
-                                alunos.</div>
-                        </div>
-                    </div>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#flush-collapse6" aria-expanded="false" aria-controls="flush-collapse6">
-                                Posso parcelar o pagamento?
-                            </button>
-                        </h2>
-                        <div id="flush-collapse6" class="accordion-collapse collapse"
-                            data-bs-parent="#accordionFlushExample">
-                            <div class="accordion-body">Sim, aceitamos diversas formas de pagamento, incluindo
-                                parcelamento no cartão de crédito. Os detalhes são apresentados no momento da inscrição.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+  <section class="section section-blue" id="como-funciona">
+    <div class="container-mech">
+      <div class="section__head reveal">
+        <p class="section__eyebrow">Processo</p>
+        <h2 class="section__title">Do zero ao certificado, sem fricção</h2>
+        <p class="section__lead">Uma experiência pensada para decidir rápido e aprender com clareza.</p>
+      </div>
+
+      <div class="steps">
+        <div class="step reveal">
+          <div class="step__visual" aria-hidden="true"><i class="bi bi-journal-bookmark"></i></div>
+          <span class="step__num"></span>
+          <h3 class="step__title">Escolha o curso</h3>
+          <p class="step__text">Veja o programa, horas, módulos e o que vai aprender — tudo numa página limpa.</p>
         </div>
-    </section>
-
-    <footer class="py-3 bg-dark ">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-2 col-md-3 col-sm-12">
-                    <img src="<?= base_url('./assets/img/logo.png') ?>" style="width: 150px;" alt="">
-                </div>
-                <div class="col-lg-8 col-md-7 col-sm-12 d-flex align-items-center justify-content-center my-3 my-md-0 my-lg-0">
-                    <p class="text-light text-start text-md-center text-lg-center mb-0">&copy; 2025 Mechanical Academy. Todos Direitos Reservados</p>
-                </div>
-                <div class="col-lg-2 col-md-2 col-12 d-flex align-items-center gap-1">
-                    <a href="https://facebook.com" class="text-decoration-none text-light"><i
-                            class="fab fa-facebook-f fs-5"></i></a>
-                    <a href="https://instagram.com" class="text-decoration-none text-light"><i
-                            class="fab fa-instagram fs-5"></i></a>
-                    <a href="https://youtube.com" class="text-decoration-none text-light"><i
-                            class="fab fa-youtube fs-5"></i></a>
-                    <a href="https://linkedin.com" class="text-decoration-none text-light"><i
-                            class="fab fa-linkedin-in fs-5"></i></a>
-                </div>
-            </div>
+        <div class="step reveal" style="--d:100ms">
+          <div class="step__visual" aria-hidden="true"><i class="bi bi-play-circle"></i></div>
+          <span class="step__num"></span>
+          <h3 class="step__title">Aprenda na prática</h3>
+          <p class="step__text">Aulas objectivas, ficheiros de apoio e avaliações. Experimente aulas gratuitas quando disponíveis.</p>
         </div>
-    </footer>
+        <div class="step reveal" style="--d:200ms">
+          <div class="step__visual" aria-hidden="true"><i class="bi bi-award"></i></div>
+          <span class="step__num"></span>
+          <h3 class="step__title">Receba o certificado</h3>
+          <p class="step__text">Conclua o curso e emita o certificado digital directamente na plataforma.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
-        crossorigin="anonymous"></script>
+  <section class="section section-ink" id="youtube">
+    <div class="container-mech">
+      <div class="yt">
+        <div class="yt__visual reveal">
+          <img src="<?= base_url('assets/img/frame-youtube.png') ?>" alt="Mechanical Tecnologia no YouTube">
+          <a class="yt__play" href="https://www.youtube.com/@MechanicalTecnologia" target="_blank" rel="noopener noreferrer" aria-label="Abrir canal no YouTube">
+            <span class="yt__play-btn"><i class="bi bi-play-fill"></i></span>
+          </a>
+        </div>
+        <div class="yt__copy reveal" style="--d:120ms">
+          <p class="section__eyebrow">Comunidade</p>
+          <h2 class="section__title">Mechanical Tecnologia no YouTube</h2>
+          <p class="section__lead">Tutoriais gratuitos e conteúdos intensivos para complementar o que aprende na Academy.</p>
+          <div class="yt__stats">
+            <div class="yt__stat">
+              <strong>2M+</strong>
+              <span>Assinantes</span>
+            </div>
+            <div class="yt__stat">
+              <strong>1000+</strong>
+              <span>Tutoriais</span>
+            </div>
+          </div>
+          <a href="https://www.youtube.com/@MechanicalTecnologia" class="btn-mech btn-mech-outline-invert" target="_blank" rel="noopener noreferrer">
+            Ver canal <i class="bi bi-box-arrow-up-right"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    <script>
-        /**
-         * PRELOADER com percentagem em:
-         *  - #preloaderFill   (largura da barra)
-         *  - #preloaderPct    (texto 0–100)
-         *
-         * Mantém:
-         *  - MIN_PRELOAD_TIME (mínimo visível)
-         *  - Esconde após window.load respeitando o mínimo
-         *  - Fallback de segurança (MIN + 1000)
-         */
-        function initPreloader() {
-            const MIN_PRELOAD_TIME = 2000; // 2s mínimo
-            const startTime = Date.now();
+  <section class="section" id="faq">
+    <div class="container-mech">
+      <div class="section__head text-center reveal" style="max-width:36rem;margin-left:auto;margin-right:auto">
+        <p class="section__eyebrow">FAQ</p>
+        <h2 class="section__title">Perguntas frequentes</h2>
+        <p class="section__lead" style="margin-left:auto;margin-right:auto">Respostas claras para decidir com confiança.</p>
+      </div>
 
-            const preloader = document.getElementById('preloader');
-            const fillEl = document.getElementById('preloaderFill');
-            const pctEl = document.getElementById('preloaderPct');
-            if (!preloader || !fillEl || !pctEl) return;
+      <div class="faq-wrap">
+        <details class="faq-item reveal">
+          <summary>O que é Mechanical Academy?</summary>
+          <div class="faq-item__body">
+            É a plataforma de ensino online da <a href="https://mechanical.co.mz" target="_blank" rel="noopener noreferrer">Mechanical Tecnologia</a>, com cursos exclusivos, conteúdos actualizados e suporte da nossa equipa.
+          </div>
+        </details>
+        <details class="faq-item reveal" style="--d:60ms">
+          <summary>Como me inscrevo num curso?</summary>
+          <div class="faq-item__body">
+            Abra a página do curso, clique em inscrever-se, preencha os dados e conclua o pagamento. O acesso é libertado após a confirmação.
+          </div>
+        </details>
+        <details class="faq-item reveal" style="--d:120ms">
+          <summary>Posso estudar no telemóvel?</summary>
+          <div class="faq-item__body">
+            Sim. A plataforma é responsiva — computador, tablet ou telemóvel, em qualquer navegador moderno.
+          </div>
+        </details>
+        <details class="faq-item reveal" style="--d:180ms">
+          <summary>Os cursos têm certificado?</summary>
+          <div class="faq-item__body">
+            Sim. Ao concluir o curso e as actividades obrigatórias, pode emitir o certificado digital na plataforma.
+          </div>
+        </details>
+        <details class="faq-item reveal" style="--d:240ms">
+          <summary>Como funciona o suporte?</summary>
+          <div class="faq-item__body">
+            Tem área de mensagens e fórum para tirar dúvidas com instrutores e interagir com outros alunos. Também pode contactar via WhatsApp nos cursos que o disponibilizam.
+          </div>
+        </details>
+        <details class="faq-item reveal" style="--d:300ms">
+          <summary>Que formas de pagamento aceitam?</summary>
+          <div class="faq-item__body">
+            Aceitamos M-Pesa, transferência e contacto via WhatsApp. Os detalhes aparecem no checkout de cada curso.
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
 
-            // (opcional) bloquear rolagem enquanto o preloader está visível
-            const lockScroll = () => {
-                document.documentElement.style.overflow = 'hidden';
-            };
-            const unlockScroll = () => {
-                document.documentElement.style.overflow = '';
-            };
-            lockScroll();
+  <section class="section" style="padding-top:0">
+    <div class="container-mech">
+      <div class="news reveal">
+        <div>
+          <p class="section__eyebrow">Novidades</p>
+          <h2 class="section__title" style="font-size:1.55rem">Seja o primeiro a saber</h2>
+          <p class="section__lead">Receba aviso quando lançarmos novos cursos.</p>
+        </div>
+        <form class="news__form" action="#" method="post" onsubmit="return false;">
+          <input class="news__input" type="email" name="email" placeholder="O seu email" aria-label="Email" required>
+          <button class="btn-mech btn-mech-dark" type="submit">Notificar-me</button>
+        </form>
+      </div>
+    </div>
+  </section>
 
-            // ---- Medição de progresso (realista) ----
-            const WEIGHTS = {
-                dom: 20,
-                fonts: 10,
-                images: 60,
-                load: 10
-            };
-            let target = 0; // alvo calculado pelos eventos
-            let current = 0; // valor exibido (animação)
-            let rafId = 0;
-            let doneFlag = false;
+  <footer class="site-footer">
+    <div class="container-mech site-footer__inner">
+      <a class="site-footer__brand" href="<?= base_url('/') ?>">
+        <img src="<?= base_url('assets/img/logo.png') ?>" alt="Mechanical Academy">
+      </a>
+      <p class="site-footer__copy">&copy; <?= date('Y') ?> Mechanical Academy. Todos os direitos reservados.</p>
+      <div class="site-footer__social">
+        <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+        <a href="https://www.youtube.com/@MechanicalTecnologia" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+        <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+      </div>
+    </div>
+  </footer>
 
-            const clamp = () => {
-                if (target < 0) target = 0;
-                if (target > 100) target = 100;
-            };
-            const render = () => {
-                const pct = Math.round(current);
-                fillEl.style.width = pct + '%';
-                pctEl.textContent = pct;
-            };
-            const tick = () => {
-                // easing suave em direção ao alvo
-                current += (target - current) * 0.12;
-                render();
-                if (!doneFlag) rafId = requestAnimationFrame(tick);
-            };
+  <script>
+    (function () {
+      const nav = document.getElementById('siteNav');
+      const toggle = document.getElementById('navToggle');
+      const links = document.getElementById('navLinks');
 
-            // 1) DOM pronto
-            const bumpDom = () => {
-                target += WEIGHTS.dom;
-                clamp();
-            };
-            if (document.readyState === 'interactive' || document.readyState === 'complete') bumpDom();
-            else document.addEventListener('DOMContentLoaded', bumpDom, {
-                once: true
-            });
+      const onScroll = () => {
+        if (!nav) return;
+        nav.classList.toggle('is-scrolled', window.scrollY > 12);
+      };
+      onScroll();
+      window.addEventListener('scroll', onScroll, { passive: true });
 
-            // 2) Fontes
-            if (document.fonts && document.fonts.ready) {
-                document.fonts.ready.then(() => {
-                    target += WEIGHTS.fonts;
-                    clamp();
-                }).catch(() => {
-                    target += Math.floor(WEIGHTS.fonts * 0.6);
-                    clamp();
-                });
-            } else {
-                target += Math.floor(WEIGHTS.fonts * 0.6);
-                clamp();
+      if (toggle && links) {
+        toggle.addEventListener('click', () => {
+          const open = links.classList.toggle('is-open');
+          toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+          toggle.innerHTML = open ? '<i class="bi bi-x-lg"></i>' : '<i class="bi bi-list"></i>';
+        });
+        links.querySelectorAll('a').forEach((a) => {
+          a.addEventListener('click', () => {
+            links.classList.remove('is-open');
+            toggle.setAttribute('aria-expanded', 'false');
+            toggle.innerHTML = '<i class="bi bi-list"></i>';
+          });
+        });
+      }
+
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!reduce && 'IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-in');
+              io.unobserve(entry.target);
             }
+          });
+        }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+        document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+      } else {
+        document.querySelectorAll('.reveal').forEach((el) => el.classList.add('is-in'));
+      }
 
-            // 3) Imagens (<img> do DOM)
-            const imgs = Array.from(document.images || []);
-            const total = imgs.length;
-            let loaded = 0;
-            const onImgDone = () => {
-                loaded++;
-                const frac = total ? loaded / total : 1;
-                const imgProgress = WEIGHTS.images * frac;
-                const base = Math.min(target, WEIGHTS.dom + WEIGHTS.fonts);
-                target = base + imgProgress;
-                clamp();
-            };
-            if (total === 0) {
-                target += WEIGHTS.images;
-                clamp();
-            } else {
-                imgs.forEach(img => {
-                    if (img.complete) onImgDone();
-                    else {
-                        img.addEventListener('load', onImgDone, {
-                            once: true
-                        });
-                        img.addEventListener('error', onImgDone, {
-                            once: true
-                        });
-                    }
-                });
-            }
+      // Preloader
+      const preloader = document.getElementById('preloader');
+      const fillEl = document.getElementById('preloaderFill');
+      const pctEl = document.getElementById('preloaderPct');
+      if (!preloader || !fillEl || !pctEl) return;
 
-            // 4) load = fecha a conta (vamos a 100, mas respeitando o mínimo)
-            function hidePreloader() {
-                if (doneFlag) return;
-                doneFlag = true;
+      const MIN = 180;
+      const start = Date.now();
+      let target = 8;
+      let current = 0;
+      let done = false;
+      let raf = 0;
 
-                target = 100;
-                current = 100;
-                render(); // garante 100% visual
+      document.documentElement.style.overflow = 'hidden';
 
-                preloader.style.opacity = '0';
-                preloader.addEventListener('transitionend', () => {
-                    preloader.style.display = 'none';
-                    unlockScroll();
-                }, {
-                    once: true
-                });
+      const render = () => {
+        const pct = Math.round(current);
+        fillEl.style.width = pct + '%';
+        pctEl.textContent = String(pct);
+      };
 
-                if (rafId) cancelAnimationFrame(rafId);
-            }
+      const tick = () => {
+        current += (target - current) * 0.14;
+        render();
+        if (!done) raf = requestAnimationFrame(tick);
+      };
 
-            // fallback: força esconder após MIN + 1000 (se algo travar)
-            const forceHideTimeout = setTimeout(hidePreloader, MIN_PRELOAD_TIME + 1000);
+      const bump = (n) => { target = Math.min(100, target + n); };
 
-            window.addEventListener('load', () => {
-                // soma o peso do load para o indicador
-                target += WEIGHTS.load;
-                clamp();
+      if (document.readyState !== 'loading') bump(25);
+      else document.addEventListener('DOMContentLoaded', () => bump(25), { once: true });
 
-                const elapsed = Date.now() - startTime;
-                const remainingTime = Math.max(0, MIN_PRELOAD_TIME - elapsed);
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(() => bump(15)).catch(() => bump(10));
+      } else bump(10);
 
-                clearTimeout(forceHideTimeout);
-                setTimeout(hidePreloader, remainingTime);
-            }, {
-                once: true
-            });
-
-            // inicia a animação do indicador
-            rafId = requestAnimationFrame(tick);
+      const imgs = Array.from(document.images || []);
+      let loaded = 0;
+      const onImg = () => {
+        loaded += 1;
+        const frac = imgs.length ? loaded / imgs.length : 1;
+        target = Math.max(target, 40 + Math.round(45 * frac));
+      };
+      if (!imgs.length) bump(45);
+      else imgs.forEach((img) => {
+        if (img.complete) onImg();
+        else {
+          img.addEventListener('load', onImg, { once: true });
+          img.addEventListener('error', onImg, { once: true });
         }
+      });
 
-        // iniciar quando o DOM estiver pronto
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initPreloader, {
-                once: true
-            });
-        } else {
-            initPreloader();
-        }
-    </script>
+      const hide = () => {
+        if (done) return;
+        done = true;
+        target = 100;
+        current = 100;
+        render();
+        preloader.classList.add('is-hidden');
+        document.documentElement.style.overflow = '';
+        if (raf) cancelAnimationFrame(raf);
+        setTimeout(() => { preloader.style.display = 'none'; }, 450);
+      };
 
+      const force = setTimeout(hide, MIN + 400);
+      window.addEventListener('load', () => {
+        bump(20);
+        clearTimeout(force);
+        const wait = Math.max(0, MIN - (Date.now() - start));
+        setTimeout(hide, wait);
+      }, { once: true });
+
+      raf = requestAnimationFrame(tick);
+    })();
+
+    (function () {
+      const nodes = document.querySelectorAll('.js-home-promo-countdown');
+      if (!nodes.length) return;
+      const pad = (n) => String(n).padStart(2, '0');
+      const fmt = (secs) => {
+        const d = Math.floor(secs / 86400);
+        const h = Math.floor((secs % 86400) / 3600);
+        const m = Math.floor((secs % 3600) / 60);
+        const s = secs % 60;
+        if (d > 0) return d + 'd ' + pad(h) + ':' + pad(m) + ':' + pad(s);
+        return pad(h) + ':' + pad(m) + ':' + pad(s);
+      };
+      nodes.forEach((el) => {
+        let left = parseInt(el.getAttribute('data-left') || '0', 10);
+        const tick = () => {
+          el.textContent = fmt(Math.max(0, left));
+          if (left <= 0) return;
+          left -= 1;
+          setTimeout(tick, 1000);
+        };
+        tick();
+      });
+    })();
+  </script>
 </body>
 
 </html>

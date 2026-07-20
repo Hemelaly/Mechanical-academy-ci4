@@ -128,564 +128,894 @@ $buyerText = $isCcnaCourse
   ? 'Se voce quer construir base para suporte, infraestrutura, NOC ou certificacao, este checkout passa a mostrar exatamente o que o aluno vai estudar e praticar.'
   : 'No lugar de depoimentos genricos, o checkout mostra o que existe de fato no curso e o que o aluno vai conseguir explorar na plataforma.';
 
+$accentColor = trim((string) ($course->color_course ?? '')) ?: '#0d6efd';
+
+if (!function_exists('mechHexToRgba')) {
+  function mechHexToRgba(string $hex, float $alpha = 1): string
+  {
+    $hex = ltrim(trim($hex), '#');
+    if (strlen($hex) === 3) {
+      $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+    }
+    if (strlen($hex) !== 6 || !ctype_xdigit($hex)) {
+      return "rgba(26, 95, 122, {$alpha})";
+    }
+    $r = hexdec(substr($hex, 0, 2));
+    $g = hexdec(substr($hex, 2, 2));
+    $b = hexdec(substr($hex, 4, 2));
+
+    return "rgba({$r}, {$g}, {$b}, {$alpha})";
+  }
+}
+
+$accentSoft   = mechHexToRgba($accentColor, 0.16);
+$accentBorder = mechHexToRgba($accentColor, 0.38);
+$accentGlow   = mechHexToRgba($accentColor, 0.28);
+
+$listPrice = (float) ($checkoutStats['listPrice'] ?? $course->price_course);
+$effectivePrice = (float) ($checkoutStats['effectivePrice'] ?? $course->price_course);
+$hasPromo = (bool) ($checkoutStats['hasPromo'] ?? false);
+$discountPercent = (int) ($checkoutStats['discountPercent'] ?? 0);
+$promoEndsAt = $checkoutStats['promoEndsAt'] ?? null;
+$promoRemainingSeconds = (int) ($checkoutStats['promoRemainingSeconds'] ?? 0);
+$whatsappUrl = (string) ($checkoutStats['whatsappUrl'] ?? '#');
+$freeLessonsCount = (int) ($checkoutStats['freeLessonsCount'] ?? 0);
+
+$overviewVideoUrlRaw = trim((string) ($course->url_video_course ?? ''));
+$overviewVideoEmbedSrc = null;
+$overviewPlayerId = (int) ($course->id_course ?? 0);
+
+if ($overviewVideoUrlRaw !== '') {
+  if (preg_match('/vimeo\.com\/(?:video\/)?([0-9]+)/', $overviewVideoUrlRaw, $vimeoMatch)) {
+    $overviewVideoEmbedSrc = 'https://player.vimeo.com/video/' . rawurlencode((string) $vimeoMatch[1])
+      . '?badge=0&autopause=0&player_id=' . $overviewPlayerId
+      . '&app_id=58479&title=0&byline=0&portrait=0&autoplay=0';
+  } elseif (preg_match('/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/', $overviewVideoUrlRaw, $youtubeMatch)) {
+    $overviewVideoEmbedSrc = 'https://www.youtube.com/embed/' . rawurlencode((string) $youtubeMatch[1])
+      . '?rel=0&modestbranding=1';
+  }
+}
+
+$courseImageSrc = !empty($course->image_course)
+  ? base_url('assets/instructor/img/courses/' . $course->image_course)
+  : base_url('assets/img/logo.png');
+
 ?>
 
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-BR">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Checkout - <?= $course->title_course ?? '' ?></title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dropzone@5/dist/min/dropzone.min.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <link rel="shortcut icon" href="<?= base_url('assets/img/favicon.png') ?>" width="100%" type="image/x-icon">
+  <title>Checkout · <?= esc($course->title_course ?? '') ?></title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"></noscript>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- kept: existing checkout JS toggles the WhatsApp button icon using a Font Awesome class -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+  <link rel="shortcut icon" href="<?= base_url('assets/img/favicon.png') ?>" type="image/x-icon">
 
   <style>
-    .container {
-      max-width: 980px !important;
+    :root {
+      --ink: #f5f7fa;
+      --ink-soft: rgba(245, 247, 250, 0.62);
+      --page-bg: #050505;
+      --surface: #141414;
+      --line: rgba(255, 255, 255, 0.09);
+      --accent: <?= esc($accentColor) ?>;
+      --accent-soft: <?= esc($accentSoft) ?>;
+      --accent-border: <?= esc($accentBorder) ?>;
+      --accent-glow: <?= esc($accentGlow) ?>;
+    }
+
+    * {
+      box-sizing: border-box;
     }
 
     body {
-      font-family: "Inter", sans-serif;
-      background-color: #fff;
-      color: #000;
+      font-family: 'Sora', sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 500px at 85% -10%, var(--accent-glow, var(--accent-soft)) 0%, transparent 55%),
+        var(--page-bg);
+      min-height: 100vh;
     }
 
-    .hero {
-      color: #fff;
-      position: relative;
-      overflow: hidden;
-      padding: 4rem 1rem;
-      text-align: center;
+    a {
+      color: inherit;
+    }
+
+    .container-mech {
       width: 100%;
-      height: 25vh;
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
     }
 
-    .hero::before,
-    .hero::after {
-      content: "";
-      position: absolute;
+    /* ---------- Top bar ---------- */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(18, 21, 26, 0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .topbar__inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.85rem 0;
+    }
+
+    .topbar__brand img {
+      height: 26px;
+      width: auto;
+      display: block;
+    }
+
+    .topbar__back {
+      color: rgba(255, 255, 255, 0.75);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: color 0.15s ease;
+    }
+
+    .topbar__back:hover {
+      color: #fff;
+    }
+
+    .topbar__secure {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.8rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .topbar__secure i {
+      color: #22c55e;
+    }
+
+    /* ---------- Page header ---------- */
+    .checkout-header {
+      padding: 2.75rem 0 0.5rem;
+    }
+
+    .checkout-header .kicker {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.6rem;
+    }
+
+    .checkout-header h1 {
+      font-weight: 700;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      letter-spacing: -0.01em;
+      margin-bottom: 0;
+      color: #fff;
+    }
+
+    /* ---------- Layout ---------- */
+    .checkout-section {
+      padding: 2rem 0 5rem;
+    }
+
+    .checkout-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 2.5rem;
+      align-items: stretch;
+    }
+
+    .checkout-summary {
+      order: 2;
+    }
+
+    .checkout-form-col {
+      order: 1;
+    }
+
+    @media (min-width: 992px) {
+      .checkout-grid {
+        grid-template-columns: minmax(0, 1fr) 400px;
+      }
+
+      .checkout-summary {
+        order: 1;
+      }
+
+      .checkout-form-col {
+        order: 2;
+        align-self: stretch;
+        height: 100%;
+      }
+    }
+
+    /* ---------- Left: course summary ---------- */
+    .course-thumb {
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+      background: #05070b;
+      box-shadow: 0 20px 45px -25px rgba(0, 0, 0, 0.55);
+      aspect-ratio: 16 / 9;
+    }
+
+    .course-thumb img,
+    .course-thumb iframe {
+      display: block;
       width: 100%;
       height: 100%;
-      top: 0;
-      left: 0;
-      background-image: url(<?= base_url('assets/instructor/img/courses/' . $course->image_course) ?>);
-      background-size: cover;
-      background-position: center center;
+      border: 0;
     }
 
-    .hero h1 {
-      font-weight: 800;
-      font-size: 2.8rem;
+    .course-thumb img {
+      object-fit: cover;
     }
 
-    .hero h1 span {
-      color: #ffcc00;
-    }
-
-    .hero small {
-      display: block;
+    .summary-block-heading {
+      font-weight: 700;
       font-size: 1rem;
-      color: #ccc;
-      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+      color: #fff;
     }
 
-    .course-section {
-      padding: 4rem 1rem;
+    .summary-title {
+      font-weight: 700;
+      font-size: 1.5rem;
+      letter-spacing: -0.01em;
+      margin-bottom: 0.9rem;
+      color: #fff;
     }
 
-    .course-thumb {
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    .summary-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1.1rem;
+      color: var(--ink-soft);
+      font-size: 0.92rem;
+      font-weight: 500;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--line);
     }
 
-    .features {
-      margin-top: 2rem;
-      list-style: none;
-      padding: 0;
+    .summary-meta .item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
     }
 
-    .features li {
-      margin-bottom: 0.5rem;
-      padding-left: 1.2rem;
-      position: relative;
-    }
-
-    .features li::before {
-      content: "•";
-      color: #ffcc00;
-      position: absolute;
-      left: 0;
-      font-size: 1.2rem;
-      line-height: 1;
-    }
-
-    .testimonial {
-      background-color: #f8f9fa;
-      border-radius: 8px;
-      padding: 1rem;
-      margin-top: 1rem;
-      font-size: 0.95rem;
-      border: 1px solid #eee;
-    }
-
-    .testimonial strong {
-      display: block;
-      margin-top: 0.5rem;
-    }
-
-    .features li::before {
-      content: "\2022";
+    .summary-meta i {
+      color: var(--accent);
     }
 
     .course-summary {
-      color: #495057;
-      font-size: 1.02rem;
+      color: var(--ink-soft);
+      font-size: 1rem;
       line-height: 1.7;
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem;
     }
 
-    .metric-card {
-      background: #f8f9fa;
-      border: 1px solid #eceef1;
-      border-radius: 12px;
-      height: 100%;
-      padding: 1rem;
-    }
-
-    .metric-label {
-      color: #6c757d;
-      display: block;
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      margin-bottom: 0.35rem;
-      text-transform: uppercase;
-    }
-
-    .metric-value {
-      color: #111827;
-      font-size: 1.2rem;
-      font-weight: 800;
-      line-height: 1.2;
-      margin: 0;
-    }
-
-    .value-card {
-      background: linear-gradient(180deg, #fbfbfb 0%, #f4f7fb 100%);
-      border: 1px solid #e9ecef;
-      border-radius: 14px;
-      margin-top: 1rem;
-      padding: 1.25rem;
-    }
-
-    .value-card p {
-      color: #495057;
-      line-height: 1.65;
-      margin-bottom: 0;
-    }
-
-    .gradient-bg {
-      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-    }
-
-    .course-card {
-      box-shadow: 0px 10px 0px 0px #dcdcdcff;
-      transition: transform 0.3s ease;
-    }
-
-    .course-card:hover {
-      transform: translateY(-5px);
-    }
-
-    .header-bg {
-      background: url(<?= base_url('assets/instructor/img/courses/' . $course->image_course) ?>) center/cover no-repeat;
-      position: relative;
-    }
-
-    .header-bg::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-    }
-
-    .sticky-top {
-      position: sticky;
-      top: 20px;
-    }
-
-    .text-green-700 {
-      color: #15803d;
-    }
-
-    .bg-green-50 {
-      background-color: #f0fdf4;
-    }
-
-    .bg-green-700 {
-      background-color: #15803d;
-    }
-
-    .text-blue-500 {
-      color: #3b82f6;
-    }
-
-    .bg-blue-500 {
-      background-color: #3b82f6;
-    }
-
-    .hover\:bg-blue-600:hover {
-      background-color: #2563eb;
-    }
-
-    .border-gray-300 {
-      border-color: #d1d5db;
-    }
-
-    .focus\:ring-blue-500:focus {
-      box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
-    }
-
-    details summary {
+    .learn-list-checkout {
       list-style: none;
-    }
-
-    details summary::-webkit-details-marker {
-      display: none;
-    }
-
-    details[open] summary svg {
-      transform: rotate(180deg);
-    }
-
-    .divider {
-      display: flex;
-      align-items: center;
-      margin: 20px 0;
-      color: #6c757d;
-    }
-
-    .divider::before,
-    .divider::after {
-      content: "";
-      flex: 1;
-      height: 1px;
-      background-color: #444;
-    }
-
-    .divider span {
-      padding: 0 15px;
-    }
-
-    .dropzone {
-      min-height: 200px;
-      border: 2px dashed #0d6efd;
-      border-radius: 10px;
-      padding: 20px;
+      margin: 0 0 2rem;
+      padding: 0;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
+      gap: 0.9rem;
     }
 
-    .dropzone:hover,
-    .dropzone.dragover {
-      background: #ecececff;
-      border-color: #0d6efd;
+    .learn-list-checkout li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      font-size: 0.96rem;
+      line-height: 1.5;
+      color: var(--ink);
     }
 
-    .dropzone i {
-      font-size: 3rem;
-      margin-bottom: 15px;
-      color: #0d6efd;
-    }
-
-    .preview-container {
-      display: none;
-      margin-top: 20px;
-      text-align: center;
-    }
-
-    .preview-image {
-      max-width: 100%;
-      max-height: 200px;
-      border-radius: 8px;
-      margin-bottom: 15px;
-    }
-
-    .rounded {
-      border-radius: 10px !important;
-    }
-
-    .success-checkout-box {
-      background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
-      border: 1px solid #d1fae5;
-      border-radius: 18px;
-      padding: 2rem 1.5rem;
-      text-align: center;
-      box-shadow: 0 12px 35px rgba(25, 135, 84, 0.08);
-    }
-
-    .success-checkout-box .icon {
-      width: 86px;
-      height: 86px;
+    .learn-list-checkout i {
+      flex: 0 0 auto;
+      width: 22px;
+      height: 22px;
       border-radius: 50%;
-      background: #d1fae5;
-      color: #198754;
+      background: var(--accent-soft);
+      color: var(--accent);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 2.4rem;
+      font-size: 0.72rem;
+      margin-top: 0.1rem;
+    }
+
+    .free-lessons-note {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-border);
+      color: var(--ink);
+      border-radius: 12px;
+      padding: 0.85rem 1.1rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-bottom: 2rem;
+    }
+
+    .free-lessons-note i {
+      color: var(--accent);
+      font-size: 1.1rem;
+    }
+
+    .price-line {
+      display: flex;
+      align-items: baseline;
+      gap: 0.7rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+
+    .price-line .list-price {
+      text-decoration: line-through;
+      color: var(--ink-soft);
+      font-size: 1rem;
+    }
+
+    .price-line .effective-price {
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: #fff;
+    }
+
+    .price-line .promo-badge {
+      background: rgba(220, 53, 69, 0.18);
+      color: #ff8a95;
+      font-size: 0.76rem;
+      font-weight: 700;
+      padding: 0.15rem 0.55rem;
+      border-radius: 999px;
+    }
+
+    .trust-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.4rem;
+      padding-top: 1.75rem;
+      border-top: 1px solid var(--line);
+      color: var(--ink-soft);
+      font-size: 0.86rem;
+    }
+
+    .trust-row .item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .trust-row i {
+      color: var(--accent);
+      font-size: 1.05rem;
+    }
+
+    /* ---------- Right: purchase card / form ---------- */
+    .checkout-card {
+      position: sticky;
+      top: 5.5rem;
+      background: #161616;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 1.85rem;
+      box-shadow: 0 30px 70px -35px rgba(0, 0, 0, 0.7);
+    }
+
+    @media (max-width: 991.98px) {
+      .checkout-card {
+        position: static;
+        top: auto;
+      }
+    }
+
+    .checkout-card .price-block {
+      margin-bottom: 1.4rem;
+    }
+
+    .checkout-card .price-block .list-price {
+      text-decoration: line-through;
+      color: var(--ink-soft);
+      font-size: 0.95rem;
+      margin-bottom: 0.1rem;
+      display: block;
+    }
+
+    .checkout-card .price-block .effective-price {
+      font-weight: 700;
+      font-size: 2.1rem;
+      letter-spacing: -0.01em;
+      color: #fff;
+      display: flex;
+      align-items: baseline;
+      gap: 0.6rem;
+    }
+
+    .checkout-card .price-block .effective-price small {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--ink-soft);
+    }
+
+    .checkout-card .promo-note {
+      color: #ff8a95;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 0.35rem;
+      margin-bottom: 0;
+    }
+
+    .checkout-card .free-note {
+      color: #6ea8fe;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 0.5rem;
+      margin-bottom: 0;
+    }
+
+    .form-control,
+    .form-select {
+      font-family: 'Sora', sans-serif;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 0.65rem 0.9rem;
+      font-size: 0.95rem;
+      background: #0a0a0a;
+      color: #fff;
+    }
+
+    .form-control::placeholder {
+      color: rgba(255, 255, 255, 0.35);
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+      background: #0a0a0a;
+      color: #fff;
+    }
+
+    .field-label {
+      font-weight: 600;
+      font-size: 0.88rem;
+      margin-bottom: 0.4rem;
+      display: block;
+      color: #fff;
+    }
+
+    .coupon-group {
+      margin-bottom: 1.4rem;
+    }
+
+    .coupon-group .btn-mech-outline {
+      border-radius: 0 10px 10px 0;
+    }
+
+    .coupon-group .form-control {
+      border-radius: 10px 0 0 10px;
+    }
+
+    .payment-methods {
+      border: 0;
+      padding: 0;
+      margin-bottom: 1.1rem;
+    }
+
+    .payment-methods legend {
+      font-weight: 700;
+      font-size: 0.94rem;
+      margin-bottom: 0.85rem;
+      padding: 0;
+    }
+
+    .pay-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 0.85rem 1rem;
+      margin-bottom: 0.6rem;
+      cursor: pointer;
+      transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.22s cubic-bezier(0.34, 1.3, 0.64, 1), box-shadow 0.22s ease;
+    }
+
+    .pay-option:last-child {
+      margin-bottom: 0;
+    }
+
+    .pay-option:hover {
+      border-color: var(--accent-border);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px -18px rgba(18, 21, 26, 0.35);
+    }
+
+    .pay-option input[type="radio"]:checked~.pay-option__body {
+      color: var(--ink);
+    }
+
+    .pay-option:has(input[type="radio"]:checked) {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .pay-option input[type="radio"] {
+      margin-top: 0.25rem;
+      accent-color: var(--accent);
+      width: 16px;
+      height: 16px;
+      flex: 0 0 auto;
+    }
+
+    .pay-option__body strong {
+      display: block;
+      font-size: 0.92rem;
+      font-weight: 700;
+      margin-bottom: 0.1rem;
+      color: #fff;
+    }
+
+    .pay-option__body span {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--ink-soft);
+    }
+
+    .mpesa-help,
+    .transfer-help-box,
+    .whatsapp-help-box {
+      border-radius: 12px;
+      padding: 0.95rem 1.1rem;
+      font-size: 0.88rem;
+    }
+
+    .btn-mech {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.55rem;
+      border-radius: 999px;
+      padding: 0.85rem 1.5rem;
+      font-weight: 600;
+      font-size: 0.96rem;
+      text-decoration: none;
+      border: 1px solid transparent;
+      transition: transform 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+      cursor: pointer;
+      line-height: 1.2;
+      width: 100%;
+    }
+
+    .btn-mech-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-mech-primary:hover {
+      transform: translateY(-1px);
+      color: #fff;
+    }
+
+    .btn-mech-outline {
+      background: transparent;
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.22);
+    }
+
+    .btn-mech-outline:hover {
+      border-color: rgba(255, 255, 255, 0.55);
+      background: rgba(255, 255, 255, 0.06);
+      color: #fff;
+    }
+
+    .btn-mech-success {
+      background: #16a34a;
+      color: #fff;
+    }
+
+    .btn-mech-success:hover {
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    .terms-note {
+      font-size: 0.78rem;
+      color: var(--ink-soft);
+      text-align: center;
+      margin-top: 1.1rem;
+      margin-bottom: 0;
+    }
+
+    .terms-note a {
+      color: #6ea8fe;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    /* ---------- Alerts / success box ---------- */
+    .alert-mech {
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .success-checkout-box {
+      background: rgba(22, 163, 74, 0.12);
+      border: 1px solid rgba(22, 163, 74, 0.35);
+      border-radius: 16px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+    }
+
+    .success-checkout-box .icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: rgba(22, 163, 74, 0.22);
+      color: #86efac;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.1rem;
       margin-bottom: 1rem;
     }
 
     .success-checkout-box h4 {
-      font-weight: 800;
-      margin-bottom: 0.75rem;
-      color: #146c43;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+      color: #86efac;
+      font-size: 1.15rem;
     }
 
     .success-checkout-box p {
-      color: #375a4a;
-      margin-bottom: 0.75rem;
-      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 0.6rem;
+      font-size: 0.94rem;
     }
 
-    footer {
+    footer.site-footer {
       text-align: center;
       padding: 2rem 1rem;
-      font-size: 0.9rem;
-      color: #777;
+      font-size: 0.85rem;
+      color: var(--ink-soft);
     }
 
-    @media (max-width: 991px) {
-      .hero {
-        padding: 3rem 1rem;
-      }
-
-      .hero h1 {
-        font-size: 2.2rem;
-      }
-
-      .price-box {
-        position: static;
-        margin-top: 2rem;
-      }
-    }
-
+    /* ---------- Motion ---------- */
     :root {
-      --pre-bg: #0b0f19;
-      --pre-fg: #fff;
-      --pre-accent: #7c5cff;
-      --pre-z: 9999;
-      --fade-ms: 360ms;
+      --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+      --ease-spring: cubic-bezier(0.34, 1.3, 0.64, 1);
     }
 
-    #preloader {
-      position: fixed;
-      inset: 0;
-      z-index: var(--pre-z);
-      display: grid;
-      place-items: center;
-      color: var(--pre-fg);
-      background:
-        radial-gradient(1000px 700px at 10% 10%, #11162a 0%, transparent 60%),
-        radial-gradient(1000px 700px at 90% 90%, #0e1330 0%, transparent 60%),
-        var(--pre-bg);
-      transition: opacity var(--fade-ms) ease, visibility var(--fade-ms) ease;
-    }
-
-    #preloader.is-hidden {
+    .checkout-header .kicker,
+    .checkout-header h1 {
       opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
+      transform: translateY(14px);
+      animation: riseIn 0.7s var(--ease-out) forwards;
     }
 
-    .preloader__inner {
-      display: grid;
-      gap: 14px;
-      place-items: center;
-      text-align: center;
+    .checkout-header h1 { animation-delay: 0.1s; }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity 0.65s var(--ease-out), transform 0.65s var(--ease-out);
+      transition-delay: var(--d, 0ms);
     }
 
-    .preloader__logo {
-      width: 84px;
-      height: auto;
-      filter: drop-shadow(0 2px 10px rgba(0, 0, 0, .35));
+    .reveal.is-in {
+      opacity: 1;
+      transform: translateY(0);
     }
 
-    .preloader__spinner {
-      width: 56px;
-      height: 56px;
+    .checkout-card .btn,
+    .btn-mech,
+    button[type="submit"] {
+      transition: transform 0.2s var(--ease-spring), box-shadow 0.2s ease, background-color 0.18s ease;
     }
 
-    .preloader__track {
-      fill: none;
-      stroke: rgba(255, 255, 255, .18);
-      stroke-width: 6;
+    .checkout-card .btn:active,
+    button[type="submit"]:active {
+      transform: scale(0.97);
     }
 
-    .preloader__arc {
-      fill: none;
-      stroke: var(--pre-accent);
-      stroke-linecap: round;
-      stroke-width: 6;
-      stroke-dasharray: 110 126;
-      transform-origin: 50% 50%;
-      animation: spin 1.05s linear infinite, dash 1.5s ease-in-out infinite;
-    }
-
-    .preloader__bar {
-      width: min(320px, 70vw);
-      height: 8px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, .15);
+    .course-thumb {
       overflow: hidden;
+      transition: transform 0.35s var(--ease-out);
     }
 
-    .preloader__bar__fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, var(--pre-accent), #9a7bff 60%, var(--pre-accent));
-      border-radius: 999px;
-      transform: translateZ(0);
+    .course-thumb img {
+      transition: transform 0.5s var(--ease-out);
     }
 
-    .preloader__text {
-      font: 600 .95rem/1.2 system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial;
-      opacity: .9;
+    .checkout-summary:hover .course-thumb:not(:has(iframe)) img {
+      transform: scale(1.03);
     }
 
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    @keyframes dash {
-      0% {
-        stroke-dasharray: 1 235;
-        stroke-dashoffset: 0;
-      }
-
-      50% {
-        stroke-dasharray: 120 115;
-        stroke-dashoffset: -25;
-      }
-
-      100% {
-        stroke-dasharray: 1 235;
-        stroke-dashoffset: -235;
-      }
+    @keyframes riseIn {
+      to { opacity: 1; transform: translateY(0); }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .preloader__arc {
-        animation: none;
+      .reveal,
+      .checkout-header .kicker,
+      .checkout-header h1,
+      .course-thumb img {
+        animation: none !important;
+        transition: none !important;
+        opacity: 1 !important;
+        transform: none !important;
       }
     }
   </style>
 </head>
 
 <body>
-  <!-- PRELOADER -->
-  <div id="preloader" role="status" aria-live="polite" aria-label="Carregando conteúdo">
-    <div class="preloader__inner">
-      <img src="<?= base_url('assets/img/logo.png') ?>" alt="Minha Marca" class="preloader__logo h-auto w-50" />
 
-      <div class="preloader__bar">
-        <div class="preloader__bar__fill" id="preloaderFill" style="width:0%"></div>
-      </div>
-      <p class="preloader__text"><span id="preloaderPct">0</span>%</p>
+  <?= view('partials/promo_urgency', [
+      'hasPromo' => $hasPromo,
+      'promoRemainingSeconds' => $promoRemainingSeconds,
+      'discountPercent' => $discountPercent,
+      'promoEndsAt' => $promoEndsAt,
+      'listPrice' => $listPrice,
+      'promoPrice' => $hasPromo ? $effectivePrice : null,
+      'courseTitle' => $course->title_course ?? '',
+      'promoCtaHref' => '#checkout-form',
+      'promoCtaLabel' => 'Garantir oferta',
+  ]) ?>
+
+  <div class="topbar">
+    <div class="container-mech topbar__inner">
+      <a class="topbar__back" href="<?= base_url('/courses/' . (int) ($course->id_course ?? 0)) ?>">
+        <i class="bi bi-arrow-left"></i> Voltar ao curso
+      </a>
+      <a class="topbar__brand" href="<?= base_url('/') ?>">
+        <img src="<?= base_url('assets/img/logo.png') ?>" alt="Mechanical Academy">
+      </a>
+      <span class="topbar__secure d-none d-sm-inline-flex"><i class="bi bi-shield-lock-fill"></i> Pagamento seguro</span>
     </div>
   </div>
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="container"></div>
-  </section>
+  <header class="checkout-header">
+    <div class="container-mech">
+      <p class="kicker">Finalizar inscrição</p>
+      <h1><?= esc($course->title_course ?? '') ?></h1>
+    </div>
+  </header>
 
-  <!-- CONTENT -->
-  <section class="course-section">
-    <div class="container">
-      <div class="row g-5 align-items-start">
-        <!-- LEFT -->
-        <div class="col-lg-7">
-          <div class="course-thumb mb-4">
-            <img src="<?= base_url('assets/instructor/img/courses/' . $course->image_course) ?>" alt="<?= esc($course->title_course ?? 'Curso') ?>" class="img-fluid rounded w-100">
+  <section class="checkout-section">
+    <div class="container-mech">
+      <div class="checkout-grid">
+
+        <!-- LEFT: COURSE SUMMARY -->
+        <div class="checkout-summary reveal">
+          <div class="course-thumb">
+            <?php if ($overviewVideoEmbedSrc): ?>
+              <iframe
+                title="Vídeo de visão geral · <?= esc($course->title_course ?? 'Curso', 'attr') ?>"
+                src="<?= esc($overviewVideoEmbedSrc, 'attr') ?>"
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowfullscreen
+                loading="lazy"
+                referrerpolicy="no-referrer"
+              ></iframe>
+            <?php else: ?>
+              <img src="<?= esc($courseImageSrc) ?>" alt="<?= esc($course->title_course ?? 'Curso') ?>">
+            <?php endif; ?>
           </div>
 
-          <h3 class="fw-bold mb-3"><?= esc($course->title_course) ?></h3>
+          <div class="summary-meta">
+            <?php if ($totalHoursLabel !== '' && $totalHoursLabel !== '0 Horas'): ?>
+              <span class="item"><i class="bi bi-clock"></i> <?= esc($totalHoursLabel) ?></span>
+            <?php endif; ?>
+            <?php if ($moduleCount > 0): ?>
+              <span class="item"><i class="bi bi-collection"></i> <?= $moduleCount ?> módulos</span>
+            <?php endif; ?>
+            <?php if ($lessonCount > 0): ?>
+              <span class="item"><i class="bi bi-play-circle"></i> <?= $lessonCount ?> aulas</span>
+            <?php endif; ?>
+            <?php if ($projectCount > 0): ?>
+              <span class="item"><i class="bi bi-diagram-3"></i> <?= $projectCount ?> projeto<?= $projectCount > 1 ? 's' : '' ?></span>
+            <?php endif; ?>
+          </div>
 
           <?php if ($courseSummary !== ''): ?>
             <p class="course-summary"><?= esc($courseSummary) ?></p>
           <?php endif; ?>
 
-          <?php if (! empty($metricCards)): ?>
-            <div class="row g-3 mb-3">
-              <?php foreach ($metricCards as $metricCard): ?>
-                <div class="col-sm-4">
-                  <div class="metric-card">
-                    <span class="metric-label"><?= esc($metricCard['label']) ?></span>
-                    <p class="metric-value"><?= esc($metricCard['value']) ?></p>
-                  </div>
-                </div>
+          <?php if (! empty($learningItems)): ?>
+            <p class="summary-block-heading">O que você vai aprender</p>
+            <ul class="learn-list-checkout">
+              <?php foreach ($learningItems as $learningItem): ?>
+                <li><i class="bi bi-check-lg"></i><span><?= esc($learningItem) ?></span></li>
               <?php endforeach; ?>
+            </ul>
+          <?php endif; ?>
+
+          <?php if ($freeLessonsCount > 0): ?>
+            <div class="free-lessons-note">
+              <i class="bi bi-play-circle-fill"></i>
+              <span>Inclui <?= $freeLessonsCount ?> aula<?= $freeLessonsCount > 1 ? 's' : '' ?> grátis para experimentar antes de decidir.</span>
             </div>
           <?php endif; ?>
 
-          <h5 class="fw-bold mt-4 mb-3">O que voce vai encontrar neste curso:</h5>
-
-          <ul class="features">
-            <?php foreach ($featureItems as $featureItem): ?>
-              <li><?= esc($featureItem) ?></li>
-            <?php endforeach; ?>
-          </ul>
-
-          <h5 class="fw-bold mt-5 mb-3">Por que esta compra faz sentido:</h5>
-
-          <div class="value-card">
-            <h6 class="fw-bold mb-2"><?= esc($valueHeading) ?></h6>
-            <p><?= esc($valueText) ?></p>
+          <div class="price-line">
+            <?php if ($hasPromo): ?>
+              <span class="list-price"><?= number_format($listPrice, 2, ",", ".") ?> MZN</span>
+              <span class="effective-price"><?= number_format($effectivePrice, 2, ",", ".") ?> MZN</span>
+              <span class="promo-badge">-<?= $discountPercent ?>%</span>
+            <?php else: ?>
+              <span class="effective-price"><?= number_format($effectivePrice, 2, ",", ".") ?> MZN</span>
+            <?php endif; ?>
+            <span class="text-secondary" style="font-size:0.88rem;">pagamento único</span>
           </div>
 
-          <div class="value-card">
-            <h6 class="fw-bold mb-2"><?= esc($buyerHeading) ?></h6>
-            <p><?= esc($buyerText) ?></p>
+          <div class="trust-row">
+            <span class="item"><i class="bi bi-shield-check"></i> Pagamento seguro</span>
+            <span class="item"><i class="bi bi-infinity"></i> Acesso vitalício</span>
+            <span class="item"><i class="bi bi-mortarboard"></i> Certificado digital</span>
           </div>
         </div>
 
-        <!-- RIGHT -->
-        <div class="col-lg-5">
-          <div class="course-card shadow bg-white rounded-3 p-4 sticky-top">
-            <div class="mb-4">
-              <p class="h2 fw-bold text-dark mb-1"><?= number_format($course->price_course, 2, ",", ".") ?> MZN</p>
+        <!-- RIGHT: FORM -->
+        <div class="checkout-form-col reveal" style="--d:120ms">
+          <div class="checkout-card">
+            <div class="price-block">
+              <?php if ($hasPromo): ?>
+                <span class="list-price"><?= number_format($listPrice, 2, ",", ".") ?> MZN</span>
+                <p class="effective-price mb-0">
+                  <?= number_format($effectivePrice, 2, ",", ".") ?> <small>MZN</small>
+                  <span class="promo-badge">-<?= $discountPercent ?>%</span>
+                </p>
+                <?php if ($promoRemainingSeconds > 0): ?>
+                  <p class="promo-note">Oferta expira em <strong class="js-promo-inline-countdown" data-left="<?= $promoRemainingSeconds ?>">--:--:--</strong></p>
+                <?php else: ?>
+                  <p class="promo-note">Preço promocional ativo</p>
+                <?php endif; ?>
+              <?php else: ?>
+                <p class="effective-price mb-0"><?= number_format($effectivePrice, 2, ",", ".") ?> <small>MZN</small></p>
+              <?php endif; ?>
+              <?php if ($freeLessonsCount > 0): ?>
+                <p class="free-note">Inclui <?= $freeLessonsCount ?> aula<?= $freeLessonsCount > 1 ? 's' : '' ?> grátis</p>
+              <?php endif; ?>
             </div>
 
             <?php if ($isEnrolled): ?>
-              <div class="alert alert-success text-center">
-                <h4 class="alert-heading">Você já está inscrito neste curso!</h4>
-                <p>Já tem acesso completo ao curso <?= $course->title_course ?>.</p>
-                <hr>
-                <a href="<?= base_url('/student/dashboard/inscricoes') ?>" class="btn btn-primary">Ir para os meus cursos</a>
+              <div class="alert-mech">
+                <h4 class="fw-bold mb-2" style="font-size:1.05rem;">Você já está inscrito neste curso!</h4>
+                <p class="text-secondary mb-3">Já tem acesso completo ao curso <?= esc($course->title_course) ?>.</p>
+                <a href="<?= base_url('/student/dashboard/inscricoes') ?>" class="btn-mech btn-mech-primary">Ir para os meus cursos</a>
               </div>
 
             <?php elseif (($user) && ($user->role == "instructor")): ?>
-              <div class="alert alert-warning text-center">
-                <h4 class="alert-heading">Você é um instrutor!</h4>
-                <p>Não pode se inscrever neste curso.</p>
-                <hr>
-                <a href="<?= base_url('/instructor/dashboard/inscricoes') ?>" class="btn btn-primary">Ir para os meus cursos</a>
+              <div class="alert-mech">
+                <h4 class="fw-bold mb-2" style="font-size:1.05rem;">Você é um instrutor!</h4>
+                <p class="text-secondary mb-3">Não pode se inscrever neste curso.</p>
+                <a href="<?= base_url('/instructor/dashboard/inscricoes') ?>" class="btn-mech btn-mech-primary">Ir para os meus cursos</a>
               </div>
 
             <?php else: ?>
@@ -693,87 +1023,185 @@ $buyerText = $isCcnaCourse
                 <form id="checkout-form" action="<?= base_url('mpesa/send') ?>" method="post" class="needs-validation" novalidate>
                   <?= csrf_field() ?>
 
-                  <div class="mb-3">
+                  <div class="coupon-group">
                     <div class="input-group">
-                      <input type="text" class="form-control text-sm" id="coupon" placeholder="Código do cupom">
-                      <button class="btn btn-outline-secondary" type="button">Aplicar</button>
+                      <input type="text" class="form-control" id="coupon" placeholder="Código do cupom">
+                      <button class="btn-mech btn-mech-outline" style="width:auto;" type="button">Aplicar</button>
                     </div>
                   </div>
 
                   <?php if (($user) && ($user->role !== "instructor")): ?>
-                    <input type="hidden" name="email" value="<?= $user->email ?>">
-                    <input type="hidden" name="username" value="<?= $user->username ?>">
-
+                    <input type="hidden" name="email" value="<?= esc($user->email) ?>">
+                    <input type="hidden" name="username" value="<?= esc($user->username) ?>">
                   <?php else: ?>
-                    <a href="<?= base_url('/login') ?>" type="button" class="w-100 mb-3 nav-link text-primary fw-bold text-end">
-                      Fazer login
-                    </a>
+                    <div class="d-flex justify-content-end mb-2">
+                      <a href="<?= base_url('/login') ?>" class="fw-bold text-decoration-none" style="color:var(--accent); font-size:0.86rem;">
+                        Já tem conta? Fazer login
+                      </a>
+                    </div>
 
                     <div class="mb-3">
-                      <input type="email" name="email" class="form-control" id="email" placeholder="Endereço de e-mail" required>
+                      <label class="field-label" for="email">Endereço de e-mail</label>
+                      <input type="email" name="email" class="form-control" id="email" placeholder="seuemail@exemplo.com" required>
                       <div class="invalid-feedback">
                         Por favor, insira um e-mail válido.
                       </div>
                     </div>
 
                     <div class="mb-3">
-                      <input type="text" name="username" class="form-control" id="name" placeholder="Nome e sobrenome" required>
+                      <label class="field-label" for="name">Nome e sobrenome</label>
+                      <input type="text" name="username" class="form-control" id="name" placeholder="O seu nome completo" required>
                       <div class="invalid-feedback">
                         Por favor, insira o seu nome e sobrenome.
                       </div>
                     </div>
 
-                    <p class="small text-muted">
+                    <p class="small text-secondary mb-3">
                       O e-mail e o nome informados serão usados para criar a sua conta automaticamente após a confirmação do pagamento.
                     </p>
                   <?php endif; ?>
 
-                  <div class="mb-3 border rounded p-3">
-                    <div class="d-flex flex-column gap-4">
-                      <div class="form-check">
-                        <input class="form-check-input" type="radio" name="payment" id="mobile" checked>
-                        <label class="form-check-label" for="mobile">
-                          Pagar com M-Pesa
-                        </label>
+                  <fieldset class="payment-methods">
+                    <legend>Escolha a forma de pagamento</legend>
+
+                    <label class="pay-option" for="pay_mpesa">
+                      <input class="form-check-input" type="radio" name="payment_method_ui" id="pay_mpesa" value="mpesa" checked>
+                      <span class="pay-option__body">
+                        <strong>M-Pesa</strong>
+                        <span>Pagamento instantâneo pelo telemóvel</span>
+                      </span>
+                    </label>
+
+                    <label class="pay-option" for="pay_transfer">
+                      <input class="form-check-input" type="radio" name="payment_method_ui" id="pay_transfer" value="transfer">
+                      <span class="pay-option__body">
+                        <strong>Transferência / Comprovativo</strong>
+                        <span>Pague e envie o comprovativo na área do aluno</span>
+                      </span>
+                    </label>
+
+                    <label class="pay-option" for="pay_whatsapp">
+                      <input class="form-check-input" type="radio" name="payment_method_ui" id="pay_whatsapp" value="whatsapp">
+                      <span class="pay-option__body">
+                        <strong>Falar com a equipa comercial (WhatsApp)</strong>
+                        <span>+258 84 262 7671 — ajuda com fatura, empresas e pagamento</span>
+                      </span>
+                    </label>
+                  </fieldset>
+
+                  <div id="mpesa-fields">
+                    <label for="client_number" class="field-label">Número de telefone com M-Pesa</label>
+                    <input type="tel" class="form-control mb-2" id="client_number" name="client_number" placeholder="84 000 0000" required>
+                    <div class="invalid-feedback">
+                      Por favor, insira o seu número de telefone com M-Pesa.
+                    </div>
+                    <p class="small text-secondary mb-3">
+                      Depois de enviar, confirme a solicitação no pop-up do seu celular com a sua senha/PIN do M-Pesa.
+                    </p>
+                  </div>
+
+                  <div id="transfer-help" class="transfer-help-box mb-3 d-none" style="background:var(--accent-soft); border:1px solid var(--accent-border); color:var(--ink);">
+                    Após criar a conta / login, vá a <strong>Checkout do curso</strong> no painel do aluno e envie o comprovativo para aprovação.
+                    <?php if ($user): ?>
+                      <div class="mt-2">
+                        <a class="btn-mech btn-mech-outline" style="width:auto; padding:0.5rem 1rem; font-size:0.85rem;" href="<?= site_url('student/dashboard/checkout/' . (int) $course->id_course) ?>">Enviar comprovativo</a>
                       </div>
+                    <?php endif; ?>
+                  </div>
+
+                  <div id="whatsapp-help" class="whatsapp-help-box mb-3 d-none" style="background:rgba(22,163,74,0.12); border:1px solid rgba(22,163,74,0.35); color:#86efac;">
+                    Prefere apoio humano? Fale connosco no WhatsApp comercial.
+                    <div class="mt-2">
+                      <a class="btn-mech btn-mech-success" style="width:auto; padding:0.5rem 1rem; font-size:0.85rem;" href="<?= esc($whatsappUrl) ?>" target="_blank" rel="noopener">
+                        Abrir WhatsApp +258 84 262 7671
+                      </a>
                     </div>
                   </div>
 
-                  <label for="client_number" class="form-label fw-semibold">Número de telefone com M-Pesa</label>
-                  <input type="tel" class="form-control mb-3" id="client_number" name="client_number" placeholder="84 000 0000" required>
-                  <div class="invalid-feedback">
-                    Por favor, insira o seu número de telefone com M-Pesa.
-                  </div>
+                  <input type="hidden" name="id_course" value="<?= (int) $course->id_course ?>">
+                  <input type="hidden" name="amount_payment" value="<?= $effectivePrice ?>">
 
-                  <p class="small text-muted mb-3">
-                    Depois de enviar, confirme a solicitação no pop-up do seu celular com a sua senha/PIN do M-Pesa.
-                  </p>
-
-                  <input type="hidden" name="id_course" value="<?= $course->id_course ?>">
-                  <input type="hidden" name="amount_payment" value="<?= $course->price_course ?>">
-
-                  <button type="submit" class="btn bg-blue-500 text-white w-100 py-2 fw-semibold hover:bg-blue-600">
+                  <button type="submit" id="checkout-submit-btn" class="btn-mech btn-mech-primary">
                     Finalizar a minha compra
-                    <i class="fas fa-arrow-right ms-2"></i>
+                    <i class="bi bi-arrow-right"></i>
                   </button>
 
-                  <p class="small text-muted text-center mt-3">
+                  <?php if ($freeLessonsCount > 0): ?>
+                    <a href="<?= site_url('courses/' . (int) $course->id_course . '/trial') ?>" class="btn-mech btn-mech-outline mt-2">
+                      Experimentar <?= $freeLessonsCount ?> aula<?= $freeLessonsCount > 1 ? 's' : '' ?> grátis
+                    </a>
+                  <?php endif; ?>
+
+                  <p class="terms-note">
                     Ao finalizar a compra, você concorda com os nossos
-                    <a href="#" class="text-blue-500 text-decoration-none">Termos de Serviço</a>
+                    <a href="#">Termos de Serviço</a>
                   </p>
                 </form>
               </div>
             <?php endif; ?>
           </div>
         </div>
+
       </div>
     </div>
   </section>
 
+  <footer class="site-footer">
+    &copy; <?= date('Y') ?> Mechanical Academy. Todos os direitos reservados.
+  </footer>
+
   <!-- SCRIPTS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+  <script>
+    (function () {
+      const radios = document.querySelectorAll('input[name="payment_method_ui"]');
+      const mpesaFields = document.getElementById('mpesa-fields');
+      const transferHelp = document.getElementById('transfer-help');
+      const whatsappHelp = document.getElementById('whatsapp-help');
+      const submitBtn = document.getElementById('checkout-submit-btn');
+      const clientNumber = document.getElementById('client_number');
+      const form = document.getElementById('checkout-form');
+      const whatsappUrl = <?= json_encode($whatsappUrl ?? '#') ?>;
+
+      const syncPaymentUi = () => {
+        const selected = document.querySelector('input[name="payment_method_ui"]:checked')?.value || 'mpesa';
+        mpesaFields?.classList.toggle('d-none', selected !== 'mpesa');
+        transferHelp?.classList.toggle('d-none', selected !== 'transfer');
+        whatsappHelp?.classList.toggle('d-none', selected !== 'whatsapp');
+        if (clientNumber) {
+          clientNumber.required = selected === 'mpesa';
+          clientNumber.disabled = selected !== 'mpesa';
+        }
+        if (submitBtn) {
+          if (selected === 'mpesa') {
+            submitBtn.classList.remove('d-none');
+            submitBtn.textContent = 'Finalizar a minha compra';
+          } else if (selected === 'transfer') {
+            submitBtn.classList.add('d-none');
+          } else {
+            submitBtn.classList.remove('d-none');
+            submitBtn.innerHTML = 'Continuar no WhatsApp <i class="fas fa-arrow-right ms-2"></i>';
+          }
+        }
+      };
+
+      radios.forEach((radio) => radio.addEventListener('change', syncPaymentUi));
+      syncPaymentUi();
+
+      form?.addEventListener('submit', (event) => {
+        const selected = document.querySelector('input[name="payment_method_ui"]:checked')?.value || 'mpesa';
+        if (selected === 'whatsapp') {
+          event.preventDefault();
+          window.open(whatsappUrl, '_blank', 'noopener');
+        }
+        if (selected === 'transfer') {
+          event.preventDefault();
+        }
+      });
+    })();
+  </script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       <?php if (session()->getFlashdata('swal')): ?>
@@ -1138,159 +1566,23 @@ $buyerText = $isCcnaCourse
         }
       });
     });
-  </script>
 
-  <script>
-    function initPreloader() {
-      const MIN_PRELOAD_TIME = 2000;
-      const startTime = Date.now();
-
-      const preloader = document.getElementById('preloader');
-      const fillEl = document.getElementById('preloaderFill');
-      const pctEl = document.getElementById('preloaderPct');
-
-      if (!preloader || !fillEl || !pctEl) return;
-
-      const lockScroll = () => {
-        document.documentElement.style.overflow = 'hidden';
-      };
-
-      const unlockScroll = () => {
-        document.documentElement.style.overflow = '';
-      };
-
-      lockScroll();
-
-      const WEIGHTS = {
-        dom: 20,
-        fonts: 10,
-        images: 60,
-        load: 10
-      };
-
-      let target = 0;
-      let current = 0;
-      let rafId = 0;
-      let doneFlag = false;
-
-      const clamp = () => {
-        if (target < 0) target = 0;
-        if (target > 100) target = 100;
-      };
-
-      const render = () => {
-        const pct = Math.round(current);
-        fillEl.style.width = pct + '%';
-        pctEl.textContent = pct;
-      };
-
-      const tick = () => {
-        current += (target - current) * 0.12;
-        render();
-        if (!doneFlag) rafId = requestAnimationFrame(tick);
-      };
-
-      const bumpDom = () => {
-        target += WEIGHTS.dom;
-        clamp();
-      };
-
-      if (document.readyState === 'interactive' || document.readyState === 'complete') {
-        bumpDom();
+    (function () {
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!reduce && 'IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-in');
+              io.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.1, rootMargin: '0px 0px -4% 0px' });
+        document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
       } else {
-        document.addEventListener('DOMContentLoaded', bumpDom, {
-          once: true
-        });
+        document.querySelectorAll('.reveal').forEach((el) => el.classList.add('is-in'));
       }
-
-      if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(() => {
-          target += WEIGHTS.fonts;
-          clamp();
-        }).catch(() => {
-          target += Math.floor(WEIGHTS.fonts * 0.6);
-          clamp();
-        });
-      } else {
-        target += Math.floor(WEIGHTS.fonts * 0.6);
-        clamp();
-      }
-
-      const imgs = Array.from(document.images || []);
-      const total = imgs.length;
-      let loaded = 0;
-
-      const onImgDone = () => {
-        loaded++;
-        const frac = total ? loaded / total : 1;
-        const imgProgress = WEIGHTS.images * frac;
-        const base = Math.min(target, WEIGHTS.dom + WEIGHTS.fonts);
-        target = base + imgProgress;
-        clamp();
-      };
-
-      if (total === 0) {
-        target += WEIGHTS.images;
-        clamp();
-      } else {
-        imgs.forEach(img => {
-          if (img.complete) {
-            onImgDone();
-          } else {
-            img.addEventListener('load', onImgDone, {
-              once: true
-            });
-            img.addEventListener('error', onImgDone, {
-              once: true
-            });
-          }
-        });
-      }
-
-      function hidePreloader() {
-        if (doneFlag) return;
-        doneFlag = true;
-
-        target = 100;
-        current = 100;
-        render();
-
-        preloader.style.opacity = '0';
-        preloader.addEventListener('transitionend', () => {
-          preloader.style.display = 'none';
-          unlockScroll();
-        }, {
-          once: true
-        });
-
-        if (rafId) cancelAnimationFrame(rafId);
-      }
-
-      const forceHideTimeout = setTimeout(hidePreloader, MIN_PRELOAD_TIME + 1000);
-
-      window.addEventListener('load', () => {
-        target += WEIGHTS.load;
-        clamp();
-
-        const elapsed = Date.now() - startTime;
-        const remainingTime = Math.max(0, MIN_PRELOAD_TIME - elapsed);
-
-        clearTimeout(forceHideTimeout);
-        setTimeout(hidePreloader, remainingTime);
-      }, {
-        once: true
-      });
-
-      rafId = requestAnimationFrame(tick);
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initPreloader, {
-        once: true
-      });
-    } else {
-      initPreloader();
-    }
+    })();
   </script>
 </body>
 

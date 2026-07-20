@@ -27,11 +27,12 @@ class PageController extends BaseController
         return $formattedHours . ' ' . $unit;
     }
 
-    private function getCourseContentStats(int $courseId): array
+    private function getCourseContentStats(int $courseId, $course = null): array
     {
         $lessonModel = new LessonModel();
         $moduleModel = new ModuleModel();
         $projectModel = new ProjectModel();
+        $commerce = new \App\Services\CourseCommerceService();
 
         $moduleCount = $moduleModel
             ->where('id_course_module', $courseId)
@@ -51,6 +52,9 @@ class PageController extends BaseController
             ->getRow();
 
         $totalMinutes = (int) ($totalMinutesRow->total_minutes ?? 0);
+        if ($course === null) {
+            $course = (new CourseModel())->find($courseId);
+        }
 
         $projectCount = $projectModel
             ->where('id_course_project', $courseId)
@@ -61,7 +65,20 @@ class PageController extends BaseController
             'lessonCount' => $lessonCount,
             'projectCount' => $projectCount,
             'totalMinutes' => $totalMinutes,
-            'totalHoursLabel' => $this->formatCourseHours($totalMinutes),
+            'totalHoursLabel' => $commerce->resolveHoursLabel($course, $totalMinutes),
+            'totalHoursValue' => $commerce->resolveHoursValue($course, $totalMinutes),
+            'listPrice' => $commerce->getListPrice($course),
+            'promoPrice' => $commerce->getPromoPrice($course),
+            'effectivePrice' => $commerce->getEffectivePrice($course),
+            'hasPromo' => $commerce->hasPromo($course),
+            'discountPercent' => $commerce->getDiscountPercent($course),
+            'promoEndsAt' => $commerce->getPromoEndsAt($course),
+            'promoRemainingSeconds' => $commerce->getPromoRemainingSeconds($course),
+            'freeLessonsCount' => $commerce->getFreeLessonsCount($course),
+            'whatsappUrl' => $commerce->buildWhatsappUrl(
+                $course,
+                'Olá! Tenho interesse no curso "' . trim((string) ($course->title_course ?? '')) . '" e gostaria de saber as opções de pagamento.'
+            ),
         ];
     }
 
@@ -77,7 +94,7 @@ class PageController extends BaseController
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Curso não encontrado');
         }
 
-        $checkoutStats = $this->getCourseContentStats((int) $course->id_course);
+        $checkoutStats = $this->getCourseContentStats((int) $course->id_course, $course);
 
         $enrollmentModel = new \App\Models\EnrollmentModel();
         $userId = $user ? $user->id : null;
@@ -95,7 +112,8 @@ class PageController extends BaseController
             'course' => $course,
             'user' => $user,
             'isEnrolled' => $isEnrolled,
-            'checkoutStats' => $checkoutStats
+            'checkoutStats' => $checkoutStats,
+            'commerce' => new \App\Services\CourseCommerceService(),
         ]);
     }
 
@@ -161,14 +179,23 @@ class PageController extends BaseController
             ->get()
             ->getRow();
         $totalMinutes = (int) ($totalMinutesRow->total_minutes ?? 0);
-        $courseHours = $totalMinutes / 60;
+
+        $commerce = new \App\Services\CourseCommerceService();
+        $courseHours = $commerce->resolveHoursValue($course, $totalMinutes);
+        $hoursLabel = $commerce->resolveHoursLabel($course, $totalMinutes);
 
         $isEnrolled = false;
+        $trialEnrollment = null;
         if ($userId) {
             $isEnrolled = $enrollmentModel
                 ->where('id_student_enrollment', $userId)
                 ->where('id_course_enrollment', $course->id_course)
                 ->where('status_enrollment', 'ativa')
+                ->first();
+            $trialEnrollment = $enrollmentModel
+                ->where('id_student_enrollment', $userId)
+                ->where('id_course_enrollment', $course->id_course)
+                ->where('status_enrollment', 'pendente')
                 ->first();
         }
 
@@ -179,6 +206,16 @@ class PageController extends BaseController
             ->where('status_enrollment !=', 'Cancelada')
             ->countAllResults();
 
+        $ratingModel = new \App\Models\CourseRatingModel();
+        $ratingSummary = ['average' => 0, 'total' => 0];
+        $ratingList = [];
+        try {
+            $ratingSummary = $ratingModel->getCourseSummary((int) $course->id_course);
+            $ratingList = $ratingModel->getForCourse((int) $course->id_course, 8);
+        } catch (\Throwable $e) {
+            // Tabela pode ainda não existir antes da migration.
+        }
+
         return view('courses/course', [
             'course' => $course,
             'modules' => $module,
@@ -188,6 +225,90 @@ class PageController extends BaseController
             'projectCount' => $projectCount,
             'studentCount' => $studentCount,
             'courseHours' => $courseHours,
+            'hoursLabel' => $hoursLabel,
+            'commerce' => $commerce,
+            'effectivePrice' => $commerce->getEffectivePrice($course),
+            'listPrice' => $commerce->getListPrice($course),
+            'promoPrice' => $commerce->getPromoPrice($course),
+            'hasPromo' => $commerce->hasPromo($course),
+            'discountPercent' => $commerce->getDiscountPercent($course),
+            'promoEndsAt' => $commerce->getPromoEndsAt($course),
+            'promoRemainingSeconds' => $commerce->getPromoRemainingSeconds($course),
+            'freeLessonsCount' => $commerce->getFreeLessonsCount($course),
+            'whatsappUrl' => $commerce->buildWhatsappUrl(
+                $course,
+                'Olá! Vi o curso "' . trim((string) ($course->title_course ?? '')) . '" e quero falar sobre pagamento/inscrição.'
+            ),
+            'isEnrolled' => $isEnrolled,
+            'trialEnrollment' => $trialEnrollment,
+            'ratingSummary' => $ratingSummary,
+            'ratingList' => $ratingList,
+            'user' => $user,
         ]);
+    }
+
+    /**
+     * Inicia acesso de teste (N aulas grátis) para aluno autenticado.
+     */
+    public function startTrial(int $id_course)
+    {
+        $user = service('auth')->user();
+        $lessonsPath = 'student/dashboard/ver_aulas/' . $id_course;
+        $trialPath   = 'courses/' . $id_course . '/trial';
+
+        if (! $user) {
+            session()->setTempdata('beforeLoginUrl', $trialPath, 600);
+
+            return redirect()->to(site_url('login'))
+                ->with('error', 'Faça login como aluno para experimentar o curso.');
+        }
+
+        $role = strtolower(trim((string) ($user->role ?? '')));
+        if ($role !== 'student') {
+            return redirect()->to(site_url('courses/' . $id_course))
+                ->with('error', 'Apenas contas de aluno podem experimentar aulas grátis.');
+        }
+
+        $courseModel = new CourseModel();
+        $course = $courseModel->where('status_course', 'Ativo')->find($id_course);
+        if (! $course) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Curso não encontrado');
+        }
+
+        $commerce = new \App\Services\CourseCommerceService();
+        $freeCount = $commerce->getFreeLessonsCount($course);
+        if ($freeCount < 1) {
+            return redirect()->to(site_url('checkout/' . $id_course))
+                ->with('warning', 'Este curso não tem aulas grátis de teste.');
+        }
+
+        $enrollmentModel = new \App\Models\EnrollmentModel();
+        $existing = $enrollmentModel
+            ->where('id_student_enrollment', (int) $user->id)
+            ->where('id_course_enrollment', (int) $course->id_course)
+            ->first();
+
+        if ($existing && strtolower((string) $existing->status_enrollment) === 'ativa') {
+            return redirect()->to(site_url($lessonsPath));
+        }
+
+        if (! $existing) {
+            $inserted = $enrollmentModel->insert([
+                'id_student_enrollment' => (int) $user->id,
+                'id_course_enrollment'  => (int) $course->id_course,
+                'status_enrollment'     => 'pendente',
+                'progress_enrollment'   => 0,
+                'enrolled_at_enrollment'=> date('Y-m-d'),
+                'is_manual_enrollment'  => 0,
+            ]);
+
+            if ($inserted === false) {
+                return redirect()->to(site_url('courses/' . $id_course))
+                    ->with('error', 'Não foi possível iniciar o acesso de teste. Tente novamente.');
+            }
+        }
+
+        return redirect()->to(site_url($lessonsPath))
+            ->with('info', 'Pode assistir as primeiras ' . $freeCount . ' aulas. Depois será necessário concluir o pagamento.');
     }
 }

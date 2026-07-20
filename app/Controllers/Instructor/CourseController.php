@@ -60,6 +60,78 @@ class CourseController extends BaseController
         return $payload;
     }
 
+    /**
+     * Campos comerciais / trial / carga horária.
+     * Compatível com os dois schemas de migration:
+     * - hours_mode_course + hours_manual_course (decimal)
+     * - hours_course + hours_manual_course (flag 0/1)
+     *
+     * @return array<string, mixed>
+     */
+    private function extractCommerceFields(array $data, bool $isPaid): array
+    {
+        $promo = $isPaid ? ($data['promo_price_course'] ?? null) : null;
+        $promo = ($promo === '' || $promo === null) ? null : (float) $promo;
+        if ($promo !== null && $promo <= 0) {
+            $promo = null;
+        }
+
+        $hoursMode = strtolower(trim((string) ($data['hours_mode_course'] ?? 'auto')));
+        if (! in_array($hoursMode, ['auto', 'manual'], true)) {
+            $hoursMode = 'auto';
+        }
+
+        $isManual = $hoursMode === 'manual';
+        $manualHoursValue = max(0, (float) ($data['hours_manual_course'] ?? $data['hours_course'] ?? 0));
+
+        $out = [
+            'promo_price_course' => $isPaid ? $promo : null,
+        ];
+
+        if ($this->courseColumnExists('promo_ends_at_course')) {
+            $endsRaw = $isPaid ? trim((string) ($data['promo_ends_at_course'] ?? '')) : '';
+            if ($promo === null || $endsRaw === '') {
+                $out['promo_ends_at_course'] = null;
+            } else {
+                $ts = strtotime(str_replace('T', ' ', $endsRaw));
+                $out['promo_ends_at_course'] = $ts ? date('Y-m-d H:i:s', $ts) : null;
+            }
+        }
+
+        if ($this->courseColumnExists('hours_mode_course')) {
+            $out['hours_mode_course'] = $hoursMode;
+        }
+
+        // Schema legado: hours_course (valor) + hours_manual_course (flag NOT NULL)
+        if ($this->courseColumnExists('hours_course')) {
+            $out['hours_course'] = $isManual ? $manualHoursValue : null;
+            if ($this->courseColumnExists('hours_manual_course')) {
+                $out['hours_manual_course'] = $isManual ? 1 : 0;
+            }
+        } elseif ($this->courseColumnExists('hours_manual_course')) {
+            // Schema actual: hours_manual_course guarda as horas (nunca null — DBs NOT NULL)
+            $out['hours_manual_course'] = $isManual ? $manualHoursValue : 0;
+        }
+
+        $freeLessons = max(0, (int) ($data['free_lessons_count_course'] ?? $data['free_lessons_course'] ?? 0));
+        if ($this->courseColumnExists('free_lessons_count_course')) {
+            $out['free_lessons_count_course'] = $freeLessons;
+        }
+        if ($this->courseColumnExists('free_lessons_course')) {
+            $out['free_lessons_course'] = $freeLessons;
+        }
+
+        $whatsapp = preg_replace('/\D+/', '', (string) ($data['whatsapp_contact_course'] ?? $data['whatsapp_course'] ?? '')) ?: null;
+        if ($this->courseColumnExists('whatsapp_contact_course')) {
+            $out['whatsapp_contact_course'] = $whatsapp;
+        }
+        if ($this->courseColumnExists('whatsapp_course')) {
+            $out['whatsapp_course'] = $whatsapp;
+        }
+
+        return $out;
+    }
+
     private function modelErrorMessage($model, string $fallback): string
     {
         $errors = method_exists($model, 'errors') ? (array) $model->errors() : [];
@@ -179,6 +251,41 @@ class CourseController extends BaseController
         return $newName;
     }
 
+    private function normalizeQuizQuestions(array $quizQuestions): array
+    {
+        $normalized = [];
+        foreach ($quizQuestions as $q) {
+            if (! is_array($q)) {
+                continue;
+            }
+            $question = trim((string) ($q['question'] ?? ''));
+            $options = array_values(array_map('strval', (array) ($q['options'] ?? [])));
+            while (count($options) < 4) {
+                $options[] = '';
+            }
+            $options = array_slice($options, 0, 4);
+            $correct = (int) ($q['correct'] ?? 0);
+            if ($correct < 0 || $correct > 3) {
+                $correct = 0;
+            }
+            $points = (float) ($q['points'] ?? $q['score'] ?? 1);
+            if ($points <= 0) {
+                $points = 1;
+            }
+            if ($question === '' && ! array_filter($options)) {
+                continue;
+            }
+            $normalized[] = [
+                'question' => $question,
+                'options'  => $options,
+                'correct'  => $correct,
+                'points'   => $points,
+            ];
+        }
+
+        return $normalized;
+    }
+
     private function lessonHasQuizQuestions(array $lesson): bool
     {
         $quizQuestions = $lesson['quiz_questions'] ?? ($lesson['quiz'] ?? []);
@@ -268,6 +375,7 @@ class CourseController extends BaseController
         $isPublish = ((string) $this->request->getPost('publish') === '1');
         $status = $isPublish ? 'Ativo' : 'Rascunho';
 
+        $isPaid = ($data['courseType'] ?? 'free') === 'paid';
         $courseData = [
             'title_course' => $data['title_course'] ?? '',
             'subtitle_course' => $data['subtitle_course'] ?? '',
@@ -276,9 +384,10 @@ class CourseController extends BaseController
             'url_video_course' => $data['url_video_course'] ?? '',
             'id_instructor_course' => auth()->id(),
             'status_course' => $status,
-            'price_course' => ($data['courseType'] ?? 'free') === 'paid' ? ($data['price_course'] ?? 0) : 0,
+            'price_course' => $isPaid ? ($data['price_course'] ?? 0) : 0,
             'color_course' => $data['color_course'] ?? '#3b82f6',
         ];
+        $courseData = array_merge($courseData, $this->extractCommerceFields($data, $isPaid));
         $courseData = $this->normalizeCoursePayload($courseData);
 
         // Upload de imagem
@@ -390,23 +499,7 @@ class CourseController extends BaseController
                         $quizQuestions = $lesson['quiz_questions'] ?? ($lesson['quiz'] ?? []);
                         $lessonContent = null;
                         if (($lesson['type'] ?? '') === 'quiz' && ! empty($quizQuestions)) {
-                            $normalized = [];
-                            foreach ($quizQuestions as $q) {
-                                $question = trim((string) ($q['question'] ?? ''));
-                                $options = $q['options'] ?? [];
-                                $options = array_slice(array_pad(array_map('strval', (array) $options), 4, ''), 0, 4);
-                                $correct = (int) ($q['correct'] ?? 0);
-                                if ($correct < 0 || $correct > 3) {
-                                    $correct = 0;
-                                }
-                                if ($question || array_filter($options)) {
-                                    $normalized[] = [
-                                        'question' => $question,
-                                        'options' => $options,
-                                        'correct' => $correct,
-                                    ];
-                                }
-                            }
+                            $normalized = $this->normalizeQuizQuestions((array) $quizQuestions);
                             if (! empty($normalized)) {
                                 $lessonContent = json_encode(['questions' => $normalized], JSON_UNESCAPED_UNICODE);
                             }
@@ -480,6 +573,7 @@ class CourseController extends BaseController
 
         $data = $this->request->getPost();
 
+        $isPaid = ($data['courseType'] ?? 'free') === 'paid';
         $courseData = [
             'id_instructor_course' => auth()->id(),
             'status_course' => 'Rascunho',
@@ -488,9 +582,10 @@ class CourseController extends BaseController
             'description_course' => $data['description_course'] ?? '',
             'learning_course' => $data['learning_course'] ?? '',
             'url_video_course' => $data['url_video_course'] ?? '',
-            'price_course' => ($data['courseType'] ?? 'free') === 'paid' ? ($data['price_course'] ?? 0) : 0,
+            'price_course' => $isPaid ? ($data['price_course'] ?? 0) : 0,
             'color_course' => $data['color_course'] ?? '#3b82f6',
         ];
+        $courseData = array_merge($courseData, $this->extractCommerceFields($data, $isPaid));
         $courseData = $this->normalizeCoursePayload($courseData);
 
         $file = $this->request->getFile('image_course');
@@ -578,6 +673,7 @@ class CourseController extends BaseController
         // Auto-save deve sempre permanecer como rascunho.
         $status = 'Rascunho';
 
+        $isPaid = ($data['courseType'] ?? 'free') === 'paid';
         $updateData = [
             'title_course' => $data['title_course'] ?? $course->title_course,
             'subtitle_course' => $data['subtitle_course'] ?? $course->subtitle_course,
@@ -585,11 +681,12 @@ class CourseController extends BaseController
             'learning_course' => $data['learning_course'] ?? $course->learning_course,
             'url_video_course' => $data['url_video_course'] ?? $course->url_video_course,
             'status_course' => $status,
-            'price_course' => ($data['courseType'] ?? 'free') === 'paid'
+            'price_course' => $isPaid
                 ? ($data['price_course'] ?? $course->price_course)
                 : 0,
             'color_course' => $data['color_course'] ?? ($course->color_course ?? '#3b82f6'),
         ];
+        $updateData = array_merge($updateData, $this->extractCommerceFields($data, $isPaid));
         $updateData = $this->normalizeCoursePayload($updateData);
 
         $file = $this->request->getFile('image_course');
@@ -659,23 +756,7 @@ class CourseController extends BaseController
                         $quizQuestions = $lesson['quiz_questions'] ?? ($lesson['quiz'] ?? []);
                         $lessonContent = null;
                         if (($lesson['type'] ?? '') === 'quiz' && ! empty($quizQuestions)) {
-                            $normalized = [];
-                            foreach ($quizQuestions as $q) {
-                                $question = trim((string) ($q['question'] ?? ''));
-                                $options = $q['options'] ?? [];
-                                $options = array_slice(array_pad(array_map('strval', (array) $options), 4, ''), 0, 4);
-                                $correct = (int) ($q['correct'] ?? 0);
-                                if ($correct < 0 || $correct > 3) {
-                                    $correct = 0;
-                                }
-                                if ($question || array_filter($options)) {
-                                    $normalized[] = [
-                                        'question' => $question,
-                                        'options' => $options,
-                                        'correct' => $correct,
-                                    ];
-                                }
-                            }
+                            $normalized = $this->normalizeQuizQuestions((array) $quizQuestions);
                             if (! empty($normalized)) {
                                 $lessonContent = json_encode(['questions' => $normalized], JSON_UNESCAPED_UNICODE);
                             }
@@ -780,6 +861,7 @@ class CourseController extends BaseController
 
         $isDraft = $this->request->getPost('draft') ? true : false;
 
+        $isPaid = ($data['courseType'] ?? 'free') === 'paid';
         $updateData = [
             'title_course' => $data['title_course'] ?? $course->title_course,
             'subtitle_course' => $data['subtitle_course'] ?? $course->subtitle_course,
@@ -787,11 +869,12 @@ class CourseController extends BaseController
             'learning_course' => $data['learning_course'] ?? $course->learning_course,
             'url_video_course' => $data['url_video_course'] ?? $course->url_video_course,
             'status_course' => $isDraft ? 'Rascunho' : 'Ativo',
-            'price_course' => ($data['courseType'] ?? 'free') === 'paid'
+            'price_course' => $isPaid
                 ? ($data['price_course'] ?? 0)
                 : 0,
             'color_course' => $data['color_course'] ?? ($course->color_course ?? '#3b82f6'),
         ];
+        $updateData = array_merge($updateData, $this->extractCommerceFields($data, $isPaid));
         $updateData = $this->normalizeCoursePayload($updateData);
 
         $file = $this->request->getFile('image_course');
@@ -875,23 +958,7 @@ class CourseController extends BaseController
                 $quizQuestions = $lesson['quiz_questions'] ?? ($lesson['quiz'] ?? []);
                 $lessonContent = null;
                 if (($lesson['type'] ?? '') === 'quiz' && ! empty($quizQuestions)) {
-                    $normalized = [];
-                    foreach ($quizQuestions as $q) {
-                        $question = trim((string) ($q['question'] ?? ''));
-                        $options = $q['options'] ?? [];
-                        $options = array_slice(array_pad(array_map('strval', (array) $options), 4, ''), 0, 4);
-                        $correct = (int) ($q['correct'] ?? 0);
-                        if ($correct < 0 || $correct > 3) {
-                            $correct = 0;
-                        }
-                        if ($question || array_filter($options)) {
-                            $normalized[] = [
-                                'question' => $question,
-                                'options' => $options,
-                                'correct' => $correct,
-                            ];
-                        }
-                    }
+                    $normalized = $this->normalizeQuizQuestions((array) $quizQuestions);
                     if (! empty($normalized)) {
                         $lessonContent = json_encode(['questions' => $normalized], JSON_UNESCAPED_UNICODE);
                     }

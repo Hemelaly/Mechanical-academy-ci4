@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\CertificateModel;
+use App\Services\CourseCommerceService;
 use CodeIgniter\Database\BaseConnection;
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -199,7 +200,10 @@ class CertificateService
             ->get()
             ->getRowArray();
         $totalMinutes = (int) ($durationRow['total_minutes'] ?? 0);
-        $workloadHours = max(1, (int) ceil($totalMinutes / 60));
+
+        $commerce = new CourseCommerceService();
+        $courseFull = $this->db->table('courses')->where('id_course', $courseId)->get()->getRowArray() ?: [];
+        $workloadHours = max(1, (int) ceil($commerce->resolveHoursValue((object) $courseFull, $totalMinutes)));
 
         $timestamp = strtotime($completedAt);
         if ($timestamp === false) {
