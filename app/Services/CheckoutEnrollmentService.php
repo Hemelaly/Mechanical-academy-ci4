@@ -528,12 +528,9 @@ class CheckoutEnrollmentService
             ->first();
 
         if ($enrollment) {
-            $updates = [
-                'status_enrollment'  => 'ativa',
-                'is_demo_enrollment' => 0,
-                'demo_started_at'    => null,
-                'demo_expires_at'    => null,
-            ];
+            $updates = array_merge([
+                'status_enrollment' => 'ativa',
+            ], (new DemoEnrollmentService())->clearedDemoPayload());
 
             if (empty($enrollment->enrolled_at_enrollment)) {
                 $updates['enrolled_at_enrollment'] = date('Y-m-d');
@@ -550,13 +547,12 @@ class CheckoutEnrollmentService
             ];
         }
 
-        $inserted = $enrollmentModel->insert([
+        $inserted = $enrollmentModel->insert(array_merge([
             'id_student_enrollment'  => $userId,
             'id_course_enrollment'   => $courseId,
             'status_enrollment'      => 'ativa',
             'enrolled_at_enrollment' => date('Y-m-d'),
-            'is_demo_enrollment'     => 0,
-        ], true);
+        ], (new DemoEnrollmentService())->clearedDemoPayload()), true);
 
         if ($inserted === false) {
             throw new \RuntimeException(implode(', ', $enrollmentModel->errors() ?: ['Nao foi possivel criar a matricula.']));

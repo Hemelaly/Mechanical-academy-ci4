@@ -37,7 +37,7 @@ if (! (bool) ($aula->screenshare_jitsi ?? 1)) {
 }
 ?>
 
-<div class="min-w-0 flex bg-slate-50 dark:bg-slate-900 rounded-md overflow-hidden">
+<div class="min-w-0 flex flex-col lg:flex-row bg-slate-50 dark:bg-slate-900 rounded-md overflow-hidden">
     <div class="flex-1 flex flex-col min-w-0">
         <div class="p-4 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3">
             <div class="min-w-0">
@@ -67,7 +67,7 @@ if (! (bool) ($aula->screenshare_jitsi ?? 1)) {
         </div>
     </div>
 
-    <div class="w-full max-w-sm bg-white dark:bg-slate-800 border-l border-slate-200 dark:border-slate-700 p-4 space-y-4 overflow-y-auto">
+    <div class="w-full lg:max-w-sm bg-white dark:bg-slate-800 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-slate-700 p-4 space-y-4 overflow-y-auto">
         <h2 class="text-lg font-semibold text-slate-800 dark:text-slate-200">Gravacoes</h2>
 
         <?php if ($canManageRecordings && $saveRecordingUrl !== ''): ?>

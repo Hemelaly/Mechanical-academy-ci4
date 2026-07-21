@@ -50,7 +50,7 @@ $user = service('auth')->user();
             </button>
 
             <!-- Dropdown Menu -->
-            <div class="absolute right-0 top-full mt-2 w-80 rounded-2xl bg-white dark:bg-slate-800 shadow-xl border border-slate-200 dark:border-slate-700 z-50 hidden dropdown-menu transform origin-top-right transition-all duration-200 ease-out opacity-0 scale-95">
+            <div class="absolute right-0 top-full mt-2 w-[min(20rem,calc(100vw-1.5rem))] rounded-2xl bg-white dark:bg-slate-800 shadow-xl border border-slate-200 dark:border-slate-700 z-50 hidden dropdown-menu transform origin-top-right transition-all duration-200 ease-out opacity-0 scale-95">
                 <!-- Cabeçalho do Dropdown -->
                 <div class="p-4 border-b border-slate-200 dark:border-slate-700">
                     <div class="flex items-center justify-between">
@@ -77,7 +77,7 @@ $user = service('auth')->user();
         </div>
 
         <a href="<?= site_url('/admin/dashboard/perfil') ?>"
-            class="flex w-full items-center gap-3 rounded-lg py-2 text-xs text-slate-200 pointer">
+            class="flex shrink-0 items-center gap-3 rounded-lg py-2 text-xs text-slate-200 pointer">
             <img
                 src="<?= base_url($user->img ?? 'assets/img/user-default.png') ?>"
                 alt="Foto de perfil de <?= esc($user->username) ?>"

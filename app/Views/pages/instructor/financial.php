@@ -88,8 +88,8 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-        <div class="flex items-center justify-between mb-4 sm:mb-6">
-          <div>
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6">
+          <div class="min-w-0">
             <h3 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-white">
               Pagamentos aprovados por mês
             </h3>
@@ -98,7 +98,7 @@
             </p>
           </div>
 
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 shrink-0">
             <select id="finance-year-select"
               class="text-xs sm:text-sm bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-white rounded-lg px-2 sm:px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
             </select>
@@ -107,22 +107,22 @@
 
         <div id="instructor-finance-chart" class="relative w-full aspect-video"></div>
 
-        <div class="grid grid-cols-3 gap-3 mt-4">
-          <div class="text-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
+          <div class="text-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg min-w-0">
             <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Maior</p>
-            <p id="finance-stat-max" class="text-sm font-bold text-slate-800 dark:text-white">
+            <p id="finance-stat-max" class="text-sm font-bold text-slate-800 dark:text-white truncate">
               <?= number_format((float) ($chartMax ?? 0), 2, ',', '.') ?> MZN
             </p>
           </div>
-          <div class="text-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+          <div class="text-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg min-w-0">
             <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Média</p>
-            <p id="finance-stat-avg" class="text-sm font-bold text-slate-800 dark:text-white">
+            <p id="finance-stat-avg" class="text-sm font-bold text-slate-800 dark:text-white truncate">
               <?= number_format((float) ($chartAvg ?? 0), 2, ',', '.') ?> MZN
             </p>
           </div>
-          <div class="text-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+          <div class="text-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg min-w-0">
             <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Cresc.</p>
-            <p id="finance-stat-growth" class="text-sm font-bold text-green-600">
+            <p id="finance-stat-growth" class="text-sm font-bold text-green-600 truncate">
               <?= number_format((float) ($chartGrowth ?? 0), 2, ',', '.') ?> MZN
             </p>
           </div>

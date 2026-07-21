@@ -73,7 +73,14 @@ $formatMzn = static function ($value): string {
       width: 100%;
       max-width: 1140px;
       margin: 0 auto;
-      padding: 0 1.5rem;
+      padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
+      padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
+    }
+
+    .container-mech.site-nav__inner,
+    .container-mech.hero__inner {
+      padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
+      padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
     }
 
     /* ---------- Preloader ---------- */
@@ -84,7 +91,7 @@ $formatMzn = static function ($value): string {
       display: grid;
       place-items: center;
       background: #12151a;
-      transition: opacity 0.42s var(--ease-out), visibility 0.42s var(--ease-out);
+      transition: none;
     }
 
     #preloader.is-hidden {
@@ -105,14 +112,14 @@ $formatMzn = static function ($value): string {
       width: 160px;
       height: auto;
       opacity: 0.95;
-      animation: brandPulse 1.6s var(--ease-out) infinite;
+      animation: none;
     }
 
     .preloader__bar {
       width: 100%;
       height: 2px;
       background: rgba(255, 255, 255, 0.12);
-      border-radius: 999px;
+      border-radius: 0.375rem;
       overflow: hidden;
     }
 
@@ -120,8 +127,8 @@ $formatMzn = static function ($value): string {
       height: 100%;
       width: 0%;
       background: linear-gradient(90deg, var(--accent), #4d8fff);
-      border-radius: 999px;
-      transition: width 0.2s linear;
+      border-radius: 0.375rem;
+      transition: none;
     }
 
     .preloader__text {
@@ -146,7 +153,7 @@ $formatMzn = static function ($value): string {
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      transition: background 0.25s ease, box-shadow 0.25s ease;
+      transition: none;
     }
 
     .site-nav.is-scrolled {
@@ -159,7 +166,8 @@ $formatMzn = static function ($value): string {
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
-      padding: 0.9rem 0;
+      padding-top: 0.9rem;
+      padding-bottom: 0.9rem;
     }
 
     .site-nav__brand {
@@ -188,7 +196,7 @@ $formatMzn = static function ($value): string {
       text-decoration: none;
       font-size: 0.92rem;
       font-weight: 500;
-      transition: color 0.15s ease;
+      transition: none;
     }
 
     .site-nav__links a:hover { color: #fff; }
@@ -196,9 +204,9 @@ $formatMzn = static function ($value): string {
     .site-nav__cta {
       color: #fff !important;
       border: 1px solid rgba(255, 255, 255, 0.28);
-      border-radius: 999px;
+      border-radius: 0.375rem;
       padding: 0.5rem 1.15rem !important;
-      transition: border-color 0.15s ease, background 0.15s ease, transform 0.2s var(--ease-spring) !important;
+      transition: none;
     }
 
     .site-nav__cta:hover {
@@ -221,7 +229,7 @@ $formatMzn = static function ($value): string {
       display: none;
       background: transparent;
       border: 1px solid rgba(255, 255, 255, 0.25);
-      border-radius: 8px;
+      border-radius: 0.375rem;
       color: #fff;
       padding: 0.4rem 0.6rem;
       font-size: 1.05rem;
@@ -243,18 +251,13 @@ $formatMzn = static function ($value): string {
       align-items: center;
       justify-content: center;
       gap: 0.55rem;
-      border-radius: 999px;
+      border-radius: 0.375rem;
       padding: 0.9rem 1.85rem;
       font-weight: 600;
       font-size: 0.98rem;
       text-decoration: none;
       border: 1px solid transparent;
-      transition:
-        transform 0.22s var(--ease-spring),
-        box-shadow 0.22s ease,
-        background-color 0.18s ease,
-        border-color 0.18s ease,
-        color 0.18s ease;
+      transition: none;
       cursor: pointer;
       line-height: 1.2;
     }
@@ -325,7 +328,7 @@ $formatMzn = static function ($value): string {
       inset: 0;
       background: url(<?= base_url('assets/img/banner.jpeg') ?>) center / cover no-repeat;
       transform: scale(1.04);
-      animation: heroKen 18s ease-out forwards;
+      animation: none;
     }
 
     .hero__gradient {
@@ -339,7 +342,8 @@ $formatMzn = static function ($value): string {
     .hero__inner {
       position: relative;
       z-index: 2;
-      padding: 8rem 0 4.75rem;
+      padding-top: 8rem;
+      padding-bottom: 4.75rem;
       width: 100%;
     }
 
@@ -380,15 +384,15 @@ $formatMzn = static function ($value): string {
     }
 
     .hero-anim > * {
-      opacity: 0;
-      transform: translateY(22px);
-      animation: riseIn 0.85s var(--ease-out) forwards;
+      opacity: 1;
+      transform: none;
+      animation: none;
     }
 
-    .hero-anim > *:nth-child(1) { animation-delay: 0.08s; }
-    .hero-anim > *:nth-child(2) { animation-delay: 0.2s; }
-    .hero-anim > *:nth-child(3) { animation-delay: 0.32s; }
-    .hero-anim > *:nth-child(4) { animation-delay: 0.44s; }
+    .hero-anim > *:nth-child(1) {  }
+    .hero-anim > *:nth-child(2) {  }
+    .hero-anim > *:nth-child(3) {  }
+    .hero-anim > *:nth-child(4) {  }
 
     @keyframes riseIn {
       to { opacity: 1; transform: translateY(0); }
@@ -481,6 +485,25 @@ $formatMzn = static function ($value): string {
 
     .trust__item {
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.55rem;
+    }
+
+    .trust__icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #6ea8fe;
+      font-size: 1.75rem;
+      line-height: 1;
+      background: none;
+      border: 0;
+      width: auto;
+      height: auto;
+      padding: 0;
+      border-radius: 0;
     }
 
     .trust__value {
@@ -492,7 +515,7 @@ $formatMzn = static function ($value): string {
     }
 
     .trust__label {
-      margin: 0.25rem 0 0;
+      margin: 0;
       font-size: 0.88rem;
       color: var(--ink-soft);
     }
@@ -511,13 +534,10 @@ $formatMzn = static function ($value): string {
       padding: 1.45rem 1.4rem 1.35rem;
       background: #161616;
       border: 1px solid var(--line);
-      border-radius: 18px;
+      border-radius: 0.375rem;
       text-decoration: none;
       color: inherit;
-      transition:
-        transform 0.28s var(--ease-spring),
-        box-shadow 0.28s ease,
-        border-color 0.2s ease;
+      transition: none;
       position: relative;
       overflow: hidden;
     }
@@ -529,18 +549,19 @@ $formatMzn = static function ($value): string {
       height: 3px;
       background: var(--tile-accent, var(--accent));
       opacity: 0;
-      transition: opacity 0.25s ease;
+      transition: none;
       z-index: 2;
     }
 
     .course-tile:hover {
-      transform: translateY(-6px);
       box-shadow: 0 28px 48px -28px rgba(0, 0, 0, 0.75);
       border-color: rgba(13, 110, 253, 0.35);
       color: inherit;
     }
 
-    .course-tile:hover::before { opacity: 1; }
+    .course-tile:hover::before {
+      opacity: 1;
+    }
 
     .course-tile__top {
       display: flex;
@@ -562,7 +583,7 @@ $formatMzn = static function ($value): string {
       align-items: center;
       gap: 0.3rem;
       padding: 0.28rem 0.65rem;
-      border-radius: 999px;
+      border-radius: 0.375rem;
       font-size: 0.72rem;
       font-weight: 600;
       letter-spacing: 0.02em;
@@ -580,7 +601,7 @@ $formatMzn = static function ($value): string {
     .course-tile__icon {
       width: 48px;
       height: 48px;
-      border-radius: 12px;
+      border-radius: 0.375rem;
       object-fit: cover;
       background: #222;
       flex-shrink: 0;
@@ -613,8 +634,17 @@ $formatMzn = static function ($value): string {
 
     .course-tile__price-was {
       font-size: 0.88rem;
-      color: var(--ink-soft);
+      color: #ef4444;
       text-decoration: line-through;
+      font-weight: 600;
+    }
+
+    .pill-discount {
+      background: rgba(239, 68, 68, 0.16);
+      border-color: rgba(239, 68, 68, 0.35);
+      color: #fca5a5;
+      font-weight: 700;
+      letter-spacing: 0.02em;
     }
 
     .course-tile__promo-time {
@@ -623,7 +653,7 @@ $formatMzn = static function ($value): string {
       gap: 0.35rem;
       margin-top: 0.55rem;
       padding: 0.28rem 0.55rem;
-      border-radius: 999px;
+      border-radius: 0.375rem;
       background: rgba(13, 110, 253, 0.14);
       border: 1px solid rgba(13, 110, 253, 0.35);
       color: #9ec5fe;
@@ -641,7 +671,7 @@ $formatMzn = static function ($value): string {
       display: inline-flex;
       align-items: center;
       gap: 0.35rem;
-      transition: gap 0.2s ease;
+      transition: none;
     }
 
     .course-tile:hover .course-tile__cta { gap: 0.55rem; }
@@ -660,10 +690,10 @@ $formatMzn = static function ($value): string {
       position: relative;
       background: rgba(255, 255, 255, 0.1);
       border: 1px solid rgba(255, 255, 255, 0.18);
-      border-radius: 20px;
+      border-radius: 0.375rem;
       padding: 1.6rem 1.4rem 1.5rem;
       backdrop-filter: blur(8px);
-      transition: transform 0.28s var(--ease-spring), background 0.2s ease;
+      transition: none;
     }
 
     .step:hover {
@@ -674,7 +704,7 @@ $formatMzn = static function ($value): string {
     .step__visual {
       width: 64px;
       height: 64px;
-      border-radius: 18px;
+      border-radius: 0.375rem;
       display: grid;
       place-items: center;
       margin-bottom: 1.15rem;
@@ -724,13 +754,13 @@ $formatMzn = static function ($value): string {
 
     .yt__visual {
       position: relative;
-      border-radius: 20px;
+      border-radius: 0.375rem;
       overflow: hidden;
       aspect-ratio: 16 / 10;
       width: 100%;
       background: #0d1014 url(<?= base_url('assets/img/youtube.png') ?>) center / cover no-repeat;
       box-shadow: 0 30px 60px -36px rgba(0, 0, 0, 0.55);
-      transition: transform 0.4s var(--ease-out);
+      transition: none;
     }
 
     .yt__visual:hover { transform: scale(1.015); }
@@ -763,7 +793,7 @@ $formatMzn = static function ($value): string {
       place-items: center;
       font-size: 1.45rem;
       box-shadow: 0 16px 40px -16px rgba(0, 0, 0, 0.45);
-      transition: transform 0.28s var(--ease-spring);
+      transition: none;
     }
 
     .yt__play:hover .yt__play-btn { transform: scale(1.08); }
@@ -803,7 +833,7 @@ $formatMzn = static function ($value): string {
       font-weight: 600;
       font-size: 1.02rem;
       position: relative;
-      transition: color 0.15s ease;
+      transition: none;
       color: #fff;
     }
 
@@ -818,7 +848,7 @@ $formatMzn = static function ($value): string {
       font-size: 1.35rem;
       font-weight: 400;
       color: var(--ink-soft);
-      transition: transform 0.25s var(--ease-out), color 0.15s ease;
+      transition: none;
     }
 
     .faq-item[open] summary::after {
@@ -851,7 +881,7 @@ $formatMzn = static function ($value): string {
       padding: 2.5rem;
       background: linear-gradient(135deg, rgba(13, 110, 253, 0.16) 0%, rgba(20, 20, 20, 0.95) 45%), var(--surface);
       border: 1px solid rgba(13, 110, 253, 0.28);
-      border-radius: 22px;
+      border-radius: 0.375rem;
     }
 
     .news__form {
@@ -864,12 +894,12 @@ $formatMzn = static function ($value): string {
       flex: 1 1 180px;
       min-width: 0;
       border: 1px solid var(--line);
-      border-radius: 999px;
+      border-radius: 0.375rem;
       padding: 0.85rem 1.2rem;
       font-family: inherit;
       font-size: 0.95rem;
       outline: none;
-      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+      transition: none;
       background: #0a0a0a;
       color: #fff;
     }
@@ -915,7 +945,7 @@ $formatMzn = static function ($value): string {
     .site-footer__social a {
       color: rgba(255, 255, 255, 0.7);
       font-size: 1.1rem;
-      transition: color 0.15s ease, transform 0.2s var(--ease-spring);
+      transition: none;
       text-decoration: none;
     }
 
@@ -926,17 +956,14 @@ $formatMzn = static function ($value): string {
 
     /* ---------- Motion system ---------- */
     .reveal {
-      opacity: 0;
-      transform: translateY(28px);
-      transition:
-        opacity 0.7s var(--ease-out),
-        transform 0.7s var(--ease-out);
-      transition-delay: var(--d, 0ms);
+      opacity: 1;
+      transform: none;
+      transition: none;
     }
 
     .reveal.is-in {
       opacity: 1;
-      transform: translateY(0);
+      transform: none;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -945,42 +972,58 @@ $formatMzn = static function ($value): string {
       .hero-anim > *,
       .hero__media,
       .preloader__logo {
-        animation: none !important;
-        transition: none !important;
+        animation: none;
+        transition: none;
         opacity: 1 !important;
         transform: none !important;
       }
     }
 
     /* ---------- Responsive ---------- */
-    @media (max-width: 991px) {
-      .site-nav__toggle { display: inline-flex; }
+    @media (max-width: 991.98px) {
+      .site-nav__inner { position: relative; }
+      .site-nav__toggle { display: inline-flex; align-items: center; justify-content: center; }
 
       .site-nav__links {
         display: none;
         position: absolute;
-        top: 100%;
+        top: calc(100% + 0.25rem);
         left: 0;
         right: 0;
         flex-direction: column;
         align-items: stretch;
-        gap: 0;
-        padding: 0.75rem 1.5rem 1.1rem;
-        background: rgba(18, 21, 26, 0.97);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        gap: 0.15rem;
+        padding: 0.65rem;
+        background: rgba(12, 12, 12, 0.98);
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        border-radius: 0.375rem;
+        box-shadow: 0 18px 40px -20px rgba(0, 0, 0, 0.7);
+        max-height: min(70vh, 420px);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        z-index: 1100;
       }
 
       .site-nav__links.is-open { display: flex; }
 
-      .site-nav__links li { padding: 0.65rem 0; }
+      .site-nav__links li { padding: 0; width: 100%; }
+      .site-nav__links a {
+        display: flex;
+        align-items: center;
+        padding: 0.7rem 0.85rem;
+        border-radius: 0.375rem;
+      }
+      .site-nav__links a:hover { background: rgba(255, 255, 255, 0.06); }
 
-      .hero { min-height: 86vh; align-items: center; }
-      .hero__inner { padding: 6.5rem 0 3.5rem; }
+      .hero { min-height: auto; align-items: center; }
+      .hero__inner { padding-top: 5.75rem; padding-bottom: 2.75rem; }
+      .section { padding: 3.5rem 0; }
 
       .course-grid,
       .steps,
       .trust__grid {
         grid-template-columns: 1fr 1fr;
+        gap: 1rem;
       }
 
       .yt,
@@ -989,7 +1032,23 @@ $formatMzn = static function ($value): string {
       }
     }
 
-    @media (max-width: 640px) {
+    @media (max-width: 767.98px) {
+      .container-mech,
+      .container-mech.site-nav__inner,
+      .container-mech.hero__inner {
+        padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
+        padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
+      }
+
+      .site-nav__inner { padding-top: 0.7rem; padding-bottom: 0.7rem; }
+      .site-nav__brand img { height: 28px; }
+
+      .hero__inner { padding-top: 5.25rem; padding-bottom: 2.25rem; }
+      .hero__title { font-size: clamp(1.85rem, 8vw, 2.4rem); }
+      .section { padding: 2.75rem 0; }
+      .section-head { margin-bottom: 1.75rem; }
+      .section-head h2 { font-size: 1.55rem; }
+
       .course-grid,
       .steps,
       .trust__grid {
@@ -999,9 +1058,34 @@ $formatMzn = static function ($value): string {
       .hero__actions { flex-direction: column; align-items: stretch; }
       .btn-mech { width: 100%; }
 
-      .news { padding: 1.5rem; }
+      .news { padding: 1.25rem; }
       .site-footer__inner { justify-content: center; text-align: center; }
       .site-footer__social { width: 100%; justify-content: center; }
+    }
+
+    @media (max-width: 479.98px) {
+      .hero__inner { padding-top: 4.75rem; padding-bottom: 2rem; }
+      .trust__item { padding: 1.1rem; }
+      .course-card__body { padding: 1.15rem; }
+    }
+
+    /* Gutters: keep last so nav/hero never lose horizontal padding */
+    .container-mech,
+    .container-mech.site-nav__inner,
+    .container-mech.hero__inner,
+    .container-mech.site-footer__inner {
+      padding-left: max(1.25rem, env(safe-area-inset-left, 0px)) !important;
+      padding-right: max(1.25rem, env(safe-area-inset-right, 0px)) !important;
+    }
+
+    @media (min-width: 768px) {
+      .container-mech,
+      .container-mech.site-nav__inner,
+      .container-mech.hero__inner,
+      .container-mech.site-footer__inner {
+        padding-left: max(1.5rem, env(safe-area-inset-left, 0px)) !important;
+        padding-right: max(1.5rem, env(safe-area-inset-right, 0px)) !important;
+      }
     }
   </style>
 </head>
@@ -1054,7 +1138,7 @@ $formatMzn = static function ($value): string {
       <div class="hero__content hero-anim">
         <p class="hero__brand">Mechanical Academy</p>
         <h1 class="hero__title">Aprenda a fazer do jeito <span>certo</span>.</h1>
-        <p class="hero__lead">Cursos práticos, baseados em projectos reais — claros, objectivos e sem enrolação.</p>
+        <p class="hero__lead">Cursos práticos, objectivos e sem enrolação.</p>
         <div class="hero__actions">
           <a href="#cursos" class="btn-mech btn-mech-primary">Explorar cursos</a>
           <a href="#como-funciona" class="btn-mech btn-mech-outline-invert">Como funciona</a>
@@ -1066,15 +1150,18 @@ $formatMzn = static function ($value): string {
   <section class="trust">
     <div class="container-mech">
       <div class="trust__grid">
-        <div class="trust__item reveal">
+        <div class="trust__item">
+          <span class="trust__icon" aria-hidden="true"><i class="bi bi-journal-bookmark-fill"></i></span>
           <p class="trust__value"><?= max($courseCount, 3) ?>+</p>
           <p class="trust__label">Cursos activos</p>
         </div>
-        <div class="trust__item reveal" style="--d:80ms">
+        <div class="trust__item">
+          <span class="trust__icon" aria-hidden="true"><i class="bi bi-clock-fill"></i></span>
           <p class="trust__value">20+</p>
           <p class="trust__label">Horas de conteúdo</p>
         </div>
-        <div class="trust__item reveal" style="--d:160ms">
+        <div class="trust__item">
+          <span class="trust__icon" aria-hidden="true"><i class="bi bi-award-fill"></i></span>
           <p class="trust__value">Certificado</p>
           <p class="trust__label">Ao concluir cada curso</p>
         </div>
@@ -1084,10 +1171,10 @@ $formatMzn = static function ($value): string {
 
   <section class="section" id="cursos">
     <div class="container-mech">
-      <div class="section__head reveal">
+      <div class="section__head">
         <p class="section__eyebrow">Catálogo</p>
-        <h2 class="section__title">Cursos para aprender com profundidade</h2>
-        <p class="section__lead">Escolha um curso, veja o programa completo e comece — com aulas gratuitas quando disponíveis.</p>
+        <h2 class="section__title">Cursos</h2>
+        <p class="section__lead">Escolha um curso e comece a aprender.</p>
       </div>
 
       <?php if (empty($courses)): ?>
@@ -1120,10 +1207,10 @@ $formatMzn = static function ($value): string {
               <h3 class="course-tile__title"><?= esc($course->title_course) ?></h3>
               <div class="course-tile__price">
                 <?php if (!empty($course->has_promo)): ?>
-                  <span class="course-tile__price-now"><?= esc($formatMzn($course->effective_price)) ?></span>
                   <span class="course-tile__price-was"><?= esc($formatMzn($course->list_price)) ?></span>
+                  <span class="course-tile__price-now"><?= esc($formatMzn($course->effective_price)) ?></span>
                   <?php if (!empty($course->discount_percent)): ?>
-                    <span class="pill">−<?= (int) $course->discount_percent ?>%</span>
+                    <span class="pill pill-discount">−<?= (int) $course->discount_percent ?>% OFF</span>
                   <?php endif; ?>
                 <?php else: ?>
                   <span class="course-tile__price-now"><?= esc($formatMzn($course->effective_price ?? $course->price_course ?? 0)) ?></span>
@@ -1146,30 +1233,30 @@ $formatMzn = static function ($value): string {
 
   <section class="section section-blue" id="como-funciona">
     <div class="container-mech">
-      <div class="section__head reveal">
+      <div class="section__head">
         <p class="section__eyebrow">Processo</p>
-        <h2 class="section__title">Do zero ao certificado, sem fricção</h2>
-        <p class="section__lead">Uma experiência pensada para decidir rápido e aprender com clareza.</p>
+        <h2 class="section__title">Como funciona</h2>
+        <p class="section__lead">Do curso ao certificado, em 3 passos.</p>
       </div>
 
       <div class="steps">
-        <div class="step reveal">
+        <div class="step">
           <div class="step__visual" aria-hidden="true"><i class="bi bi-journal-bookmark"></i></div>
           <span class="step__num"></span>
           <h3 class="step__title">Escolha o curso</h3>
-          <p class="step__text">Veja o programa, horas, módulos e o que vai aprender — tudo numa página limpa.</p>
+          <p class="step__text">Veja o programa e as horas.</p>
         </div>
-        <div class="step reveal" style="--d:100ms">
+        <div class="step">
           <div class="step__visual" aria-hidden="true"><i class="bi bi-play-circle"></i></div>
           <span class="step__num"></span>
           <h3 class="step__title">Aprenda na prática</h3>
-          <p class="step__text">Aulas objectivas, ficheiros de apoio e avaliações. Experimente aulas gratuitas quando disponíveis.</p>
+          <p class="step__text">Aulas objectivas e exercícios.</p>
         </div>
-        <div class="step reveal" style="--d:200ms">
+        <div class="step">
           <div class="step__visual" aria-hidden="true"><i class="bi bi-award"></i></div>
           <span class="step__num"></span>
           <h3 class="step__title">Receba o certificado</h3>
-          <p class="step__text">Conclua o curso e emita o certificado digital directamente na plataforma.</p>
+          <p class="step__text">Emita o certificado ao concluir.</p>
         </div>
       </div>
     </div>
@@ -1184,10 +1271,10 @@ $formatMzn = static function ($value): string {
             <span class="yt__play-btn"><i class="bi bi-play-fill"></i></span>
           </a>
         </div>
-        <div class="yt__copy reveal" style="--d:120ms">
+        <div class="yt__copy">
           <p class="section__eyebrow">Comunidade</p>
-          <h2 class="section__title">Mechanical Tecnologia no YouTube</h2>
-          <p class="section__lead">Tutoriais gratuitos e conteúdos intensivos para complementar o que aprende na Academy.</p>
+          <h2 class="section__title">YouTube</h2>
+          <p class="section__lead">Tutoriais gratuitos para complementar o curso.</p>
           <div class="yt__stats">
             <div class="yt__stat">
               <strong>2M+</strong>
@@ -1208,10 +1295,10 @@ $formatMzn = static function ($value): string {
 
   <section class="section" id="faq">
     <div class="container-mech">
-      <div class="section__head text-center reveal" style="max-width:36rem;margin-left:auto;margin-right:auto">
+      <div class="section__head text-center" style="max-width:36rem;margin-left:auto;margin-right:auto">
         <p class="section__eyebrow">FAQ</p>
         <h2 class="section__title">Perguntas frequentes</h2>
-        <p class="section__lead" style="margin-left:auto;margin-right:auto">Respostas claras para decidir com confiança.</p>
+        <p class="section__lead">Respostas rápidas sobre a Academy.</p>
       </div>
 
       <div class="faq-wrap">
@@ -1257,11 +1344,11 @@ $formatMzn = static function ($value): string {
 
   <section class="section" style="padding-top:0">
     <div class="container-mech">
-      <div class="news reveal">
+      <div class="news">
         <div>
           <p class="section__eyebrow">Novidades</p>
-          <h2 class="section__title" style="font-size:1.55rem">Seja o primeiro a saber</h2>
-          <p class="section__lead">Receba aviso quando lançarmos novos cursos.</p>
+          <h2 class="section__title" style="font-size:1.55rem">Newsletter</h2>
+          <p class="section__lead">Avisos de novos cursos.</p>
         </div>
         <form class="news__form" action="#" method="post" onsubmit="return false;">
           <input class="news__input" type="email" name="email" placeholder="O seu email" aria-label="Email" required>
@@ -1276,8 +1363,9 @@ $formatMzn = static function ($value): string {
       <a class="site-footer__brand" href="<?= base_url('/') ?>">
         <img src="<?= base_url('assets/img/logo.png') ?>" alt="Mechanical Academy">
       </a>
-      <p class="site-footer__copy">&copy; <?= date('Y') ?> Mechanical Academy. Todos os direitos reservados.</p>
+      <p class="site-footer__copy">&copy; <?= date('Y') ?> Mechanical Academy · +258 84 272 6761</p>
       <div class="site-footer__social">
+        <a href="https://wa.me/258842726761" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
         <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
         <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
         <a href="https://www.youtube.com/@MechanicalTecnologia" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="bi bi-youtube"></i></a>

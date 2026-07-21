@@ -227,7 +227,14 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
       width: 100%;
       max-width: 1140px;
       margin: 0 auto;
-      padding: 0 1.5rem;
+      padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
+      padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
+    }
+
+    .container-mech.site-nav__inner,
+    .container-mech.hero__inner {
+      padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
+      padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
     }
 
     /* ---------- Nav ---------- */
@@ -239,7 +246,7 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      transition: background 0.25s ease, box-shadow 0.25s ease;
+      transition: none;
     }
 
     .site-nav.is-scrolled {
@@ -248,11 +255,13 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
     }
 
     .site-nav__inner {
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
-      padding: 0.9rem 0;
+      padding-top: 0.9rem;
+      padding-bottom: 0.9rem;
     }
 
     .site-nav__brand {
@@ -281,7 +290,7 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
       text-decoration: none;
       font-size: 0.92rem;
       font-weight: 500;
-      transition: color 0.15s ease;
+      transition: none;
     }
 
     .site-nav__links a:hover {
@@ -291,7 +300,7 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
     .site-nav__cta {
       color: #fff !important;
       border: 1px solid rgba(255, 255, 255, 0.28);
-      border-radius: 999px;
+      border-radius: 0.375rem;
       padding: 0.5rem 1.15rem !important;
     }
 
@@ -315,7 +324,7 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
       display: none;
       background: transparent;
       border: 1px solid rgba(255, 255, 255, 0.25);
-      border-radius: 8px;
+      border-radius: 0.375rem;
       color: #fff;
       padding: 0.4rem 0.6rem;
       font-size: 1.05rem;
@@ -327,13 +336,13 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
       align-items: center;
       justify-content: center;
       gap: 0.55rem;
-      border-radius: 999px;
+      border-radius: 0.375rem;
       padding: 0.85rem 1.75rem;
       font-weight: 600;
       font-size: 0.98rem;
       text-decoration: none;
       border: 1px solid transparent;
-      transition: transform 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+      transition: none;
       cursor: pointer;
       line-height: 1.2;
     }
@@ -413,7 +422,8 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
     .hero__inner {
       position: relative;
       z-index: 2;
-      padding: 7.5rem 0 4.5rem;
+      padding-top: 7.5rem;
+      padding-bottom: 4.5rem;
       width: 100%;
     }
 
@@ -428,7 +438,7 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
       border: 1px solid var(--accent-border);
       background: rgba(255, 255, 255, 0.04);
       color: rgba(255, 255, 255, 0.92);
-      border-radius: 999px;
+      border-radius: 0.375rem;
       padding: 0.4rem 0.9rem 0.4rem 0.7rem;
       font-size: 0.78rem;
       font-weight: 600;
@@ -487,7 +497,7 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
       font-size: 0.92rem;
       font-weight: 500;
       border-bottom: 1px solid transparent;
-      transition: color 0.15s ease, border-color 0.15s ease;
+      transition: none;
     }
 
     .hero__whatsapp:hover {
@@ -622,7 +632,7 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
       width: 100%;
       max-width: 860px;
       aspect-ratio: 16 / 9;
-      border-radius: 16px;
+      border-radius: 0.375rem;
       overflow: hidden;
       background: #05070b;
       box-shadow: 0 30px 70px -30px rgba(18, 21, 26, 0.35);
@@ -670,7 +680,7 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
     .accordion-mech .accordion-item {
       background: var(--surface);
       border: 1px solid var(--line);
-      border-radius: 14px !important;
+      border-radius: 0.375rem;
       overflow: hidden;
       margin-bottom: 0.9rem;
     }
@@ -727,7 +737,7 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
       background: transparent;
       color: var(--ink);
       padding: 0.85rem 0.6rem;
-      border-radius: 8px;
+      border-radius: 0.375rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -738,7 +748,7 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
       width: 100%;
       text-align: left;
       text-decoration: none;
-      transition: background-color 0.16s ease;
+      transition: none;
     }
 
     .module-lesson-item:hover {
@@ -817,7 +827,7 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
       z-index: 30;
       background: #161616;
       border: 1px solid var(--line);
-      border-radius: 18px;
+      border-radius: 0.375rem;
       padding: 1.75rem;
       box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.65);
     }
@@ -861,22 +871,27 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
 
     .purchase-card__list-price {
       text-decoration: line-through;
-      color: var(--ink-soft);
-      font-size: 0.95rem;
+      color: #ef4444;
+      font-size: 1rem;
+      font-weight: 700;
     }
 
     .purchase-card__badge {
       display: inline-flex;
-      background: rgba(220, 53, 69, 0.18);
-      color: #ff8a95;
-      font-size: 0.78rem;
+      align-items: center;
+      background: rgba(239, 68, 68, 0.18);
+      color: #fca5a5;
+      font-size: 0.75rem;
       font-weight: 700;
-      padding: 0.15rem 0.55rem;
-      border-radius: 999px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.55rem;
+      border-radius: 0.375rem;
+      border: 1px solid rgba(239, 68, 68, 0.35);
     }
 
     .purchase-card__promo-note {
-      color: #ff8a95;
+      color: #fca5a5;
       font-size: 0.85rem;
       font-weight: 600;
       margin-bottom: 1.1rem;
@@ -940,12 +955,18 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
       display: none;
       align-items: center;
       justify-content: space-between;
-      gap: 1rem;
-      background: rgba(10, 10, 10, 0.94);
+      gap: 0.75rem;
+      background: rgba(10, 10, 10, 0.96);
       backdrop-filter: blur(12px);
       border-top: 1px solid var(--line);
-      padding: 0.75rem 1rem;
+      padding: 0.7rem 1rem calc(0.7rem + env(safe-area-inset-bottom, 0px));
       box-shadow: 0 -12px 30px -20px rgba(0, 0, 0, 0.65);
+    }
+
+    .mobile-sticky-cta .btn-mech {
+      flex-shrink: 0;
+      padding: 0.7rem 1.1rem;
+      font-size: 0.9rem;
     }
 
     .mobile-sticky-cta .price {
@@ -963,21 +984,11 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
       text-decoration: none;
     }
 
-    @media (max-width: 991.98px) {
-      .mobile-sticky-cta {
-        display: flex;
-      }
-
-      body {
-        padding-bottom: 76px;
-      }
-    }
-
     /* ---------- Preview modal ---------- */
     .lesson-preview-player {
       aspect-ratio: 16 / 9;
       background: #020617;
-      border-radius: 1rem;
+      border-radius: 0.375rem;
       overflow: hidden;
     }
 
@@ -1022,7 +1033,7 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
       color: rgba(255, 255, 255, 0.65);
       font-size: 1.05rem;
       text-decoration: none;
-      transition: color 0.15s ease;
+      transition: none;
     }
 
     .site-footer__social a:hover {
@@ -1040,22 +1051,22 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
     }
 
     .hero__media {
-      animation: heroKen 18s ease-out forwards;
+      animation: none;
     }
 
     .hero-anim > * {
-      opacity: 0;
-      transform: translateY(20px);
-      animation: riseIn 0.8s var(--ease-out) forwards;
+      opacity: 1;
+      transform: none;
+      animation: none;
     }
 
-    .hero-anim > *:nth-child(1) { animation-delay: 0.06s; }
-    .hero-anim > *:nth-child(2) { animation-delay: 0.14s; }
-    .hero-anim > *:nth-child(3) { animation-delay: 0.22s; }
-    .hero-anim > *:nth-child(4) { animation-delay: 0.3s; }
-    .hero-anim > *:nth-child(5) { animation-delay: 0.38s; }
-    .hero-anim > *:nth-child(6) { animation-delay: 0.46s; }
-    .hero-anim > *:nth-child(7) { animation-delay: 0.54s; }
+    .hero-anim > *:nth-child(1) {  }
+    .hero-anim > *:nth-child(2) {  }
+    .hero-anim > *:nth-child(3) {  }
+    .hero-anim > *:nth-child(4) {  }
+    .hero-anim > *:nth-child(5) {  }
+    .hero-anim > *:nth-child(6) {  }
+    .hero-anim > *:nth-child(7) {  }
 
     @keyframes riseIn {
       to { opacity: 1; transform: translateY(0); }
@@ -1067,19 +1078,18 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
     }
 
     .reveal {
-      opacity: 0;
-      transform: translateY(24px);
-      transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
-      transition-delay: var(--d, 0ms);
+      opacity: 1;
+      transform: none;
+      transition: none;
     }
 
     .reveal.is-in {
       opacity: 1;
-      transform: translateY(0);
+      transform: none;
     }
 
     .learn-grid li {
-      transition: transform 0.22s var(--ease-out), background-color 0.22s ease;
+      transition: none;
     }
 
     .learn-grid li:hover {
@@ -1088,44 +1098,212 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
 
     .module-item,
     .accordion-item {
-      transition: border-color 0.2s ease, box-shadow 0.25s ease, transform 0.25s var(--ease-spring);
+      transition: none;
     }
 
     .buy-bar,
     .sticky-cta {
-      transition: transform 0.28s var(--ease-out), opacity 0.28s ease;
+      transition: none;
     }
 
     @media (prefers-reduced-motion: reduce) {
       .reveal,
       .hero-anim > *,
       .hero__media {
-        animation: none !important;
-        transition: none !important;
+        animation: none;
+        transition: none;
         opacity: 1 !important;
         transform: none !important;
       }
     }
 
-    @media (max-width: 767.98px) {
+    @media (max-width: 991.98px) {
+      .site-nav__toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .site-nav__links {
+        display: none;
+        position: absolute;
+        top: calc(100% + 0.25rem);
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.15rem;
+        padding: 0.65rem;
+        background: rgba(12, 12, 12, 0.98);
+        border: 1px solid var(--line);
+        border-radius: 0.375rem;
+        box-shadow: 0 18px 40px -20px rgba(0, 0, 0, 0.7);
+        max-height: min(70vh, 420px);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        z-index: 1100;
+      }
+
+      .site-nav__links.is-open {
+        display: flex;
+      }
+
+      .site-nav__links li {
+        width: 100%;
+      }
+
+      .site-nav__links a {
+        display: flex;
+        align-items: center;
+        padding: 0.7rem 0.85rem;
+        border-radius: 0.375rem;
+      }
+
+      .site-nav__links a:hover {
+        background: rgba(255, 255, 255, 0.06);
+      }
+
+      .site-nav__cta {
+        margin-top: 0.15rem;
+        justify-content: center;
+        text-align: center;
+      }
+
       .hero {
-        min-height: 100vh;
+        min-height: auto;
       }
 
       .hero__inner {
-        padding: 6.5rem 0 3rem;
+        padding-top: 5.75rem;
+        padding-bottom: 2.75rem;
+      }
+
+      .hero__cta {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.7rem;
+      }
+
+      .hero__cta .btn-mech {
+        width: 100%;
+      }
+
+      .hero__whatsapp {
+        justify-content: center;
+      }
+
+      .hero__meta {
+        gap: 0.55rem 0.85rem;
+        font-size: 0.86rem;
+      }
+
+      .hero__meta .sep {
+        display: none;
       }
 
       .section {
-        padding: 3.75rem 0;
+        padding: 3.25rem 0;
+      }
+
+      .mobile-sticky-cta {
+        display: flex;
+      }
+
+      body {
+        padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+      }
+    }
+
+    @media (max-width: 767.98px) {
+      .container-mech {
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+      }
+
+      .site-nav__inner {
+        padding-top: 0.7rem;
+        padding-bottom: 0.7rem;
+      }
+
+      .site-nav__brand img {
+        height: 28px;
+      }
+
+      .hero__inner {
+        padding-top: 5.25rem;
+        padding-bottom: 2.25rem;
+      }
+
+      .hero__title {
+        font-size: clamp(1.7rem, 7.5vw, 2.25rem);
+        margin-bottom: 0.85rem;
+      }
+
+      .hero__subtitle {
+        font-size: 0.98rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .hero__meta {
+        padding-top: 1.15rem;
+      }
+
+      .section {
+        padding: 2.75rem 0;
+      }
+
+      .section-head {
+        margin-bottom: 1.75rem;
+      }
+
+      .section-head h2 {
+        font-size: 1.55rem;
       }
 
       .learn-grid {
         grid-template-columns: 1fr;
       }
 
-      .site-nav__links {
-        display: none;
+      .purchase-card {
+        padding: 1.25rem;
+      }
+
+      .site-footer__row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.85rem;
+      }
+    }
+
+    @media (max-width: 479.98px) {
+      .hero__cta .btn-mech {
+        padding: 0.8rem 1.15rem;
+        font-size: 0.92rem;
+      }
+
+      .mobile-sticky-cta .price {
+        font-size: 0.95rem;
+      }
+
+      .mobile-sticky-cta .btn-mech {
+        padding: 0.65rem 0.9rem;
+        font-size: 0.85rem;
+      }
+    }
+
+    .container-mech,
+    .container-mech.site-nav__inner,
+    .container-mech.hero__inner {
+      padding-left: max(1.25rem, env(safe-area-inset-left, 0px)) !important;
+      padding-right: max(1.25rem, env(safe-area-inset-right, 0px)) !important;
+    }
+
+    @media (min-width: 768px) {
+      .container-mech,
+      .container-mech.site-nav__inner,
+      .container-mech.hero__inner {
+        padding-left: max(1.5rem, env(safe-area-inset-left, 0px)) !important;
+        padding-right: max(1.5rem, env(safe-area-inset-right, 0px)) !important;
       }
     }
   </style>
@@ -1150,7 +1328,10 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
       <a class="site-nav__brand" href="<?= base_url('/') ?>">
         <img src="<?= base_url('assets/img/logo.png') ?>" alt="Mechanical Academy">
       </a>
-      <ul class="site-nav__links">
+      <button type="button" class="site-nav__toggle" id="siteNavToggle" aria-expanded="false" aria-controls="siteNavLinks" aria-label="Abrir menu">
+        <i class="bi bi-list" aria-hidden="true"></i>
+      </button>
+      <ul class="site-nav__links" id="siteNavLinks">
         <?php if ($isLoggedIn): ?>
           <li><a href="<?= base_url($user->role . '/dashboard/meus_cursos') ?>">Meus cursos</a></li>
           <li><a href="https://www.youtube.com/@MechanicalTecnologia" target="_blank" rel="noopener noreferrer">Youtube</a></li>
@@ -1174,11 +1355,10 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
     <div class="hero__media" style="background-image:url('<?= base_url('assets/img/' . ($course->bg_course ?? 'bg.webp')) ?>');"></div>
     <div class="hero__gradient"></div>
     <div class="container-mech hero__inner">
-      <div class="hero__content hero-anim">
-        <span class="hero__badge"><span class="dot"></span> Curso mais vendido &middot; conteúdo atualizado</span>
+      <div class="hero__content">
+        <span class="hero__badge"><span class="dot"></span> Curso mais vendido</span>
         <p class="hero__kicker">MECHANICAL</p>
         <h1 class="hero__title">Curso de <?= esc($course->title_course) ?></h1>
-        <p class="hero__subtitle"><?= $heroSubtitle ?></p>
 
         <div class="hero__cta">
           <a href="<?= base_url('/checkout/' . $course->id_course) ?>" class="btn-mech btn-mech-primary">
@@ -1194,12 +1374,12 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
 
         <?php if (!empty($whatsappUrl)): ?>
           <a href="<?= esc($whatsappUrl) ?>" target="_blank" rel="noopener" class="hero__whatsapp mb-4 d-inline-flex">
-            <i class="bi bi-whatsapp"></i> Falar com a equipa comercial no WhatsApp
+            <i class="bi bi-whatsapp"></i> WhatsApp
           </a>
         <?php endif; ?>
 
         <div class="hero__meta">
-          <span class="item"><i class="bi bi-clock"></i> <?= esc($hoursLabel ?? (number_format($courseHours ?? 0, 1, ',', '.') . 'h')) ?> de conteúdo</span>
+          <span class="item"><i class="bi bi-clock"></i> <?= esc($hoursLabel ?? (number_format($courseHours ?? 0, 1, ',', '.') . 'h')) ?></span>
           <span class="sep">&middot;</span>
           <span class="item"><i class="bi bi-collection"></i> <?= (int) $moduleCount ?> módulos</span>
           <span class="sep">&middot;</span>
@@ -1210,34 +1390,10 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
           <?php endif; ?>
           <?php if (!empty($ratingSummary['total'])): ?>
             <span class="sep">&middot;</span>
-            <span class="item"><i class="bi bi-star-fill"></i> <?= number_format((float) $ratingSummary['average'], 1, ',', '.') ?> (<?= (int) $ratingSummary['total'] ?>)</span>
+            <span class="item"><i class="bi bi-star-fill"></i> <?= number_format((float) $ratingSummary['average'], 1, ',', '.') ?></span>
           <?php endif; ?>
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- O QUE VAI APRENDER -->
-  <section id="learn" class="section">
-    <div class="container-mech">
-      <div class="section-heading reveal">
-        <p class="kicker">O que você vai aprender</p>
-        <h2>Habilidades práticas, do início ao avançado</h2>
-      </div>
-
-      <?php if ($descriptionHtml !== ''): ?>
-        <div class="section-lead reveal" style="--d:80ms"><?= $descriptionHtml ?></div>
-      <?php endif; ?>
-
-      <ul class="learn-grid reveal" style="--d:140ms">
-        <?php foreach ($learnPreviewItems as $itemText): ?>
-          <li><i class="bi bi-check-lg"></i><span><?= esc($itemText) ?></span></li>
-        <?php endforeach; ?>
-      </ul>
-
-      <?php if ($learnMoreCount > 0): ?>
-        <p class="learn-more-note">+ <?= $learnMoreCount ?> tópico<?= $learnMoreCount > 1 ? 's' : '' ?> adicional<?= $learnMoreCount > 1 ? 'ais' : '' ?> no currículo completo abaixo.</p>
-      <?php endif; ?>
     </div>
   </section>
 
@@ -1245,11 +1401,10 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
   <?php if ($overviewVideoId): ?>
     <section id="overview" class="section section-tight" style="background:var(--surface); border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
       <div class="container-mech text-center">
-        <div class="section-heading centered reveal">
-          <p class="kicker">Aula de apresentação</p>
-          <h2>Conheça o curso antes de comprar</h2>
+        <div class="section-heading centered">
+          <h2>Apresentação do curso</h2>
         </div>
-        <div class="video-frame mx-auto reveal" style="--d:100ms">
+        <div class="video-frame mx-auto">
           <iframe id="vimeoPlayerOverview"
             title="Vimeo player"
             src="https://player.vimeo.com/video/<?= esc($overviewVideoId) ?>?badge=0&autopause=0&player_id=<?= esc($overviewPlayerId) ?>&app_id=58479&title=0&byline=0&portrait=0&autoplay=0"
@@ -1265,24 +1420,30 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
     </section>
   <?php endif; ?>
 
+  <!-- O QUE VAI APRENDER -->
+  <section id="learn" class="section">
+    <div class="container-mech">
+      <div class="section-heading">
+        <h2>O que você vai aprender</h2>
+      </div>
+
+      <ul class="learn-grid">
+        <?php foreach ($learnPreviewItems as $itemText): ?>
+          <li><i class="bi bi-check-lg"></i><span><?= esc($itemText) ?></span></li>
+        <?php endforeach; ?>
+      </ul>
+    </div>
+  </section>
+
   <!-- CONTEÚDO DO CURSO -->
   <section id="curriculum" class="section">
     <div class="container-mech">
-      <div class="section-heading reveal">
-        <p class="kicker">Currículo completo</p>
+      <div class="section-heading">
         <h2>Conteúdo do curso</h2>
       </div>
 
       <div class="curriculum-layout">
-        <div class="reveal" style="--d:80ms">
-          <p class="preview-helper">
-            <?php if ($publicPreviewLessonCount > 0): ?>
-              <i class="bi bi-unlock"></i>Aulas com cadeado aberto podem ser assistidas antes da compra.
-            <?php else: ?>
-              <i class="bi bi-info-circle"></i>O currículo completo está listado abaixo.
-            <?php endif; ?>
-          </p>
-
+        <div>
           <div class="accordion accordion-mech" id="excelAccordion">
             <?php foreach ($modules as $key => $module): ?>
               <div class="accordion-item">
@@ -1377,22 +1538,16 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
             <div class="purchase-card__price-row">
               <?php if (!empty($hasPromo)): ?>
                 <span class="purchase-card__list-price"><?= number_format((float) $listPrice, 2, ',', '.') ?> MZN</span>
-                <span class="purchase-card__badge">-<?= (int) $discountPercent ?>%</span>
+                <span class="purchase-card__badge">−<?= (int) $discountPercent ?>% OFF</span>
               <?php endif; ?>
             </div>
             <div class="purchase-card__price-row">
               <span class="purchase-card__price"><?= number_format((float) ($effectivePrice ?? $course->price_course), 2, ',', '.') ?></span>
               <span class="purchase-card__price-unit">MZN</span>
             </div>
-            <?php if (!empty($hasPromo)): ?>
-              <?php if (!empty($promoRemainingSeconds) && (int) $promoRemainingSeconds > 0): ?>
-                <p class="purchase-card__promo-note">Oferta expira em <strong class="js-promo-inline-countdown" data-left="<?= (int) $promoRemainingSeconds ?>">--:--:--</strong></p>
-              <?php else: ?>
-                <p class="purchase-card__promo-note">Preço promocional por tempo limitado</p>
-              <?php endif; ?>
+            <?php if (!empty($hasPromo) && !empty($promoRemainingSeconds) && (int) $promoRemainingSeconds > 0): ?>
+              <p class="purchase-card__promo-note">Expira em <strong class="js-promo-inline-countdown" data-left="<?= (int) $promoRemainingSeconds ?>">--:--:--</strong></p>
             <?php endif; ?>
-
-            <p class="purchase-card__single">Pagamento único &middot; acesso vitalício</p>
 
             <div class="purchase-card__actions">
               <a href="<?= site_url('checkout/' . (int) $course->id_course) ?>" class="btn-mech btn-mech-primary btn-mech-block">
@@ -1405,21 +1560,21 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
               <?php endif; ?>
               <?php if (!empty($whatsappUrl)): ?>
                 <a href="<?= esc($whatsappUrl) ?>" target="_blank" rel="noopener" class="btn-mech btn-mech-outline btn-mech-block">
-                  <i class="bi bi-whatsapp"></i> Falar no WhatsApp
+                  <i class="bi bi-whatsapp"></i> WhatsApp
                 </a>
               <?php endif; ?>
             </div>
 
             <?php if (!empty($ratingSummary['total'])): ?>
               <p class="purchase-card__rating">
-                <span class="stars">★★★★★</span><?= number_format((float) $ratingSummary['average'], 1, ',', '.') ?> &middot; <?= (int) $ratingSummary['total'] ?> avaliações
+                <span class="stars">★★★★★</span><?= number_format((float) $ratingSummary['average'], 1, ',', '.') ?>
               </p>
             <?php endif; ?>
 
             <ul class="purchase-card__facts">
-              <li><i class="bi bi-infinity"></i> Acesso vitalício ao conteúdo</li>
-              <li><i class="bi bi-phone"></i> Estude no computador e no celular</li>
-              <li><i class="bi bi-mortarboard"></i> Certificado digital de conclusão</li>
+              <li><i class="bi bi-infinity"></i> Acesso vitalício</li>
+              <li><i class="bi bi-phone"></i> PC e telemóvel</li>
+              <li><i class="bi bi-mortarboard"></i> Certificado digital</li>
             </ul>
           </div>
         </aside>
@@ -1432,7 +1587,7 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
     <div class="price">
       <?= number_format((float) ($effectivePrice ?? $course->price_course), 2, ',', '.') ?> MZN
       <?php if (!empty($hasPromo)): ?>
-        <small class="text-decoration-line-through"><?= number_format((float) $listPrice, 2, ',', '.') ?> MZN</small>
+        <small class="text-decoration-line-through" style="color:#ef4444;font-weight:700"><?= number_format((float) $listPrice, 2, ',', '.') ?> MZN</small>
       <?php endif; ?>
     </div>
     <a href="<?= site_url('checkout/' . (int) $course->id_course) ?>" class="btn-mech btn-mech-primary btn-mech-sm">Comprar</a>
@@ -1471,9 +1626,9 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
       <a href="<?= base_url('/') ?>">
         <img src="<?= base_url('assets/img/logo.png') ?>" alt="Mechanical Academy">
       </a>
-      <small>&copy; <?= date('Y') ?> Mechanical Academy. Todos os direitos reservados.</small>
+      <small>&copy; <?= date('Y') ?> Mechanical Academy · +258 84 272 6761</small>
       <div class="site-footer__social">
-        <a href="#" aria-label="X"><i class="bi bi-twitter-x"></i></a>
+        <a href="https://wa.me/258842726761" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
         <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
         <a href="https://www.youtube.com/@MechanicalTecnologia" target="_blank" rel="noopener noreferrer" aria-label="Youtube"><i class="bi bi-youtube"></i></a>
         <a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
@@ -1524,6 +1679,28 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
         const onScroll = () => nav.classList.toggle('is-scrolled', window.scrollY > 12);
         onScroll();
         window.addEventListener('scroll', onScroll, { passive: true });
+      }
+
+      const navToggle = document.getElementById('siteNavToggle');
+      const navLinks = document.getElementById('siteNavLinks');
+      if (navToggle && navLinks) {
+        const setOpen = (open) => {
+          navLinks.classList.toggle('is-open', open);
+          navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+          navToggle.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
+          const icon = navToggle.querySelector('i');
+          if (icon) icon.className = open ? 'bi bi-x-lg' : 'bi bi-list';
+        };
+        navToggle.addEventListener('click', () => setOpen(!navLinks.classList.contains('is-open')));
+        navLinks.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => setOpen(false)));
+        document.addEventListener('click', (e) => {
+          if (!navLinks.classList.contains('is-open')) return;
+          if (navToggle.contains(e.target) || navLinks.contains(e.target)) return;
+          setOpen(false);
+        });
+        window.addEventListener('resize', () => {
+          if (window.innerWidth > 991.98) setOpen(false);
+        });
       }
     })();
   </script>

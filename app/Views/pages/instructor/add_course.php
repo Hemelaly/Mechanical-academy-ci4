@@ -869,8 +869,8 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                                             placeholder="Horas manuais"
                                             class="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-sm">
                                         <input type="text" name="whatsapp_contact_course"
-                                            value="<?= esc($draft->whatsapp_contact_course ?? $draft->whatsapp_course ?? '258842627671') ?>"
-                                            placeholder="WhatsApp comercial"
+                                            value="<?= esc($draft->whatsapp_contact_course ?? $draft->whatsapp_course ?? '258842726761') ?>"
+                                            placeholder="258842726761"
                                             class="w-full px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl text-sm">
                                     </div>
                                 </div>

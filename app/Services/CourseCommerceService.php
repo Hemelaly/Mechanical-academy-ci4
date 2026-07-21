@@ -7,7 +7,7 @@ namespace App\Services;
  */
 class CourseCommerceService
 {
-    public const DEFAULT_WHATSAPP = '258842627671';
+    public const DEFAULT_WHATSAPP = '258842726761';
 
     /**
      * @param object|array $course

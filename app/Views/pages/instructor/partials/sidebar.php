@@ -112,8 +112,8 @@ use Faker\Provider\Base;
 
         const links = document.querySelectorAll('#sidebar .side-link');
 
-        // página atual sem query string
-        const currentPage = window.location.pathname.split('/').pop().split('?')[0];
+        // página atual (pathname completo, sem trailing slash)
+        const currentPath = window.location.pathname.replace(/\/$/, '');
 
         links.forEach(link => {
 

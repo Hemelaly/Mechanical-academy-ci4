@@ -230,7 +230,7 @@ $tonePalette = [
                 <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Cursos populares</h2>
                 <a href="<?= site_url('/admin/dashboard/cursos') ?>" class="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400">Ver todos</a>
             </div>
-            <div class="mt-4 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
+            <div class="mt-4 overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
                 <table
                     id="admin-home-popular-courses-table"
                     data-flowbite-datatable

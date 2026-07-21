@@ -180,6 +180,10 @@ $courseImageSrc = !empty($course->image_course)
   ? base_url('assets/instructor/img/courses/' . $course->image_course)
   : base_url('assets/img/logo.png');
 
+$courseIconBg = !empty($course->icon_course)
+  ? base_url('assets/img/' . $course->icon_course)
+  : $courseImageSrc;
+
 ?>
 
 <!DOCTYPE html>
@@ -221,10 +225,40 @@ $courseImageSrc = !empty($course->image_course)
     body {
       font-family: 'Sora', sans-serif;
       color: var(--ink);
-      background:
-        radial-gradient(1200px 500px at 85% -10%, var(--accent-glow, var(--accent-soft)) 0%, transparent 55%),
-        var(--page-bg);
+      background: var(--page-bg);
       min-height: 100vh;
+      position: relative;
+    }
+
+    .checkout-icon-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .checkout-icon-bg img {
+      position: absolute;
+      width: clamp(64px, 9vw, 110px);
+      height: clamp(64px, 9vw, 110px);
+      object-fit: contain;
+      opacity: 0.22;
+      filter: saturate(0.85);
+    }
+
+    .checkout-icon-bg img:nth-child(1) { top: 8%; left: 4%; transform: rotate(-18deg); }
+    .checkout-icon-bg img:nth-child(2) { top: 18%; right: 6%; transform: rotate(14deg); }
+    .checkout-icon-bg img:nth-child(3) { top: 42%; left: 10%; transform: rotate(8deg); }
+    .checkout-icon-bg img:nth-child(4) { top: 55%; right: 12%; transform: rotate(-12deg); }
+    .checkout-icon-bg img:nth-child(5) { bottom: 18%; left: 6%; transform: rotate(22deg); }
+    .checkout-icon-bg img:nth-child(6) { bottom: 10%; right: 8%; transform: rotate(-8deg); }
+    .checkout-icon-bg img:nth-child(7) { top: 70%; left: 42%; transform: rotate(16deg); }
+    .checkout-icon-bg img:nth-child(8) { top: 32%; left: 48%; transform: rotate(-24deg); }
+
+    .checkout-page {
+      position: relative;
+      z-index: 1;
     }
 
     a {
@@ -235,7 +269,13 @@ $courseImageSrc = !empty($course->image_course)
       width: 100%;
       max-width: 1140px;
       margin: 0 auto;
-      padding: 0 1.5rem;
+      padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
+      padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
+    }
+
+    .container-mech.topbar__inner {
+      padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
+      padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
     }
 
     /* ---------- Top bar ---------- */
@@ -253,7 +293,8 @@ $courseImageSrc = !empty($course->image_course)
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
-      padding: 0.85rem 0;
+      padding-top: 0.85rem;
+      padding-bottom: 0.85rem;
     }
 
     .topbar__brand img {
@@ -270,7 +311,7 @@ $courseImageSrc = !empty($course->image_course)
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
-      transition: color 0.15s ease;
+      transition: none;
     }
 
     .topbar__back:hover {
@@ -349,7 +390,7 @@ $courseImageSrc = !empty($course->image_course)
 
     /* ---------- Left: course summary ---------- */
     .course-thumb {
-      border-radius: 14px;
+      border-radius: 0.375rem;
       overflow: hidden;
       margin-bottom: 1.5rem;
       background: #05070b;
@@ -399,11 +440,27 @@ $courseImageSrc = !empty($course->image_course)
     .summary-meta .item {
       display: inline-flex;
       align-items: center;
-      gap: 0.45rem;
+      gap: 0.5rem;
+    }
+
+    .summary-meta .item-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: 0;
+      color: var(--accent);
+      font-size: 1.55rem;
+      line-height: 1;
+      width: auto;
+      height: auto;
+      padding: 0;
+      border-radius: 0;
+      flex-shrink: 0;
     }
 
     .summary-meta i {
-      color: var(--accent);
+      color: inherit;
     }
 
     .course-summary {
@@ -452,7 +509,7 @@ $courseImageSrc = !empty($course->image_course)
       background: var(--accent-soft);
       border: 1px solid var(--accent-border);
       color: var(--ink);
-      border-radius: 12px;
+      border-radius: 0.375rem;
       padding: 0.85rem 1.1rem;
       font-size: 0.9rem;
       font-weight: 500;
@@ -472,10 +529,12 @@ $courseImageSrc = !empty($course->image_course)
       margin-bottom: 2rem;
     }
 
-    .price-line .list-price {
+    .price-line .list-price,
+    .checkout-card .list-price {
       text-decoration: line-through;
-      color: var(--ink-soft);
+      color: #ef4444;
       font-size: 1rem;
+      font-weight: 700;
     }
 
     .price-line .effective-price {
@@ -484,13 +543,17 @@ $courseImageSrc = !empty($course->image_course)
       color: #fff;
     }
 
-    .price-line .promo-badge {
-      background: rgba(220, 53, 69, 0.18);
-      color: #ff8a95;
-      font-size: 0.76rem;
+    .price-line .promo-badge,
+    .checkout-card .promo-badge {
+      background: rgba(239, 68, 68, 0.18);
+      color: #fca5a5;
+      font-size: 0.72rem;
       font-weight: 700;
-      padding: 0.15rem 0.55rem;
-      border-radius: 999px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.55rem;
+      border-radius: 0.375rem;
+      border: 1px solid rgba(239, 68, 68, 0.35);
     }
 
     .trust-row {
@@ -520,7 +583,7 @@ $courseImageSrc = !empty($course->image_course)
       top: 5.5rem;
       background: #161616;
       border: 1px solid var(--line);
-      border-radius: 20px;
+      border-radius: 0.375rem;
       padding: 1.85rem;
       box-shadow: 0 30px 70px -35px rgba(0, 0, 0, 0.7);
     }
@@ -580,7 +643,7 @@ $courseImageSrc = !empty($course->image_course)
     .form-select {
       font-family: 'Sora', sans-serif;
       border: 1px solid var(--line);
-      border-radius: 10px;
+      border-radius: 0.375rem;
       padding: 0.65rem 0.9rem;
       font-size: 0.95rem;
       background: #0a0a0a;
@@ -611,12 +674,17 @@ $courseImageSrc = !empty($course->image_course)
       margin-bottom: 1.4rem;
     }
 
-    .coupon-group .btn-mech-outline {
-      border-radius: 0 10px 10px 0;
+    .coupon-group .input-group {
+      gap: 0;
     }
 
     .coupon-group .form-control {
-      border-radius: 10px 0 0 10px;
+      border-radius: 0.375rem 0 0 0.375rem !important;
+    }
+
+    .coupon-group .btn-mech,
+    .coupon-group .btn-mech-outline {
+      border-radius: 0 0.375rem 0.375rem 0 !important;
     }
 
     .payment-methods {
@@ -637,11 +705,11 @@ $courseImageSrc = !empty($course->image_course)
       align-items: flex-start;
       gap: 0.75rem;
       border: 1px solid var(--line);
-      border-radius: 12px;
+      border-radius: 0.375rem;
       padding: 0.85rem 1rem;
       margin-bottom: 0.6rem;
       cursor: pointer;
-      transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.22s cubic-bezier(0.34, 1.3, 0.64, 1), box-shadow 0.22s ease;
+      transition: none;
     }
 
     .pay-option:last-child {
@@ -688,7 +756,7 @@ $courseImageSrc = !empty($course->image_course)
     .mpesa-help,
     .transfer-help-box,
     .whatsapp-help-box {
-      border-radius: 12px;
+      border-radius: 0.375rem;
       padding: 0.95rem 1.1rem;
       font-size: 0.88rem;
     }
@@ -698,13 +766,13 @@ $courseImageSrc = !empty($course->image_course)
       align-items: center;
       justify-content: center;
       gap: 0.55rem;
-      border-radius: 999px;
+      border-radius: 0.375rem;
       padding: 0.85rem 1.5rem;
       font-weight: 600;
       font-size: 0.96rem;
       text-decoration: none;
       border: 1px solid transparent;
-      transition: transform 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+      transition: none;
       cursor: pointer;
       line-height: 1.2;
       width: 100%;
@@ -758,7 +826,7 @@ $courseImageSrc = !empty($course->image_course)
 
     /* ---------- Alerts / success box ---------- */
     .alert-mech {
-      border-radius: 14px;
+      border-radius: 0.375rem;
       border: 1px solid var(--line);
       padding: 1.5rem;
       text-align: center;
@@ -767,7 +835,7 @@ $courseImageSrc = !empty($course->image_course)
     .success-checkout-box {
       background: rgba(22, 163, 74, 0.12);
       border: 1px solid rgba(22, 163, 74, 0.35);
-      border-radius: 16px;
+      border-radius: 0.375rem;
       padding: 2rem 1.5rem;
       text-align: center;
     }
@@ -813,29 +881,28 @@ $courseImageSrc = !empty($course->image_course)
 
     .checkout-header .kicker,
     .checkout-header h1 {
-      opacity: 0;
-      transform: translateY(14px);
-      animation: riseIn 0.7s var(--ease-out) forwards;
+      opacity: 1;
+      transform: none;
+      animation: none;
     }
 
-    .checkout-header h1 { animation-delay: 0.1s; }
+    .checkout-header h1 {  }
 
     .reveal {
-      opacity: 0;
-      transform: translateY(22px);
-      transition: opacity 0.65s var(--ease-out), transform 0.65s var(--ease-out);
-      transition-delay: var(--d, 0ms);
+      opacity: 1;
+      transform: none;
+      transition: none;
     }
 
     .reveal.is-in {
       opacity: 1;
-      transform: translateY(0);
+      transform: none;
     }
 
     .checkout-card .btn,
     .btn-mech,
     button[type="submit"] {
-      transition: transform 0.2s var(--ease-spring), box-shadow 0.2s ease, background-color 0.18s ease;
+      transition: none;
     }
 
     .checkout-card .btn:active,
@@ -845,11 +912,11 @@ $courseImageSrc = !empty($course->image_course)
 
     .course-thumb {
       overflow: hidden;
-      transition: transform 0.35s var(--ease-out);
+      transition: none;
     }
 
     .course-thumb img {
-      transition: transform 0.5s var(--ease-out);
+      transition: none;
     }
 
     .checkout-summary:hover .course-thumb:not(:has(iframe)) img {
@@ -865,16 +932,127 @@ $courseImageSrc = !empty($course->image_course)
       .checkout-header .kicker,
       .checkout-header h1,
       .course-thumb img {
-        animation: none !important;
-        transition: none !important;
+        animation: none;
+        transition: none;
         opacity: 1 !important;
         transform: none !important;
+      }
+    }
+
+    @media (max-width: 991.98px) {
+      .checkout-section {
+        padding-top: 1.5rem;
+        padding-bottom: 2.5rem;
+      }
+
+      .checkout-card {
+        padding: 1.35rem;
+      }
+
+      .topbar__secure {
+        display: none;
+      }
+    }
+
+    @media (max-width: 767.98px) {
+      .checkout-icon-bg {
+        display: none;
+      }
+
+      .container-mech {
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+      }
+
+      .topbar__inner {
+        padding-top: 0.7rem;
+        padding-bottom: 0.7rem;
+        gap: 0.65rem;
+      }
+
+      .topbar__brand img {
+        height: 22px;
+      }
+
+      .topbar__back {
+        font-size: 0.8rem;
+      }
+
+      .checkout-header h1 {
+        font-size: clamp(1.45rem, 6vw, 1.85rem);
+      }
+
+      .checkout-card {
+        padding: 1.15rem;
+      }
+
+      .checkout-card .price-block .effective-price {
+        font-size: 1.75rem;
+      }
+
+      .coupon-group .input-group {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .coupon-group .form-control {
+        flex: 1 1 100%;
+        min-width: 0;
+        width: 100%;
+        border-radius: 0.375rem !important;
+      }
+
+      .coupon-group .btn-mech,
+      .coupon-group .btn-mech-outline {
+        width: 100%;
+        border-radius: 0.375rem !important;
+      }
+
+      .pay-option {
+        padding: 0.85rem;
+      }
+
+      .checkout-summary {
+        padding: 1.15rem;
+      }
+    }
+
+    @media (max-width: 479.98px) {
+      .checkout-card .btn-mech,
+      .checkout-card button[type="submit"] {
+        width: 100%;
+      }
+
+      .trust-row {
+        gap: 0.75rem;
+      }
+    }
+
+    .container-mech,
+    .container-mech.topbar__inner {
+      padding-left: max(1.25rem, env(safe-area-inset-left, 0px)) !important;
+      padding-right: max(1.25rem, env(safe-area-inset-right, 0px)) !important;
+    }
+
+    @media (min-width: 768px) {
+      .container-mech,
+      .container-mech.topbar__inner {
+        padding-left: max(1.5rem, env(safe-area-inset-left, 0px)) !important;
+        padding-right: max(1.5rem, env(safe-area-inset-right, 0px)) !important;
       }
     }
   </style>
 </head>
 
 <body>
+
+  <div class="checkout-icon-bg" aria-hidden="true">
+    <?php for ($i = 0; $i < 8; $i++): ?>
+      <img src="<?= esc($courseIconBg) ?>" alt="">
+    <?php endfor; ?>
+  </div>
+
+  <div class="checkout-page">
 
   <?= view('partials/promo_urgency', [
       'hasPromo' => $hasPromo,
@@ -891,18 +1069,17 @@ $courseImageSrc = !empty($course->image_course)
   <div class="topbar">
     <div class="container-mech topbar__inner">
       <a class="topbar__back" href="<?= base_url('/courses/' . (int) ($course->id_course ?? 0)) ?>">
-        <i class="bi bi-arrow-left"></i> Voltar ao curso
+        <i class="bi bi-arrow-left"></i> Voltar
       </a>
       <a class="topbar__brand" href="<?= base_url('/') ?>">
         <img src="<?= base_url('assets/img/logo.png') ?>" alt="Mechanical Academy">
       </a>
-      <span class="topbar__secure d-none d-sm-inline-flex"><i class="bi bi-shield-lock-fill"></i> Pagamento seguro</span>
+      <span class="topbar__secure d-none d-sm-inline-flex"><i class="bi bi-shield-lock-fill"></i> Seguro</span>
     </div>
   </div>
 
   <header class="checkout-header">
     <div class="container-mech">
-      <p class="kicker">Finalizar inscrição</p>
       <h1><?= esc($course->title_course ?? '') ?></h1>
     </div>
   </header>
@@ -912,7 +1089,7 @@ $courseImageSrc = !empty($course->image_course)
       <div class="checkout-grid">
 
         <!-- LEFT: COURSE SUMMARY -->
-        <div class="checkout-summary reveal">
+        <div class="checkout-summary">
           <div class="course-thumb">
             <?php if ($overviewVideoEmbedSrc): ?>
               <iframe
@@ -930,92 +1107,73 @@ $courseImageSrc = !empty($course->image_course)
 
           <div class="summary-meta">
             <?php if ($totalHoursLabel !== '' && $totalHoursLabel !== '0 Horas'): ?>
-              <span class="item"><i class="bi bi-clock"></i> <?= esc($totalHoursLabel) ?></span>
+              <span class="item"><span class="item-icon"><i class="bi bi-clock-fill"></i></span> <?= esc($totalHoursLabel) ?></span>
             <?php endif; ?>
             <?php if ($moduleCount > 0): ?>
-              <span class="item"><i class="bi bi-collection"></i> <?= $moduleCount ?> módulos</span>
+              <span class="item"><span class="item-icon"><i class="bi bi-folder-fill"></i></span> <?= $moduleCount ?> módulos</span>
             <?php endif; ?>
             <?php if ($lessonCount > 0): ?>
-              <span class="item"><i class="bi bi-play-circle"></i> <?= $lessonCount ?> aulas</span>
+              <span class="item"><span class="item-icon"><i class="bi bi-play-btn-fill"></i></span> <?= $lessonCount ?> aulas</span>
             <?php endif; ?>
             <?php if ($projectCount > 0): ?>
-              <span class="item"><i class="bi bi-diagram-3"></i> <?= $projectCount ?> projeto<?= $projectCount > 1 ? 's' : '' ?></span>
+              <span class="item"><span class="item-icon"><i class="bi bi-kanban-fill"></i></span> <?= $projectCount ?> projeto<?= $projectCount > 1 ? 's' : '' ?></span>
             <?php endif; ?>
           </div>
-
-          <?php if ($courseSummary !== ''): ?>
-            <p class="course-summary"><?= esc($courseSummary) ?></p>
-          <?php endif; ?>
 
           <?php if (! empty($learningItems)): ?>
             <p class="summary-block-heading">O que você vai aprender</p>
             <ul class="learn-list-checkout">
-              <?php foreach ($learningItems as $learningItem): ?>
+              <?php foreach (array_slice($learningItems, 0, 6) as $learningItem): ?>
                 <li><i class="bi bi-check-lg"></i><span><?= esc($learningItem) ?></span></li>
               <?php endforeach; ?>
             </ul>
-          <?php endif; ?>
-
-          <?php if ($freeLessonsCount > 0): ?>
-            <div class="free-lessons-note">
-              <i class="bi bi-play-circle-fill"></i>
-              <span>Inclui <?= $freeLessonsCount ?> aula<?= $freeLessonsCount > 1 ? 's' : '' ?> grátis para experimentar antes de decidir.</span>
-            </div>
           <?php endif; ?>
 
           <div class="price-line">
             <?php if ($hasPromo): ?>
               <span class="list-price"><?= number_format($listPrice, 2, ",", ".") ?> MZN</span>
               <span class="effective-price"><?= number_format($effectivePrice, 2, ",", ".") ?> MZN</span>
-              <span class="promo-badge">-<?= $discountPercent ?>%</span>
+              <span class="promo-badge">−<?= $discountPercent ?>% OFF</span>
             <?php else: ?>
               <span class="effective-price"><?= number_format($effectivePrice, 2, ",", ".") ?> MZN</span>
             <?php endif; ?>
-            <span class="text-secondary" style="font-size:0.88rem;">pagamento único</span>
           </div>
 
           <div class="trust-row">
-            <span class="item"><i class="bi bi-shield-check"></i> Pagamento seguro</span>
-            <span class="item"><i class="bi bi-infinity"></i> Acesso vitalício</span>
-            <span class="item"><i class="bi bi-mortarboard"></i> Certificado digital</span>
+            <span class="item"><i class="bi bi-shield-check"></i> Seguro</span>
+            <span class="item"><i class="bi bi-infinity"></i> Vitalício</span>
+            <span class="item"><i class="bi bi-mortarboard"></i> Certificado</span>
           </div>
         </div>
 
         <!-- RIGHT: FORM -->
-        <div class="checkout-form-col reveal" style="--d:120ms">
+        <div class="checkout-form-col">
           <div class="checkout-card">
             <div class="price-block">
               <?php if ($hasPromo): ?>
                 <span class="list-price"><?= number_format($listPrice, 2, ",", ".") ?> MZN</span>
                 <p class="effective-price mb-0">
                   <?= number_format($effectivePrice, 2, ",", ".") ?> <small>MZN</small>
-                  <span class="promo-badge">-<?= $discountPercent ?>%</span>
+                  <span class="promo-badge">−<?= $discountPercent ?>% OFF</span>
                 </p>
                 <?php if ($promoRemainingSeconds > 0): ?>
-                  <p class="promo-note">Oferta expira em <strong class="js-promo-inline-countdown" data-left="<?= $promoRemainingSeconds ?>">--:--:--</strong></p>
-                <?php else: ?>
-                  <p class="promo-note">Preço promocional ativo</p>
+                  <p class="promo-note">Expira em <strong class="js-promo-inline-countdown" data-left="<?= $promoRemainingSeconds ?>">--:--:--</strong></p>
                 <?php endif; ?>
               <?php else: ?>
                 <p class="effective-price mb-0"><?= number_format($effectivePrice, 2, ",", ".") ?> <small>MZN</small></p>
-              <?php endif; ?>
-              <?php if ($freeLessonsCount > 0): ?>
-                <p class="free-note">Inclui <?= $freeLessonsCount ?> aula<?= $freeLessonsCount > 1 ? 's' : '' ?> grátis</p>
               <?php endif; ?>
             </div>
 
             <?php if ($isEnrolled): ?>
               <div class="alert-mech">
-                <h4 class="fw-bold mb-2" style="font-size:1.05rem;">Você já está inscrito neste curso!</h4>
-                <p class="text-secondary mb-3">Já tem acesso completo ao curso <?= esc($course->title_course) ?>.</p>
-                <a href="<?= base_url('/student/dashboard/inscricoes') ?>" class="btn-mech btn-mech-primary">Ir para os meus cursos</a>
+                <h4 class="fw-bold mb-2" style="font-size:1.05rem;">Já inscrito</h4>
+                <a href="<?= base_url('/student/dashboard/inscricoes') ?>" class="btn-mech btn-mech-primary">Meus cursos</a>
               </div>
 
             <?php elseif (($user) && ($user->role == "instructor")): ?>
               <div class="alert-mech">
-                <h4 class="fw-bold mb-2" style="font-size:1.05rem;">Você é um instrutor!</h4>
-                <p class="text-secondary mb-3">Não pode se inscrever neste curso.</p>
-                <a href="<?= base_url('/instructor/dashboard/inscricoes') ?>" class="btn-mech btn-mech-primary">Ir para os meus cursos</a>
+                <h4 class="fw-bold mb-2" style="font-size:1.05rem;">Conta de instrutor</h4>
+                <a href="<?= base_url('/instructor/dashboard/inscricoes') ?>" class="btn-mech btn-mech-primary">Painel</a>
               </div>
 
             <?php else: ?>
@@ -1041,7 +1199,7 @@ $courseImageSrc = !empty($course->image_course)
                     </div>
 
                     <div class="mb-3">
-                      <label class="field-label" for="email">Endereço de e-mail</label>
+                      <label class="field-label" for="email">E-mail</label>
                       <input type="email" name="email" class="form-control" id="email" placeholder="seuemail@exemplo.com" required>
                       <div class="invalid-feedback">
                         Por favor, insira um e-mail válido.
@@ -1049,80 +1207,66 @@ $courseImageSrc = !empty($course->image_course)
                     </div>
 
                     <div class="mb-3">
-                      <label class="field-label" for="name">Nome e sobrenome</label>
-                      <input type="text" name="username" class="form-control" id="name" placeholder="O seu nome completo" required>
+                      <label class="field-label" for="name">Nome</label>
+                      <input type="text" name="username" class="form-control" id="name" placeholder="O seu nome" required>
                       <div class="invalid-feedback">
-                        Por favor, insira o seu nome e sobrenome.
+                        Por favor, insira o seu nome.
                       </div>
                     </div>
-
-                    <p class="small text-secondary mb-3">
-                      O e-mail e o nome informados serão usados para criar a sua conta automaticamente após a confirmação do pagamento.
-                    </p>
                   <?php endif; ?>
 
                   <fieldset class="payment-methods">
-                    <legend>Escolha a forma de pagamento</legend>
+                    <legend>Pagamento</legend>
 
                     <label class="pay-option" for="pay_mpesa">
                       <input class="form-check-input" type="radio" name="payment_method_ui" id="pay_mpesa" value="mpesa" checked>
                       <span class="pay-option__body">
                         <strong>M-Pesa</strong>
-                        <span>Pagamento instantâneo pelo telemóvel</span>
                       </span>
                     </label>
 
                     <label class="pay-option" for="pay_transfer">
                       <input class="form-check-input" type="radio" name="payment_method_ui" id="pay_transfer" value="transfer">
                       <span class="pay-option__body">
-                        <strong>Transferência / Comprovativo</strong>
-                        <span>Pague e envie o comprovativo na área do aluno</span>
+                        <strong>Transferência</strong>
                       </span>
                     </label>
 
                     <label class="pay-option" for="pay_whatsapp">
                       <input class="form-check-input" type="radio" name="payment_method_ui" id="pay_whatsapp" value="whatsapp">
                       <span class="pay-option__body">
-                        <strong>Falar com a equipa comercial (WhatsApp)</strong>
-                        <span>+258 84 262 7671 — ajuda com fatura, empresas e pagamento</span>
+                        <strong>WhatsApp · +258 84 272 6761</strong>
                       </span>
                     </label>
                   </fieldset>
 
                   <div id="mpesa-fields">
-                    <label for="client_number" class="field-label">Número de telefone com M-Pesa</label>
+                    <label for="client_number" class="field-label">Número M-Pesa</label>
                     <input type="tel" class="form-control mb-2" id="client_number" name="client_number" placeholder="84 000 0000" required>
                     <div class="invalid-feedback">
-                      Por favor, insira o seu número de telefone com M-Pesa.
+                      Por favor, insira o seu número M-Pesa.
                     </div>
-                    <p class="small text-secondary mb-3">
-                      Depois de enviar, confirme a solicitação no pop-up do seu celular com a sua senha/PIN do M-Pesa.
-                    </p>
                   </div>
 
                   <div id="transfer-help" class="transfer-help-box mb-3 d-none" style="background:var(--accent-soft); border:1px solid var(--accent-border); color:var(--ink);">
-                    Após criar a conta / login, vá a <strong>Checkout do curso</strong> no painel do aluno e envie o comprovativo para aprovação.
                     <?php if ($user): ?>
-                      <div class="mt-2">
-                        <a class="btn-mech btn-mech-outline" style="width:auto; padding:0.5rem 1rem; font-size:0.85rem;" href="<?= site_url('student/dashboard/checkout/' . (int) $course->id_course) ?>">Enviar comprovativo</a>
-                      </div>
+                      <a class="btn-mech btn-mech-outline" style="width:auto; padding:0.5rem 1rem; font-size:0.85rem;" href="<?= site_url('student/dashboard/checkout/' . (int) $course->id_course) ?>">Enviar comprovativo</a>
+                    <?php else: ?>
+                      <span>Faça login e envie o comprovativo no painel.</span>
                     <?php endif; ?>
                   </div>
 
                   <div id="whatsapp-help" class="whatsapp-help-box mb-3 d-none" style="background:rgba(22,163,74,0.12); border:1px solid rgba(22,163,74,0.35); color:#86efac;">
-                    Prefere apoio humano? Fale connosco no WhatsApp comercial.
-                    <div class="mt-2">
                       <a class="btn-mech btn-mech-success" style="width:auto; padding:0.5rem 1rem; font-size:0.85rem;" href="<?= esc($whatsappUrl) ?>" target="_blank" rel="noopener">
-                        Abrir WhatsApp +258 84 262 7671
+                        WhatsApp +258 84 272 6761
                       </a>
-                    </div>
                   </div>
 
                   <input type="hidden" name="id_course" value="<?= (int) $course->id_course ?>">
                   <input type="hidden" name="amount_payment" value="<?= $effectivePrice ?>">
 
                   <button type="submit" id="checkout-submit-btn" class="btn-mech btn-mech-primary">
-                    Finalizar a minha compra
+                    Finalizar compra
                     <i class="bi bi-arrow-right"></i>
                   </button>
 
@@ -1131,11 +1275,6 @@ $courseImageSrc = !empty($course->image_course)
                       Experimentar <?= $freeLessonsCount ?> aula<?= $freeLessonsCount > 1 ? 's' : '' ?> grátis
                     </a>
                   <?php endif; ?>
-
-                  <p class="terms-note">
-                    Ao finalizar a compra, você concorda com os nossos
-                    <a href="#">Termos de Serviço</a>
-                  </p>
                 </form>
               </div>
             <?php endif; ?>
@@ -1584,6 +1723,7 @@ $courseImageSrc = !empty($course->image_course)
       }
     })();
   </script>
+</div>
 </body>
 
 </html>

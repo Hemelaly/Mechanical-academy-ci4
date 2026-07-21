@@ -1172,13 +1172,10 @@ class Dashboard extends BaseController
             ->first();
 
         if ($existing) {
-            $updates = [
+            $updates = array_merge([
                 'status_enrollment'    => 'ativa',
-                'is_demo_enrollment'   => 0,
-                'demo_started_at'      => null,
-                'demo_expires_at'      => null,
                 'is_manual_enrollment' => 1,
-            ];
+            ], (new \App\Services\DemoEnrollmentService())->clearedDemoPayload());
             if (empty($existing->enrolled_at_enrollment)) {
                 $updates['enrolled_at_enrollment'] = date('Y-m-d');
             }
@@ -1195,15 +1192,14 @@ class Dashboard extends BaseController
             return $this->jsonMessage('Aluno ja estava matriculado (matricula reativada se necessario).');
         }
 
-        $inserted = $enrollmentModel->insert([
+        $inserted = $enrollmentModel->insert(array_merge([
             'id_course_enrollment'   => $courseId,
             'id_student_enrollment'  => $userId,
             'status_enrollment'      => 'ativa',
             'progress_enrollment'    => 0,
             'enrolled_at_enrollment' => date('Y-m-d'),
             'is_manual_enrollment'   => 1,
-            'is_demo_enrollment'     => 0,
-        ], true);
+        ], (new \App\Services\DemoEnrollmentService())->clearedDemoPayload()), true);
 
         if ($inserted === false) {
             return $this->jsonMessage(implode(', ', $enrollmentModel->errors() ?: ['Falha ao criar matricula.']), 422);
@@ -1226,106 +1222,118 @@ class Dashboard extends BaseController
      */
     public function grantDemoAccess()
     {
-        $actualUser = service('auth')->user();
-        $db = db_connect();
+        try {
+            $actualUser = service('auth')->user();
+            $db = db_connect();
 
-        $courseId = (int) $this->request->getPost('course_id');
-        $studentLookup = trim((string) $this->request->getPost('student'));
-        $enrollmentId = (int) $this->request->getPost('enrollment_id');
+            $courseId = (int) $this->request->getPost('course_id');
+            $studentLookup = trim((string) $this->request->getPost('student'));
+            $enrollmentId = (int) $this->request->getPost('enrollment_id');
 
-        if ($enrollmentId > 0) {
-            $row = $db->table('enrollments e')
-                ->select('e.id_enrollment, e.id_student_enrollment, e.id_course_enrollment, c.id_instructor_course, c.price_course')
-                ->join('courses c', 'c.id_course = e.id_course_enrollment')
-                ->where('e.id_enrollment', $enrollmentId)
+            $demo = new \App\Services\DemoEnrollmentService();
+            if (! $demo->demoFieldsReady()) {
+                return $this->jsonMessage(
+                    'Campos de demo em falta na base de dados. No servidor execute: php spark migrate',
+                    503
+                );
+            }
+
+            if ($enrollmentId > 0) {
+                $row = $db->table('enrollments e')
+                    ->select('e.id_enrollment, e.id_student_enrollment, e.id_course_enrollment, c.id_instructor_course, c.price_course')
+                    ->join('courses c', 'c.id_course = e.id_course_enrollment')
+                    ->where('e.id_enrollment', $enrollmentId)
+                    ->get()
+                    ->getRow();
+
+                if (! $row || (int) ($row->id_instructor_course ?? 0) !== (int) $actualUser->id) {
+                    return $this->jsonMessage('Matrícula inválida ou sem permissão.', 403);
+                }
+
+                if ((float) ($row->price_course ?? 0) <= 0) {
+                    return $this->jsonMessage('Acesso demo é para cursos pagos (não pagos usam inscrição normal).', 422);
+                }
+
+                $result = $demo->grant((int) $row->id_student_enrollment, (int) $row->id_course_enrollment);
+
+                $this->auditLogger->write(
+                    'instructor.enrollment.demo_granted',
+                    $result['ok'] ? 'info' : 'warning',
+                    $result['message'],
+                    ['enrollment_id' => $enrollmentId, 'course_id' => (int) $row->id_course_enrollment]
+                );
+
+                return $this->jsonMessage($result['message'], $result['ok'] ? 200 : 422);
+            }
+
+            if ($courseId <= 0 || $studentLookup === '') {
+                return $this->jsonMessage('Informe o curso e o aluno.', 422);
+            }
+
+            $course = $db->table('courses')
+                ->select('id_course, id_instructor_course, price_course')
+                ->where('id_course', $courseId)
                 ->get()
                 ->getRow();
 
-            if (! $row || (int) ($row->id_instructor_course ?? 0) !== (int) $actualUser->id) {
-                return $this->jsonMessage('Matrícula inválida ou sem permissão.', 403);
+            if (! $course || (int) ($course->id_instructor_course ?? 0) !== (int) $actualUser->id) {
+                return $this->jsonMessage('Curso inválido ou sem permissão.', 403);
             }
 
-            if ((float) ($row->price_course ?? 0) <= 0) {
-                return $this->jsonMessage('Acesso demo é para cursos pagos (não pagos usam inscrição normal).', 422);
+            if ((float) ($course->price_course ?? 0) <= 0) {
+                return $this->jsonMessage('Acesso demo é para cursos pagos.', 422);
             }
 
-            $demo = new \App\Services\DemoEnrollmentService();
-            $result = $demo->grant((int) $row->id_student_enrollment, (int) $row->id_course_enrollment);
+            $userId = null;
+            if (ctype_digit($studentLookup)) {
+                $userId = (int) $studentLookup;
+            } else {
+                $studentRow = $db->table('students')
+                    ->select('id_user_student')
+                    ->where('email_student', $studentLookup)
+                    ->get()
+                    ->getRow();
+
+                if ($studentRow) {
+                    $userId = (int) $studentRow->id_user_student;
+                } else {
+                    $identity = $db->table('auth_identities')
+                        ->select('user_id')
+                        ->where('type', 'email_password')
+                        ->where('secret', $studentLookup)
+                        ->get()
+                        ->getRow();
+
+                    if ($identity) {
+                        $userId = (int) $identity->user_id;
+                    }
+                }
+            }
+
+            if (! $userId) {
+                return $this->jsonMessage('Aluno não encontrado (use email ou ID).', 404);
+            }
+
+            $userRow = $db->table('users')->select('id, role')->where('id', $userId)->get()->getRow();
+            if (! $userRow || strtolower((string) ($userRow->role ?? '')) !== 'student') {
+                return $this->jsonMessage('O utilizador informado não é um estudante.', 422);
+            }
+
+            $result = $demo->grant($userId, $courseId);
 
             $this->auditLogger->write(
                 'instructor.enrollment.demo_granted',
                 $result['ok'] ? 'info' : 'warning',
                 $result['message'],
-                ['enrollment_id' => $enrollmentId, 'course_id' => (int) $row->id_course_enrollment]
+                ['course_id' => $courseId, 'student_id' => $userId]
             );
 
             return $this->jsonMessage($result['message'], $result['ok'] ? 200 : 422);
+        } catch (\Throwable $e) {
+            log_message('error', 'grantDemoAccess failed: ' . $e->getMessage());
+
+            return $this->jsonMessage('Falha ao conceder demo: ' . $e->getMessage(), 500);
         }
-
-        if ($courseId <= 0 || $studentLookup === '') {
-            return $this->jsonMessage('Informe o curso e o aluno.', 422);
-        }
-
-        $course = $db->table('courses')
-            ->select('id_course, id_instructor_course, price_course')
-            ->where('id_course', $courseId)
-            ->get()
-            ->getRow();
-
-        if (! $course || (int) ($course->id_instructor_course ?? 0) !== (int) $actualUser->id) {
-            return $this->jsonMessage('Curso inválido ou sem permissão.', 403);
-        }
-
-        if ((float) ($course->price_course ?? 0) <= 0) {
-            return $this->jsonMessage('Acesso demo é para cursos pagos.', 422);
-        }
-
-        $userId = null;
-        if (ctype_digit($studentLookup)) {
-            $userId = (int) $studentLookup;
-        } else {
-            $studentRow = $db->table('students')
-                ->select('id_user_student')
-                ->where('email_student', $studentLookup)
-                ->get()
-                ->getRow();
-
-            if ($studentRow) {
-                $userId = (int) $studentRow->id_user_student;
-            } else {
-                $identity = $db->table('auth_identities')
-                    ->select('user_id')
-                    ->where('type', 'email_password')
-                    ->where('secret', $studentLookup)
-                    ->get()
-                    ->getRow();
-
-                if ($identity) {
-                    $userId = (int) $identity->user_id;
-                }
-            }
-        }
-
-        if (! $userId) {
-            return $this->jsonMessage('Aluno não encontrado (use email ou ID).', 404);
-        }
-
-        $userRow = $db->table('users')->select('id, role')->where('id', $userId)->get()->getRow();
-        if (! $userRow || strtolower((string) ($userRow->role ?? '')) !== 'student') {
-            return $this->jsonMessage('O utilizador informado não é um estudante.', 422);
-        }
-
-        $demo = new \App\Services\DemoEnrollmentService();
-        $result = $demo->grant($userId, $courseId);
-
-        $this->auditLogger->write(
-            'instructor.enrollment.demo_granted',
-            $result['ok'] ? 'info' : 'warning',
-            $result['message'],
-            ['course_id' => $courseId, 'student_id' => $userId]
-        );
-
-        return $this->jsonMessage($result['message'], $result['ok'] ? 200 : 422);
     }
 
     public function studentsData()
@@ -1342,58 +1350,91 @@ class Dashboard extends BaseController
         $offset = ($page - 1) * $perPage;
 
         $db = db_connect();
-        $builder = $db->table('enrollments e')
-            ->select([
-                'e.id_enrollment',
-                'e.status_enrollment',
-                'e.progress_enrollment',
-                'e.enrolled_at_enrollment',
-                'e.is_demo_enrollment',
-                'e.demo_started_at',
-                'e.demo_expires_at',
-                'e.updated_at AS last_enrollment_update',
-                's.name_student',
-                's.email_student',
-                'c.title_course',
-                'c.price_course',
-            ])
-            ->select('(SELECT MAX(COALESCE(p.updated_at, p.created_at, p.completed_at_progress)) FROM progress p WHERE p.id_enrollment_progress = e.id_enrollment) AS last_activity', false)
-            ->join('courses c', 'c.id_course = e.id_course_enrollment')
-            ->join('students s', 's.id_user_student = e.id_student_enrollment')
-            ->where('c.id_instructor_course', $user->id);
+        $demoReady = (new \App\Services\DemoEnrollmentService())->demoFieldsReady();
 
-        if ($search !== '') {
-            $builder->groupStart()
-                ->like('s.name_student', $search)
-                ->orLike('s.email_student', $search)
-                ->orLike('c.title_course', $search)
-                ->groupEnd();
+        $select = [
+            'e.id_enrollment',
+            'e.status_enrollment',
+            'e.progress_enrollment',
+            'e.enrolled_at_enrollment',
+            'e.updated_at AS last_enrollment_update',
+            's.name_student',
+            's.email_student',
+            'c.title_course',
+            'c.price_course',
+        ];
+
+        if ($demoReady) {
+            $select[] = 'e.is_demo_enrollment';
+            $select[] = 'e.demo_started_at';
+            $select[] = 'e.demo_expires_at';
         }
 
-        if ($status !== '') {
-            $builder->where('e.status_enrollment', $status);
+        try {
+            $builder = $db->table('enrollments e')
+                ->select($select)
+                ->select('(SELECT MAX(COALESCE(p.updated_at, p.created_at, p.completed_at_progress)) FROM progress p WHERE p.id_enrollment_progress = e.id_enrollment) AS last_activity', false)
+                ->join('courses c', 'c.id_course = e.id_course_enrollment')
+                ->join('students s', 's.id_user_student = e.id_student_enrollment')
+                ->where('c.id_instructor_course', $user->id);
+
+            if ($search !== '') {
+                $builder->groupStart()
+                    ->like('s.name_student', $search)
+                    ->orLike('s.email_student', $search)
+                    ->orLike('c.title_course', $search)
+                    ->groupEnd();
+            }
+
+            if ($status !== '') {
+                $builder->where('e.status_enrollment', $status);
+            }
+
+            $countBuilder = clone $builder;
+            $total = (int) $countBuilder->countAllResults();
+
+            $rows = $builder
+                ->orderBy('e.updated_at', 'DESC')
+                ->limit($perPage, $offset)
+                ->get()
+                ->getResultArray();
+
+            if (! $demoReady) {
+                foreach ($rows as &$row) {
+                    $row['is_demo_enrollment'] = 0;
+                    $row['demo_started_at'] = null;
+                    $row['demo_expires_at'] = null;
+                }
+                unset($row);
+            }
+
+            $totalPages = (int) ceil($total / $perPage);
+
+            return $this->response->setJSON([
+                'items' => $rows,
+                'pagination' => [
+                    'page' => $page,
+                    'per_page' => $perPage,
+                    'total' => $total,
+                    'total_pages' => $totalPages,
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            log_message('error', 'studentsData failed: ' . $e->getMessage());
+
+            return $this->response
+                ->setStatusCode(500)
+                ->setJSON([
+                    'items' => [],
+                    'pagination' => [
+                        'page' => $page,
+                        'per_page' => $perPage,
+                        'total' => 0,
+                        'total_pages' => 0,
+                    ],
+                    'message' => 'Erro ao carregar alunos: ' . $e->getMessage(),
+                ]);
         }
-
-        $countBuilder = clone $builder;
-        $total = (int) $countBuilder->countAllResults();
-
-        $rows = $builder
-            ->orderBy('e.updated_at', 'DESC')
-            ->limit($perPage, $offset)
-            ->get()
-            ->getResultArray();
-
-        $totalPages = (int) ceil($total / $perPage);
-
-        return $this->response->setJSON([
-            'items' => $rows,
-            'pagination' => [
-                'page' => $page,
-                'per_page' => $perPage,
-                'total' => $total,
-                'total_pages' => $totalPages,
-            ],
-        ]);
     }
 
     public function pendingPaymentsData()

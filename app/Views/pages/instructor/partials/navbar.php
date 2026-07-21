@@ -152,7 +152,7 @@ $user = service('auth')->user();
         </div>
 
         <a href="<?= site_url('/student/dashboard/perfil') ?>"
-            class="flex w-full items-center gap-3 rounded-lg py-2 text-xs text-slate-200 pointer">
+            class="flex shrink-0 items-center gap-3 rounded-lg py-2 text-xs text-slate-200 pointer">
             <span
                 class="flex px-[11px] py-3 rounded-full items-center justify-center rounded-full bg-slate-700 text-[14px] font-semibold">
                 EM

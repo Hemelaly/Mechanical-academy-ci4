@@ -21,14 +21,16 @@ $user = service('auth')->user();
     }
 
     body {
-        height: 100vh;
+        min-height: 100vh;
         width: 100%;
         background-image: url(https://kajabi-storefronts-production.kajabi-cdn.com/kajabi-storefronts-production/file-uploads/themes/2152537062/settings_images/a66be81-c84a-a41c-a2bb-044835e5116_Landing_BG.webp);
+        background-size: cover;
+        background-position: center;
         font-family: 'Poppins', sans-serif;
     }
 
     .overlay {
-        height: 100%;
+        min-height: 100%;
         width: 100%;
         background: rgba(0, 0, 0, 0.8);
     }

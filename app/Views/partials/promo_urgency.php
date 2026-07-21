@@ -48,6 +48,9 @@ $urgencyCopy = $d >= 2
             : 'Atenção: a promoção está a acabar. Não perca o preço especial.'));
 ?>
 <style>
+  :root {
+    --promo-bar-h: 2.65rem;
+  }
   .promo-urgency-bar {
     position: sticky;
     top: 0;
@@ -55,7 +58,8 @@ $urgencyCopy = $d >= 2
     background: linear-gradient(90deg, #0a58ca 0%, #0d6efd 45%, #3d8bfd 100%);
     color: #fff;
     text-align: center;
-    padding: 0.65rem 1rem;
+    padding: 0.55rem 0.85rem;
+    padding-top: calc(0.55rem + env(safe-area-inset-top, 0px));
     font-family: 'Sora', sans-serif;
     font-size: 0.88rem;
     font-weight: 600;
@@ -67,7 +71,7 @@ $urgencyCopy = $d >= 2
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    gap: 0.45rem 0.75rem;
+    gap: 0.35rem 0.65rem;
   }
   .promo-urgency-bar strong {
     font-variant-numeric: tabular-nums;
@@ -75,52 +79,44 @@ $urgencyCopy = $d >= 2
   }
   body.has-promo-urgency .site-nav,
   body.has-promo-urgency .topbar {
-    top: 2.65rem;
+    top: var(--promo-bar-h);
   }
   .promo-popup-backdrop {
     position: fixed;
     inset: 0;
     z-index: 1200;
     background: rgba(0, 0, 0, 0.72);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
     display: none;
     align-items: center;
     justify-content: center;
-    padding: 1.25rem;
-    opacity: 0;
-    transition: opacity 0.28s ease;
+    padding: max(1rem, env(safe-area-inset-top, 0px)) 1rem max(1rem, env(safe-area-inset-bottom, 0px));
   }
   .promo-popup-backdrop.is-open {
     display: flex;
-    opacity: 1;
   }
   .promo-popup {
     width: 100%;
     max-width: 440px;
-    background: linear-gradient(180deg, #1a1a1a 0%, #121212 100%);
+    max-height: min(92vh, 640px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    background: #141414;
     border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 22px;
-    padding: 1.85rem 1.5rem 1.5rem;
+    border-radius: 0.375rem;
+    padding: 1.5rem 1.25rem 1.25rem;
     color: #fff;
     font-family: 'Sora', sans-serif;
     text-align: center;
-    box-shadow: 0 40px 80px -40px rgba(0,0,0,0.9), 0 0 0 1px rgba(13,110,253,0.12);
-    transform: translateY(12px) scale(0.98);
-    transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  .promo-popup-backdrop.is-open .promo-popup {
-    transform: translateY(0) scale(1);
   }
   .promo-popup__badge {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
     padding: 0.28rem 0.75rem;
-    border-radius: 999px;
-    background: rgba(13, 110, 253, 0.18);
-    border: 1px solid rgba(13, 110, 253, 0.4);
-    color: #9ec5fe;
+    border-radius: 0.375rem;
+    background: rgba(239, 68, 68, 0.18);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    color: #fca5a5;
     font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.04em;
@@ -128,18 +124,13 @@ $urgencyCopy = $d >= 2
     margin-bottom: 0.9rem;
   }
   .promo-popup h3 {
-    margin: 0 0 0.45rem;
-    font-size: 1.35rem;
+    margin: 0 0 1rem;
+    font-size: 1.2rem;
     font-weight: 700;
     letter-spacing: -0.02em;
     line-height: 1.25;
   }
-  .promo-popup__lead {
-    margin: 0 0 1.15rem;
-    color: rgba(255,255,255,0.68);
-    font-size: 0.92rem;
-    line-height: 1.55;
-  }
+  .promo-popup__lead { display: none; }
   .promo-popup__units {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -149,7 +140,7 @@ $urgencyCopy = $d >= 2
   .promo-popup__unit {
     background: rgba(255,255,255,0.04);
     border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 12px;
+    border-radius: 0.375rem;
     padding: 0.65rem 0.25rem 0.55rem;
   }
   .promo-popup__unit strong {
@@ -209,7 +200,7 @@ $urgencyCopy = $d >= 2
   }
   .promo-popup button,
   .promo-popup a {
-    border-radius: 999px;
+    border-radius: 0.375rem;
     padding: 0.75rem 1.35rem;
     font-weight: 600;
     font-size: 0.9rem;
@@ -228,8 +219,29 @@ $urgencyCopy = $d >= 2
     color: rgba(255,255,255,0.7);
     border: 1px solid rgba(255,255,255,0.18);
   }
+  @media (max-width: 575.98px) {
+    .promo-urgency-bar {
+      font-size: 0.8rem;
+      padding: 0.5rem 0.75rem;
+      padding-top: calc(0.5rem + env(safe-area-inset-top, 0px));
+    }
+    .promo-popup {
+      padding: 1.25rem 1rem 1rem;
+    }
+    .promo-popup .actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .promo-popup .actions .btn-primary,
+    .promo-popup .actions .btn-ghost {
+      width: 100%;
+      text-align: center;
+    }
+  }
   @media (max-width: 420px) {
     .promo-popup__unit strong { font-size: 1.1rem; }
+    .promo-popup__unit { padding: 0.5rem 0.15rem 0.45rem; }
+    .promo-popup__prices .now { font-size: 1.25rem; }
   }
 </style>
 
@@ -243,8 +255,8 @@ $urgencyCopy = $d >= 2
 <div class="promo-popup-backdrop" id="promoPopup" aria-hidden="true">
   <div class="promo-popup" role="dialog" aria-modal="true" aria-labelledby="promoPopupTitle">
     <div class="promo-popup__badge">Tempo limitado</div>
-    <h3 id="promoPopupTitle"><?= $discountPercent > 0 ? 'Desconto de ' . $discountPercent . '% a expirar' : 'Promoção a expirar' ?></h3>
-    <p class="promo-popup__lead"><?= esc($urgencyCopy) ?></p>
+    <h3 id="promoPopupTitle"><?= $discountPercent > 0 ? '−' . $discountPercent . '% OFF' : 'Promoção' ?></h3>
+    <p class="promo-popup__lead"></p>
 
     <div class="promo-popup__units" aria-label="Tempo restante">
       <div class="promo-popup__unit"><strong id="promoUnitD"><?= (int) $d ?></strong><span>Dias</span></div>
@@ -280,6 +292,7 @@ $urgencyCopy = $d >= 2
 (function () {
   document.body.classList.add('has-promo-urgency');
   let left = <?= (int) $promoRemainingSeconds ?>;
+  const barRoot = document.getElementById('promoUrgencyBar');
   const barEl = document.getElementById('promoBarCountdown');
   const unitD = document.getElementById('promoUnitD');
   const unitH = document.getElementById('promoUnitH');
@@ -290,6 +303,17 @@ $urgencyCopy = $d >= 2
   const cta = document.getElementById('promoPopupCta');
   const storageKey = <?= json_encode($popupKey) ?>;
   const pad = (n) => String(n).padStart(2, '0');
+
+  const syncPromoBarHeight = () => {
+    if (!barRoot) return;
+    const h = Math.ceil(barRoot.getBoundingClientRect().height);
+    if (h > 0) document.documentElement.style.setProperty('--promo-bar-h', h + 'px');
+  };
+  syncPromoBarHeight();
+  window.addEventListener('resize', syncPromoBarHeight, { passive: true });
+  if (typeof ResizeObserver !== 'undefined' && barRoot) {
+    new ResizeObserver(syncPromoBarHeight).observe(barRoot);
+  }
 
   const fmtBar = (secs) => {
     const d = Math.floor(secs / 86400);

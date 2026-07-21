@@ -842,8 +842,8 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
                                         WhatsApp comercial (opcional)
                                     </label>
                                     <input type="text" name="whatsapp_contact_course"
-                                        value="<?= esc($course->whatsapp_contact_course ?? $course->whatsapp_course ?? '258842627671') ?>"
-                                        placeholder="258842627671"
+                                        value="<?= esc($course->whatsapp_contact_course ?? $course->whatsapp_course ?? '258842726761') ?>"
+                                        placeholder="258842726761"
                                         class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white text-sm">
                                 </div>
 
