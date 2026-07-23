@@ -133,6 +133,7 @@
     <script src="<?= base_url('assets/js/main.js') ?>"></script>
     <script>window.ANALYTICS_COLLECT_URL = <?= json_encode(site_url('analytics/collect')) ?>;</script>
     <script src="<?= base_url('assets/js/analytics-tracker.js') ?>" defer></script>
+    <?= view('partials/posthog') ?>
 
     <?= $this->renderSection('page_scripts') ?>
 

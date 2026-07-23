@@ -1706,6 +1706,7 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
   </script>
   <script>window.ANALYTICS_COLLECT_URL = <?= json_encode(site_url('analytics/collect')) ?>;</script>
   <script src="<?= base_url('assets/js/analytics-tracker.js') ?>" defer></script>
+  <?= view('partials/posthog') ?>
 </body>
 
 </html>

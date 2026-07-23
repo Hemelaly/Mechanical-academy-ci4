@@ -3,6 +3,7 @@
     "@tailwindcss/cli": "^4.1.17",
     "bootstrap-icons": "^1.13.1",
     "flowbite": "^4.0.1",
+    "posthog-js": "^1.407.1",
     "tailwindcss": "^4.1.17"
   },
   "scripts": {
