@@ -5,6 +5,8 @@ namespace Config;
 use App\Libraries\AuditLogger;
 use App\Libraries\JitsiJwtService;
 use CodeIgniter\Config\BaseService;
+use CodeIgniter\Email\Email;
+use Config\Email as EmailConfig;
 
 /**
  * Services Configuration file.
@@ -39,14 +41,35 @@ class Services extends BaseService
         return new JitsiJwtService();
     }
 
-    /*
-     * public static function example($getShared = true)
-     * {
-     *     if ($getShared) {
-     *         return static::getSharedInstance('example');
-     *     }
+    /**
+     * Email com From (no-reply) e Reply-To (academy@) oficiais.
      *
-     *     return new \CodeIgniter\Example();
-     * }
+     * @param array|EmailConfig|null $config
      */
+    public static function email($config = null, bool $getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('email', $config);
+        }
+
+        if (empty($config) || (! is_array($config) && ! $config instanceof EmailConfig)) {
+            $config = config(EmailConfig::class);
+        }
+
+        $email = new Email($config);
+
+        $replyTo = is_object($config)
+            ? (string) ($config->replyToEmail ?? '')
+            : (string) ($config['replyToEmail'] ?? '');
+        $replyName = is_object($config)
+            ? (string) ($config->replyToName ?? '')
+            : (string) ($config['replyToName'] ?? '');
+
+        if ($replyTo !== '') {
+            $email->setReplyTo($replyTo, $replyName);
+        }
+
+        return $email;
+    }
 }
+

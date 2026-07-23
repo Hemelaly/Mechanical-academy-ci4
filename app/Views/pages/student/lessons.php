@@ -88,28 +88,33 @@ $nextModuleUrl = !empty($nextModuleLessonId)
     : '';
 ?>
 
-<?= $this->extend('layouts/master') ?>
+<?= $this->extend('layouts/player') ?>
 
 <?= $this->section('title') ?>Assistir<?= $this->endSection() ?>
 
 <?= $this->section('lessons') ?>
-
-<!-- Bootstrap Icons -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-<!-- Vimeo Player -->
-<script src="https://player.vimeo.com/api/player.js"></script>
 
 <!-- CSRF para AJAX -->
 <meta name="csrf-name" content="<?= csrf_token() ?>">
 <meta name="csrf-hash" content="<?= csrf_hash() ?>">
 
 <style>
+    .player-shell {
+        min-height: 100%;
+        padding: 1rem 1rem 2rem;
+    }
+    @media (min-width: 1024px) {
+        .player-shell {
+            padding: 1.25rem 1.5rem 2rem;
+        }
+    }
+
     .blocked-access #lesson-content,
     .blocked-access .lesson-row,
     .blocked-access .module-header,
     .blocked-access #nextLessonBtn,
-    .blocked-access #drawerToggle,
     .blocked-access #closeDrawer,
+    .blocked-access #player-toc-toggle,
     .blocked-access #lesson-content a,
     .blocked-access #lesson-content button,
     .blocked-access #lesson-content input,
@@ -131,6 +136,336 @@ $nextModuleUrl = !empty($nextModuleLessonId)
         background-color: #1d3557;
         border-color: #3b82f6;
         color: #bfdbfe;
+    }
+
+    /* —— Fórum da aula (estilo YouTube, compacto + colapsável) —— */
+    .lesson-forum {
+        margin-top: 1.25rem;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 0.5rem;
+        background: #fff;
+        overflow: hidden;
+    }
+    html.dark .lesson-forum {
+        border-color: rgba(255, 255, 255, 0.08);
+        background: #0c1017;
+    }
+    .lesson-forum__toggle {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0.85rem 1rem;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        text-align: left;
+        font-family: inherit;
+        color: inherit;
+    }
+    .lesson-forum__toggle:hover {
+        background: rgba(148, 163, 184, 0.08);
+    }
+    html.dark .lesson-forum__toggle:hover {
+        background: rgba(255, 255, 255, 0.03);
+    }
+    .lesson-forum__toggle-main {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        min-width: 0;
+    }
+    .lesson-forum__toggle-title {
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 650;
+        letter-spacing: -0.01em;
+        color: #0f172a;
+    }
+    html.dark .lesson-forum__toggle-title { color: #f8fafc; }
+    .lesson-forum__badge {
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #64748b;
+    }
+    html.dark .lesson-forum__badge { color: #94a3b8; }
+    .lesson-forum__chevron {
+        color: #64748b;
+        transition: transform .2s ease;
+        font-size: 0.95rem;
+    }
+    html.dark .lesson-forum__chevron { color: #94a3b8; }
+    .lesson-forum.is-open .lesson-forum__chevron {
+        transform: rotate(180deg);
+    }
+    .lesson-forum__body {
+        display: none;
+        border-top: 1px solid rgba(148, 163, 184, 0.16);
+    }
+    html.dark .lesson-forum__body {
+        border-top-color: rgba(255, 255, 255, 0.06);
+    }
+    .lesson-forum.is-open .lesson-forum__body {
+        display: block;
+    }
+
+    .lesson-forum__composer {
+        padding: 0.85rem 1rem 0.75rem;
+    }
+    .lesson-forum__reply-chip {
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+        padding: 0.4rem 0.65rem;
+        border-radius: 0.25rem;
+        border: 1px solid rgba(13, 110, 253, 0.28);
+        background: rgba(13, 110, 253, 0.08);
+        color: #0d6efd;
+        font-size: 0.72rem;
+    }
+    html.dark .lesson-forum__reply-chip {
+        color: #8bb8ff;
+        border-color: rgba(13, 110, 253, 0.35);
+        background: rgba(13, 110, 253, 0.12);
+    }
+    .lesson-forum__reply-chip.is-on { display: flex; }
+    .lesson-forum__reply-chip button {
+        border: 0;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        font-size: 0.7rem;
+        font-weight: 650;
+        cursor: pointer;
+        opacity: 0.85;
+        padding: 0;
+    }
+    .lesson-forum__reply-chip button:hover { opacity: 1; text-decoration: underline; }
+    .lesson-forum__composer-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.65rem;
+    }
+    .lesson-forum__me {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        background: rgba(13, 110, 253, 0.14);
+        color: #0d6efd;
+        font-size: 0.7rem;
+        font-weight: 700;
+    }
+    html.dark .lesson-forum__me {
+        background: rgba(13, 110, 253, 0.22);
+        color: #8bb8ff;
+    }
+    .lesson-forum__composer-main { flex: 1; min-width: 0; }
+    .lesson-forum__textarea {
+        width: 100%;
+        min-height: 2.4rem;
+        max-height: 8rem;
+        resize: none;
+        border: 0;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+        border-radius: 0;
+        padding: 0.45rem 0.1rem 0.55rem;
+        background: transparent;
+        color: #0f172a;
+        font-family: inherit;
+        font-size: 0.88rem;
+        line-height: 1.4;
+        outline: none;
+        transition: border-color .15s ease, min-height .15s ease;
+    }
+    html.dark .lesson-forum__textarea {
+        border-bottom-color: rgba(255, 255, 255, 0.12);
+        color: #f8fafc;
+    }
+    .lesson-forum__textarea::placeholder { color: #94a3b8; }
+    .lesson-forum__textarea:focus {
+        border-bottom-color: #0d6efd;
+        min-height: 4.2rem;
+    }
+    .lesson-forum__actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-top: 0.55rem;
+    }
+    .lesson-forum__hint {
+        min-height: 1rem;
+        font-size: 0.72rem;
+        color: #94a3b8;
+    }
+    .lesson-forum__hint.is-error { color: #f43f5e; }
+    .lesson-forum__hint.is-ok { color: #10b981; }
+    .lesson-forum__submit {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        border: 0;
+        border-radius: 999px;
+        padding: 0.45rem 0.95rem;
+        background: #0d6efd;
+        color: #fff;
+        font-family: inherit;
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        opacity: 0.45;
+        pointer-events: none;
+        transition: opacity .15s ease, filter .15s ease;
+    }
+    .lesson-forum__submit.is-ready {
+        opacity: 1;
+        pointer-events: auto;
+    }
+    .lesson-forum__submit:hover { filter: brightness(1.06); }
+    .lesson-forum__submit:disabled { opacity: .45; cursor: not-allowed; }
+
+    .lesson-forum__list {
+        max-height: 22rem;
+        overflow-y: auto;
+        padding: 0.25rem 1rem 0.9rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+    }
+    .lesson-forum__empty,
+    .lesson-forum__loading,
+    .lesson-forum__error {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.25rem;
+        padding: 0.85rem 0.5rem;
+        text-align: center;
+        color: #64748b;
+        font-size: 0.8rem;
+    }
+    html.dark .lesson-forum__empty,
+    html.dark .lesson-forum__loading,
+    html.dark .lesson-forum__error { color: #94a3b8; }
+    .lesson-forum__error { color: #f43f5e; }
+
+    .forum-thread {
+        display: flex;
+        flex-direction: column;
+        gap: 0.05rem;
+        padding: 0.55rem 0;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+    }
+    html.dark .forum-thread {
+        border-bottom-color: rgba(255, 255, 255, 0.05);
+    }
+    .forum-thread:last-child { border-bottom: 0; }
+    .forum-post {
+        display: flex;
+        gap: 0.65rem;
+        padding: 0.35rem 0;
+        border: 0;
+        background: transparent;
+    }
+    .forum-post--reply {
+        margin-left: 2.4rem;
+        padding-left: 0.65rem;
+        border-left: 2px solid rgba(13, 110, 253, 0.25);
+    }
+    .forum-avatar {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 999px;
+        object-fit: cover;
+        flex-shrink: 0;
+        background: #e2e8f0;
+    }
+    .forum-avatar--fallback {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(13, 110, 253, 0.14);
+        color: #0d6efd;
+        font-size: 0.68rem;
+        font-weight: 700;
+    }
+    html.dark .forum-avatar--fallback {
+        background: rgba(13, 110, 253, 0.22);
+        color: #8bb8ff;
+    }
+    .forum-post__meta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0.35rem 0.5rem;
+    }
+    .forum-post__name {
+        font-size: 0.8rem;
+        font-weight: 650;
+        color: #0f172a;
+    }
+    html.dark .forum-post__name { color: #f8fafc; }
+    .forum-post__time {
+        font-size: 0.7rem;
+        color: #94a3b8;
+    }
+    .forum-post__body {
+        margin: 0.2rem 0 0;
+        font-size: 0.86rem;
+        line-height: 1.45;
+        color: #334155;
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+    html.dark .forum-post__body { color: #cbd5e1; }
+    .forum-post__reply {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        margin-top: 0.3rem;
+        border: 0;
+        background: transparent;
+        padding: 0;
+        color: #64748b;
+        font-family: inherit;
+        font-size: 0.72rem;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .forum-post__reply:hover { color: #0d6efd; }
+    html.dark .forum-post__reply:hover { color: #6ea8fe; }
+
+    .course-toc-sticky {
+        position: sticky;
+        top: 0.75rem;
+        align-self: start;
+        z-index: 5;
+    }
+    .course-toc-sticky > .course-toc-panel {
+        max-height: calc(100vh - 5.5rem);
+        display: flex;
+        flex-direction: column;
+    }
+    .course-toc-sticky .course-toc-scroll {
+        flex: 1 1 auto;
+        min-height: 0;
+        max-height: none;
+        overflow-y: auto;
+    }
+
+    @media (max-width: 640px) {
+        .forum-post--reply { margin-left: 1rem; }
+        .lesson-forum__actions { gap: 0.5rem; }
     }
 
     .quiz-failure-overlay {
@@ -185,11 +520,11 @@ $demoExpired = $isDemoAccess && $paywallRequired && $accessBlocked;
 $checkoutUrl = (string) ($checkoutUrl ?? site_url('checkout/' . (int) ($course->id_course ?? 0)));
 $whatsappUrl = (string) ($whatsappUrl ?? '#');
 ?>
-<div class="min-w-0 text-gray-900 dark:text-gray-100 transition-colors duration-300 <?= ($accessBlocked || (bool) session('blocked_access')) ? 'blocked-access' : '' ?>">
+<div class="player-shell min-w-0 text-gray-900 dark:text-gray-100 transition-colors duration-300 <?= ($accessBlocked || (bool) session('blocked_access')) ? 'blocked-access' : '' ?>">
     <div class="container mx-auto" data-enrollment-id="<?= (int)($enrollment->id_enrollment) ?>" data-enrollment-status="<?= esc($enrollmentStatus) ?>">
 
         <?php if (! $accessBlocked && $isDemoAccess && $demoRemainingSeconds > 0): ?>
-            <div class="mb-4 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-200 flex flex-wrap items-center justify-between gap-2">
+            <div class="mb-4 rounded-md border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-200 flex flex-wrap items-center justify-between gap-2">
                 <span><i class="bi bi-clock-history me-1"></i> Acesso demo — expira em <strong id="demoCountdown"><?= esc(gmdate('H:i:s', $demoRemainingSeconds)) ?></strong></span>
                 <a href="<?= esc($checkoutUrl) ?>" class="font-semibold underline">Comprar acesso completo</a>
             </div>
@@ -214,7 +549,7 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
 
         <?php if ($accessBlocked || (bool) session('blocked_access')) : ?>
             <div id="blockedAccessModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md mx-4 shadow-xl">
+                <div class="bg-white dark:bg-gray-800 rounded-md p-6 max-w-md mx-4 shadow-xl">
                     <div class="text-center">
                         <div class="w-16 h-16 <?= $paywallRequired ? 'bg-amber-100 dark:bg-amber-900' : 'bg-red-100 dark:bg-red-900' ?> rounded-full flex items-center justify-center mx-auto mb-4">
                             <i class="bi <?= $paywallRequired ? 'bi-credit-card' : 'bi-lock-fill' ?> text-2xl <?= $paywallRequired ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400' ?>"></i>
@@ -229,8 +564,8 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
                                 <?php endif; ?>
                             </p>
                             <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                                <a href="<?= esc($checkoutUrl) ?>" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm">Pagar agora</a>
-                                <a href="<?= esc($whatsappUrl) ?>" target="_blank" rel="noopener" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm">WhatsApp</a>
+                                <a href="<?= esc($checkoutUrl) ?>" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-md transition-colors text-sm">Pagar agora</a>
+                                <a href="<?= esc($whatsappUrl) ?>" target="_blank" rel="noopener" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 px-6 rounded-md transition-colors text-sm">WhatsApp</a>
                             </div>
                         <?php else: ?>
                             <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Acesso bloqueado</h3>
@@ -238,7 +573,7 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
                                 Você foi bloqueado pelo instrutor do curso. Entre em contato com o instrutor para mais detalhes.
                             </p>
                             <div class="flex justify-center">
-                                <button id="blockedOkBtn" type="button" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm">
+                                <button id="blockedOkBtn" type="button" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-md transition-colors text-sm">
                                     OK
                                 </button>
                             </div>
@@ -250,7 +585,7 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
                 document.body.style.overflow = 'hidden';
                 const blockedBtn = document.getElementById('blockedOkBtn');
                 const blockedModal = document.getElementById('blockedAccessModal');
-                const fallbackUrl = <?= json_encode(site_url('student/dashboard/meus_cursos')) ?>;
+                const fallbackUrl = <?= json_encode(site_url('student/dashboard/inscricoes')) ?>;
                 const goBack = () => {
                     if (document.referrer) {
                         window.location.href = document.referrer;
@@ -266,7 +601,7 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
         <?php endif; ?>
 
         <?php if ($previewMode): ?>
-            <div class="mb-6 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-4 text-sm text-blue-900 shadow-sm dark:border-blue-800 dark:bg-blue-900/20 dark:text-slate-100">
+            <div class="mb-6 rounded-md border border-blue-200 bg-blue-50 px-4 py-4 text-sm text-blue-900 shadow-sm dark:border-blue-800 dark:bg-blue-900/20 dark:text-slate-100">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <div class="font-semibold">Modo de pré-visualização do instrutor</div>
@@ -274,7 +609,7 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
                             Esta tela reaproveita a página de assistir aulas. Navegação, progresso e quiz aqui são apenas simulados.
                         </div>
                     </div>
-                    <a href="<?= esc($previewBackUrl) ?>" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700">
+                    <a href="<?= esc($previewBackUrl) ?>" class="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700">
                         <i class="bi bi-arrow-left"></i>
                         Voltar ao editor
                     </a>
@@ -282,14 +617,9 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
             </div>
         <?php endif; ?>
 
-        <!-- Breadcrumb -->
-        <nav class="flex items-center gap-2 text-sm mb-6">
-            <a href="<?= esc($backToCoursesUrl) ?>" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors flex items-center gap-1">
-                <i class="bi bi-arrow-left"></i>
-                <?= esc($backToCoursesLabel) ?>
-            </a>
-            <span class="text-gray-400 dark:text-gray-600">/</span>
-            <span class="font-medium text-gray-700 dark:text-gray-300 text-sm truncate max-w-xs md:max-w-md"><?= esc($course->title_course) ?></span>
+        <!-- Course title (mobile) -->
+        <nav class="flex items-center gap-2 text-sm mb-4 lg:hidden">
+            <span class="font-medium text-gray-700 dark:text-gray-300 text-sm truncate"><?= esc($course->title_course) ?></span>
         </nav>
 
         <!-- Progress Bar -->
@@ -312,7 +642,7 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
             ? ''
             : '?autoplay=1';
         ?>
-        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-6 shadow-sm">
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md p-4 mb-6 shadow-sm">
             <div class="flex justify-between items-center mb-2">
                 <span class="text-gray-700 dark:text-gray-300 text-sm font-medium">Progresso do Curso</span>
                 <span id="progressPercentage" class="font-bold text-blue-600 dark:text-blue-400 text-sm"><?= $initialProgress ?>%</span>
@@ -322,16 +652,8 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
             </div>
         </div>
 
-        <!-- Mobile Drawer Button -->
-        <div class="lg:hidden mb-4">
-            <button id="drawerToggle" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm shadow-md">
-                <i class="bi bi-list"></i>
-                Ver Conteúdo do Curso
-            </button>
-        </div>
-
         <!-- Main Content Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 items-start lg:grid-cols-3 gap-6">
 
             <!-- Video Section -->
             <?php
@@ -349,10 +671,10 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
                 data-is-last-module="<?= $isLastInModule ? '1' : '0' ?>"
                 data-next-module-url="<?= esc($nextModuleUrl) ?>"
                 class="lg:col-span-2 space-y-6">
-                <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-md">
+                <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden shadow-md">
                     <?php if (!$isQuiz): ?>
                         <!-- Video Player -->
-                        <div class="relative pt-[56.25%] bg-black rounded-t-xl overflow-hidden">
+                        <div class="relative pt-[56.25%] bg-black rounded-t-md overflow-hidden">
                             <?php
                             function getVimeoId($url)
                             {
@@ -383,7 +705,7 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
                             <!-- End Overlay -->
                             <?php if ($nextLesson): ?>
                                 <div id="endOverlay" class="absolute inset-0 hidden items-center justify-center backdrop-blur-sm bg-black bg-opacity-70 z-10">
-                                    <div class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl p-6 max-w-md w-[90%] text-center shadow-xl">
+                                    <div class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md p-6 max-w-md w-[90%] text-center shadow-xl">
                                         <div class="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
                                             <i class="bi bi-check-lg text-2xl text-green-600 dark:text-green-400"></i>
                                         </div>
@@ -400,11 +722,11 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
                                                     : '?autoplay=1';
                                                 ?>
                                                 href="<?= $nextUrl ?><?= $autoSuffix ?>"
-                                                class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
+                                                class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-md transition-colors text-sm flex items-center justify-center gap-2">
                                                 Próxima Aula
                                                 <i class="bi bi-arrow-right"></i>
                                             </a>
-                                            <button id="stayBtn" type="button" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm">
+                                            <button id="stayBtn" type="button" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2.5 px-6 rounded-md transition-colors text-sm">
                                                 Ficar aqui
                                             </button>
                                         </div>
@@ -433,9 +755,8 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
 
                         <?php if (!empty($lesson->attachment_path_lesson)): ?>
                             <div class="mt-4">
-                                <a href="<?= esc(base_url('assets/instructor/lesson_files/' . $lesson->attachment_path_lesson)) ?>"
-                                    class="inline-flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white text-sm font-medium rounded-lg transition-colors"
-                                    download>
+                                <a href="<?= esc(site_url('materials/lesson/' . (int) $lesson->id_lesson)) ?>"
+                                    class="inline-flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white text-sm font-medium rounded-md transition-colors">
                                     <i class="bi bi-paperclip"></i>
                                     <?= esc($lesson->attachment_name_lesson ?? 'Baixar anexo') ?>
                                 </a>
@@ -443,55 +764,221 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
                         <?php endif; ?>
 
                         <?php if (!$previewMode && !$accessBlocked && strtolower((string) ($enrollment->status_enrollment ?? '')) === 'ativa'): ?>
-                            <div class="mt-6 p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
-                                <h4 class="text-sm font-semibold text-slate-800 dark:text-white mb-2">Avaliar este curso</h4>
-                                <div class="flex flex-wrap gap-2 mb-2" id="course-rating-stars">
-                                    <?php for ($s = 1; $s <= 5; $s++): ?>
-                                        <button type="button" data-score="<?= $s ?>" class="rating-star px-2 py-1 text-lg text-amber-400 hover:scale-110 transition">★</button>
-                                    <?php endfor; ?>
+                            <?php
+                            $forumUser = auth()->user();
+                            $forumName = trim((string) ($forumUser->username ?? $forumUser->email ?? 'U'));
+                            $forumParts = preg_split('/\s+/', $forumName) ?: [];
+                            $forumInitials = strtoupper(mb_substr((string) ($forumParts[0] ?? 'U'), 0, 1) . mb_substr((string) ($forumParts[1] ?? ''), 0, 1));
+                            if ($forumInitials === '' || $forumInitials === false) {
+                                $forumInitials = 'U';
+                            }
+                            ?>
+                            <section class="lesson-forum" id="lesson-forum" data-lesson-id="<?= (int) $lesson->id_lesson ?>">
+                                <button type="button" class="lesson-forum__toggle" id="forum-toggle" aria-expanded="false" aria-controls="forum-body-panel">
+                                    <span class="lesson-forum__toggle-main">
+                                        <h4 class="lesson-forum__toggle-title">Discussão da aula</h4>
+                                        <span class="lesson-forum__badge" id="forum-count">0</span>
+                                    </span>
+                                    <i class="bi bi-chevron-down lesson-forum__chevron" aria-hidden="true"></i>
+                                </button>
+
+                                <div class="lesson-forum__body" id="forum-body-panel">
+                                    <div class="lesson-forum__composer">
+                                        <div class="lesson-forum__reply-chip" id="forum-reply-banner">
+                                            <span id="forum-reply-label"><i class="bi bi-reply"></i> A responder…</span>
+                                            <button type="button" id="forum-reply-cancel">Cancelar</button>
+                                        </div>
+                                        <div class="lesson-forum__composer-row">
+                                            <span class="lesson-forum__me" aria-hidden="true"><?= esc($forumInitials) ?></span>
+                                            <div class="lesson-forum__composer-main">
+                                                <label for="forum-body" class="sr-only">Mensagem da discussão</label>
+                                                <textarea id="forum-body" class="lesson-forum__textarea" rows="1" maxlength="4000" placeholder="Adicionar um comentário…"></textarea>
+                                                <div class="lesson-forum__actions">
+                                                    <p class="lesson-forum__hint" id="forum-msg"></p>
+                                                    <button type="button" class="lesson-forum__submit" id="forum-submit">
+                                                        Comentar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="lesson-forum__list" id="forum-list">
+                                        <div class="lesson-forum__loading">A carregar…</div>
+                                    </div>
                                 </div>
-                                <textarea id="course-rating-comment" rows="2" class="w-full text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 mb-2" placeholder="Comentário opcional"></textarea>
-                                <button type="button" id="course-rating-submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg">Enviar avaliação</button>
-                                <p id="course-rating-msg" class="text-xs text-slate-500 mt-2"></p>
-                            </div>
+                            </section>
                             <script>
-                                (function() {
-                                    let selectedScore = 0;
-                                    const stars = document.querySelectorAll('#course-rating-stars .rating-star');
-                                    stars.forEach((btn) => {
-                                        btn.addEventListener('click', () => {
-                                            selectedScore = Number(btn.dataset.score || 0);
-                                            stars.forEach((s, idx) => {
-                                                s.classList.toggle('opacity-40', idx >= selectedScore);
-                                            });
+                            (function () {
+                                const root = document.getElementById('lesson-forum');
+                                if (!root) return;
+
+                                const lessonId = root.dataset.lessonId;
+                                const toggleBtn = document.getElementById('forum-toggle');
+                                const listEl = document.getElementById('forum-list');
+                                const countEl = document.getElementById('forum-count');
+                                const bodyEl = document.getElementById('forum-body');
+                                const msgEl = document.getElementById('forum-msg');
+                                const submitBtn = document.getElementById('forum-submit');
+                                const replyBanner = document.getElementById('forum-reply-banner');
+                                const replyLabel = document.getElementById('forum-reply-label');
+                                const replyCancel = document.getElementById('forum-reply-cancel');
+                                const endpoint = <?= json_encode(site_url('student/lessons')) ?> + '/' + lessonId + '/discussions';
+                                let replyTo = null;
+                                let loadedOnce = false;
+
+                                const escapeHtml = (value) => String(value ?? '')
+                                    .replace(/&/g, '&amp;')
+                                    .replace(/</g, '&lt;')
+                                    .replace(/>/g, '&gt;')
+                                    .replace(/"/g, '&quot;')
+                                    .replace(/'/g, '&#039;');
+
+                                const csrfHeaders = () => ({
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-hash"]')?.content
+                                        || document.querySelector('meta[name="csrf-token"]')?.content
+                                        || '<?= csrf_hash() ?>'
+                                });
+
+                                const setHint = (text, type) => {
+                                    msgEl.textContent = text || '';
+                                    msgEl.className = 'lesson-forum__hint' + (type ? ' is-' + type : '');
+                                };
+
+                                const syncSubmit = () => {
+                                    const ready = (bodyEl.value || '').trim().length >= 2;
+                                    submitBtn.classList.toggle('is-ready', ready);
+                                };
+
+                                const avatarHtml = (post) => {
+                                    if (post.avatar) {
+                                        return `<img class="forum-avatar" src="${escapeHtml(post.avatar)}" alt="">`;
+                                    }
+                                    return `<span class="forum-avatar forum-avatar--fallback">${escapeHtml(post.initials || 'U')}</span>`;
+                                };
+
+                                const postHtml = (post, isReply = false) => `
+                                    <article class="forum-post ${isReply ? 'forum-post--reply' : ''}" data-id="${post.id}">
+                                        ${avatarHtml(post)}
+                                        <div class="min-w-0 flex-1">
+                                            <div class="forum-post__meta">
+                                                <span class="forum-post__name">${escapeHtml(post.username)}</span>
+                                                <span class="forum-post__time">${escapeHtml(post.created_at || '')}</span>
+                                            </div>
+                                            <p class="forum-post__body">${escapeHtml(post.body)}</p>
+                                            ${isReply ? '' : `
+                                                <button type="button" class="forum-post__reply forum-reply-btn" data-id="${post.id}" data-user="${escapeHtml(post.username)}">
+                                                    Responder
+                                                </button>`}
+                                        </div>
+                                    </article>
+                                `;
+
+                                const render = (items, total) => {
+                                    countEl.textContent = String(Number(total || 0));
+                                    if (!items || !items.length) {
+                                        listEl.innerHTML = `<div class="lesson-forum__empty">Ainda sem comentários. Seja o primeiro.</div>`;
+                                        return;
+                                    }
+                                    listEl.innerHTML = items.map((thread) => {
+                                        const replies = (thread.replies || []).map((r) => postHtml(r, true)).join('');
+                                        return `<div class="forum-thread">${postHtml(thread, false)}${replies}</div>`;
+                                    }).join('');
+                                };
+
+                                const load = async () => {
+                                    try {
+                                        const res = await fetch(endpoint, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } });
+                                        const data = await res.json();
+                                        if (!res.ok || !data.ok) throw new Error(data.message || 'Erro');
+                                        render(data.items || [], data.total || 0);
+                                        loadedOnce = true;
+                                    } catch (e) {
+                                        listEl.innerHTML = `<div class="lesson-forum__error">Não foi possível carregar a discussão.</div>`;
+                                    }
+                                };
+
+                                const clearReply = () => {
+                                    replyTo = null;
+                                    replyBanner.classList.remove('is-on');
+                                };
+
+                                const openForum = () => {
+                                    root.classList.add('is-open');
+                                    toggleBtn.setAttribute('aria-expanded', 'true');
+                                    if (!loadedOnce) load();
+                                };
+
+                                const closeForum = () => {
+                                    root.classList.remove('is-open');
+                                    toggleBtn.setAttribute('aria-expanded', 'false');
+                                };
+
+                                toggleBtn?.addEventListener('click', () => {
+                                    if (root.classList.contains('is-open')) closeForum();
+                                    else openForum();
+                                });
+
+                                bodyEl?.addEventListener('input', () => {
+                                    bodyEl.style.height = 'auto';
+                                    bodyEl.style.height = Math.min(bodyEl.scrollHeight, 128) + 'px';
+                                    syncSubmit();
+                                    if (msgEl.classList.contains('is-error') || msgEl.classList.contains('is-ok')) {
+                                        setHint('');
+                                    }
+                                });
+
+                                listEl.addEventListener('click', (e) => {
+                                    const btn = e.target.closest('.forum-reply-btn');
+                                    if (!btn) return;
+                                    replyTo = Number(btn.dataset.id || 0);
+                                    replyLabel.innerHTML = `A responder a <strong>${escapeHtml(btn.dataset.user || 'comentário')}</strong>`;
+                                    replyBanner.classList.add('is-on');
+                                    openForum();
+                                    bodyEl.focus();
+                                });
+
+                                replyCancel?.addEventListener('click', clearReply);
+
+                                submitBtn?.addEventListener('click', async () => {
+                                    const body = (bodyEl.value || '').trim();
+                                    if (body.length < 2) {
+                                        setHint('Escreva pelo menos 2 caracteres.', 'error');
+                                        return;
+                                    }
+                                    submitBtn.disabled = true;
+                                    setHint('A publicar…');
+                                    try {
+                                        const res = await fetch(endpoint, {
+                                            method: 'POST',
+                                            headers: csrfHeaders(),
+                                            body: JSON.stringify({ body, parent_id: replyTo || 0 })
                                         });
-                                    });
-                                    document.getElementById('course-rating-submit')?.addEventListener('click', async () => {
-                                        const msg = document.getElementById('course-rating-msg');
-                                        if (selectedScore < 1) {
-                                            msg.textContent = 'Escolha de 1 a 5 estrelas.';
-                                            return;
-                                        }
-                                        try {
-                                            const res = await fetch('<?= site_url('student/courses/' . (int) $course->id_course . '/rate') ?>', {
-                                                method: 'POST',
-                                                headers: {
-                                                    'Content-Type': 'application/json',
-                                                    'X-Requested-With': 'XMLHttpRequest',
-                                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '<?= csrf_hash() ?>'
-                                                },
-                                                body: JSON.stringify({
-                                                    score: selectedScore,
-                                                    comment: document.getElementById('course-rating-comment')?.value || ''
-                                                })
-                                            });
-                                            const data = await res.json();
-                                            msg.textContent = data.message || (data.ok ? 'Avaliação guardada.' : 'Não foi possível guardar.');
-                                        } catch (e) {
-                                            msg.textContent = 'Erro de rede ao enviar avaliação.';
-                                        }
-                                    });
-                                })();
+                                        const data = await res.json();
+                                        if (!res.ok || !data.ok) throw new Error(data.message || 'Erro ao publicar');
+                                        bodyEl.value = '';
+                                        bodyEl.style.height = 'auto';
+                                        clearReply();
+                                        syncSubmit();
+                                        render(data.items || [], data.total || 0);
+                                        setHint(data.message || 'Publicado.', 'ok');
+                                        listEl.scrollTop = 0;
+                                        setTimeout(() => setHint(''), 2000);
+                                    } catch (e) {
+                                        setHint(e.message || 'Erro de rede.', 'error');
+                                    } finally {
+                                        submitBtn.disabled = false;
+                                        syncSubmit();
+                                    }
+                                });
+
+                                // Prefetch count while collapsed (YouTube-like header count)
+                                load();
+                                syncSubmit();
+                            })();
                             </script>
                         <?php endif; ?>
                     </div>
@@ -508,7 +995,7 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
                             </div>
 
                             <?php if ($quizAttempted): ?>
-                                <div class="mb-4 rounded-lg border border-emerald-200 dark:border-emerald-700 bg-emerald-50/80 dark:bg-emerald-900/30 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-200">
+                                <div class="mb-4 rounded-md border border-emerald-200 dark:border-emerald-700 bg-emerald-50/80 dark:bg-emerald-900/30 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-200">
                                     Você já realizou este quiz e obteve <strong><?= (int) $quizScore ?>%</strong>.
                                 </div>
                             <?php endif; ?>
@@ -519,7 +1006,7 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
                                 </p>
                             <?php else: ?>
                                 <div id="quizStepper" class="space-y-4">
-                                    <div class="bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 shadow-sm space-y-4">
+                                    <div class="bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-700 rounded-md p-5 shadow-sm space-y-4">
                                             <div class="flex flex-wrap items-center justify-between gap-2 text-xs uppercase tracking-wider text-slate-500">
                                                 <span id="quizStepLabel">Pergunta 1 de <?= count($quizQuestions) ?></span>
                                                 <span id="quizProgressPercent">0%</span>
@@ -536,7 +1023,7 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
                                                     <div class="grid gap-3">
                                                         <?php for ($opt = 0; $opt < 4; $opt++): ?>
                                                             <button type="button"
-                                                                class="quiz-option w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-left text-sm font-medium text-slate-900 dark:text-slate-100 hover:border-blue-500 transition-colors"
+                                                                class="quiz-option w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-left text-sm font-medium text-slate-900 dark:text-slate-100 hover:border-blue-500 transition-colors"
                                                                 data-option-index="<?= $opt ?>">
                                                                 <?= esc($question['options'][$opt] ?? '') ?>
                                                             </button>
@@ -547,11 +1034,11 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
                                         </div>
                                         <div class="text-sm text-slate-500 dark:text-slate-400" id="quizHint">Selecione uma resposta para continuar.</div>
                                         <div class="flex gap-3">
-                                            <button id="quizPrevBtn" type="button" class="flex-1 px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-600 dark:text-slate-200 disabled:opacity-50 disabled:cursor-not-allowed" disabled>Anterior</button>
-                                            <button id="quizNextBtn" type="button" class="flex-1 px-4 py-3 rounded-lg text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed" disabled>Próxima pergunta</button>
+                                            <button id="quizPrevBtn" type="button" class="flex-1 px-4 py-3 rounded-md border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-600 dark:text-slate-200 disabled:opacity-50 disabled:cursor-not-allowed" disabled>Anterior</button>
+                                            <button id="quizNextBtn" type="button" class="flex-1 px-4 py-3 rounded-md text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed" disabled>Próxima pergunta</button>
                                         </div>
                                     </div>
-                                    <div id="quizSummary" class="hidden bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 shadow-sm space-y-3">
+                                    <div id="quizSummary" class="hidden bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-700 rounded-md p-5 shadow-sm space-y-3">
                                         <h3 class="text-lg font-bold text-slate-900 dark:text-white">Resultado do quiz</h3>
                                         <p id="quizSummaryScore" class="text-3xl font-extrabold text-blue-600"></p>
                                         <p id="quizSummaryNote" class="text-sm text-slate-500 dark:text-slate-400"></p>
@@ -583,7 +1070,7 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
                     <?php if ($prevLesson): ?>
                         <?php $prevUrl = $resolveLessonUrl((int) $prevLesson, $prevLessonSlug ?? null); ?>
                         <a href="<?= $prevUrl ?><?= $autoSuffix ?>"
-                            class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-5 rounded-lg transition-colors flex items-center gap-2 text-sm shadow-sm">
+                            class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-5 rounded-md transition-colors flex items-center gap-2 text-sm shadow-sm">
                             <i class="bi bi-arrow-left"></i>
                             Aula Anterior
                         </a>
@@ -593,7 +1080,7 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
 
                     <?php if ($nextLesson): ?>
                         <button id="nextLessonBtn"
-                            class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-5 rounded-lg transition-colors flex items-center gap-2 text-sm shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                            class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-5 rounded-md transition-colors flex items-center gap-2 text-sm shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
                             <?= ($isQuiz && ! $quizAttempted) ? 'disabled' : '' ?>>
                             <span class="next-lesson-label"><?= $isLastInModule ? 'Próximo Módulo' : 'Próxima Aula' ?></span>
                             <i class="bi bi-arrow-right"></i>
@@ -603,14 +1090,14 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
             </div>
 
             <!-- Sidebar - Desktop -->
-            <div class="hidden lg:block space-y-4">
-                <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-sm">
+            <div class="hidden lg:block course-toc-sticky">
+                <div class="course-toc-panel bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md p-4 shadow-sm">
                     <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Conteúdo do Curso</h3>
 
                     <!-- Course Sidebar Content -->
-                    <div class="space-y-3 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
+                    <div class="course-toc-scroll space-y-3 pr-2">
                         <?php foreach ($modules as $index => $m): ?>
-                            <div class="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
+                            <div class="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md overflow-hidden">
                                 <!-- Module Header -->
                                 <button class="module-header w-full flex justify-between items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
                                     onclick="toggleModule(<?= $index ?>)">
@@ -693,7 +1180,7 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
                     <!-- Course Sidebar Content for Mobile -->
                     <div class="space-y-3">
                         <?php foreach ($modules as $index => $m): ?>
-                            <div class="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
+                            <div class="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md overflow-hidden">
                                 <!-- Module Header -->
                                 <button class="module-header w-full flex justify-between items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
                                     onclick="toggleModuleMobile(<?= $index ?>)">
@@ -858,7 +1345,7 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
 
         const modal = `
             <div id="courseCompletedModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
-            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 max-w-md w-[90%] text-center shadow-xl">
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md p-6 max-w-md w-[90%] text-center shadow-xl">
                 <div class="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i class="bi bi-trophy text-3xl text-green-600 dark:text-green-400"></i>
                 </div>
@@ -875,11 +1362,11 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
 
                 <div class="flex flex-col sm:flex-row gap-3 justify-center">
                 <button id="certOkBtn"
-                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm">
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-md transition-colors text-sm">
                     OK
                 </button>
 
-                <a id="courseCompletedAction" href="${actionHref}" class="${actionColorClass} text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm text-center">
+                <a id="courseCompletedAction" href="${actionHref}" class="${actionColorClass} text-white font-medium py-2.5 px-6 rounded-md transition-colors text-sm text-center">
                     ${actionLabel}
                 </a>
                 </div>
@@ -1391,7 +1878,7 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
             wrongList.innerHTML = `<div class="text-sm text-emerald-600 dark:text-emerald-300">Nenhuma resposta incorreta registrada.</div>`;
         } else {
             wrongList.innerHTML = wrongAnswers.map(item => `
-                <div class="rounded-xl border border-red-100 dark:border-red-600 bg-red-50 dark:bg-red-900/30 p-3 text-sm text-red-800 dark:text-red-200">
+                <div class="rounded-md border border-red-100 dark:border-red-600 bg-red-50 dark:bg-red-900/30 p-3 text-sm text-red-800 dark:text-red-200">
                     <p class="font-semibold mb-1">Questão ${item.index}</p>
                     <p>${escapeHtml(item.question)}</p>
                     <p class="text-xs mt-2 text-red-600 dark:text-red-300">Você escolheu: ${escapeHtml(item.selected)}</p>
@@ -1557,26 +2044,23 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
     /* =========================
        Mobile Drawer
        ========================= */
-    const drawerToggle = document.getElementById('drawerToggle');
     const mobileDrawer = document.getElementById('mobileDrawer');
     const closeDrawer = document.getElementById('closeDrawer');
     const drawerBackdrop = document.getElementById('drawerBackdrop');
 
     function openDrawer() {
-        mobileDrawer.classList.remove('translate-x-full');
-        drawerBackdrop.classList.remove('hidden');
+        mobileDrawer?.classList.remove('translate-x-full');
+        drawerBackdrop?.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     }
 
     function closeDrawerFunc() {
-        mobileDrawer.classList.add('translate-x-full');
-        drawerBackdrop.classList.add('hidden');
+        mobileDrawer?.classList.add('translate-x-full');
+        drawerBackdrop?.classList.add('hidden');
         document.body.style.overflow = '';
     }
 
-    if (drawerToggle) {
-        drawerToggle.addEventListener('click', openDrawer);
-    }
+    document.getElementById('player-toc-toggle')?.addEventListener('click', openDrawer);
 
     if (closeDrawer) {
         closeDrawer.addEventListener('click', closeDrawerFunc);
@@ -1806,7 +2290,7 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
 
         const warningModal = `
             <div id="completionWarning" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md mx-4 shadow-xl">
+                <div class="bg-white dark:bg-gray-800 rounded-md p-6 max-w-md mx-4 shadow-xl">
                     <div class="text-center">
                         <div class="w-16 h-16 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center mx-auto mb-4">
                             <i class="bi bi-exclamation-triangle text-2xl text-yellow-600 dark:text-yellow-400"></i>
@@ -1816,10 +2300,10 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
                             ${warningMessage}
                         </p>
                         <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                            <button id="continueWatching" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm flex-1">
+                            <button id="continueWatching" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-md transition-colors text-sm flex-1">
                                 ${primaryLabel}
                             </button>
-                            <button id="forceNext" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm flex-1">
+                            <button id="forceNext" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2.5 px-6 rounded-md transition-colors text-sm flex-1">
                                 ${secondaryLabel}
                             </button>
                         </div>
@@ -1895,10 +2379,10 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
 
     function showBlockedAccessModal() {
         if (!accessBlocked) return;
-        const fallbackUrl = <?= json_encode(site_url('student/dashboard/meus_cursos')) ?>;
+        const fallbackUrl = <?= json_encode(site_url('student/dashboard/inscricoes')) ?>;
         const blockedModal = `
             <div id="blockedAccessModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md mx-4 shadow-xl">
+                <div class="bg-white dark:bg-gray-800 rounded-md p-6 max-w-md mx-4 shadow-xl">
                     <div class="text-center">
                         <div class="w-16 h-16 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center mx-auto mb-4">
                             <i class="bi bi-lock-fill text-2xl text-red-600 dark:text-red-400"></i>
@@ -1908,7 +2392,7 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
                             Você foi bloqueado pelo instrutor do curso. Entre em contato com o instrutor para mais detalhes.
                         </p>
                         <div class="flex justify-center">
-                            <button id="blockedOkBtn" type="button" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm">
+                            <button id="blockedOkBtn" type="button" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-md transition-colors text-sm">
                                 OK
                             </button>
                         </div>

@@ -1333,7 +1333,7 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
       </button>
       <ul class="site-nav__links" id="siteNavLinks">
         <?php if ($isLoggedIn): ?>
-          <li><a href="<?= base_url($user->role . '/dashboard/meus_cursos') ?>">Meus cursos</a></li>
+          <li><a href="<?= base_url($user->role === 'student' ? 'student/dashboard/inscricoes' : ($user->role === 'instructor' ? 'instructor/dashboard/meus_cursos' : $user->role . '/dashboard')) ?>">Meus cursos</a></li>
           <li><a href="https://www.youtube.com/@MechanicalTecnologia" target="_blank" rel="noopener noreferrer">Youtube</a></li>
           <li>
             <a href="<?= base_url($user->role . '/dashboard/perfil') ?>" class="d-flex align-items-center gap-2 text-decoration-none">
@@ -1704,6 +1704,8 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
       }
     })();
   </script>
+  <script>window.ANALYTICS_COLLECT_URL = <?= json_encode(site_url('analytics/collect')) ?>;</script>
+  <script src="<?= base_url('assets/js/analytics-tracker.js') ?>" defer></script>
 </body>
 
 </html>

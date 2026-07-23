@@ -911,6 +911,15 @@ $formatMzn = static function ($value): string {
       box-shadow: 0 0 0 4px var(--accent-soft);
     }
 
+    .news__msg {
+      margin: 0.85rem 0 0;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    .news__msg.is-ok { color: #7dd3a7; }
+    .news__msg.is-err { color: #f0a0a0; }
+
     /* ---------- Footer ---------- */
     .site-footer {
       background: #000;
@@ -1113,7 +1122,7 @@ $formatMzn = static function ($value): string {
 
       <ul class="site-nav__links" id="navLinks">
         <?php if ($isLoggedIn && $user): ?>
-          <li><a href="<?= base_url($user->role . '/dashboard/meus_cursos') ?>">Meus Cursos</a></li>
+          <li><a href="<?= base_url($user->role === 'student' ? 'student/dashboard/inscricoes' : ($user->role === 'instructor' ? 'instructor/dashboard/meus_cursos' : $user->role . '/dashboard')) ?>">Meus Cursos</a></li>
           <li><a href="https://www.youtube.com/@MechanicalTecnologia" target="_blank" rel="noopener noreferrer">YouTube</a></li>
           <li>
             <a class="site-nav__user" href="<?= base_url($user->role . '/dashboard/perfil') ?>">
@@ -1350,10 +1359,13 @@ $formatMzn = static function ($value): string {
           <h2 class="section__title" style="font-size:1.55rem">Newsletter</h2>
           <p class="section__lead">Avisos de novos cursos.</p>
         </div>
-        <form class="news__form" action="#" method="post" onsubmit="return false;">
-          <input class="news__input" type="email" name="email" placeholder="O seu email" aria-label="Email" required>
-          <button class="btn-mech btn-mech-dark" type="submit">Notificar-me</button>
-        </form>
+        <div>
+          <form class="news__form" id="newsletterForm" action="<?= site_url('newsletter/subscribe') ?>" method="post">
+            <input class="news__input" type="email" name="email" placeholder="O seu email" aria-label="Email" required autocomplete="email">
+            <button class="btn-mech btn-mech-dark" type="submit" id="newsletterBtn">Notificar-me</button>
+          </form>
+          <p class="news__msg" id="newsletterMsg" hidden role="status"></p>
+        </div>
       </div>
     </div>
   </section>
@@ -1515,7 +1527,57 @@ $formatMzn = static function ($value): string {
         tick();
       });
     })();
+
+    (function () {
+      const form = document.getElementById('newsletterForm');
+      const msg = document.getElementById('newsletterMsg');
+      const btn = document.getElementById('newsletterBtn');
+      if (!form || !msg || !btn) return;
+
+      const show = (text, ok) => {
+        msg.hidden = false;
+        msg.textContent = text;
+        msg.classList.toggle('is-ok', !!ok);
+        msg.classList.toggle('is-err', !ok);
+      };
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = (form.email?.value || '').trim();
+        if (!email) {
+          show('Indique um email válido.', false);
+          return;
+        }
+
+        btn.disabled = true;
+        const prev = btn.textContent;
+        btn.textContent = 'A enviar…';
+
+        try {
+          const body = new FormData(form);
+          const res = await fetch(form.action, {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+            body,
+          });
+          const data = await res.json().catch(() => ({}));
+          if (res.ok && data.ok) {
+            show(data.message || 'Subscrição registada.', true);
+            form.reset();
+          } else {
+            show(data.message || 'Não foi possível registar. Tente novamente.', false);
+          }
+        } catch (_) {
+          show('Falha de ligação. Tente novamente.', false);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = prev;
+        }
+      });
+    })();
   </script>
+  <script>window.ANALYTICS_COLLECT_URL = <?= json_encode(site_url('analytics/collect')) ?>;</script>
+  <script src="<?= base_url('assets/js/analytics-tracker.js') ?>" defer></script>
 </body>
 
 </html>

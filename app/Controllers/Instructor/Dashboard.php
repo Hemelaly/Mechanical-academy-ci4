@@ -14,6 +14,7 @@ use App\Models\JitsiModel;
 use App\Models\JitsiRecordingModel;
 use App\Models\PendingUserModel;
 use App\Services\EnrollmentNotificationService;
+use App\Models\UserNotificationModel;
 use App\Libraries\JitsiJwtService;
 use CodeIgniter\Shield\Entities\User;
 use CodeIgniter\Shield\Models\UserModel;
@@ -635,6 +636,9 @@ class Dashboard extends BaseController
             'user' => $user,
             'sidebarLinks' => $this->sidebarLinks(),
             'currentUrl' => current_url(),
+            'playerBackUrl' => $returnUrl,
+            'playerTitle' => (string) ($lesson->title_lesson ?? 'Pré-visualização'),
+            'playerSubtitle' => (string) ($course->title_course ?? ''),
         ]);
     }
 
@@ -1213,6 +1217,8 @@ class Dashboard extends BaseController
             'Matricula manual criada pelo instrutor.',
             ['course_id' => $courseId, 'student_id' => $userId, 'enrollment_id' => $enrollmentId]
         );
+
+        (new EnrollmentNotificationService())->notifyStudentAboutEnrollment($enrollmentId, 'manual');
 
         return $this->jsonMessage('Aluno matriculado com sucesso.');
     }
@@ -1941,6 +1947,74 @@ class Dashboard extends BaseController
         return $row;
     }
 
+    public function notificationsData()
+    {
+        $user = service('auth')->user();
+        $userId = (int) ($user->id ?? 0);
+        $model = new UserNotificationModel();
+
+        $limit = (int) $this->request->getGet('limit');
+        if ($limit <= 0) {
+            $limit = 12;
+        }
+        $limit = min($limit, 30);
+
+        $rows = $model->where('user_id', $userId)
+            ->orderBy('created_at', 'DESC')
+            ->orderBy('id_notification', 'DESC')
+            ->findAll($limit);
+
+        $unread = $model->unreadCount($userId);
+        $items = [];
+
+        foreach ($rows as $row) {
+            $createdAt = (string) ($row['created_at'] ?? '');
+            $ts = strtotime($createdAt);
+            $type = (string) ($row['type_notification'] ?? '');
+            $isPayment = str_starts_with($type, 'payment.');
+            $isEnrollment = str_starts_with($type, 'enrollment.');
+
+            $items[] = [
+                'id'             => (int) ($row['id_notification'] ?? 0),
+                'type'           => $type,
+                'title'          => (string) ($row['title_notification'] ?? 'Notificação'),
+                'body'           => (string) ($row['body_notification'] ?? ''),
+                'link'           => (string) ($row['link_notification'] ?? ''),
+                'unread'         => empty($row['read_at']),
+                'created_at'     => $ts ? date('d/m/Y H:i', $ts) : $createdAt,
+                'created_at_iso' => $ts ? date(DATE_ATOM, $ts) : '',
+                'tone'           => $isPayment ? 'emerald' : ($isEnrollment ? 'blue' : 'indigo'),
+                'icon'           => $isPayment ? 'bi-cash-coin' : ($isEnrollment ? 'bi-person-plus' : 'bi-bell'),
+            ];
+        }
+
+        return $this->response->setJSON([
+            'ok'     => true,
+            'unread' => $unread,
+            'items'  => $items,
+        ]);
+    }
+
+    public function notificationsMarkRead()
+    {
+        $user = service('auth')->user();
+        $userId = (int) ($user->id ?? 0);
+        $model = new UserNotificationModel();
+        $id = (int) ($this->request->getPost('id') ?? 0);
+
+        if ($id > 0) {
+            $model->markRead($userId, $id);
+        } else {
+            $model->markAllRead($userId);
+        }
+
+        return $this->response->setJSON([
+            'ok'     => true,
+            'unread' => $model->unreadCount($userId),
+            'csrf'   => csrf_hash(),
+        ]);
+    }
+
     public function profile()
     {
         $users = new ExtendedUserModel();
@@ -2261,6 +2335,12 @@ class Dashboard extends BaseController
             ]);
 
             // Atualizar pagamento
+            $paymentRow = $paymentModel
+                ->where('id_user_payment', $pendingId)
+                ->where('id_course_payment', $courseId)
+                ->orderBy('id_payment', 'DESC')
+                ->first();
+
             $paymentModel
                 ->where('id_user_payment', $pendingId)
                 ->set([
@@ -2273,8 +2353,13 @@ class Dashboard extends BaseController
             // Remover pending_user
             $pendingUserModel->where('id', $pendingId)->delete();
 
-            if ($newEnrollmentId !== false) {
+            if ($paymentRow) {
+                $enrollmentNotificationService->notifyInstructorAboutNewPayment((int) $paymentRow->id_payment);
+            } elseif ($newEnrollmentId !== false) {
                 $enrollmentNotificationService->notifyInstructorAboutNewEnrollment((int) $newEnrollmentId);
+            }
+            if ($newEnrollmentId !== false) {
+                $enrollmentNotificationService->notifyStudentAboutEnrollment((int) $newEnrollmentId, 'self');
             }
 
             $this->auditLogger->write(
@@ -2326,11 +2411,20 @@ class Dashboard extends BaseController
         $email = \Config\Services::email();
         $email->setTo($user->email);
         $email->setSubject('Crie sua senha e acesse o curso');
-        $email->setMessage("
-        OlÃƒÂ¡ {$user->username},<br><br>
-        Sua matrÃƒÂ­cula foi aprovada! Clique no link abaixo para criar sua senha e acessar o curso:<br><br>
-        <a href='{$link}'>Criar minha senha</a>
-        ");
+        $email->setMessage(\App\Libraries\BrandEmail::render([
+            'preheader' => 'A sua matrícula foi aprovada — crie a senha para aceder.',
+            'eyebrow'   => 'Matrícula aprovada',
+            'greeting'  => 'Olá ' . \App\Libraries\BrandEmail::strong((string) $user->username) . ',',
+            'title'     => 'Crie a sua senha e aceda ao curso',
+            'body'      => \App\Libraries\BrandEmail::p(
+                'A sua matrícula foi aprovada. Clique no botão abaixo para criar a senha e aceder ao curso.'
+            ),
+            'cta' => [
+                'url'   => $link,
+                'label' => 'Criar minha senha',
+            ],
+        ]));
+        $email->setMailType('html');
         $email->send();
 
         // 4. Criar estudante vinculado
@@ -2350,6 +2444,12 @@ class Dashboard extends BaseController
         ]);
 
         // 6. Atualizar pagamento
+        $paymentRow = $paymentModel
+            ->where('id_user_payment', $pendingId)
+            ->where('id_course_payment', $courseId)
+            ->orderBy('id_payment', 'DESC')
+            ->first();
+
         $paymentModel
             ->where('id_user_payment', $pendingId)
             ->set([
@@ -2362,8 +2462,13 @@ class Dashboard extends BaseController
         // 7. Remover pending_user
         $pendingUserModel->where('id', $pendingId)->delete();
 
-        if ($result !== false) {
+        if ($paymentRow) {
+            $enrollmentNotificationService->notifyInstructorAboutNewPayment((int) $paymentRow->id_payment);
+        } elseif ($result !== false) {
             $enrollmentNotificationService->notifyInstructorAboutNewEnrollment((int) $result);
+        }
+        if ($result !== false) {
+            $enrollmentNotificationService->notifyStudentAboutEnrollment((int) $result, 'self');
         }
 
         $this->auditLogger->write(

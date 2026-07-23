@@ -468,7 +468,7 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
                             <div class="mt-3 text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 rounded-xl p-3">
                                 Dica: use títulos como <strong>Mês 1 — Fundamentos</strong> para organizar o calendário.
                                 Em quizzes, use o importador HTML com <code>data-q</code>, <code>data-points</code> e <code>li[data-correct]</code>.
-                                Ficheiros da aula ficam em <code>assets/instructor/lesson_files/</code> e aparecem no player do aluno.
+                                Ficheiros da aula ficam em <code>writable/uploads/lesson_files/</code> e aparecem no player do aluno.
                             </div>
                         </div>
 

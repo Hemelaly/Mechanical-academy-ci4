@@ -36,6 +36,8 @@ class Filters extends BaseFilters
         'performance'   => PerformanceMetrics::class,
         'role'  => \App\Filters\RoleFilter::class, // filtro para tipos de users
         'magic-redirect' => \App\Filters\MagicLoginRedirect::class, // filtro para reset-password
+        'analytics' => \App\Filters\AnalyticsTrackFilter::class,
+        'cf-turnstile' => \App\Filters\CloudflareTurnstileFilter::class,
     ];
 
     /**
@@ -77,10 +79,32 @@ class Filters extends BaseFilters
             // 'honeypot',
             // 'csrf',
             // 'invalidchars',
+            'cf-turnstile' => [
+                'except' => [
+                    'cf-challenge',
+                    'cf-challenge/*',
+                    'analytics/collect',
+                    'materials/*',
+                    'student/lessons/download/*',
+                    'certificados/download/*',
+                    'mpesa/callback',
+                    'mpesa/status',
+                ],
+            ],
         ],
         'after' => [
             // 'honeypot',
             // 'secureheaders',
+            'analytics' => [
+                'except' => [
+                    'materials/*',
+                    'student/lessons/download/*',
+                    'certificados/download/*',
+                    'analytics/collect',
+                    'cf-challenge',
+                    'cf-challenge/*',
+                ],
+            ],
         ],
        
     ];

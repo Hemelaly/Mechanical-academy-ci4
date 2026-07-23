@@ -4,6 +4,9 @@ namespace App\Controllers;
 
 use App\Models\CourseModel;
 use App\Services\CourseCommerceService;
+use CodeIgniter\HTTP\ResponseInterface;
+use Config\Academy;
+use Config\Services;
 
 class Home extends BaseController
 {
@@ -45,6 +48,72 @@ class Home extends BaseController
     return view('home', [
       'courses' => $courses,
       'user' => $user,
+    ]);
+  }
+
+  /**
+   * Subscrição da newsletter — notifica academy@ (contacto com clientes).
+   */
+  public function subscribe(): ResponseInterface
+  {
+    $email = strtolower(trim((string) $this->request->getPost('email')));
+
+    if ($email === '' || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+      return $this->response->setStatusCode(422)->setJSON([
+        'ok' => false,
+        'message' => 'Indique um email válido.',
+      ]);
+    }
+
+    $academy = config(Academy::class);
+    $to = trim((string) ($academy->contactEmail ?? ''));
+    if ($to === '') {
+      $to = 'academy@mechanical.co.mz';
+    }
+
+    $safeEmail = esc($email);
+    $when = date('d/m/Y H:i');
+
+    try {
+      $mail = Services::email();
+      $mail->setTo($to);
+      $mail->setReplyTo($email);
+      $mail->setSubject('Nova subscrição — Newsletter Academy');
+      $mail->setMessage(\App\Libraries\BrandEmail::render([
+        'preheader' => 'Nova subscrição na newsletter: ' . $email,
+        'eyebrow'   => 'Newsletter',
+        'title'     => 'Nova subscrição à newsletter',
+        'body'      => \App\Libraries\BrandEmail::p(
+          'Um visitante pediu para ser notificado sobre novos cursos.'
+        ),
+        'info' => [
+          ['label' => 'Email', 'value' => $safeEmail],
+          ['label' => 'Recebido em', 'value' => esc($when)],
+        ],
+      ]));
+
+      if (! $mail->send()) {
+        log_message('error', 'Newsletter subscribe SMTP fail: {debug}', [
+          'debug' => $mail->printDebugger(['headers']),
+        ]);
+
+        return $this->response->setStatusCode(500)->setJSON([
+          'ok' => false,
+          'message' => 'Não foi possível registar a subscrição. Tente novamente.',
+        ]);
+      }
+    } catch (\Throwable $e) {
+      log_message('error', 'Newsletter subscribe error: {msg}', ['msg' => $e->getMessage()]);
+
+      return $this->response->setStatusCode(500)->setJSON([
+        'ok' => false,
+        'message' => 'Não foi possível registar a subscrição. Tente novamente.',
+      ]);
+    }
+
+    return $this->response->setJSON([
+      'ok' => true,
+      'message' => 'Obrigado! Vamos notificá-lo sobre novos cursos.',
     ]);
   }
 }

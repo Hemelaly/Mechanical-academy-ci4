@@ -116,76 +116,7 @@ window.addEventListener("resize", handleResize);
 applyCollapsedState();
 handleResize();
 
-// ---------- THEME SWITCHER ----------
-
-const themeToggleBtn = document.getElementById("theme-toggle");
-const themeToggleIcon = document.getElementById("theme-toggle-icon");
-
-// novos: logos para claro/escuro
-const logoLight = document.getElementById("logo-light");
-const logoDark = document.getElementById("logo-dark");
-
-// Atualiza qual logo aparece conforme o tema
-function updateLogo(theme) {
-    if (!logoLight || !logoDark) return;
-
-    const isDark = theme === "dark";
-
-    logoLight.classList.toggle("hidden", !isDark);
-    logoDark.classList.toggle("hidden", isDark);
-}
-
-// Aplica tema + ícone + logo
-function applyTheme(theme) {
-    const root = document.documentElement;
-
-    if (theme === "dark") {
-        root.classList.add("dark");
-        themeToggleIcon?.classList.remove("bi-sun");
-        themeToggleIcon?.classList.add("bi-moon-stars");
-    } else {
-        root.classList.remove("dark");
-        themeToggleIcon?.classList.remove("bi-moon-stars");
-        themeToggleIcon?.classList.add("bi-sun");
-    }
-
-    // atualiza logo conforme tema
-    updateLogo(theme);
-
-    try {
-        localStorage.setItem("theme", theme);
-    } catch (_) {
-        // ignore
-    }
-
-    document.dispatchEvent(new CustomEvent('themechange', { detail: { theme } }));
-}
-
-// Detecta preferência inicial
-(function initTheme() {
-    let stored = null;
-    try {
-        stored = localStorage.getItem("theme");
-    } catch (_) {
-        stored = null;
-    }
-    if (stored === "dark" || stored === "light") {
-        applyTheme(stored);
-    } else {
-        const prefersDark = window.matchMedia(
-            "(prefers-color-scheme: dark)"
-        ).matches;
-        applyTheme(prefersDark ? "dark" : "light");
-    }
-})();
-
-// Click no botão
-if (themeToggleBtn) {
-    themeToggleBtn.addEventListener("click", () => {
-        const isDark = document.documentElement.classList.contains("dark");
-        applyTheme(isDark ? "light" : "dark");
-    });
-}
+// Theme: ver assets/js/theme.js (carregado no layout)
 
 // Controle do Dropdown de Notificações
 document.addEventListener('DOMContentLoaded', function () {

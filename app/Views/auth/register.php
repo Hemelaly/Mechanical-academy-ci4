@@ -50,7 +50,7 @@ $user = service('auth')->user();
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
                 <?php if ($isLoggedIn): ?>
                     <li class="nav-item me-3">
-                        <a class="nav-link active" href="<?= base_url($user->role . '/dashboard/meus_cursos') ?>">Meus Cursos</a>
+                        <a class="nav-link active" href="<?= base_url($user->role === 'student' ? 'student/dashboard/inscricoes' : ($user->role === 'instructor' ? 'instructor/dashboard/meus_cursos' : $user->role . '/dashboard')) ?>">Meus Cursos</a>
                     </li>
                     <li class="nav-item d-flex align-items-center">
                         <a href="<?= base_url($user->role . '/dashboard/perfil') ?>" class="d-flex align-items-center text-decoration-none">

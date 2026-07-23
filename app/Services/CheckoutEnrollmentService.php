@@ -145,8 +145,9 @@ class CheckoutEnrollmentService
 
         $db->transComplete();
 
+        $this->enrollmentNotificationService->notifyInstructorAboutNewPayment($paymentId);
         if ($enrollment['created']) {
-            $this->enrollmentNotificationService->notifyInstructorAboutNewEnrollment($enrollmentId);
+            $this->enrollmentNotificationService->notifyStudentAboutEnrollment($enrollmentId, 'self');
         }
 
         return [
@@ -258,6 +259,7 @@ class CheckoutEnrollmentService
 
         $db->transComplete();
 
+        $this->enrollmentNotificationService->notifyInstructorAboutNewPayment($paymentId);
         $emailSent = $this->sendPendingSetupEmail($normalizedEmail, $resolvedName, $courseTitle, $redirectUrl);
 
         return [
@@ -334,8 +336,9 @@ class CheckoutEnrollmentService
 
         $db->transComplete();
 
+        // Pagamento ja notificado em finalizeApprovedGuestPayment.
         if ($enrollment['created']) {
-            $this->enrollmentNotificationService->notifyInstructorAboutNewEnrollment($enrollmentId);
+            $this->enrollmentNotificationService->notifyStudentAboutEnrollment($enrollmentId, 'self');
         }
 
         return [
@@ -588,14 +591,25 @@ class CheckoutEnrollmentService
             $mail->setTo($email);
             $mail->setSubject('Configure a sua senha e ative o acesso ao curso');
             $mail->setMailType('html');
-            $mail->setMessage(
-                '<p>Ola ' . esc($fullName) . ',</p>' .
-                '<p>Recebemos o seu pagamento do curso <strong>' . esc($courseTitle) . '</strong>.</p>' .
-                '<p>Para ativar o acesso, configure a sua senha no link abaixo:</p>' .
-                '<p><a href="' . esc($link) . '">Configurar senha e ativar acesso</a></p>' .
-                '<p>Se o botao nao funcionar, copie e cole este link no navegador:</p>' .
-                '<p>' . esc($link) . '</p>'
-            );
+            $mail->setMessage(\App\Libraries\BrandEmail::render([
+                'preheader' => 'Configure a senha para ativar o acesso a ' . $courseTitle . '.',
+                'eyebrow'   => 'Pagamento confirmado',
+                'greeting'  => 'Olá ' . \App\Libraries\BrandEmail::strong($fullName) . ',',
+                'title'     => 'Ative o seu acesso ao curso',
+                'body'      => \App\Libraries\BrandEmail::p(
+                    'Recebemos o seu pagamento do curso ' . \App\Libraries\BrandEmail::strong($courseTitle) . '.'
+                ) . \App\Libraries\BrandEmail::p(
+                    'Para concluir, configure a sua senha e ative o acesso na plataforma.'
+                ),
+                'info' => [
+                    ['label' => 'Curso', 'value' => esc($courseTitle)],
+                    ['label' => 'Email', 'value' => esc($email)],
+                ],
+                'cta' => [
+                    'url'   => $link,
+                    'label' => 'Configurar senha e ativar acesso',
+                ],
+            ]));
 
             if (! $mail->send()) {
                 log_message('warning', 'Falha ao enviar email de configuracao do checkout pendente.', [

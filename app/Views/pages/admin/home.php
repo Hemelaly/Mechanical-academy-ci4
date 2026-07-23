@@ -93,44 +93,21 @@ $tonePalette = [
 ];
 ?>
 
-<div class="space-y-6">
-    <!-- Banner Hero -->
-    <section class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-8 text-white">
-        <div class="absolute inset-0 opacity-10">
-            <div class="absolute right-0 top-0 h-64 w-64 translate-x-32 -translate-y-32 rounded-full bg-white"></div>
-            <div class="absolute bottom-0 left-0 h-48 w-48 -translate-x-24 translate-y-24 rounded-full bg-cyan-300"></div>
+<div class="dash-page">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
+                Olá, <?= esc($userName) ?>
+            </h1>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Visão geral da plataforma</p>
         </div>
+        <a href="<?= site_url('/admin/dashboard/financas') ?>" class="dash-btn dash-btn-primary self-start">
+            <i class="bi bi-cash-coin"></i>
+            Finanças
+        </a>
+    </div>
 
-        <div class="relative z-10">
-            <div class="flex items-start justify-between gap-4">
-                <div class="flex-1">
-                    <h1 class="text-2xl font-bold">Olá, <?= esc($userName) ?>!</h1>
-                    <p class="mt-2 text-sm text-blue-100 leading-relaxed">
-                        Aqui está um resumo das principais métricas e actividades do painel administrativo.
-                    </p>
-                </div>
-                <div class="hidden md:flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
-                    <i class="bi bi-bar-chart text-2xl text-white"></i>
-                </div>
-            </div>
-
-            <div class="mt-6 flex flex-wrap gap-3">
-                <button
-                    class="flex items-center gap-2 rounded-xl bg-white px-6 py-3.5 text-sm font-semibold text-blue-600 shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/95 hover:shadow-xl">
-                    <i class="bi bi-calendar-event text-sm"></i>
-                    Últimos 30 dias
-                </button>
-                <button
-                    class="flex items-center gap-2 rounded-xl border border-white/20 bg-white/15 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/25 hover:border-white/30">
-                    <i class="bi bi-download text-sm"></i>
-                    Exportar
-                </button>
-            </div>
-        </div>
-    </section>
-
-    <!-- KPIs -->
-    <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <section class="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <?php foreach ($stats as $card): ?>
             <?php
             $delta = (float) ($card['delta'] ?? 0);
@@ -143,141 +120,88 @@ $tonePalette = [
                 ? number_format((float) $value, $prefix ? 2 : 0, ',', '.')
                 : $value;
             ?>
-            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-                <div class="flex items-start justify-between">
-                    <div class="flex h-11 w-11 items-center justify-center rounded-xl <?= esc($tone['bg']) ?> <?= esc($tone['text']) ?> <?= esc($tone['darkBg']) ?> <?= esc($tone['darkText']) ?>">
-                        <i class="bi <?= esc($card['icon']) ?> text-lg"></i>
-                    </div>
-                    <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium <?= $isUp ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' : 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300' ?>">
-                        <i class="bi <?= $isUp ? 'bi-arrow-up-right' : 'bi-arrow-down-right' ?>"></i>
-                        <?= number_format(abs($delta), 1, ',', '.') ?>%
+            <div class="dash-card !p-4">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-md <?= esc($tone['bg']) ?> <?= esc($tone['text']) ?> <?= esc($tone['darkBg']) ?> <?= esc($tone['darkText']) ?>">
+                        <i class="bi <?= esc($card['icon']) ?>"></i>
+                    </span>
+                    <span class="text-[11px] font-medium <?= $isUp ? 'text-emerald-500' : 'text-rose-500' ?>">
+                        <?= $isUp ? '+' : '-' ?><?= number_format(abs($delta), 1, ',', '.') ?>%
                     </span>
                 </div>
-                <p class="mt-4 text-sm text-slate-500 dark:text-slate-400"><?= esc($card['label']) ?></p>
-                <p class="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">
+                <p class="mt-3 text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">
                     <?= $prefix . $valueFormatted ?>
                 </p>
+                <p class="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400"><?= esc($card['label']) ?></p>
             </div>
         <?php endforeach; ?>
     </section>
 
-    <!-- Main grid -->
-    <section class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <!-- Activity -->
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800 lg:col-span-1">
-            <div class="flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Atividade recente</h2>
-                <button class="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400">
-                    Ver tudo
-                </button>
+    <section class="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
+        <div class="dash-card">
+            <h2 class="text-sm font-semibold text-slate-900 dark:text-white">Receita · 12 meses</h2>
+            <div class="mt-3 h-[200px]">
+                <canvas id="admin-dashboard-revenue-chart" class="!h-full !w-full"></canvas>
             </div>
-            <ol class="mt-5 space-y-4">
-                <?php foreach ($activity as $item): ?>
-                    <?php
-                    $toneKey = $item['tone'] ?? 'blue';
-                    $tone = $tonePalette[$toneKey] ?? $tonePalette['blue'];
-                    ?>
-                    <li class="ml-4">
-                        <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900">
-                            <div class="flex items-center gap-3">
-                                <span class="flex h-9 w-9 items-center justify-center rounded-lg <?= esc($tone['bg']) ?> <?= esc($tone['text']) ?> <?= esc($tone['darkBg']) ?> <?= esc($tone['darkText']) ?>">
-                                    <i class="bi <?= esc($item['icon']) ?>"></i>
-                                </span>
-                                <div>
-                                    <p class="text-sm font-medium text-slate-900 dark:text-white"><?= esc($item['title']) ?></p>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400"><?= esc($item['time']) ?></p>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
-                <?php endforeach; ?>
-            </ol>
         </div>
-
-        <!-- Overview -->
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800 lg:col-span-2">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-                <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Resumo operacional</h2>
-                <span class="text-xs text-slate-500 dark:text-slate-400">Atualizado automaticamente</span>
-            </div>
-            <div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
-                <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900">
-                    <div class="flex items-center justify-between">
-                        <p class="text-sm font-medium text-slate-700 dark:text-slate-200">Receita (12 meses)</p>
-                        <i class="bi bi-graph-up text-slate-400"></i>
-                    </div>
-                    <div class="mt-3">
-                        <canvas id="admin-dashboard-revenue-chart" height="180"></canvas>
-                    </div>
-                </div>
-                <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900">
-                    <div class="flex items-center justify-between">
-                        <p class="text-sm font-medium text-slate-700 dark:text-slate-200">Matrículas (14 dias)</p>
-                        <i class="bi bi-bar-chart text-slate-400"></i>
-                    </div>
-                    <div class="mt-3">
-                        <canvas id="admin-dashboard-enrollments-chart" height="180"></canvas>
-                    </div>
-                </div>
+        <div class="dash-card">
+            <h2 class="text-sm font-semibold text-slate-900 dark:text-white">Matrículas · 14 dias</h2>
+            <div class="mt-3 h-[200px]">
+                <canvas id="admin-dashboard-enrollments-chart" class="!h-full !w-full"></canvas>
             </div>
         </div>
     </section>
 
-    <!-- Courses + quick actions -->
-    <section class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800 lg:col-span-2">
-            <div class="flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Cursos populares</h2>
-                <a href="<?= site_url('/admin/dashboard/cursos') ?>" class="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400">Ver todos</a>
+    <section class="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
+        <div class="dash-card min-w-0">
+            <div class="flex items-center justify-between gap-3">
+                <h2 class="text-sm font-semibold text-slate-900 dark:text-white">Cursos populares</h2>
+                <a href="<?= site_url('/admin/dashboard/cursos') ?>" class="text-xs font-medium text-blue-600 dark:text-blue-400">Ver todos</a>
             </div>
-            <div class="mt-4 overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
-                <table
-                    id="admin-home-popular-courses-table"
-                    data-flowbite-datatable
-                    data-datatable-per-page="5"
-                    class="w-full text-left text-sm text-slate-500 dark:text-slate-400">
-                    <thead class="bg-slate-50 text-xs uppercase text-slate-600 dark:bg-slate-900 dark:text-slate-300">
-                        <tr>
-                            <th class="px-4 py-3">Curso</th>
-                            <th class="px-4 py-3">Estudantes</th>
-                            <th class="px-4 py-3">Progresso</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($popularCourses as $course): ?>
-                            <?php
-                            $toneKey = $course['tone'] ?? 'blue';
-                            $tone = $tonePalette[$toneKey] ?? $tonePalette['blue'];
-                            ?>
-                            <tr class="border-t border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800">
-                                <td class="px-4 py-4 font-medium text-slate-900 dark:text-white">
-                                    <?= esc($course['name']) ?>
-                                </td>
-                                <td class="px-4 py-4"><?= number_format((int) ($course['students'] ?? 0), 0, ',', '.') ?></td>
-                                <td class="px-4 py-4">
-                                    <div class="flex items-center gap-2">
-                                        <div class="h-2 w-full rounded-full bg-slate-200 dark:bg-slate-700">
-                                            <div class="h-2 rounded-full <?= esc($tone['bar']) ?>" style="width: <?= (int) ($course['progress'] ?? 0) ?>%;"></div>
-                                        </div>
-                                        <span class="text-xs text-slate-500 dark:text-slate-400"><?= (int) ($course['progress'] ?? 0) ?>%</span>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+            <div class="mt-4 space-y-4">
+                <?php foreach ($popularCourses as $course): ?>
+                    <?php
+                    $toneKey = $course['tone'] ?? 'blue';
+                    $tone = $tonePalette[$toneKey] ?? $tonePalette['blue'];
+                    $pct = (int) ($course['progress'] ?? 0);
+                    ?>
+                    <div>
+                        <div class="mb-1.5 flex items-center justify-between gap-3">
+                            <p class="min-w-0 truncate text-sm font-medium text-slate-800 dark:text-slate-100"><?= esc($course['name']) ?></p>
+                            <span class="shrink-0 text-xs text-slate-500 dark:text-slate-400"><?= number_format((int) ($course['students'] ?? 0), 0, ',', '.') ?> alunos</span>
+                        </div>
+                        <div class="h-1.5 w-full rounded-full bg-slate-200 dark:bg-slate-700">
+                            <div class="h-1.5 rounded-full <?= esc($tone['bar']) ?>" style="width: <?= max(0, min(100, $pct)) ?>%;"></div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+                <?php if (empty($popularCourses)): ?>
+                    <p class="py-2 text-sm text-slate-500 dark:text-slate-400">Sem cursos para mostrar.</p>
+                <?php endif; ?>
             </div>
         </div>
 
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-            <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Acoes rapidas</h2>
-            <div class="mt-4 grid grid-cols-2 gap-3">
-                <?php foreach ($quickActions as $qa): ?>
-                    <a href="<?= esc($qa['href']) ?>" class="group rounded-xl border border-slate-200 bg-slate-50 p-4 text-center transition hover:border-blue-500 hover:bg-blue-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-blue-900/20">
-                        <i class="bi <?= esc($qa['icon']) ?> text-2xl text-blue-600 dark:text-blue-400"></i>
-                        <p class="mt-2 text-sm font-medium text-slate-700 group-hover:text-blue-700 dark:text-slate-300 dark:group-hover:text-blue-300">
-                            <?= esc($qa['label']) ?>
-                        </p>
+        <div class="dash-card flex min-w-0 flex-col">
+            <h2 class="text-sm font-semibold text-slate-900 dark:text-white">Actividade</h2>
+            <ul class="mt-3 divide-y divide-slate-200 dark:divide-slate-700">
+                <?php foreach (array_slice($activity, 0, 5) as $item): ?>
+                    <li class="flex items-start gap-3 py-2.5 first:pt-0">
+                        <span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500"></span>
+                        <div class="min-w-0 flex-1">
+                            <p class="truncate text-sm font-medium text-slate-800 dark:text-slate-100"><?= esc($item['title']) ?></p>
+                            <p class="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400"><?= esc($item['time']) ?></p>
+                        </div>
+                    </li>
+                <?php endforeach; ?>
+                <?php if (empty($activity)): ?>
+                    <li class="py-2 text-sm text-slate-500 dark:text-slate-400">Sem actividade recente.</li>
+                <?php endif; ?>
+            </ul>
+            <div class="mt-auto grid grid-cols-2 gap-2 border-t border-slate-200 pt-4 dark:border-slate-700">
+                <?php foreach (array_slice($quickActions, 0, 4) as $qa): ?>
+                    <a href="<?= esc($qa['href']) ?>" class="inline-flex items-center justify-center gap-1.5 rounded-md border border-slate-200 px-3 py-2.5 text-center text-xs font-medium text-slate-700 transition hover:border-blue-500/40 hover:text-blue-600 dark:border-slate-600 dark:text-slate-200 dark:hover:border-blue-400/40 dark:hover:text-blue-300">
+                        <i class="bi <?= esc($qa['icon']) ?>"></i>
+                        <span><?= esc($qa['label']) ?></span>
                     </a>
                 <?php endforeach; ?>
             </div>
@@ -322,11 +246,13 @@ $tonePalette = [
                         }]
                     },
                     options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
                         scales: {
                             x: { ticks: { color: chartText() }, grid: { display: false } },
-                            y: { ticks: { color: chartText() }, grid: { color: gridColor() } },
+                            y: { ticks: { color: chartText() }, grid: { color: gridColor() }, beginAtZero: true },
                         },
-                        plugins: { legend: { labels: { color: chartText() } } }
+                        plugins: { legend: { display: false } }
                     }
                     });
                 }
@@ -346,15 +272,21 @@ $tonePalette = [
                             label: 'Matrículas',
                             data: charts.enrollments_14d.data || [],
                             backgroundColor: '#10b981',
-                            borderRadius: 10,
+                            borderRadius: 4,
                         }]
                     },
                     options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
                         scales: {
                             x: { ticks: { color: chartText() }, grid: { display: false } },
-                            y: { ticks: { color: chartText() }, grid: { color: gridColor() } },
+                            y: {
+                                beginAtZero: true,
+                                ticks: { color: chartText(), precision: 0 },
+                                grid: { color: gridColor() },
+                            },
                         },
-                        plugins: { legend: { labels: { color: chartText() } } }
+                        plugins: { legend: { display: false } }
                     }
                     });
                 }

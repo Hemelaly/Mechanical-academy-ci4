@@ -177,12 +177,22 @@ class Certificates extends BaseController
 
     public function download($enrollmentId)
     {
+        return $this->serveCertificatePdf((int) $enrollmentId, false);
+    }
+
+    /**
+     * Visualização / impressão inline do PDF do certificado.
+     */
+    public function preview($enrollmentId)
+    {
+        return $this->serveCertificatePdf((int) $enrollmentId, true);
+    }
+
+    private function serveCertificatePdf(int $enrollmentId, bool $inline)
+    {
         $certificateModel = new CertificateModel();
         $db = \Config\Database::connect();
 
-        $enrollmentId = (int) $enrollmentId;
-
-        // âœ… Valida ownership do aluno: enrollment deve ser do usuÃ¡rio logado
         $row = $db->table('enrollments')
             ->select('enrollments.id_enrollment, enrollments.id_student_enrollment, enrollments.id_course_enrollment, courses.title_course')
             ->join('courses', 'courses.id_course = enrollments.id_course_enrollment', 'inner')
@@ -194,44 +204,49 @@ class Certificates extends BaseController
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
         }
 
-        if ((int)$row['id_student_enrollment'] !== (int)auth()->id()) {
-            return redirect()->back()->with('error', 'Sem permissÃ£o para baixar este certificado.');
+        if ((int) $row['id_student_enrollment'] !== (int) auth()->id()) {
+            return redirect()->back()->with('error', 'Sem permissão para aceder a este certificado.');
         }
 
         $cert = $certificateModel
             ->where('id_user_certificate', $row['id_student_enrollment'])
             ->where('id_course_certificate', $row['id_course_enrollment'])
             ->first();
+
         if (!$cert) {
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
         }
 
-        // âœ… Regra de disponibilidade (se usar available_at)
-        $now = time();
-        $availableAt = strtotime($cert['avaiable_at_certificate'] ?? '1970-01-01');
-
         if (empty($cert['pdf_path_certificate'])) {
-            return redirect()->back()->with('error', 'Seu certificado ainda nÃ£o estÃ¡ disponÃ­vel.');
+            return redirect()->back()->with('error', 'Seu certificado ainda não está disponível.');
         }
 
-        // âœ… Caminho real do store(): writable/uploads/ + file_path
         $fullPath = rtrim(WRITEPATH, '/\\') . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . $cert['pdf_path_certificate'];
 
-        if (!is_file($fullPath)) {
-            return redirect()->back()->with('error', 'Arquivo do certificado nÃ£o encontrado.');
+        if (! is_file($fullPath)) {
+            return redirect()->back()->with('error', 'Arquivo do certificado não encontrado.');
         }
 
         $courseTitle = trim((string) ($row['title_course'] ?? ''));
         $baseName = $courseTitle !== '' ? $courseTitle : 'certificado';
         $safe = preg_replace('/[^a-z0-9]+/i', '-', strtolower($baseName));
-        $safe = trim($safe, '-');
+        $safe = trim((string) $safe, '-');
         if ($safe === '') {
             $safe = 'certificado';
+        }
+        $fileName = 'certificado-' . $safe . '.pdf';
+
+        if ($inline) {
+            return $this->response
+                ->setHeader('Content-Type', 'application/pdf')
+                ->setHeader('Content-Disposition', 'inline; filename="' . $fileName . '"')
+                ->setHeader('Cache-Control', 'private, max-age=0, must-revalidate')
+                ->setBody((string) file_get_contents($fullPath));
         }
 
         return $this->response
             ->download($fullPath, null)
-            ->setFileName('certificado-' . $safe . '.pdf');
+            ->setFileName($fileName);
     }
 
     public function deleteCertificate()

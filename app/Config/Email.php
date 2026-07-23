@@ -6,9 +6,15 @@ use CodeIgniter\Config\BaseConfig;
 
 class Email extends BaseConfig
 {
-    public string $fromEmail  = 'hemelaly02@gmail.com';
+    public string $fromEmail  = 'no-reply.academy@mechanical.co.mz';
     public string $fromName   = 'Mechanical Academy';
     public string $recipients = '';
+
+    /**
+     * Reply-To oficial (contacto Academy)
+     */
+    public string $replyToEmail = 'academy@mechanical.co.mz';
+    public string $replyToName  = 'Mechanical Academy';
 
     /**
      * The "user agent"
@@ -28,27 +34,27 @@ class Email extends BaseConfig
     /**
      * SMTP Server Hostname
      */
-    public string $SMTPHost = 'smtp.gmail.com';
+    public string $SMTPHost = 'mail.mechanical.co.mz';
 
     /**
      * SMTP Username
      */
-    public string $SMTPUser = 'hemelaly02@gmail.com';
+    public string $SMTPUser = 'no-reply.academy@mechanical.co.mz';
 
     /**
      * SMTP Password
      */
-    public string $SMTPPass = 'mydookccbushsqhq';
+    public string $SMTPPass = '';
 
     /**
      * SMTP Port
      */
-    public int $SMTPPort = 25;
+    public int $SMTPPort = 587;
 
     /**
      * SMTP Timeout (in seconds)
      */
-    public int $SMTPTimeout = 5;
+    public int $SMTPTimeout = 60;
 
     /**
      * Enable persistent SMTP connections

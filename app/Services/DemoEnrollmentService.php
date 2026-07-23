@@ -254,19 +254,34 @@ class DemoEnrollmentService
             $mail->setTo($email);
             $mail->setSubject('Acesso demo · ' . $courseTitle);
             $mail->setMailType('html');
-            $mail->setMessage(
-                '<p>Olá' . ($username !== '' ? ' <strong>' . esc($username) . '</strong>' : '') . ',</p>' .
-                '<p>Recebeu acesso <strong>demo</strong> ao curso <strong>' . esc($courseTitle) . '</strong>.</p>' .
-                '<p>O acesso demo expira <strong>' . (int) $hours . ' horas após o primeiro acesso</strong> às aulas.</p>' .
-                '<p><strong>Dados de acesso:</strong></p>' .
-                '<ul>' .
-                '<li>Utilizador / Email: <strong>' . esc($email) . '</strong></li>' .
-                '<li>Palavra-passe temporária: <strong>' . esc($tempPassword) . '</strong></li>' .
-                '</ul>' .
-                '<p><a href="' . esc($loginUrl) . '">Entrar na plataforma</a></p>' .
-                '<p>Depois de entrar, abra o curso: <a href="' . esc($lessonsUrl) . '">' . esc($courseTitle) . '</a></p>' .
-                '<p>Recomendamos alterar a palavra-passe após o primeiro login.</p>'
-            );
+            $mail->setMessage(\App\Libraries\BrandEmail::render([
+                'preheader' => 'O seu acesso demo ao curso ' . $courseTitle . ' está pronto.',
+                'eyebrow'   => 'Acesso demo',
+                'greeting'  => 'Olá' . ($username !== '' ? ' ' . \App\Libraries\BrandEmail::strong($username) : '') . ',',
+                'title'     => 'O seu acesso demo está ativo',
+                'body'      => \App\Libraries\BrandEmail::p(
+                    'Recebeu acesso <strong style="color:#1a1d23;">demo</strong> ao curso '
+                    . \App\Libraries\BrandEmail::strong($courseTitle) . '.'
+                ) . \App\Libraries\BrandEmail::p(
+                    'O acesso demo expira <strong style="color:#1a1d23;">' . (int) $hours
+                    . ' horas após o primeiro acesso</strong> às aulas.'
+                ),
+                'info' => [
+                    ['label' => 'Utilizador / Email', 'value' => esc($email)],
+                    ['label' => 'Palavra-passe temporária', 'value' => esc($tempPassword)],
+                    ['label' => 'Curso', 'value' => esc($courseTitle)],
+                    ['label' => 'Validade', 'value' => (int) $hours . ' horas após o 1.º acesso'],
+                ],
+                'cta' => [
+                    'url'   => $loginUrl,
+                    'label' => 'Entrar na plataforma',
+                ],
+                'secondary_cta' => [
+                    'url'   => $lessonsUrl,
+                    'label' => 'Abrir o curso ' . $courseTitle,
+                ],
+                'note' => 'Recomendamos alterar a palavra-passe após o primeiro login.',
+            ]));
 
             if (! $mail->send()) {
                 log_message('warning', 'Falha ao enviar email demo para ' . $email);

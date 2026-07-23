@@ -473,6 +473,10 @@
 
         if (appearanceBtn) {
             appearanceBtn.addEventListener('click', () => {
+                if (window.AcademyTheme?.toggle) {
+                    window.AcademyTheme.toggle();
+                    return;
+                }
                 const themeToggle = document.getElementById('theme-toggle');
                 if (themeToggle) {
                     themeToggle.click();
@@ -480,7 +484,7 @@
                 }
                 const root = document.documentElement;
                 const nextTheme = root.classList.contains('dark') ? 'light' : 'dark';
-                root.classList.toggle('dark');
+                root.classList.toggle('dark', nextTheme === 'dark');
                 localStorage.setItem('theme', nextTheme);
             });
         }

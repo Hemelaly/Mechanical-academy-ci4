@@ -5,13 +5,13 @@ $user = service('auth')->user();
 ?>
 
 <header
-    class="flex py-3 items-center justify-between border-b border-white bg-white dark:bg-slate-800/50 dark:border-slate-800 px-4 shadow-sm transition-all duration-500 ease-in-out">
+    class="academy-nav flex shrink-0 py-3 items-center justify-between border-b border-slate-200/80 bg-white/90 backdrop-blur-sm dark:border-white/10 dark:bg-[#0c1017]/80 px-4 transition-colors duration-300">
     <div class="flex items-center gap-2">
 
         <!-- COLAPSAR DESKTOP -->
         <button
             id="collapse-desktop"
-            class="hidden lg:inline-flex w-11 h-11 transition-all duration-500 ease-in-out items-center border border-slate-300 text-slate-500 dark:border-slate-700 justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-white"
+            class="hidden lg:inline-flex w-10 h-10 transition-all duration-300 ease-in-out items-center border border-slate-200 text-slate-500 dark:border-white/10 justify-center rounded-md hover:bg-slate-100 dark:hover:bg-white/5 dark:text-white"
             title="Colapsar sidebar">
             <i class="bi bi-list"></i>
         </button>
@@ -19,7 +19,7 @@ $user = service('auth')->user();
         <!-- ABRIR SIDEBAR NO MOBILE -->
         <button
             id="open-sidebar"
-            class="inline-flex lg:hidden h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+            class="inline-flex lg:hidden h-9 w-9 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-[#11151c] dark:text-slate-100 dark:hover:bg-white/5">
             &#9776;
         </button>
 
@@ -27,21 +27,22 @@ $user = service('auth')->user();
             <input
                 type="text"
                 placeholder="Pesquisar..."
-                class="w-72 rounded-lg border border-slate-300 bg-slate-50 px-3 py-3.5 text-xs text-slate-700 outline-none focus:border-blue-500 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white" />
+                class="w-72 rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs text-slate-700 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-white/10 dark:bg-[#11151c] dark:text-white" />
         </div>
     </div>
 
     <div class="flex items-center gap-2">
         <button
             id="theme-toggle"
-            class="inline-flex px-[11px] py-1.5 items-center cursor-pointer justify-center rounded-full border border-slate-200 dark:border-slate-700
-                            bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-400 text-lg hover:bg-slate-50 dark:hover:bg-slate-800"
-            aria-label="Trocar tema">
-            <i id="theme-toggle-icon" class="bi bi-moon-stars"></i>
+            class="inline-flex px-[11px] py-1.5 items-center cursor-pointer justify-center rounded-md border border-slate-200 dark:border-white/10
+                            bg-white dark:bg-[#11151c] text-slate-700 dark:text-slate-400 text-lg hover:bg-slate-50 dark:hover:bg-white/5"
+            aria-label="Trocar tema"
+            title="Trocar tema">
+            <i id="theme-toggle-icon" class="bi bi-sun"></i>
         </button>
 
         <div class="relative">
-            <button class="relative inline-flex overflow-visible px-[12px] py-1.5 cursor-pointer items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-400 text-lg hover:bg-slate-50 dark:hover:bg-slate-800 dropdown-toggle">
+            <button class="relative inline-flex overflow-visible px-[12px] py-1.5 cursor-pointer items-center justify-center rounded-md border border-slate-200 dark:border-white/10 bg-white dark:bg-[#11151c] text-slate-700 dark:text-slate-400 text-lg hover:bg-slate-50 dark:hover:bg-white/5 dropdown-toggle">
                 <i class="bi bi-bell"></i>
                 <span id="admin-notifications-dot" class="absolute -top-1 -right-1 hidden h-3 w-3 pointer-events-none">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
@@ -77,14 +78,14 @@ $user = service('auth')->user();
         </div>
 
         <a href="<?= site_url('/admin/dashboard/perfil') ?>"
-            class="flex shrink-0 items-center gap-3 rounded-lg py-2 text-xs text-slate-200 pointer">
+            class="flex shrink-0 items-center gap-3 rounded-md px-1.5 py-1.5 text-xs hover:bg-slate-100 dark:hover:bg-white/5">
             <img
                 src="<?= base_url($user->img ?? 'assets/img/user-default.png') ?>"
                 alt="Foto de perfil de <?= esc($user->username) ?>"
-                class="h-10 w-10 rounded-full object-cover border border-slate-200 dark:border-slate-700" />
+                class="h-9 w-9 rounded-full object-cover border border-slate-200 dark:border-white/10" />
             <div class="sidebar-label hidden sm:block text-left">
-                <p class="text-xs font-medium text-slate-800 dark:text-white"><?= $user->username ?></p>
-                <p class="text-[11px] text-slate-400">Ver Perfil</p>
+                <p class="text-xs font-medium text-slate-800 dark:text-white"><?= esc($user->username) ?></p>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">Ver Perfil</p>
             </div>
         </a>
     </div>

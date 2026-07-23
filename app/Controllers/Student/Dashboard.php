@@ -678,6 +678,9 @@ class Dashboard extends BaseController
             'user'               => $authUser,
             'sidebarLinks'       => $this->sidebarLinks(),
             'currentUrl'         => current_url(false),
+            'playerBackUrl'      => site_url('student/dashboard/inscricoes'),
+            'playerTitle'        => (string) ($lesson->title_lesson ?? 'Aula'),
+            'playerSubtitle'     => (string) ($course->title_course ?? ''),
         ]);
     }
 

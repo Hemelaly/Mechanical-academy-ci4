@@ -150,73 +150,22 @@ class Register extends Controller
                     $emailSrv = \Config\Services::email();
                     $emailSrv->setTo($email);
                     $emailSrv->setSubject('Crie sua senha e acesse o curso');
-                    $emailSrv->setMessage("
-                    <div style='
-                        font-family: Arial, Helvetica, sans-serif;
-                        background-color: #f4f6f8;
-                        padding: 30px;
-                    '>
-                        <div style='
-                            max-width: 600px;
-                            margin: auto;
-                            background-color: #ffffff;
-                            border-radius: 8px;
-                            padding: 30px;
-                            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-                        '>
-                            <h2 style='color: #2c3e50; margin-top: 0;'>
-                                Olá {$username} 👋
-                            </h2>
-
-                            <p style='color: #555; font-size: 15px; line-height: 1.6;'>
-                                Temos boas notícias para si!
-                            </p>
-
-                            <p style='color: #555; font-size: 15px; line-height: 1.6;'>
-                                O seu <strong>pagamento foi aprovado</strong> e a sua
-                                <strong>matrícula será ativada</strong> automaticamente.
-                            </p>
-
-                            <p style='color: #555; font-size: 15px; line-height: 1.6;'>
-                                Para começar, crie a sua senha clicando no botão abaixo:
-                            </p>
-
-                            <div style='text-align: center; margin: 30px 0;'>
-                                <a href='{$link}'
-                                style='
-                                    background-color: #1abc9c;
-                                    color: #ffffff;
-                                    text-decoration: none;
-                                    padding: 14px 28px;
-                                    border-radius: 6px;
-                                    font-weight: bold;
-                                    display: inline-block;
-                                '>
-                                    Criar minha senha
-                                </a>
-                            </div>
-
-                            <p style='color: #777; font-size: 13px; line-height: 1.6;'>
-                                Se o botão não funcionar, copie e cole o link abaixo no seu navegador:
-                            </p>
-
-                            <p style='word-break: break-all; font-size: 13px; color: #1abc9c;'>
-                                {$link}
-                            </p>
-
-                            <hr style='border: none; border-top: 1px solid #eee; margin: 30px 0;'>
-
-                            <p style='color: #999; font-size: 12px;'>
-                                Se não solicitou este acesso, por favor ignore este email.
-                            </p>
-
-                            <p style='color: #999; font-size: 12px;'>
-                                Atenciosamente,<br>
-                                <strong>Equipe da Plataforma</strong>
-                            </p>
-                        </div>
-                    </div>
-                    ");
+                    $emailSrv->setMessage(\App\Libraries\BrandEmail::render([
+                        'preheader' => 'Pagamento aprovado — crie a sua senha para aceder ao curso.',
+                        'eyebrow'   => 'Matrícula aprovada',
+                        'greeting'  => 'Olá ' . \App\Libraries\BrandEmail::strong($username) . ',',
+                        'title'     => 'Crie a sua senha e aceda ao curso',
+                        'body'      => \App\Libraries\BrandEmail::p(
+                            'Temos boas notícias: o seu <strong style="color:#1a1d23;">pagamento foi aprovado</strong> e a matrícula será ativada automaticamente.'
+                        ) . \App\Libraries\BrandEmail::p(
+                            'Para começar, crie a sua senha na plataforma.'
+                        ),
+                        'cta' => [
+                            'url'   => $link,
+                            'label' => 'Criar minha senha',
+                        ],
+                        'note' => 'Se não solicitou este acesso, ignore este email.',
+                    ]));
                     $emailSrv->setMailType('html');
                     $emailSrv->send();
                 } catch (\Throwable $e) {
@@ -267,8 +216,11 @@ class Register extends Controller
                 return redirect()->back()->with('error', 'Falha ao concluir matrícula após pagamento.');
             }
 
+            if ($idPayment !== false) {
+                $enrollmentNotificationService->notifyInstructorAboutNewPayment((int) $idPayment);
+            }
             if ($enroll !== false) {
-                $enrollmentNotificationService->notifyInstructorAboutNewEnrollment((int) $enroll);
+                $enrollmentNotificationService->notifyStudentAboutEnrollment((int) $enroll, 'self');
             }
 
             // Log do retorno M-Pesa (opcional)

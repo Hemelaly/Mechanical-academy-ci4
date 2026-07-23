@@ -9,6 +9,8 @@ use App\Models\ModuleModel;
 use App\Models\LessonModel;
 use App\Models\CourseSettingModel;
 use App\Models\ExtendedUserModel;
+use App\Services\DemoEnrollmentService;
+use App\Services\EnrollmentNotificationService;
 use CodeIgniter\Shield\Models\UserModel;
 use Config\Services;
 use CodeIgniter\Shield\Entities\User;
@@ -52,7 +54,13 @@ class Dashboard extends BaseController
                 $mail->setBCC(array_slice($emails, 1));
             }
             $mail->setSubject($subject);
-            $mail->setMessage($htmlMessage);
+            $mail->setMailType('html');
+            $mail->setMessage(\App\Libraries\BrandEmail::render([
+                'preheader' => $subject,
+                'eyebrow'   => 'Aviso administrativo',
+                'title'     => $subject,
+                'body'      => $htmlMessage,
+            ]));
             $mail->send();
         } catch (\Throwable $e) {
             log_message('error', 'Falha ao enviar email de notificação para admins: {error}', ['error' => $e->getMessage()]);
@@ -65,8 +73,10 @@ class Dashboard extends BaseController
             ['label' => 'Início', 'icon' => 'bi-house-door', 'url' => '/admin/dashboard'],
             ['label' => 'Cursos', 'icon' => 'bi-book', 'url' => '/admin/dashboard/cursos'],
             ['label' => 'Estudantes', 'icon' => 'bi-people', 'url' => '/admin/dashboard/estudantes'],
-            ['label' => 'Instrutores', 'icon' => 'bi-people', 'url' => '/admin/dashboard/instrutores'],
+            ['label' => 'Matrículas', 'icon' => 'bi-journal-check', 'url' => '/admin/dashboard/matriculas'],
+            ['label' => 'Instrutores', 'icon' => 'bi-person-badge', 'url' => '/admin/dashboard/instrutores'],
             ['label' => 'Finanças', 'icon' => 'bi-cash-coin', 'url' => '/admin/dashboard/financas'],
+            ['label' => 'Analytics', 'icon' => 'bi-graph-up-arrow', 'url' => '/admin/dashboard/analytics'],
             ['label' => 'Notificações', 'icon' => 'bi-bell', 'url' => '/admin/dashboard/notificacoes'],
             ['label' => 'Perfil', 'icon' => 'bi-person-circle', 'url' => '/admin/dashboard/perfil'],
         ];
@@ -1122,6 +1132,8 @@ class Dashboard extends BaseController
             ['course_id' => $courseId, 'student_id' => $userId, 'enrollment_id' => $enrollmentId]
         );
 
+        (new EnrollmentNotificationService())->notifyStudentAboutEnrollment($enrollmentId, 'manual');
+
         $this->notifyAdmins(
             'Matrícula manual criada',
             '<p>Nova matrícula manual criada para o aluno <strong>#' . (int) $userId . '</strong> no curso <strong>#' . (int) $courseId . '</strong> (matrícula #' . (int) $enrollmentId . ').</p>'
@@ -1220,11 +1232,140 @@ class Dashboard extends BaseController
     public function financial()
     {
         $user = service('auth')->user();
+        $db = db_connect();
+
+        $currentYear = (int) date('Y');
+        $currentMonth = (int) date('m');
+
+        $totalRevenueRow = $db->table('payments p')
+            ->selectSum('p.amount_payment', 'total')
+            ->where('p.status_payment', 'Aprovado')
+            ->get()
+            ->getRow();
+        $totalRevenue = (float) ($totalRevenueRow->total ?? 0);
+
+        $monthRevenueRow = $db->table('payments p')
+            ->selectSum('p.amount_payment', 'total')
+            ->where('p.status_payment', 'Aprovado')
+            ->where('YEAR(p.created_at)', $currentYear)
+            ->where('MONTH(p.created_at)', $currentMonth)
+            ->get()
+            ->getRow();
+        $monthRevenue = (float) ($monthRevenueRow->total ?? 0);
+
+        $monthlyRows = $db->table('payments p')
+            ->select('MONTH(p.created_at) as month, SUM(p.amount_payment) as total')
+            ->where('p.status_payment', 'Aprovado')
+            ->where('YEAR(p.created_at)', $currentYear)
+            ->groupBy('MONTH(p.created_at)')
+            ->get()
+            ->getResult();
+
+        $monthsWithSales = count($monthlyRows);
+        $yearTotal = 0;
+        foreach ($monthlyRows as $row) {
+            $yearTotal += (float) ($row->total ?? 0);
+        }
+        $averageMonth = $monthsWithSales > 0 ? $yearTotal / $monthsWithSales : 0;
+
+        $nextPaymentRow = $db->table('payments p')
+            ->selectSum('p.amount_payment', 'total')
+            ->where('p.status_payment', 'Pendente')
+            ->get()
+            ->getRow();
+        $nextPayment = (float) ($nextPaymentRow->total ?? 0);
+
+        $latestTransactions = [];
+        try {
+            $latestTransactions = $this->financialTransactionsBuilder()
+                ->orderBy('p.created_at', 'DESC')
+                ->limit(10)
+                ->get()
+                ->getResult();
+
+            foreach ($latestTransactions as $transaction) {
+                $transaction->method_payment_label = $this->normalizePaymentMethod($transaction->method_payment ?? null);
+            }
+        } catch (\Throwable $e) {
+            log_message('error', 'Admin financial transactions failed: {error}', ['error' => $e->getMessage()]);
+            $latestTransactions = [];
+        }
+
+        $paymentMethods = $db->table('payments p')
+            ->select('COALESCE(NULLIF(p.method_payment, ""), "Nao informado") AS method_payment', false)
+            ->select('COUNT(*) AS total_transactions, SUM(p.amount_payment) AS total_amount', false)
+            ->whereIn('p.status_payment', ['Aprovado', 'Pendente'])
+            ->groupBy('method_payment')
+            ->orderBy('total_amount', 'DESC')
+            ->get()
+            ->getResult();
+
+        foreach ($paymentMethods as $method) {
+            $method->method_payment_label = $this->normalizePaymentMethod($method->method_payment ?? null);
+        }
+
+        $topCourses = $db->table('payments p')
+            ->select('c.title_course, SUM(p.amount_payment) as total')
+            ->join('courses c', 'c.id_course = p.id_course_payment')
+            ->where('p.status_payment', 'Aprovado')
+            ->groupBy('c.id_course, c.title_course')
+            ->orderBy('total', 'DESC')
+            ->limit(8)
+            ->get()
+            ->getResult();
+
+        $topInstructors = $db->table('payments p')
+            ->select('COALESCE(u.username, CONCAT("Instrutor #", c.id_instructor_course)) AS instructor_name, SUM(p.amount_payment) AS total', false)
+            ->join('courses c', 'c.id_course = p.id_course_payment')
+            ->join('users u', 'u.id = c.id_instructor_course', 'left')
+            ->where('p.status_payment', 'Aprovado')
+            ->groupBy('c.id_instructor_course, u.username')
+            ->orderBy('total', 'DESC')
+            ->limit(8)
+            ->get()
+            ->getResult();
+
+        $chartRows = $db->table('payments p')
+            ->select('MONTH(p.created_at) as month, SUM(p.amount_payment) as total')
+            ->where('p.status_payment', 'Aprovado')
+            ->where('YEAR(p.created_at)', $currentYear)
+            ->groupBy('MONTH(p.created_at)')
+            ->orderBy('MONTH(p.created_at)')
+            ->get()
+            ->getResultArray();
+
+        $totals = array_fill(1, 12, 0.0);
+        foreach ($chartRows as $row) {
+            $month = (int) ($row['month'] ?? 0);
+            if ($month >= 1 && $month <= 12) {
+                $totals[$month] = (float) ($row['total'] ?? 0);
+            }
+        }
+
+        $chartSeries = array_values($totals);
+        $chartMax = ! empty($chartSeries) ? max($chartSeries) : 0;
+        $chartAvg = array_sum($chartSeries) / 12;
+        $chartGrowth = $currentMonth > 1
+            ? ($chartSeries[$currentMonth - 1] - $chartSeries[$currentMonth - 2])
+            : 0;
 
         return view('pages/admin/financial', [
             'user' => $user,
             'sidebarLinks' => $this->sidebarLinks(),
-            'currentUrl' => current_url()
+            'currentUrl' => current_url(),
+            'currentYear' => $currentYear,
+            'totalRevenue' => $totalRevenue,
+            'monthRevenue' => $monthRevenue,
+            'averageMonth' => $averageMonth,
+            'yearTotal' => $yearTotal,
+            'nextPayment' => $nextPayment,
+            'latestTransactions' => $latestTransactions,
+            'paymentMethods' => $paymentMethods,
+            'topCourses' => $topCourses,
+            'topInstructors' => $topInstructors,
+            'chartMax' => $chartMax,
+            'chartAvg' => $chartAvg,
+            'chartGrowth' => $chartGrowth,
         ]);
     }
 
@@ -1241,7 +1382,7 @@ class Dashboard extends BaseController
             ->where('p.status_payment', 'Aprovado')
             ->where('YEAR(p.created_at)', $year)
             ->groupBy('MONTH(p.created_at)')
-            ->orderBy('MONTH(p.created_at)')
+            ->orderBy('MONTH(p.created_at)', 'ASC')
             ->get()
             ->getResultArray();
 
@@ -1258,8 +1399,126 @@ class Dashboard extends BaseController
 
         return $this->response->setJSON([
             'labels' => $labels,
-            'data' => $series,
+            'data'   => $series,
+            'max'    => ! empty($series) ? max($series) : 0,
+            'avg'    => count($series) ? array_sum($series) / count($series) : 0,
         ]);
+    }
+
+    public function exportFinancialCsv()
+    {
+        $period = strtolower(trim((string) $this->request->getGet('period')));
+        if (! in_array($period, ['daily', 'monthly', 'annual', 'custom'], true)) {
+            $period = 'monthly';
+        }
+
+        $status = trim((string) $this->request->getGet('status'));
+        if (! in_array($status, ['', 'Aprovado', 'Pendente', 'Rejeitado'], true)) {
+            $status = 'Aprovado';
+        }
+        if ($status === '') {
+            $status = null;
+        }
+
+        $today = date('Y-m-d');
+        $dateFrom = trim((string) $this->request->getGet('date_from'));
+        $dateTo = trim((string) $this->request->getGet('date_to'));
+
+        if ($period === 'daily') {
+            $day = $dateFrom !== '' ? $dateFrom : $today;
+            if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', $day)) {
+                $day = $today;
+            }
+            $dateFrom = $day;
+            $dateTo = $day;
+            $label = 'diario_' . $day;
+        } elseif ($period === 'monthly') {
+            $month = trim((string) $this->request->getGet('month'));
+            if (! preg_match('/^\d{4}-\d{2}$/', $month)) {
+                $month = date('Y-m');
+            }
+            $dateFrom = $month . '-01';
+            $dateTo = date('Y-m-t', strtotime($dateFrom));
+            $label = 'mensal_' . $month;
+        } elseif ($period === 'annual') {
+            $year = (int) $this->request->getGet('year');
+            if ($year < 2000 || $year > 2100) {
+                $year = (int) date('Y');
+            }
+            $dateFrom = sprintf('%04d-01-01', $year);
+            $dateTo = sprintf('%04d-12-31', $year);
+            $label = 'anual_' . $year;
+        } else {
+            if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateFrom)) {
+                $dateFrom = date('Y-m-01');
+            }
+            if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateTo)) {
+                $dateTo = $today;
+            }
+            if ($dateFrom > $dateTo) {
+                [$dateFrom, $dateTo] = [$dateTo, $dateFrom];
+            }
+            $label = 'custom_' . $dateFrom . '_' . $dateTo;
+        }
+
+        $rows = $this->financialTransactionsBuilder($dateFrom, $dateTo, $status)
+            ->orderBy('p.created_at', 'DESC')
+            ->get()
+            ->getResultArray();
+
+        $handle = fopen('php://temp', 'r+');
+        if ($handle === false) {
+            return $this->response->setStatusCode(500)->setBody('Falha ao gerar CSV.');
+        }
+
+        // UTF-8 BOM for Excel
+        fwrite($handle, "\xEF\xBB\xBF");
+        fputcsv($handle, [
+            'ID',
+            'Data',
+            'Comprador',
+            'Email',
+            'Curso',
+            'Instrutor',
+            'Valor (MZN)',
+            'Metodo',
+            'Estado',
+            'Referencia',
+        ], ';');
+
+        $total = 0.0;
+        foreach ($rows as $row) {
+            $amount = (float) ($row['amount_payment'] ?? 0);
+            if (($row['status_payment'] ?? '') === 'Aprovado') {
+                $total += $amount;
+            }
+            fputcsv($handle, [
+                (int) ($row['id_payment'] ?? 0),
+                (string) ($row['created_at'] ?? ''),
+                (string) ($row['buyer_label'] ?? ''),
+                (string) ($row['buyer_email'] ?? ''),
+                (string) ($row['title_course'] ?? ''),
+                (string) ($row['instructor_name'] ?? ''),
+                number_format($amount, 2, ',', ''),
+                $this->normalizePaymentMethod($row['method_payment'] ?? null),
+                (string) ($row['status_payment'] ?? ''),
+                (string) ($row['reference_payment'] ?? ''),
+            ], ';');
+        }
+
+        fputcsv($handle, [], ';');
+        fputcsv($handle, ['TOTAL APROVADO (MZN)', number_format($total, 2, ',', ''), 'Registos', count($rows), 'Periodo', $dateFrom . ' a ' . $dateTo], ';');
+
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
+
+        $filename = 'financas_' . $label . '_' . date('Ymd_His') . '.csv';
+
+        return $this->response
+            ->setHeader('Content-Type', 'text/csv; charset=utf-8')
+            ->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"')
+            ->setBody($csv ?: '');
     }
 
     public function profile()
@@ -2051,7 +2310,14 @@ class Dashboard extends BaseController
         $mail = Services::email();
         $mail->setTo($row->email);
         $mail->setSubject('Mensagem do administrador');
-        $mail->setMessage(nl2br(esc($message)));
+        $mail->setMailType('html');
+        $mail->setMessage(\App\Libraries\BrandEmail::render([
+            'preheader' => 'Mensagem da Mechanical Academy',
+            'eyebrow'   => 'Mensagem',
+            'greeting'  => 'Olá ' . \App\Libraries\BrandEmail::strong((string) ($row->username ?? 'utilizador')) . ',',
+            'title'     => 'Mensagem do administrador',
+            'body'      => \App\Libraries\BrandEmail::p(nl2br(esc($message))),
+        ]));
         $mail->send();
 
         return $this->response->setJSON([
@@ -2213,5 +2479,645 @@ class Dashboard extends BaseController
             'message' => 'Usuario criado com sucesso.',
             'csrf' => csrf_hash(),
         ]);
+    }
+
+    private function wantsJson(): bool
+    {
+        return $this->request->isAJAX()
+            || $this->request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest';
+    }
+
+    private function jsonMessage(string $message, int $statusCode = 200, array $extra = [])
+    {
+        return $this->response
+            ->setStatusCode($statusCode)
+            ->setJSON(array_merge([
+                'message' => $message,
+                'csrf' => csrf_hash(),
+            ], $extra));
+    }
+
+    private function normalizePaymentMethod(?string $value): string
+    {
+        $normalized = strtolower(trim((string) $value));
+
+        return match ($normalized) {
+            '', 'nao informado' => 'Nao informado',
+            'mpesa', 'm-pesa', 'mpesa/emola', 'emola' => 'M-Pesa / e-Mola',
+            'paypal' => 'PayPal',
+            'credit_card', 'cartao', 'cartão' => 'Cartão',
+            'comprovativo', 'comprovativo manual', 'manual', 'transferencia', 'transferência' => 'Comprovativo',
+            default => trim((string) $value) !== '' ? trim((string) $value) : 'Nao informado',
+        };
+    }
+
+    /**
+     * Query base de transações financeiras (admin) com comprador resolvido.
+     *
+     * @return \CodeIgniter\Database\BaseBuilder
+     */
+    private function financialTransactionsBuilder(?string $dateFrom = null, ?string $dateTo = null, ?string $status = null)
+    {
+        $db = db_connect();
+
+        $hasGuestName = $db->fieldExists('guest_name_payment', 'payments');
+        $hasGuestEmail = $db->fieldExists('guest_email_payment', 'payments');
+
+        $buyerParts = [];
+        if ($hasGuestName) {
+            $buyerParts[] = 'NULLIF(p.guest_name_payment, "")';
+        }
+        $buyerParts[] = 'NULLIF(s.name_student, "")';
+        $buyerParts[] = 'NULLIF(buyer_user.username, "")';
+        $buyerParts[] = 'NULLIF(pu.username, "")';
+        if ($hasGuestEmail) {
+            $buyerParts[] = 'NULLIF(p.guest_email_payment, "")';
+        }
+        $buyerParts[] = 'NULLIF(s.email_student, "")';
+        $buyerParts[] = 'NULLIF(ai.secret, "")';
+        $buyerParts[] = 'NULLIF(pu.email, "")';
+        $buyerParts[] = 'CONCAT("Pagamento #", p.id_payment)';
+        $buyerExpr = 'COALESCE(' . implode(', ', $buyerParts) . ')';
+
+        $emailParts = [];
+        if ($hasGuestEmail) {
+            $emailParts[] = 'NULLIF(p.guest_email_payment, "")';
+        }
+        $emailParts[] = 'NULLIF(s.email_student, "")';
+        $emailParts[] = 'NULLIF(ai.secret, "")';
+        $emailParts[] = 'NULLIF(pu.email, "")';
+        $emailParts[] = '""';
+        $emailExpr = 'COALESCE(' . implode(', ', $emailParts) . ')';
+
+        $builder = $db->table('payments p')
+            ->select('p.id_payment, p.amount_payment, p.status_payment, p.method_payment, p.reference_payment, p.created_at, p.id_user_payment, c.title_course', false)
+            ->select("COALESCE(instr.username, '-') AS instructor_name", false)
+            ->select("{$buyerExpr} AS buyer_label", false)
+            ->select("{$emailExpr} AS buyer_email", false)
+            ->join('courses c', 'c.id_course = p.id_course_payment', 'left')
+            ->join('users instr', 'instr.id = c.id_instructor_course', 'left')
+            ->join('students s', 's.id_user_student = p.id_user_payment', 'left')
+            ->join('users buyer_user', 'buyer_user.id = p.id_user_payment', 'left')
+            ->join('auth_identities ai', 'ai.user_id = p.id_user_payment AND ai.type = \'email_password\'', 'left')
+            ->join('pending_users pu', 'pu.id = p.id_user_payment', 'left');
+
+        if ($status !== null && $status !== '') {
+            $builder->where('p.status_payment', $status);
+        }
+
+        if ($dateFrom !== null && $dateFrom !== '') {
+            $builder->where('p.created_at >=', $dateFrom . ' 00:00:00');
+        }
+        if ($dateTo !== null && $dateTo !== '') {
+            $builder->where('p.created_at <=', $dateTo . ' 23:59:59');
+        }
+
+        return $builder;
+    }
+
+    public function financialTransactionsData()
+    {
+        $page = max(1, (int) $this->request->getGet('page'));
+        $perPage = (int) $this->request->getGet('per_page');
+        if ($perPage <= 0) {
+            $perPage = 10;
+        }
+        $perPage = min(max($perPage, 5), 50);
+        $offset = ($page - 1) * $perPage;
+        $status = trim((string) $this->request->getGet('status'));
+        $search = trim((string) $this->request->getGet('q'));
+
+        if (! in_array($status, ['', 'Aprovado', 'Pendente', 'Rejeitado'], true)) {
+            $status = '';
+        }
+
+        try {
+            $builder = $this->financialTransactionsBuilder(null, null, $status !== '' ? $status : null);
+
+            if ($search !== '') {
+                $builder->groupStart()
+                    ->like('c.title_course', $search)
+                    ->orLike('instr.username', $search)
+                    ->orLike('s.name_student', $search)
+                    ->orLike('s.email_student', $search)
+                    ->orLike('buyer_user.username', $search)
+                    ->orLike('pu.username', $search)
+                    ->orLike('pu.email', $search)
+                    ->groupEnd();
+            }
+
+            $countBuilder = clone $builder;
+            $total = (int) $countBuilder->countAllResults(false);
+
+            $rows = $builder
+                ->orderBy('p.created_at', 'DESC')
+                ->limit($perPage, $offset)
+                ->get()
+                ->getResultArray();
+
+            $items = array_map(function (array $row): array {
+                return [
+                    'id_payment' => (int) ($row['id_payment'] ?? 0),
+                    'created_at' => (string) ($row['created_at'] ?? ''),
+                    'buyer_label' => (string) ($row['buyer_label'] ?? '—'),
+                    'buyer_email' => (string) ($row['buyer_email'] ?? ''),
+                    'title_course' => (string) ($row['title_course'] ?? '—'),
+                    'instructor_name' => (string) ($row['instructor_name'] ?? '—'),
+                    'method_payment' => (string) ($row['method_payment'] ?? ''),
+                    'method_payment_label' => $this->normalizePaymentMethod($row['method_payment'] ?? null),
+                    'status_payment' => (string) ($row['status_payment'] ?? ''),
+                    'amount_payment' => (float) ($row['amount_payment'] ?? 0),
+                    'reference_payment' => (string) ($row['reference_payment'] ?? ''),
+                ];
+            }, $rows);
+
+            return $this->response->setJSON([
+                'items' => $items,
+                'pagination' => [
+                    'page' => $page,
+                    'per_page' => $perPage,
+                    'total' => $total,
+                    'total_pages' => (int) max(1, ceil($total / $perPage)),
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            log_message('error', 'financialTransactionsData failed: {error}', ['error' => $e->getMessage()]);
+
+            return $this->response->setStatusCode(500)->setJSON([
+                'items' => [],
+                'pagination' => ['page' => $page, 'per_page' => $perPage, 'total' => 0, 'total_pages' => 0],
+                'message' => 'Erro ao carregar transações: ' . $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function enrollments()
+    {
+        $user = service('auth')->user();
+        $db = db_connect();
+        $courses = $db->table('courses')
+            ->select('id_course, title_course, price_course')
+            ->orderBy('title_course', 'ASC')
+            ->get()
+            ->getResultArray();
+
+        return view('pages/admin/enrollments', [
+            'user' => $user,
+            'courses' => $courses,
+            'sidebarLinks' => $this->sidebarLinks(),
+            'currentUrl' => current_url(),
+        ]);
+    }
+
+    public function enrollmentsData()
+    {
+        $search = trim((string) $this->request->getGet('q'));
+        $status = strtolower((string) $this->request->getGet('status'));
+        $page = max(1, (int) $this->request->getGet('page'));
+        $perPage = (int) $this->request->getGet('per_page');
+        if ($perPage <= 0) {
+            $perPage = 10;
+        }
+        $perPage = min(max($perPage, 5), 50);
+        $offset = ($page - 1) * $perPage;
+
+        $db = db_connect();
+        $demoReady = (new DemoEnrollmentService())->demoFieldsReady();
+
+        $select = [
+            'e.id_enrollment',
+            'e.status_enrollment',
+            'e.progress_enrollment',
+            'e.enrolled_at_enrollment',
+            'e.updated_at AS last_enrollment_update',
+            's.name_student',
+            's.email_student',
+            'c.title_course',
+            'c.price_course',
+            'COALESCE(u.username, "-") AS instructor_name',
+        ];
+
+        if ($demoReady) {
+            $select[] = 'e.is_demo_enrollment';
+            $select[] = 'e.demo_started_at';
+            $select[] = 'e.demo_expires_at';
+        }
+
+        try {
+            $builder = $db->table('enrollments e')
+                ->select($select, false)
+                ->select('(SELECT MAX(COALESCE(p.updated_at, p.created_at, p.completed_at_progress)) FROM progress p WHERE p.id_enrollment_progress = e.id_enrollment) AS last_activity', false)
+                ->join('courses c', 'c.id_course = e.id_course_enrollment')
+                ->join('students s', 's.id_user_student = e.id_student_enrollment')
+                ->join('users u', 'u.id = c.id_instructor_course', 'left');
+
+            if ($search !== '') {
+                $builder->groupStart()
+                    ->like('s.name_student', $search)
+                    ->orLike('s.email_student', $search)
+                    ->orLike('c.title_course', $search)
+                    ->orLike('u.username', $search)
+                    ->groupEnd();
+            }
+
+            if ($status !== '') {
+                $builder->where('e.status_enrollment', $status);
+            }
+
+            $countBuilder = clone $builder;
+            $total = (int) $countBuilder->countAllResults();
+
+            $rows = $builder
+                ->orderBy('e.updated_at', 'DESC')
+                ->limit($perPage, $offset)
+                ->get()
+                ->getResultArray();
+
+            if (! $demoReady) {
+                foreach ($rows as &$row) {
+                    $row['is_demo_enrollment'] = 0;
+                    $row['demo_started_at'] = null;
+                    $row['demo_expires_at'] = null;
+                }
+                unset($row);
+            }
+
+            return $this->response->setJSON([
+                'items' => $rows,
+                'pagination' => [
+                    'page' => $page,
+                    'per_page' => $perPage,
+                    'total' => $total,
+                    'total_pages' => (int) ceil($total / $perPage),
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            log_message('error', 'admin enrollmentsData failed: ' . $e->getMessage());
+
+            return $this->response->setStatusCode(500)->setJSON([
+                'items' => [],
+                'pagination' => ['page' => $page, 'per_page' => $perPage, 'total' => 0, 'total_pages' => 0],
+                'message' => 'Erro ao carregar matrículas: ' . $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function pendingPaymentsData()
+    {
+        $search = trim((string) $this->request->getGet('q'));
+        $page = max(1, (int) $this->request->getGet('page'));
+        $perPage = (int) $this->request->getGet('per_page');
+        if ($perPage <= 0) {
+            $perPage = 10;
+        }
+        $perPage = min(max($perPage, 5), 50);
+        $offset = ($page - 1) * $perPage;
+
+        $db = db_connect();
+        $builder = $db->table('payments p')
+            ->select([
+                'p.id_payment',
+                'p.status_payment',
+                'p.proof_file_payment',
+                'p.created_at',
+                'pu.id AS id_user_payment',
+                'pu.username',
+                'pu.email',
+                'c.id_course',
+                'c.title_course',
+            ])
+            ->join('pending_users pu', 'pu.id = p.id_user_payment')
+            ->join('courses c', 'c.id_course = p.id_course_payment')
+            ->where('p.status_payment', 'Pendente');
+
+        if ($search !== '') {
+            $builder->groupStart()
+                ->like('pu.username', $search)
+                ->orLike('pu.email', $search)
+                ->orLike('c.title_course', $search)
+                ->groupEnd();
+        }
+
+        $countBuilder = clone $builder;
+        $total = (int) $countBuilder->countAllResults();
+
+        $rows = $builder
+            ->orderBy('p.created_at', 'DESC')
+            ->limit($perPage, $offset)
+            ->get()
+            ->getResultArray();
+
+        return $this->response->setJSON([
+            'items' => $rows,
+            'pagination' => [
+                'page' => $page,
+                'per_page' => $perPage,
+                'total' => $total,
+                'total_pages' => (int) ceil($total / $perPage),
+            ],
+        ]);
+    }
+
+    public function toggleEnrollment($enrollmentId)
+    {
+        $enrollmentId = (int) $enrollmentId;
+        $enrollmentModel = new \App\Models\EnrollmentModel();
+        $row = $enrollmentModel->find($enrollmentId);
+
+        if (! $row) {
+            return $this->jsonMessage('Matrícula não encontrada.', 404);
+        }
+
+        $currentStatus = strtolower((string) ($row->status_enrollment ?? ''));
+        $newStatus = $currentStatus === 'ativa' ? 'cancelada' : 'ativa';
+        $updated = $enrollmentModel->update($enrollmentId, ['status_enrollment' => $newStatus]);
+
+        $this->auditLogger->write(
+            'admin.enrollment.toggled',
+            $updated ? 'info' : 'error',
+            $updated ? 'Status de matrícula alterado pelo admin.' : 'Falha ao alterar status de matrícula.',
+            ['enrollment_id' => $enrollmentId, 'from_status' => $currentStatus, 'to_status' => $newStatus]
+        );
+
+        $msg = $newStatus === 'ativa' ? 'Acesso do aluno liberado.' : 'Acesso do aluno bloqueado.';
+
+        return $this->jsonMessage($msg);
+    }
+
+    public function grantDemoAccess()
+    {
+        try {
+            $db = db_connect();
+            $courseId = (int) $this->request->getPost('course_id');
+            $studentLookup = trim((string) $this->request->getPost('student'));
+            $enrollmentId = (int) $this->request->getPost('enrollment_id');
+            $demo = new DemoEnrollmentService();
+
+            if (! $demo->demoFieldsReady()) {
+                return $this->jsonMessage('Campos de demo em falta. Execute: php spark migrate', 503);
+            }
+
+            if ($enrollmentId > 0) {
+                $row = $db->table('enrollments e')
+                    ->select('e.id_enrollment, e.id_student_enrollment, e.id_course_enrollment, c.price_course')
+                    ->join('courses c', 'c.id_course = e.id_course_enrollment')
+                    ->where('e.id_enrollment', $enrollmentId)
+                    ->get()
+                    ->getRow();
+
+                if (! $row) {
+                    return $this->jsonMessage('Matrícula inválida.', 404);
+                }
+                if ((float) ($row->price_course ?? 0) <= 0) {
+                    return $this->jsonMessage('Acesso demo é para cursos pagos.', 422);
+                }
+
+                $result = $demo->grant((int) $row->id_student_enrollment, (int) $row->id_course_enrollment);
+                $this->auditLogger->write('admin.enrollment.demo_granted', $result['ok'] ? 'info' : 'warning', $result['message'], [
+                    'enrollment_id' => $enrollmentId,
+                ]);
+
+                return $this->jsonMessage($result['message'], $result['ok'] ? 200 : 422);
+            }
+
+            if ($courseId <= 0 || $studentLookup === '') {
+                return $this->jsonMessage('Informe o curso e o aluno.', 422);
+            }
+
+            $course = $db->table('courses')->select('id_course, price_course')->where('id_course', $courseId)->get()->getRow();
+            if (! $course) {
+                return $this->jsonMessage('Curso inválido.', 404);
+            }
+            if ((float) ($course->price_course ?? 0) <= 0) {
+                return $this->jsonMessage('Acesso demo é para cursos pagos.', 422);
+            }
+
+            $userId = null;
+            if (ctype_digit($studentLookup)) {
+                $userId = (int) $studentLookup;
+            } else {
+                $studentRow = $db->table('students')->select('id_user_student')->where('email_student', $studentLookup)->get()->getRow();
+                if ($studentRow) {
+                    $userId = (int) $studentRow->id_user_student;
+                } else {
+                    $identity = $db->table('auth_identities')->select('user_id')->where('type', 'email_password')->where('secret', $studentLookup)->get()->getRow();
+                    if ($identity) {
+                        $userId = (int) $identity->user_id;
+                    }
+                }
+            }
+
+            if (! $userId) {
+                return $this->jsonMessage('Aluno não encontrado.', 404);
+            }
+
+            $result = $demo->grant($userId, $courseId);
+            $this->auditLogger->write('admin.enrollment.demo_granted', $result['ok'] ? 'info' : 'warning', $result['message'], [
+                'course_id' => $courseId,
+                'student_id' => $userId,
+            ]);
+
+            return $this->jsonMessage($result['message'], $result['ok'] ? 200 : 422);
+        } catch (\Throwable $e) {
+            log_message('error', 'admin grantDemoAccess failed: ' . $e->getMessage());
+
+            return $this->jsonMessage('Falha ao conceder demo: ' . $e->getMessage(), 500);
+        }
+    }
+
+    public function approveEnrollment($courseId, $pendingId)
+    {
+        $actualUser = service('auth')->user();
+        $courseId = (int) $courseId;
+        $pendingId = (int) $pendingId;
+
+        $db = db_connect();
+        helper('text');
+
+        $studentModel = new \App\Models\StudentModel();
+        $enrollmentModel = new \App\Models\EnrollmentModel();
+        $paymentModel = new \App\Models\PaymentModel();
+        $pendingUserModel = new \App\Models\PendingUserModel();
+        $users = new UserModel();
+        $enrollmentNotificationService = new EnrollmentNotificationService();
+
+        $isReject = $this->request->getPost('status_payment') === 'Rejeitado';
+        if ($isReject) {
+            $paymentModel
+                ->where('id_user_payment', $pendingId)
+                ->where('id_course_payment', $courseId)
+                ->set([
+                    'status_payment' => 'Rejeitado',
+                    'approved_by_payment' => $actualUser->id,
+                ])
+                ->update();
+
+            $this->auditLogger->write('admin.payment.rejected', 'info', 'Pagamento rejeitado pelo admin.', [
+                'course_id' => $courseId,
+                'pending_user_id' => $pendingId,
+            ]);
+
+            return $this->jsonMessage('Pagamento rejeitado.');
+        }
+
+        $pendingUser = $pendingUserModel->find($pendingId);
+        if (! $pendingUser) {
+            return $this->jsonMessage('Usuario pendente nao encontrado.', 404);
+        }
+
+        $existingUser = $users->findByCredentials(['email' => $pendingUser->email]);
+
+        if ($existingUser !== null) {
+            $student = $studentModel->where('id_user_student', $existingUser->id)->first();
+            if (! $student) {
+                $studentModel->insert([
+                    'id_user_student' => $existingUser->id,
+                    'name_student'    => $existingUser->username,
+                    'email_student'   => $pendingUser->email,
+                ]);
+            }
+
+            $alreadyEnrolled = $enrollmentModel
+                ->where('id_student_enrollment', $existingUser->id)
+                ->where('id_course_enrollment', $courseId)
+                ->first();
+
+            if ($alreadyEnrolled) {
+                return $this->jsonMessage('Usuario ja inscrito neste curso.', 409);
+            }
+
+            $newEnrollmentId = $enrollmentModel->insert([
+                'id_course_enrollment'   => $courseId,
+                'id_student_enrollment'  => $existingUser->id,
+                'status_enrollment'      => 'ativa',
+                'progress_enrollment'    => 0.00,
+                'enrolled_at_enrollment' => date('Y-m-d H:i:s'),
+            ]);
+
+            $paymentRow = $paymentModel
+                ->where('id_user_payment', $pendingId)
+                ->where('id_course_payment', $courseId)
+                ->orderBy('id_payment', 'DESC')
+                ->first();
+
+            $paymentModel
+                ->where('id_user_payment', $pendingId)
+                ->set([
+                    'id_user_payment'     => $existingUser->id,
+                    'status_payment'      => 'Aprovado',
+                    'approved_by_payment' => $actualUser->id,
+                ])
+                ->update();
+
+            $pendingUserModel->where('id', $pendingId)->delete();
+
+            if ($paymentRow) {
+                $enrollmentNotificationService->notifyInstructorAboutNewPayment((int) $paymentRow->id_payment);
+            } elseif ($newEnrollmentId !== false) {
+                $enrollmentNotificationService->notifyInstructorAboutNewEnrollment((int) $newEnrollmentId);
+            }
+            if ($newEnrollmentId !== false) {
+                $enrollmentNotificationService->notifyStudentAboutEnrollment((int) $newEnrollmentId, 'self');
+            }
+
+            $this->auditLogger->write('admin.enrollment.approved_existing_user', 'info', 'Inscricao aprovada pelo admin.', [
+                'course_id' => $courseId,
+                'pending_user_id' => $pendingId,
+                'existing_user_id' => (int) $existingUser->id,
+            ]);
+
+            return $this->jsonMessage('Inscricao aprovada para usuario existente.');
+        }
+
+        $newUser = new User([
+            'username' => $pendingUser->username,
+        ]);
+        $newUser->email = $pendingUser->email;
+        $tempPassword = random_string('alnum', 12);
+        $newUser->password = $tempPassword;
+        $users->save($newUser);
+
+        $userId = $users->getInsertID();
+        $createdUser = $users->find($userId);
+
+        $token = bin2hex(random_bytes(16));
+        $expires = date('Y-m-d H:i:s', strtotime('+1 day'));
+        $db->table('password_resets')->insert([
+            'user_id' => $createdUser->id,
+            'token' => $token,
+            'expires_at' => $expires,
+        ]);
+
+        $link = site_url("reset-password?token={$token}");
+        try {
+            $email = Services::email();
+            $email->setTo($createdUser->email);
+            $email->setSubject('Crie sua senha e acesse o curso');
+            $email->setMailType('html');
+            $email->setMessage(\App\Libraries\BrandEmail::render([
+                'preheader' => 'A sua matrícula foi aprovada — crie a senha para aceder.',
+                'eyebrow'   => 'Matrícula aprovada',
+                'greeting'  => 'Olá ' . \App\Libraries\BrandEmail::strong((string) $createdUser->username) . ',',
+                'title'     => 'Crie a sua senha e aceda ao curso',
+                'body'      => \App\Libraries\BrandEmail::p(
+                    'A sua matrícula foi aprovada. Clique no botão abaixo para criar a senha e aceder ao curso.'
+                ),
+                'cta' => [
+                    'url'   => $link,
+                    'label' => 'Criar minha senha',
+                ],
+            ]));
+            $email->send();
+        } catch (\Throwable $e) {
+            log_message('error', 'Falha ao enviar email de aprovação admin: {error}', ['error' => $e->getMessage()]);
+        }
+
+        $studentModel->insert([
+            'id_user_student' => $userId,
+            'name_student'    => $pendingUser->username,
+            'email_student'   => $pendingUser->email,
+        ]);
+
+        $result = $enrollmentModel->insert([
+            'id_course_enrollment'   => $courseId,
+            'id_student_enrollment'  => $userId,
+            'status_enrollment'      => 'ativa',
+            'progress_enrollment'    => 0.00,
+            'enrolled_at_enrollment' => date('Y-m-d H:i:s'),
+        ]);
+
+        $paymentRow = $paymentModel
+            ->where('id_user_payment', $pendingId)
+            ->where('id_course_payment', $courseId)
+            ->orderBy('id_payment', 'DESC')
+            ->first();
+
+        $paymentModel
+            ->where('id_user_payment', $pendingId)
+            ->set([
+                'id_user_payment'     => $userId,
+                'status_payment'      => 'Aprovado',
+                'approved_by_payment' => $actualUser->id,
+            ])
+            ->update();
+
+        $pendingUserModel->where('id', $pendingId)->delete();
+
+        if ($paymentRow) {
+            $enrollmentNotificationService->notifyInstructorAboutNewPayment((int) $paymentRow->id_payment);
+        } elseif ($result !== false) {
+            $enrollmentNotificationService->notifyInstructorAboutNewEnrollment((int) $result);
+        }
+        if ($result !== false) {
+            $enrollmentNotificationService->notifyStudentAboutEnrollment((int) $result, 'self');
+        }
+
+        $this->auditLogger->write('admin.enrollment.approved_new_user', 'info', 'Inscricao aprovada com criacao de usuario pelo admin.', [
+            'course_id' => $courseId,
+            'pending_user_id' => $pendingId,
+            'new_user_id' => $userId,
+        ]);
+
+        return $this->jsonMessage('Inscricao aprovada e usuario criado com sucesso.');
     }
 }

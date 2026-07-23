@@ -1,0 +1,353 @@
+/* Mechanical Academy — dashboard polish (works with existing Tailwind pages) */
+html.dark body,
+body.dark {
+  background: #07090d !important;
+}
+
+html:not(.dark) body {
+  background: #f8fafc !important;
+  color: #0f172a;
+}
+
+#main-content > main {
+  background: transparent;
+}
+
+/* Sharper corners across dashboards + player */
+:root {
+  --academy-radius: 0.25rem;
+}
+
+.academy-shell .rounded-3xl,
+.academy-shell .rounded-2xl,
+.academy-shell .rounded-xl,
+.academy-shell .rounded-lg,
+.academy-shell .rounded-md,
+.academy-shell .rounded-t-xl,
+.academy-shell .rounded-b-xl,
+.academy-shell .rounded-t-2xl,
+.academy-shell .rounded-b-2xl,
+.academy-shell .rounded-t-md,
+.academy-shell .rounded-b-md,
+.academy-player .rounded-3xl,
+.academy-player .rounded-2xl,
+.academy-player .rounded-xl,
+.academy-player .rounded-lg,
+.academy-player .rounded-md,
+.academy-player .rounded-t-xl,
+.academy-player .rounded-b-xl,
+.academy-player .rounded-t-2xl,
+.academy-player .rounded-b-2xl,
+.academy-player .rounded-t-md,
+.academy-player .rounded-b-md,
+#main-content .rounded-3xl,
+#main-content .rounded-2xl,
+#main-content .rounded-xl,
+#main-content .rounded-lg,
+#main-content .rounded-md {
+  border-radius: var(--academy-radius) !important;
+}
+
+/* Badges/pills no player: menos cápsula */
+.academy-player .badge-current,
+.academy-player span.rounded-full.text-\[10px\],
+.academy-player span.rounded-full.text-xs {
+  border-radius: var(--academy-radius) !important;
+}
+
+/* Quieter surfaces in dark mode */
+html.dark #main-content .bg-white {
+  background-color: #11151c !important;
+}
+
+html.dark #main-content .dark\:bg-slate-800 {
+  background-color: #11151c !important;
+}
+
+html.dark #main-content .dark\:bg-slate-900 {
+  background-color: #0c1017 !important;
+}
+
+html.dark #main-content .border-slate-200,
+html.dark #main-content .dark\:border-slate-700,
+html.dark #main-content .dark\:border-slate-800,
+html.dark #main-content .dark\:border-slate-600 {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Ensure readable body text inside cards when opacity utilities are missing */
+html.dark #main-content .dash-card .text-slate-800,
+html.dark #main-content .dash-card .text-slate-700,
+html.dark #main-content .dash-card .text-slate-600 {
+  color: #f1f5f9 !important;
+}
+
+html.dark #main-content .dash-card .text-slate-500,
+html.dark #main-content .dash-card .text-slate-400 {
+  color: #94a3b8 !important;
+}
+
+html.dark #main-content .dash-card .dark\:text-slate-100 {
+  color: #f1f5f9 !important;
+}
+
+html.dark #main-content .dash-card .dark\:text-slate-200 {
+  color: #e2e8f0 !important;
+}
+
+html.dark #main-content .dash-card .dark\:text-slate-400 {
+  color: #94a3b8 !important;
+}
+
+html.dark #main-content .dash-card .dark\:divide-slate-700 > :not([hidden]) ~ :not([hidden]),
+html.dark #main-content .dash-card ul.divide-y > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Hero banners → academy minimal (legacy pages without .dash-hero) */
+#main-content section.bg-gradient-to-br.from-blue-600,
+#main-content section.from-blue-500,
+#main-content .from-blue-600.via-blue-700.to-indigo-800,
+#main-content .from-blue-500.to-blue-900,
+#main-content .bg-gradient-to-r.from-blue-500.to-blue-900,
+#main-content .bg-gradient-to-br.from-blue-600 {
+  background-image:
+    radial-gradient(700px 280px at 100% 0%, rgba(13, 110, 253, 0.28), transparent 60%),
+    linear-gradient(135deg, #0b1220 0%, #101826 55%, #0a101a 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: none !important;
+}
+
+/* Tables / panels quieter */
+html.dark #main-content .dark\:bg-slate-50,
+html.dark #main-content thead {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+/* Reduce noisy shadows */
+#main-content .shadow-lg,
+#main-content .shadow-xl,
+#main-content .shadow-sm {
+  box-shadow: none !important;
+}
+
+/* Sidebar active link */
+#sidebar .side-link.active {
+  background: rgba(13, 110, 253, 0.14) !important;
+  color: #6ea8fe !important;
+  font-weight: 600;
+}
+
+#sidebar .side-link:hover {
+  color: #6ea8fe;
+}
+
+html.dark #sidebar {
+  background: #0c1017 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark header.border-b,
+html.dark .academy-nav {
+  background: rgba(12, 16, 23, 0.92) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(12px);
+}
+
+/* Light mode navbar — solid, readable */
+html:not(.dark) .academy-nav {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
+}
+
+html:not(.dark) .academy-nav input {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #0f172a;
+}
+
+.dash-rank-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.dash-rank-item:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.dash-rank-item:first-child {
+  padding-top: 0;
+}
+
+html.dark .dash-rank-item {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.dash-rank-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.dash-rank-title {
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  color: #334155;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+html.dark .dash-rank-title {
+  color: rgba(243, 246, 251, 0.85);
+}
+
+.dash-rank-value {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #0f172a;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+html.dark .dash-rank-value {
+  color: #f3f6fb;
+}
+
+/* Forms / inputs quieter */
+html.dark #main-content input,
+html.dark #main-content select,
+html.dark #main-content textarea {
+  border-color: rgba(255, 255, 255, 0.1);
+  background-color: #0c1017;
+}
+
+/* Tables */
+html.dark #main-content thead {
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+
+/* Row dividers must follow theme (Tailwind divide-* can miss dark variants) */
+html.dark #main-content .finance-tx-body > tr + tr > td,
+html.dark #main-content tbody.divide-y > tr + tr > td {
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html:not(.dark) #main-content .finance-tx-body > tr + tr > td,
+html:not(.dark) #main-content tbody.divide-y > tr + tr > td {
+  border-top-color: #e2e8f0 !important;
+}
+
+html.dark #main-content .finance-tx-body {
+  --tw-divide-opacity: 1;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+html.dark #main-content .finance-tx-body > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html:not(.dark) #main-content .finance-tx-body > :not([hidden]) ~ :not([hidden]) {
+  border-color: #e2e8f0 !important;
+}
+
+/* Finance page — chart + table theme fixes */
+.finance-charts-grid {
+  align-items: start !important;
+}
+
+.finance-chart-card {
+  align-self: start !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+.finance-chart-wrap {
+  position: relative !important;
+  width: 100% !important;
+  height: 240px !important;
+  max-height: 240px !important;
+  overflow: hidden !important;
+}
+
+.finance-chart-wrap .apexcharts-canvas {
+  max-height: 240px !important;
+}
+
+.finance-tx-table tbody tr + tr > td {
+  border-top: 1px solid #e2e8f0 !important;
+}
+
+html.dark .finance-tx-table tbody tr + tr > td {
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark .finance-tx-table,
+html.dark .finance-tx-table td,
+html.dark .finance-tx-table th {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark .finance-tx-table thead th {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Analytics KPIs — always one row */
+.analytics-kpi-row {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  gap: 0.75rem !important;
+  width: 100%;
+}
+
+.analytics-kpi-card {
+  padding: 0.75rem 0.85rem !important;
+}
+
+.analytics-kpi-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  font-size: 1rem;
+}
+
+.analytics-kpi-label {
+  font-size: 0.7rem;
+  line-height: 1.2;
+}
+
+.analytics-kpi-value {
+  margin-top: 0.125rem;
+  font-size: 1.125rem;
+  line-height: 1.2;
+}
+
+@media (max-width: 1100px) {
+  .analytics-kpi-row {
+    gap: 0.5rem !important;
+  }
+  .analytics-kpi-card {
+    padding: 0.65rem 0.55rem !important;
+  }
+  .analytics-kpi-icon {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.9rem;
+  }
+  .analytics-kpi-value {
+    font-size: 1rem;
+  }
+}
+
+/* Footer */
+html.dark footer {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: #07090d;
+}

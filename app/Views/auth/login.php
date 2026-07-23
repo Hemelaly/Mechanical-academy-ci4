@@ -59,7 +59,7 @@ $user = service('auth')->user();
     max-width: 400px;
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 20px;
+    border-radius: 0.375rem;
     padding: 2.25rem 1.75rem 1.85rem;
     box-shadow: 0 28px 60px -36px rgba(0, 0, 0, 0.75);
     text-align: center;
@@ -88,7 +88,7 @@ $user = service('auth')->user();
   .login-alert {
     margin-bottom: 1rem;
     padding: 0.75rem 0.9rem;
-    border-radius: 12px;
+    border-radius: 0.375rem;
     font-size: 0.88rem;
     line-height: 1.4;
     text-align: left;
@@ -122,7 +122,7 @@ $user = service('auth')->user();
   .login-field input {
     width: 100%;
     border: 1px solid var(--line);
-    border-radius: 12px;
+    border-radius: 0.375rem;
     padding: 0.85rem 1rem;
     background: #0a0a0a;
     color: #fff;
@@ -180,7 +180,7 @@ $user = service('auth')->user();
   .login-submit {
     width: 100%;
     border: 0;
-    border-radius: 999px;
+    border-radius: 0.375rem;
     padding: 0.9rem 1.25rem;
     background: var(--accent);
     color: #fff;

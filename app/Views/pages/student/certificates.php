@@ -2,302 +2,235 @@
 
 <?= $this->section('title') ?>Certificados<?= $this->endSection() ?>
 
-<!-- Bootstrap Icons -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-
 <?= $this->section('certificates') ?>
 <style>
-    /* Estilos para o modal de visualização */
-    .modal-enter {
-        animation: fadeIn 0.3s ease-out;
-    }
-
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-        }
-
-        to {
-            opacity: 1;
-        }
-    }
-
-    /* Estilos para os certificados */
     .certificate-card {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        transition: transform 0.2s ease, border-color 0.2s ease;
         border: 1px solid #e2e8f0;
+        background: #fff;
     }
-
-    .dark .certificate-card {
-        border-color: #334155;
+    html.dark .certificate-card {
+        border-color: rgba(255,255,255,0.1);
+        background: #11151c;
     }
-
     .certificate-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        border-color: #cbd5e1;
+        transform: translateY(-2px);
+        border-color: #93c5fd;
     }
 
-    .dark .certificate-card:hover {
-        border-color: #475569;
-    }
-
-    /* Badge status */
     .status-badge {
-        padding: 4px 12px;
-        border-radius: 9999px;
-        font-size: 0.75rem;
+        padding: 4px 10px;
+        border-radius: 0.375rem;
+        font-size: 0.7rem;
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.04em;
     }
-    
     .status-badge.active {
-        background-color: rgba(16, 185, 129, 0.1);
-        color: #10b981;
-        border: 1px solid rgba(16, 185, 129, 0.2);
+        background-color: rgba(16, 185, 129, 0.15);
+        color: #059669;
     }
-    
-    .status-badge.inactive {
-        background-color: rgba(239, 68, 68, 0.1);
-        color: #ef4444;
-        border: 1px solid rgba(239, 68, 68, 0.2);
-    }
-    
+    html.dark .status-badge.active { color: #34d399; }
     .status-badge.pending {
-        background-color: rgba(245, 158, 11, 0.1);
-        color: #f59e0b;
-        border: 1px solid rgba(245, 158, 11, 0.2);
+        background-color: rgba(245, 158, 11, 0.15);
+        color: #d97706;
+    }
+    html.dark .status-badge.pending { color: #fbbf24; }
+
+    /* Pré-visualização do certificado (sempre claro — documento) */
+    .cert-preview-frame {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 1.414 / 1;
+        overflow: hidden;
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    html.dark .cert-preview-frame {
+        border-bottom-color: rgba(255,255,255,0.08);
+        background: #0b1220;
+    }
+    .cert-preview-frame img,
+    .cert-preview-frame iframe,
+    .cert-preview-frame object {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border: 0;
+        pointer-events: none;
+    }
+    .cert-preview-frame img {
+        object-fit: cover;
+        object-position: top center;
+    }
+    .cert-preview-frame iframe,
+    .cert-preview-frame object {
+        width: 140%;
+        height: 140%;
+        left: -20%;
+        top: -8%;
+        transform: scale(1);
+    }
+
+    #certificate-modal .modal-panel {
+        background: #ffffff;
+        color: #0f172a;
+        border: 1px solid #e2e8f0;
+    }
+    html.dark #certificate-modal .modal-panel {
+        background: #11151c;
+        color: #f3f6fb;
+        border-color: rgba(255,255,255,0.1);
+    }
+    #certificate-modal .meta-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #0f172a;
+    }
+    html.dark #certificate-modal .meta-card {
+        background: #0c1017;
+        border-color: rgba(255,255,255,0.1);
+        color: #f3f6fb;
+    }
+    #certificate-modal .meta-card .meta-label {
+        color: #64748b;
+    }
+    html.dark #certificate-modal .meta-card .meta-label {
+        color: rgba(243,246,251,0.5);
+    }
+    #certificate-modal .meta-card .meta-value {
+        color: #0f172a;
+        font-weight: 600;
+    }
+    html.dark #certificate-modal .meta-card .meta-value {
+        color: #f3f6fb;
+    }
+
+    #modal-pdf-wrap {
+        background: #e2e8f0;
+        min-height: min(78vh, 820px);
+    }
+    html.dark #modal-pdf-wrap {
+        background: #0b1220;
+    }
+    #modal-pdf {
+        width: 100%;
+        height: min(78vh, 820px);
+        min-height: 520px;
+        background: #fff;
     }
 </style>
 
-<div class="h-full text-slate-800 dark:text-white transition-colors duration-300">
+<div class="h-full text-slate-800 dark:text-slate-100 transition-colors duration-300">
     <div class="min-w-0 flex flex-col">
 
-        <!-- Conteúdo principal -->
-        <main class="flex-grow container mx-auto py-6 px-4">
-            <!-- Cabeçalho -->
-            <div class="mb-8">
-                <h1 class="text-3xl font-bold text-slate-900 dark:text-white mb-2">Seus Certificados de Conclusão</h1>
-                <p class="text-slate-600 dark:text-slate-400">Visualize e faça download dos seus certificados de cursos concluídos</p>
+        <main class="flex-grow w-full max-w-7xl mx-auto py-6 px-4 sm:px-6">
+            <div class="mb-6">
+                <h1 class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white mb-1">Certificados</h1>
+                <p class="text-sm text-slate-500 dark:text-white/45">Visualize e descarregue os seus certificados</p>
             </div>
 
-            <!-- KPIs com a estilização solicitada -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
-                <!-- Total de Certificados -->
-                <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-                    <div class="flex items-center justify-between">
-                        <div class="flex-1 min-w-0">
-                            <p class="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1 truncate">
-                                Total de Certificados
-                            </p>
-                            <h3 id="kpi-total" class="text-2xl font-bold text-slate-800 dark:text-white mb-1">0</h3>
-                            <div class="flex items-center gap-1">
-                                <i class="bi bi-arrow-up-short text-green-500 text-sm flex-shrink-0"></i>
-                                <span class="text-green-500 text-sm font-medium truncate">
-                                    +2 este mês
-                                </span>
-                            </div>
-                        </div>
-                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center flex-shrink-0 ml-3">
-                            <i class="bi bi-award text-blue-600 dark:text-blue-400 text-base sm:text-lg"></i>
-                        </div>
-                    </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+                <div class="rounded-md border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-[#11151c]">
+                    <p class="text-xs text-slate-500 dark:text-white/45">Total</p>
+                    <h3 id="kpi-total" class="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">0</h3>
                 </div>
-                
-                <!-- Concluídos Recentemente -->
-                <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-                    <div class="flex items-center justify-between">
-                        <div class="flex-1 min-w-0">
-                            <p class="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1 truncate">
-                                Concluídos Recentemente
-                            </p>
-                            <h3 id="kpi-recent" class="text-2xl font-bold text-slate-800 dark:text-white mb-1">0</h3>
-                            <div class="flex items-center gap-1">
-                                <i class="bi bi-arrow-up-short text-green-500 text-sm flex-shrink-0"></i>
-                                <span class="text-green-500 text-sm font-medium truncate">
-                                    Últimos 30 dias
-                                </span>
-                            </div>
-                        </div>
-                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 dark:bg-green-900 rounded-xl flex items-center justify-center flex-shrink-0 ml-3">
-                            <i class="bi bi-calendar-check text-green-600 dark:text-green-400 text-base sm:text-lg"></i>
-                        </div>
-                    </div>
+                <div class="rounded-md border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-[#11151c]">
+                    <p class="text-xs text-slate-500 dark:text-white/45">Últimos 30 dias</p>
+                    <h3 id="kpi-recent" class="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">0</h3>
                 </div>
-                
-                <!-- Downloads Disponíveis -->
-                <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 dark:border-slate-700">
-                    <div class="flex items-center justify-between">
-                        <div class="flex-1 min-w-0">
-                            <p class="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1 truncate">
-                                Downloads Disponíveis
-                            </p>
-                            <h3 id="kpi-available" class="text-2xl font-bold text-slate-800 dark:text-white mb-1">0</h3>
-                            <div class="flex items-center gap-1">
-                                <i class="bi bi-check-circle text-blue-500 text-sm flex-shrink-0"></i>
-                                <span class="text-blue-500 text-sm font-medium truncate">
-                                    Todos os certificados
-                                </span>
-                            </div>
-                        </div>
-                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 dark:bg-purple-900 rounded-xl flex items-center justify-center flex-shrink-0 ml-3">
-                            <i class="bi bi-cloud-arrow-down text-purple-600 dark:text-purple-400 text-base sm:text-lg"></i>
-                        </div>
-                    </div>
+                <div class="rounded-md border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-[#11151c]">
+                    <p class="text-xs text-slate-500 dark:text-white/45">Disponíveis</p>
+                    <h3 id="kpi-available" class="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">0</h3>
                 </div>
             </div>
 
-            <!-- Filtros melhorados -->
-            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 mb-8 border border-slate-200 dark:border-slate-700">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-                    <div>
-                        <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Todos os Certificados</h2>
-                        <p class="text-slate-600 dark:text-slate-400">Clique em um certificado para visualizá-lo</p>
-                    </div>
-
-                    <div class="flex flex-wrap gap-3 mt-4 md:mt-0">
-                        <!-- Busca -->
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="bi bi-search text-slate-400"></i>
-                            </div>
-                            <input id="search-certificates" type="text" placeholder="Buscar certificados..." class="pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full md:w-64">
+            <div class="rounded-md border border-slate-200 bg-white p-4 sm:p-5 dark:border-white/10 dark:bg-[#11151c]">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-5">
+                    <h2 class="text-base font-semibold text-slate-900 dark:text-white">Todos os certificados</h2>
+                    <div class="flex flex-wrap gap-2 w-full md:w-auto">
+                        <div class="relative flex-1 md:flex-none">
+                            <i class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input id="search-certificates" type="text" placeholder="Buscar..."
+                                class="w-full md:w-56 rounded-md border border-slate-300 bg-slate-50 py-2 pl-9 pr-3 text-sm text-slate-800 dark:border-white/10 dark:bg-[#0c1017] dark:text-white">
                         </div>
-                        
-                        <!-- Filtro de curso -->
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="bi bi-filter text-slate-400"></i>
-                            </div>
-                            <select id="filter-course" class="pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none">
-                                <option value="">Todos os cursos</option>
-                            </select>
-                        </div>
-                        
-                        <!-- Botão de ordenar -->
-                        <button id="sort-certificates" class="px-4 py-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-300 rounded-xl font-medium flex items-center space-x-2 shadow-sm hover:shadow-md transition-all duration-300" data-sort="newest">
+                        <select id="filter-course"
+                            class="rounded-md border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-800 dark:border-white/10 dark:bg-[#0c1017] dark:text-white">
+                            <option value="">Todos os cursos</option>
+                        </select>
+                        <button id="sort-certificates" type="button" data-sort="newest"
+                            class="rounded-md border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-700 dark:border-white/10 dark:bg-[#0c1017] dark:text-slate-200">
                             <i class="bi bi-sort-down"></i>
-                            <span>Ordenar</span>
+                            <span>Mais recentes</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- Grid de certificados melhorado -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8" id="certificates-grid">
-                    <!-- Os certificados serão carregados aqui via JavaScript -->
-                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" id="certificates-grid"></div>
             </div>
         </main>
     </div>
 
-    <!-- Modal para visualização de certificado - Melhorado -->
-    <div id="certificate-modal" tabindex="-1" aria-hidden="true" class="hidden fixed inset-0 z-50 overflow-y-auto overflow-x-hidden">
-        <div class="flex items-center justify-center p-4">
-            <div class="relative w-full max-w-4xl">
-                <!-- Overlay de fundo -->
-                <div class="fixed inset-0 bg-black bg-opacity-70"></div>
-                
-                <!-- Modal content -->
-                <div class="relative bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg p-4 md:p-6">
-                    <!-- Modal header -->
-                    <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-4 md:pb-5">
-                        <div>
-                            <h3 id="modal-title" class="text-lg font-medium text-slate-900 dark:text-white">
-                                Visualização do Certificado
-                            </h3>
-                            <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Certificado válido e registrado</p>
-                        </div>
-                        <button type="button" id="close-modal" class="text-slate-500 dark:text-slate-400 bg-transparent hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white rounded-lg text-sm w-9 h-9 ms-auto inline-flex justify-center items-center">
-                            <i class="bi bi-x-lg text-lg"></i>
-                            <span class="sr-only">Fechar modal</span>
-                        </button>
+    <!-- Modal -->
+    <div id="certificate-modal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+        <div class="flex min-h-full items-start justify-center p-3 sm:p-6">
+            <div class="fixed inset-0 bg-black/70" data-close-modal></div>
+
+            <div class="relative modal-panel w-full max-w-6xl rounded-md shadow-xl my-4 sm:my-6">
+                <div class="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-white/10 sm:px-5">
+                    <div class="min-w-0">
+                        <h3 id="modal-title" class="truncate text-base font-semibold text-slate-900 dark:text-white">Visualização</h3>
+                        <p class="text-xs text-slate-500 dark:text-white/45">Certificado válido e registado</p>
                     </div>
-                    
-                    <!-- Modal body -->
-                    <div class="pt-4 md:pt-6">
-                        <div class="flex flex-col items-center">
-                            <!-- Imagem do certificado no modal -->
-                            <div class="relative w-full max-w-3xl mb-6">
-                                <div class="absolute -inset-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-3xl blur-xl"></div>
-                                <img id="modal-image" src="" alt="Certificado" class="relative w-full rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700">
-                                <div class="absolute -bottom-4 -right-4 w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center shadow-lg">
-                                    <i class="bi bi-award text-white text-2xl"></i>
-                                </div>
-                            </div>
+                    <button type="button" id="close-modal"
+                        class="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 dark:text-white/60 dark:hover:bg-white/5">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
 
-                            <!-- Detalhes do certificado -->
-                            <div class="w-full max-w-3xl mb-8">
-                                <h4 class="text-lg font-medium text-slate-900 dark:text-white mb-6 pb-3 border-b border-slate-200 dark:border-slate-700">Detalhes do Certificado</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl border border-slate-200 dark:border-slate-600">
-                                        <div class="flex items-center mb-2">
-                                            <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/40 rounded-lg flex items-center justify-center mr-3">
-                                                <i class="bi bi-book text-blue-600 dark:text-blue-400"></i>
-                                            </div>
-                                            <div>
-                                                <p class="text-xs text-slate-500 dark:text-slate-500">Curso</p>
-                                                <p id="modal-course" class="font-medium text-slate-900 dark:text-white">-</p>
-                                            </div>
-                                        </div>
-                                    </div>
+                <div class="p-3 sm:p-5">
+                    <div id="modal-pdf-wrap" class="hidden overflow-hidden rounded-md border border-slate-200 dark:border-white/10 mb-4">
+                        <iframe id="modal-pdf" title="Certificado PDF"></iframe>
+                    </div>
+                    <div id="modal-image-wrap" class="relative mb-4">
+                        <img id="modal-image" src="" alt="Pré-visualização do certificado"
+                            class="w-full rounded-md border border-slate-200 dark:border-white/10 bg-white object-contain max-h-[50vh]">
+                        <p id="modal-pending-note" class="mt-2 text-center text-sm text-amber-600 dark:text-amber-400 hidden">PDF ainda não disponível.</p>
+                    </div>
 
-                                    <div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl border border-slate-200 dark:border-slate-600">
-                                        <div class="flex items-center mb-2">
-                                            <div class="w-8 h-8 bg-green-100 dark:bg-green-900/40 rounded-lg flex items-center justify-center mr-3">
-                                                <i class="bi bi-calendar-check text-green-600 dark:text-green-400"></i>
-                                            </div>
-                                            <div>
-                                                <p class="text-xs text-slate-500 dark:text-slate-500">Data de Conclusão</p>
-                                                <p id="modal-date" class="font-medium text-slate-900 dark:text-white">-</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl border border-slate-200 dark:border-slate-600">
-                                        <div class="flex items-center mb-2">
-                                            <div class="w-8 h-8 bg-purple-100 dark:bg-purple-900/40 rounded-lg flex items-center justify-center mr-3">
-                                                <i class="bi bi-hash text-purple-600 dark:text-purple-400"></i>
-                                            </div>
-                                            <div>
-                                                <p class="text-xs text-slate-500 dark:text-slate-500">Código do Certificado</p>
-                                                <p id="modal-code" class="font-medium text-slate-900 dark:text-white font-mono">-</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl border border-slate-200 dark:border-slate-600">
-                                        <div class="flex items-center mb-2">
-                                            <div class="w-8 h-8 bg-amber-100 dark:bg-amber-900/40 rounded-lg flex items-center justify-center mr-3">
-                                                <i class="bi bi-clock text-amber-600 dark:text-amber-400"></i>
-                                            </div>
-                                            <div>
-                                                <p class="text-xs text-slate-500 dark:text-slate-500">Carga Horária</p>
-                                                <p id="modal-hours" class="font-medium text-slate-900 dark:text-white">-</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Botões de ação -->
-                            <div class="flex flex-wrap justify-center gap-3 w-full max-w-3xl">
-                                <button id="download-pdf" class="inline-flex items-center text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 shadow-sm font-medium text-sm px-4 py-2.5 rounded-lg">
-                                    <i class="bi bi-file-earmark-pdf me-2"></i>
-                                    <span>Baixar PDF</span>
-                                </button>
-
-                                <button id="share-certificate" class="inline-flex items-center text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:ring-green-300 shadow-sm font-medium text-sm px-4 py-2.5 rounded-lg">
-                                    <i class="bi bi-share me-2"></i>
-                                    <span>Compartilhar</span>
-                                </button>
-
-                                <button id="print-certificate" class="inline-flex items-center text-white bg-purple-600 hover:bg-purple-700 focus:ring-4 focus:ring-purple-300 shadow-sm font-medium text-sm px-4 py-2.5 rounded-lg">
-                                    <i class="bi bi-printer me-2"></i>
-                                    <span>Imprimir</span>
-                                </button>
-                            </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 mb-4 no-print">
+                        <div class="meta-card rounded-md p-3">
+                            <p class="meta-label text-xs mb-0.5">Curso</p>
+                            <p id="modal-course" class="meta-value text-sm break-words">-</p>
                         </div>
+                        <div class="meta-card rounded-md p-3">
+                            <p class="meta-label text-xs mb-0.5">Data de Conclusão</p>
+                            <p id="modal-date" class="meta-value text-sm">-</p>
+                        </div>
+                        <div class="meta-card rounded-md p-3">
+                            <p class="meta-label text-xs mb-0.5">Código</p>
+                            <p id="modal-code" class="meta-value text-sm font-mono break-all">-</p>
+                        </div>
+                        <div class="meta-card rounded-md p-3">
+                            <p class="meta-label text-xs mb-0.5">Carga Horária</p>
+                            <p id="modal-hours" class="meta-value text-sm">-</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap justify-center gap-2 no-print">
+                        <button id="download-pdf" type="button"
+                            class="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-500">
+                            <i class="bi bi-file-earmark-pdf"></i> Baixar PDF
+                        </button>
+                        <button id="share-certificate" type="button"
+                            class="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-500">
+                            <i class="bi bi-share"></i> Compartilhar
+                        </button>
+                        <button id="print-certificate" type="button"
+                            class="inline-flex items-center gap-2 rounded-md bg-violet-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-violet-500">
+                            <i class="bi bi-printer"></i> Imprimir
+                        </button>
                     </div>
                 </div>
             </div>
@@ -305,29 +238,32 @@
     </div>
 
     <script>
-        // Dados dos certificados (DB -> JS)
         const certificatesRaw = <?= json_encode(
                                     $certificates ?? [],
                                     JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
                                 ) ?>;
-        const fallbackCover = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1000&q=80';
-        const courseImageBase = "<?= base_url('assets/instructor/img/courses') ?>";
+        const certificateBg = "<?= base_url('assets/certificado/certificado-bg.png') ?>";
         const downloadBase = "<?= site_url('/certificados/download') ?>";
+        const previewBase = "<?= site_url('/certificados/preview') ?>";
 
         function formatDateBr(value) {
             const d = new Date(value);
             if (Number.isNaN(d.getTime())) return '-';
-            return d.toLocaleDateString('pt-BR', {
-                day: '2-digit',
-                month: 'long',
-                year: 'numeric'
-            });
+            return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
         }
 
         const certificates = (certificatesRaw || []).map(r => {
             const issuedAt = r.issued_at_certificate ?? '';
-            const imageCourse = r.image_course ? `${courseImageBase}/${r.image_course}` : fallbackCover;
             const enrollmentId = Number(r.enrollment_id ?? 0);
+            const hasPdf = Boolean(r.pdf_path_certificate) && enrollmentId > 0;
 
             return {
                 id: Number(r.id_certificate ?? r.id ?? 0),
@@ -336,24 +272,29 @@
                 date: issuedAt ? formatDateBr(issuedAt) : '-',
                 hours: r.hours_course ?? '-',
                 code: r.number_certificate ?? r.uuid_certificate ?? '-',
-                image: imageCourse,
-                available: Boolean(r.pdf_path_certificate),
-                pdfUrl: (r.pdf_path_certificate && enrollmentId) ? `${downloadBase}/${enrollmentId}` : '#',
+                image: certificateBg,
+                available: hasPdf,
+                pdfUrl: hasPdf ? `${downloadBase}/${enrollmentId}` : '#',
+                previewUrl: hasPdf ? `${previewBase}/${enrollmentId}` : '',
                 issuedAtRaw: issuedAt
             };
         });
 
-        // Elementos do DOM
         const certificatesGrid = document.getElementById('certificates-grid');
         const modal = document.getElementById('certificate-modal');
         const closeModalBtn = document.getElementById('close-modal');
         const modalImage = document.getElementById('modal-image');
+        const modalImageWrap = document.getElementById('modal-image-wrap');
+        const modalPdfWrap = document.getElementById('modal-pdf-wrap');
+        const modalPdf = document.getElementById('modal-pdf');
+        const modalPendingNote = document.getElementById('modal-pending-note');
         const modalTitle = document.getElementById('modal-title');
         const modalCourse = document.getElementById('modal-course');
         const modalDate = document.getElementById('modal-date');
         const modalCode = document.getElementById('modal-code');
         const modalHours = document.getElementById('modal-hours');
         const downloadPdfBtn = document.getElementById('download-pdf');
+        const printCertificateBtn = document.getElementById('print-certificate');
         const searchInput = document.getElementById('search-certificates');
         const filterCourse = document.getElementById('filter-course');
         const sortSelectBtn = document.getElementById('sort-certificates');
@@ -361,7 +302,6 @@
         const kpiRecent = document.getElementById('kpi-recent');
         const kpiAvailable = document.getElementById('kpi-available');
 
-        // Certificado atualmente selecionado
         let currentCertificate = null;
 
         function updateKpis(list) {
@@ -441,53 +381,40 @@
             return cert.available ? 'Ativo' : 'Pendente';
         }
 
-        // Carregar certificados na grid
         function loadCertificates(list) {
             certificatesGrid.innerHTML = '';
 
             if (!list.length) {
-                certificatesGrid.innerHTML = '<div class="col-span-full text-center text-slate-500 dark:text-slate-400">Nenhum certificado encontrado.</div>';
+                certificatesGrid.innerHTML = '<div class="col-span-full py-10 text-center text-sm text-slate-500 dark:text-white/45">Nenhum certificado encontrado.</div>';
                 return;
             }
 
             list.forEach(cert => {
                 const card = document.createElement('div');
-                card.className = 'certificate-card bg-white dark:bg-slate-800 rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl cursor-pointer';
+                card.className = 'certificate-card rounded-md overflow-hidden cursor-pointer';
                 card.setAttribute('data-id', cert.id);
 
+                const previewInner = cert.available && cert.previewUrl
+                    ? `<iframe src="${escapeHtml(cert.previewUrl)}#toolbar=0&navpanes=0&scrollbar=0&view=FitH" title="Pré-visualização" loading="lazy"></iframe>
+                       <img src="${escapeHtml(certificateBg)}" alt="" class="opacity-0" aria-hidden="true">`
+                    : `<img src="${escapeHtml(certificateBg)}" alt="Modelo de certificado">`;
+
                 card.innerHTML = `
-                    <div class="relative overflow-hidden h-48">
-                        <img src="${cert.image}" alt="${cert.title}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
-                        <div class="absolute top-4 right-4">
+                    <div class="cert-preview-frame">
+                        ${previewInner}
+                        <div class="absolute top-3 right-3 z-10">
                             <span class="status-badge ${cert.available ? 'active' : 'pending'}">${statusLabel(cert)}</span>
                         </div>
-                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                            <h4 class="font-bold text-xl text-white mb-1 line-clamp-1">${cert.title}</h4>
-                            <p class="text-blue-200 text-sm">${cert.hours}</p>
-                        </div>
                     </div>
-                    
-                    <div class="p-6">
-                        <div class="mb-6">
-                            <div class="flex items-start">
-                                <div class="w-10 h-10 bg-slate-100 dark:bg-slate-700 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
-                                    <i class="bi bi-book text-slate-600 dark:text-slate-400"></i>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-xs text-slate-500 dark:text-slate-500 mb-1">Curso</p>
-                                    <p class="font-medium text-slate-900 dark:text-white text-sm line-clamp-2">${cert.course}</p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="flex justify-between gap-3">
-                            <button class="view-btn flex-1 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 shadow-sm hover:shadow-md focus:ring-2 focus:ring-blue-300 focus:outline-none">
-                                <i class="bi bi-eye text-sm"></i>
-                                <span class="font-medium text-sm">Visualizar</span>
+                    <div class="p-4">
+                        <p class="text-xs text-slate-500 dark:text-white/45 mb-1">Curso</p>
+                        <h4 class="text-sm font-semibold text-slate-900 dark:text-white line-clamp-2 mb-3">${escapeHtml(cert.course)}</h4>
+                        <div class="flex gap-2">
+                            <button type="button" class="view-btn flex-1 rounded-md bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 text-sm font-medium">
+                                <i class="bi bi-eye"></i> Visualizar
                             </button>
-                            <button class="download-btn flex-1 px-4 py-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-300 rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 shadow-sm hover:shadow-md focus:ring-2 focus:ring-slate-300 focus:outline-none">
-                                <i class="bi bi-download text-sm"></i>
-                                <span class="font-medium text-sm">PDF</span>
+                            <button type="button" class="download-btn flex-1 rounded-md border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 dark:border-white/10 dark:bg-[#0c1017] dark:text-slate-200 dark:hover:bg-white/5 px-3 py-2 text-sm font-medium">
+                                <i class="bi bi-download"></i> PDF
                             </button>
                         </div>
                     </div>
@@ -495,14 +422,11 @@
 
                 certificatesGrid.appendChild(card);
 
-                // Adicionar evento para visualizar
-                const viewBtn = card.querySelector('.view-btn');
-                viewBtn.addEventListener('click', (e) => {
+                card.querySelector('.view-btn').addEventListener('click', (e) => {
                     e.stopPropagation();
                     openCertificateModal(cert);
                 });
 
-                // Adicionar evento para download
                 const downloadBtn = card.querySelector('.download-btn');
                 downloadBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -510,44 +434,60 @@
                 });
                 if (!cert.available) {
                     downloadBtn.disabled = true;
-                    downloadBtn.classList.add('opacity-60', 'cursor-not-allowed');
+                    downloadBtn.classList.add('opacity-50', 'cursor-not-allowed');
                 }
 
-                // Adicionar evento para abrir modal ao clicar no card
-                card.addEventListener('click', () => {
-                    openCertificateModal(cert);
-                });
+                card.addEventListener('click', () => openCertificateModal(cert));
             });
         }
 
-        // Abrir modal com certificado
         function openCertificateModal(certificate) {
             currentCertificate = certificate;
 
-            modalImage.src = certificate.image;
             modalTitle.textContent = certificate.title;
             modalCourse.textContent = certificate.course;
             modalDate.textContent = certificate.date;
             modalCode.textContent = certificate.code;
             modalHours.textContent = certificate.hours;
+            modalImage.src = certificate.image || certificateBg;
+
+            const hasPdf = Boolean(certificate.previewUrl);
+            if (modalPdfWrap && modalPdf && modalImageWrap) {
+                if (hasPdf) {
+                    modalPdf.src = certificate.previewUrl + '#toolbar=0&navpanes=0&view=FitH';
+                    modalPdfWrap.classList.remove('hidden');
+                    modalImageWrap.classList.add('hidden');
+                } else {
+                    modalPdf.removeAttribute('src');
+                    modalPdfWrap.classList.add('hidden');
+                    modalImageWrap.classList.remove('hidden');
+                }
+            }
+            if (modalPendingNote) modalPendingNote.classList.toggle('hidden', hasPdf);
+            if (downloadPdfBtn) {
+                downloadPdfBtn.disabled = !hasPdf;
+                downloadPdfBtn.classList.toggle('opacity-50', !hasPdf);
+            }
+            if (printCertificateBtn) {
+                printCertificateBtn.disabled = !hasPdf;
+                printCertificateBtn.classList.toggle('opacity-50', !hasPdf);
+            }
 
             modal.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
         }
 
-        // Fechar modal
         function closeCertificateModal() {
             modal.classList.add('hidden');
             document.body.style.overflow = 'auto';
+            if (modalPdf) modalPdf.removeAttribute('src');
         }
 
-        // Baixar PDF do certificado
         function downloadCertificatePdf(certificate) {
             if (!certificate.pdfUrl || certificate.pdfUrl === '#') {
-                alert('PDF do certificado nÃ£o estÃ¡ disponÃ­vel.');
+                alert('PDF do certificado não está disponível.');
                 return;
             }
-
             const link = document.createElement('a');
             link.href = certificate.pdfUrl;
             link.download = `certificado-${certificate.code}.pdf`;
@@ -556,57 +496,59 @@
             document.body.removeChild(link);
         }
 
-        // Compartilhar certificado
+        function printCertificatePdf(certificate) {
+            if (!certificate?.previewUrl) {
+                alert('PDF do certificado não está disponível para impressão.');
+                return;
+            }
+            const printWindow = window.open(certificate.previewUrl, '_blank');
+            if (!printWindow) {
+                alert('Permita pop-ups para imprimir o certificado.');
+                return;
+            }
+            const tryPrint = () => {
+                try {
+                    printWindow.focus();
+                    printWindow.print();
+                } catch (err) {
+                    console.error(err);
+                }
+            };
+            printWindow.addEventListener('load', () => setTimeout(tryPrint, 400));
+            setTimeout(tryPrint, 1200);
+        }
+
         function shareCertificate() {
             if (navigator.share && currentCertificate) {
                 navigator.share({
-                        title: `Meu certificado: ${currentCertificate.title}`,
-                        text: `Concluí o curso ${currentCertificate.course} e obtive este certificado!`,
-                        url: window.location.href,
-                    })
-                    .catch(console.error);
+                    title: `Meu certificado: ${currentCertificate.title}`,
+                    text: `Concluí o curso ${currentCertificate.course} e obtive este certificado!`,
+                    url: currentCertificate.previewUrl || window.location.href,
+                }).catch(console.error);
             } else {
                 alert(`Compartilhe o link para o certificado: ${currentCertificate ? currentCertificate.title : 'Certificado'}`);
             }
         }
 
-        // Event Listeners
         document.addEventListener('DOMContentLoaded', () => {
             buildCourseOptions();
-            if (sortSelectBtn) {
-                const span = sortSelectBtn.querySelector('span');
-                if (span) span.textContent = 'Mais recentes';
-            }
             applyFiltersAndSort();
 
-            // Eventos do modal
-            closeModalBtn.addEventListener('click', closeCertificateModal);
-            
-            // Fechar modal ao clicar no overlay
-            modal.addEventListener('click', (e) => {
-                if (e.target.classList.contains('fixed')) {
-                    closeCertificateModal();
-                }
+            closeModalBtn?.addEventListener('click', closeCertificateModal);
+            modal?.querySelector('[data-close-modal]')?.addEventListener('click', closeCertificateModal);
+
+            downloadPdfBtn?.addEventListener('click', () => {
+                if (currentCertificate) downloadCertificatePdf(currentCertificate);
             });
-
-            // Eventos dos botões do modal
-            downloadPdfBtn.addEventListener('click', () => {
-                if (currentCertificate) {
-                    downloadCertificatePdf(currentCertificate);
-                }
-            });
-
-            document.getElementById('share-certificate').addEventListener('click', shareCertificate);
-
-            document.getElementById('print-certificate').addEventListener('click', () => {
-                window.print();
+            document.getElementById('share-certificate')?.addEventListener('click', shareCertificate);
+            printCertificateBtn?.addEventListener('click', () => {
+                if (currentCertificate) printCertificatePdf(currentCertificate);
             });
 
             searchInput?.addEventListener('input', applyFiltersAndSort);
             filterCourse?.addEventListener('change', applyFiltersAndSort);
             sortSelectBtn?.addEventListener('click', cycleSortMode);
 
-            // Evento de tecla ESC para fechar modal
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
                     closeCertificateModal();

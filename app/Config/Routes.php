@@ -7,9 +7,21 @@ use CodeIgniter\Router\RouteCollection;
  */
 
 $routes->get('/', 'Home::index');
+$routes->post('newsletter/subscribe', 'Home::subscribe');
+$routes->post('analytics/collect', 'AnalyticsController::collect');
+$routes->options('analytics/collect', static function () {
+    return service('response')->setStatusCode(204);
+});
 
-// Rotas do Shield (login, logout, etc.)
-service('auth')->routes($routes, ['except' => ['register']]);
+// Cloudflare Turnstile — verificação de página inteira
+$routes->get('cf-challenge', 'CloudflareChallenge::index');
+$routes->post('cf-challenge/verify', 'CloudflareChallenge::verify');
+
+// Rotas do Shield (login, logout, etc.) — login/logout via controller da app
+service('auth')->routes($routes, ['except' => ['register', 'login', 'logout']]);
+$routes->get('login', '\App\Controllers\LoginController::loginView', ['as' => 'login']);
+$routes->post('login', '\App\Controllers\LoginController::loginAction');
+$routes->get('logout', '\App\Controllers\LoginController::logoutAction', ['as' => 'logout']);
 $routes->get('novo_usuario', '\CodeIgniter\Shield\Controllers\RegisterController::registerView', ['as' => 'register', 'filter' => 'role:admin']);
 $routes->post('novo_usuario', '\CodeIgniter\Shield\Controllers\RegisterController::registerAction', ['filter' => 'role:admin']);
 
@@ -29,6 +41,13 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ro
     $routes->get('dashboard/estudantes/data', 'Dashboard::studentsData');
     $routes->get('dashboard/estudantes/search', 'Dashboard::studentsSearch');
     $routes->post('dashboard/estudantes/matricular', 'Dashboard::manualEnroll');
+    $routes->get('dashboard/matriculas', 'Dashboard::enrollments');
+    $routes->get('dashboard/matriculas/data', 'Dashboard::enrollmentsData');
+    $routes->get('dashboard/matriculas/pending', 'Dashboard::pendingPaymentsData');
+    $routes->post('dashboard/matriculas/toggle/(:num)', 'Dashboard::toggleEnrollment/$1');
+    $routes->post('dashboard/matriculas/matricular', 'Dashboard::manualEnroll');
+    $routes->post('dashboard/matriculas/demo', 'Dashboard::grantDemoAccess');
+    $routes->post('dashboard/matriculas/(:num)/(:num)', 'Dashboard::approveEnrollment/$1/$2');
     $routes->get('dashboard/instrutores', 'Dashboard::instructors');
     $routes->get('dashboard/instrutores/data', 'Dashboard::instructorsData');
     $routes->post('dashboard/usuarios/toggle', 'Dashboard::toggleUserStatus');
@@ -38,6 +57,11 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'ro
     $routes->post('dashboard/usuarios/update', 'Dashboard::updateUser');
     $routes->get('dashboard/financas', 'Dashboard::financial');
     $routes->get('dashboard/financas/data', 'Dashboard::financialData');
+    $routes->get('dashboard/financas/transactions', 'Dashboard::financialTransactionsData');
+    $routes->get('dashboard/financas/export', 'Dashboard::exportFinancialCsv');
+    $routes->get('dashboard/analytics', 'AnalyticsController::index');
+    $routes->get('dashboard/analytics/data', 'AnalyticsController::data');
+    $routes->get('dashboard/analytics/table', 'AnalyticsController::table');
     $routes->get('dashboard/perfil', 'Dashboard::profile');
     $routes->post('dashboard/perfil', 'Dashboard::profile');
 });
@@ -74,6 +98,8 @@ $routes->group('instructor', ['namespace' => 'App\Controllers\Instructor', 'filt
     $routes->get('dashboard/logs', 'Dashboard::logs');
     $routes->get('dashboard/logs/data', 'Dashboard::logsData');
     $routes->get('dashboard/logs/export', 'Dashboard::logsExportCsv');
+    $routes->get('dashboard/notifications/data', 'Dashboard::notificationsData');
+    $routes->post('dashboard/notifications/read', 'Dashboard::notificationsMarkRead');
     $routes->get('dashboard/perfil', 'Dashboard::profile');
     $routes->post('dashboard/perfil', 'Dashboard::profile');
     $routes->get('dashboard/certificados', 'Dashboard::certificate');
@@ -101,6 +127,9 @@ $routes->group('student', ['namespace' => 'App\Controllers\Student', 'filter' =>
     $routes->group('lessons', function ($r) {
         $r->post('complete',   'LessonsController::complete');
         $r->post('uncomplete', 'LessonsController::uncomplete');
+        $r->get('download/(:num)', 'LessonsController::download/$1');
+        $r->get('(:num)/discussions', 'LessonDiscussions::index/$1');
+        $r->post('(:num)/discussions', 'LessonDiscussions::store/$1');
     });
 });
 
@@ -110,6 +139,7 @@ $routes->match(['get', 'post'], 'courses/(:num)/trial', 'PageController::startTr
 $routes->get('checkout/(:num)', 'PageController::index/$1');
 $routes->post('checkout/pending/(:num)', 'Register::createPendingUser/$1');
 $routes->post('student/courses/(:num)/rate', 'Student\CourseRatings::store/$1', ['filter' => 'session']);
+$routes->get('materials/lesson/(:num)', 'Student\LessonsController::download/$1', ['filter' => 'session']);
 
 // Pagamentos
 // Pagamentos
@@ -126,6 +156,7 @@ $routes->post('checkout/(:num)', 'PaymentController::createPayment/$1');
 $routes->post('certificados/emitir/(:num)', 'Certificates::emitir/$1');
 // $routes->get('certificados/gerar/(:segment)', 'Certificates::gerarPdf/$1');
 $routes->get('certificados/download/(:num)', 'Certificates::download/$1');
+$routes->get('certificados/preview/(:num)', 'Certificates::preview/$1');
 $routes->get('certificados/verificar', 'Certificates::verificar');
 $routes->get('certificados/verificar/(:segment)', 'Certificates::verificar/$1');
 

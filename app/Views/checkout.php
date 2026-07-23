@@ -1724,6 +1724,8 @@ $courseIconBg = !empty($course->icon_course)
     })();
   </script>
 </div>
+  <script>window.ANALYTICS_COLLECT_URL = <?= json_encode(site_url('analytics/collect')) ?>;</script>
+  <script src="<?= base_url('assets/js/analytics-tracker.js') ?>" defer></script>
 </body>
 
 </html>

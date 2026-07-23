@@ -28,7 +28,7 @@ class ResetPassword extends BaseController
         $email = trim((string) $this->request->getPost('email'));
 
         if ($email === '' || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return redirect()->back()->withInput()->with('error', 'Informe um email valido.');
+            return redirect()->to(site_url('reset-password'))->withInput()->with('error', 'Informe um email valido.');
         }
 
         $users = auth()->getProvider();
@@ -56,16 +56,27 @@ class ResetPassword extends BaseController
 
             $mail = \Config\Services::email();
             $mail->setTo($user->email);
-            $mail->setSubject('Redefinicao de senha');
-            $mail->setMessage(
-                'Ola ' . $user->username . ",<br><br>" .
-                'Clique no link abaixo para redefinir sua senha:<br><br>' .
-                '<a href="' . $link . '">Redefinir senha</a>'
-            );
+            $mail->setSubject('Redefinição de senha');
+            $mail->setMailType('html');
+            $mail->setMessage(\App\Libraries\BrandEmail::render([
+                'preheader' => 'Use o link para redefinir a sua palavra-passe.',
+                'eyebrow'   => 'Segurança da conta',
+                'greeting'  => 'Olá ' . \App\Libraries\BrandEmail::strong((string) $user->username) . ',',
+                'title'     => 'Redefinir a sua palavra-passe',
+                'body'      => \App\Libraries\BrandEmail::p(
+                    'Recebemos um pedido para redefinir a palavra-passe da sua conta na Mechanical Academy.'
+                ) . \App\Libraries\BrandEmail::p(
+                    'O link é válido por tempo limitado. Se não solicitou esta alteração, ignore este email.'
+                ),
+                'cta' => [
+                    'url'   => $link,
+                    'label' => 'Redefinir senha',
+                ],
+            ]));
             $mail->send();
         }
 
-        return redirect()->back()->with('message', 'Se o email existir, enviaremos um link de redefinicao.');
+        return redirect()->to(site_url('reset-password'))->with('message', 'Se o email existir, enviaremos um link de redefinicao.');
     }
 
     public function submitReset()

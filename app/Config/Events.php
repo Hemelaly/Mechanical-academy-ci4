@@ -90,6 +90,22 @@ Events::on('pre_system', static function (): void {
         ob_start(static fn($buffer) => $buffer);
     }
 
+    // Alinha o fuso da sessão MySQL com Africa/Maputo (UTC+2, sem DST).
+    try {
+        $tz = new \DateTimeZone(app_timezone());
+        $offset = $tz->getOffset(new \DateTime('now', $tz));
+        $sign = $offset < 0 ? '-' : '+';
+        $offset = abs($offset);
+        $hours = intdiv($offset, 3600);
+        $mins = intdiv($offset % 3600, 60);
+        $mysqlTz = sprintf('%s%02d:%02d', $sign, $hours, $mins);
+        $db = db_connect();
+        $db->query('SET time_zone = ' . $db->escape($mysqlTz));
+    } catch (\Throwable $e) {
+        // Não bloquear o boot se a BD ainda não estiver disponível.
+        log_message('debug', 'Falha ao definir time_zone MySQL: ' . $e->getMessage());
+    }
+
     /*
      * --------------------------------------------------------------------
      * Debug Toolbar Listeners.

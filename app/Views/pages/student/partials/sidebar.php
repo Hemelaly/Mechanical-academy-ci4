@@ -9,7 +9,7 @@ use Faker\Provider\Base;
 </div>
 
 <!-- SIDEBAR -->
-<aside id="sidebar" class="fixed inset-y-0 left-0 z-40 flex w-80 -translate-x-full flex-col border-r border-slate-200 bg-gradient-to-br from-white to-slate-50 text-slate-700 transition-transform duration-200 ease-in-out dark:border-slate-800 dark:from-slate-800 dark:to-slate-900 dark:text-slate-100 lg:static lg:translate-x-0 lg:w-80">
+<aside id="sidebar" class="fixed inset-y-0 left-0 z-40 flex w-72 -translate-x-full flex-col border-r border-slate-200 bg-white text-slate-700 transition-transform duration-200 ease-in-out dark:border-white/10 dark:bg-[#0c1017] dark:text-slate-100 lg:static lg:translate-x-0 lg:w-72">
     <!-- TOPO: LOGO + BOTÕES -->
     <div class="flex h-16 items-center justify-between px-4">
         <div class="gap-2">
@@ -60,7 +60,7 @@ use Faker\Provider\Base;
                     <a
                         href="<?= site_url($link['url']) ?>"
                         data-pattern="<?= esc($pattern) ?>"
-                        class="side-link flex <?= $isActive ? 'active bg-slate-200/60 dark:bg-slate-700/60 text-slate-800 dark:text-white font-semibold' : 'text-slate-500 dark:text-slate-400' ?> items-center rounded-lg px-2 py-2 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-blue-500 transition">
+                        class="side-link flex <?= $isActive ? 'active bg-blue-600/15 text-blue-600 dark:text-blue-300 font-semibold' : 'text-slate-500 dark:text-slate-400' ?> items-center rounded-md px-2 py-2 hover:bg-blue-600/10 hover:text-blue-500 transition">
                         <span class="flex h-8 w-8 items-center justify-center">
                             <i class="bi <?= $link['icon'] ?>"></i>
                         </span>
@@ -80,7 +80,7 @@ use Faker\Provider\Base;
             href="#"
             id="logoutBtn"
             data-href="/logout/"
-            class="side-link flex w-full items-center rounded-lg px-2 py-2 text-red-600 hover:bg-slate-200/60 dark:text-rose-400 dark:hover:bg-slate-700/60 transition">
+            class="side-link flex w-full items-center rounded-md px-2 py-2 text-red-600 hover:bg-rose-500/10 dark:text-rose-400 transition">
             <span class="flex h-8 w-8 items-center justify-center">
                 <i class="bi bi-box-arrow-left"></i>
             </span>
@@ -91,7 +91,7 @@ use Faker\Provider\Base;
 
         <a
             href="/"
-            class="side-link flex w-full <?= $isHome ? 'active bg-slate-200/60 dark:bg-slate-700/60 text-blue-600 dark:text-blue-400 font-semibold' : 'text-slate-500 dark:text-slate-400' ?> items-center rounded-lg px-2 py-2 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-blue-500 transition">
+            class="side-link flex w-full <?= $isHome ? 'active bg-blue-600/15 text-blue-600 dark:text-blue-300 font-semibold' : 'text-slate-500 dark:text-slate-400' ?> items-center rounded-md px-2 py-2 hover:bg-blue-600/10 hover:text-blue-500 transition">
             <span class="flex h-8 w-8 items-center justify-center">
                 <i class="bi bi-house-door"></i>
             </span>

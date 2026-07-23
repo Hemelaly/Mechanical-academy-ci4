@@ -1,105 +1,223 @@
-<?php
-
-$isLoggedIn   = auth()->loggedIn();
-
-$user = service('auth')->user();
-
-?>
-
 <?= $this->extend(config('Auth')->views['layout']) ?>
 
-<?= $this->section('title') ?>Recuperar Senha<?= $this->endSection() ?>
+<?= $this->section('title') ?>Recuperar Senha · Mechanical Academy<?= $this->endSection() ?>
 
 <?= $this->section('main2') ?>
 
 <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap');
 
-    body {
-        min-height: 100vh;
-        width: 100%;
-        background-image: url(https://kajabi-storefronts-production.kajabi-cdn.com/kajabi-storefronts-production/file-uploads/themes/2152537062/settings_images/a66be81-c84a-a41c-a2bb-044835e5116_Landing_BG.webp);
-        font-family: 'Poppins', sans-serif;
-    }
+  :root {
+    --ink: #f5f7fa;
+    --ink-soft: rgba(245, 247, 250, 0.62);
+    --page-bg: #050505;
+    --surface: #141414;
+    --line: rgba(255, 255, 255, 0.09);
+    --accent: #0d6efd;
+    --accent-soft: rgba(13, 110, 253, 0.16);
+    --accent-border: rgba(13, 110, 253, 0.38);
+  }
 
-    .overlay {
-        height: 100%;
-        width: 100%;
-        background: rgba(0, 0, 0, 0.8);
-    }
+  * { box-sizing: border-box; }
+
+  body {
+    min-height: 100vh !important;
+    height: auto !important;
+    margin: 0;
+    display: block !important;
+    align-items: stretch !important;
+    font-family: 'Sora', sans-serif !important;
+    color: var(--ink);
+    background:
+      radial-gradient(900px 480px at 50% -20%, rgba(13, 110, 253, 0.22) 0%, transparent 55%),
+      var(--page-bg) !important;
+    background-image: none !important;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .overlay {
+    min-height: 100vh;
+    width: 100%;
+    background: transparent !important;
+  }
+
+  .login {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.25rem;
+  }
+
+  .login-card {
+    width: 100%;
+    max-width: 400px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 0.375rem;
+    padding: 2.25rem 1.75rem 1.85rem;
+    box-shadow: 0 28px 60px -36px rgba(0, 0, 0, 0.75);
+    text-align: center;
+  }
+
+  .login-card__logo {
+    display: inline-flex;
+    margin: 0 auto 1.75rem;
+    text-decoration: none;
+  }
+
+  .login-card__logo img {
+    height: 42px;
+    width: auto;
+    display: block;
+  }
+
+  .login-card__title {
+    margin: 0 0 0.55rem;
+    font-size: 1.35rem;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    color: #fff;
+  }
+
+  .login-card__subtitle {
+    margin: 0 0 1.5rem;
+    font-size: 0.88rem;
+    line-height: 1.45;
+    color: var(--ink-soft);
+  }
+
+  .login-alert {
+    margin-bottom: 1rem;
+    padding: 0.75rem 0.9rem;
+    border-radius: 0.375rem;
+    font-size: 0.88rem;
+    line-height: 1.4;
+    text-align: left;
+  }
+
+  .login-alert--error {
+    background: rgba(220, 53, 69, 0.14);
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    color: #ff8a95;
+  }
+
+  .login-alert--ok {
+    background: rgba(22, 163, 74, 0.14);
+    border: 1px solid rgba(22, 163, 74, 0.3);
+    color: #86efac;
+  }
+
+  .login-field {
+    margin-bottom: 1.25rem;
+    text-align: left;
+  }
+
+  .login-field label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--ink-soft);
+  }
+
+  .login-field input {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 0.375rem;
+    padding: 0.85rem 1rem;
+    background: #0a0a0a;
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .login-field input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+  }
+
+  .login-field input:focus {
+    border-color: var(--accent-border);
+    box-shadow: 0 0 0 4px var(--accent-soft);
+  }
+
+  .login-submit {
+    width: 100%;
+    border: 0;
+    border-radius: 0.375rem;
+    padding: 0.9rem 1.25rem;
+    background: var(--accent);
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: 0 12px 28px -14px rgba(13, 110, 253, 0.65);
+  }
+
+  .login-submit:hover {
+    filter: brightness(1.06);
+    transform: translateY(-1px);
+  }
+
+  .login-submit:active {
+    transform: scale(0.98);
+  }
+
+  .login-back {
+    display: inline-block;
+    margin-top: 1.35rem;
+    color: var(--ink-soft);
+    text-decoration: none;
+    font-size: 0.84rem;
+    font-weight: 500;
+  }
+
+  .login-back:hover {
+    color: #fff;
+  }
 </style>
 
-<nav class="navbar navbar-expand-lg sticky-top bg-black navbar-dark py-3">
-    <div class="container">
-        <a class="navbar-brand" href="/">
-            <img src="<?= base_url('./assets/img/logo.png') ?>" alt="Logo" style="width: 150px;">
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-            data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-            aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
-                <?php if ($isLoggedIn): ?>
-                    <li class="nav-item me-3">
-                        <a class="nav-link active" href="<?= base_url($user->role . '/dashboard/meus_cursos') ?>">Meus Cursos</a>
-                    </li>
-                    <li class="nav-item d-flex align-items-center">
-                        <a href="<?= base_url($user->role . '/dashboard/perfil') ?>" class="d-flex align-items-center text-decoration-none">
-                            <img src="<?= base_url('assets/img/user-default.png') ?>" alt="User" class="rounded-circle me-2" width="35" height="35">
-                            <span class="text-white fw-semibold text-nowrap"><?= $user->username ?></span>
-                        </a>
-                    </li>
-                <?php else: ?>
-                    <li class="nav-item me-3">
-                        <a class="nav-link active" href="<?= base_url('/#cursos') ?>">Cursos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="<?= base_url('login') ?>">Entrar</a>
-                    </li>
-                <?php endif; ?>
-            </ul>
-        </div>
-    </div>
-</nav>
+<div class="login">
+  <div class="login-card">
+    <a class="login-card__logo" href="<?= base_url('/') ?>">
+      <img src="<?= base_url('assets/img/logo.png') ?>" alt="Mechanical Academy">
+    </a>
 
-<div class="d-flex align-items-center pt-5">
-    <div class="container d-flex justify-content-center p-5">
-        <div class="col-12 col-md-5 pt-5">
-            <div class="card-body">
-                <h5 class="card-title mb-4 text-white">Recuperar Senha</h5>
-                <p class="text-white-50 mb-4">Digite seu email para receber o link de redefinicao.</p>
+    <h1 class="login-card__title">Recuperar senha</h1>
+    <p class="login-card__subtitle">Digite o seu email para receber o link de redefinição.</p>
 
-                <?php if (session('error') !== null) : ?>
-                    <div class="alert alert-danger" role="alert"><?= esc(session('error')) ?></div>
-                <?php elseif (session('message') !== null) : ?>
-                    <div class="alert alert-success" role="alert"><?= esc(session('message')) ?></div>
-                <?php endif ?>
+    <?php if (session('error') !== null) : ?>
+      <div class="login-alert login-alert--error" role="alert"><?= esc(session('error')) ?></div>
+    <?php elseif (session('message') !== null) : ?>
+      <div class="login-alert login-alert--ok" role="alert"><?= esc(session('message')) ?></div>
+    <?php endif ?>
 
-                <form action="<?= site_url('reset-password/request') ?>" method="post">
-                    <?= csrf_field() ?>
+    <form action="<?= site_url('reset-password/request') ?>" method="post">
+      <?= csrf_field() ?>
 
-                    <div class="form-floating mb-4">
-                        <input type="email" class="form-control" id="floatingEmailInput" name="email" inputmode="email" autocomplete="email" placeholder="Email" value="<?= old('email') ?>" required>
-                        <label for="floatingEmailInput">Email</label>
-                    </div>
+      <div class="login-field">
+        <label for="floatingEmailInput">Email</label>
+        <input
+          type="email"
+          id="floatingEmailInput"
+          name="email"
+          inputmode="email"
+          autocomplete="email"
+          placeholder="nome@email.com"
+          value="<?= old('email') ?>"
+          required
+        >
+      </div>
 
-                    <div class="d-block w-100">
-                        <button type="submit" class="btn btn-primary btn-block px-5 py-2">Enviar link</button>
-                    </div>
+      <button type="submit" class="login-submit">Enviar link</button>
+    </form>
 
-                    <div class="mt-3 text-center">
-                        <a class="link-primary text-decoration-underline" href="<?= base_url('login') ?>">Voltar para login</a>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    <a class="login-back" href="<?= base_url('login') ?>">← Voltar para login</a>
+  </div>
 </div>
 
 <?= $this->endSection() ?>

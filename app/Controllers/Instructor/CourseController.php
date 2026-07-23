@@ -185,19 +185,27 @@ class CourseController extends BaseController
             return null;
         }
 
-        $targetDir = FCPATH . 'assets/instructor/lesson_files';
+        // Garante pasta de anexos (writable — sobrevive melhor a deploys)
+        $targetDir = rtrim(WRITEPATH, '/\\') . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'lesson_files';
         if (! is_dir($targetDir)) {
             @mkdir($targetDir, 0755, true);
         }
 
-        $newName = $file->getRandomName();
+        $originalName = $file->getClientName();
+        $ext = strtolower($file->getClientExtension());
+        // Nome aleatório SEM perder a extensão real do ficheiro
+        $newName = bin2hex(random_bytes(8)) . '_' . time() . ($ext !== '' ? '.' . $ext : '');
         if (! $file->move($targetDir, $newName)) {
+            log_message('error', 'Falha ao mover anexo de aula: {error}', [
+                'error' => $file->getErrorString() . ' (' . $file->getError() . ')',
+            ]);
+
             return null;
         }
 
         return [
             'path' => $newName,
-            'name' => $file->getClientName(),
+            'name' => $originalName,
         ];
     }
 
