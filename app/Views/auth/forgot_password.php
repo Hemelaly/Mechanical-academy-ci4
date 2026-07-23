@@ -49,9 +49,14 @@
     padding: 2rem 1.25rem;
   }
 
-  .login-card {
+  .login-stack {
     width: 100%;
     max-width: 400px;
+  }
+
+  .login-card {
+    width: 100%;
+    max-width: none;
     background: var(--surface);
     border: 1px solid var(--line);
     border-radius: 0.375rem;
@@ -60,13 +65,14 @@
     text-align: center;
   }
 
-  .login-card__logo {
-    display: inline-flex;
-    margin: 0 auto 1.75rem;
+  .login-brand {
+    display: flex;
+    justify-content: center;
+    margin: 0 auto 1.35rem;
     text-decoration: none;
   }
 
-  .login-card__logo img {
+  .login-brand img {
     height: 42px;
     width: auto;
     display: block;
@@ -182,11 +188,11 @@
 </style>
 
 <div class="login">
-  <div class="login-card">
-    <a class="login-card__logo" href="<?= base_url('/') ?>">
+  <div class="login-stack">
+    <a class="login-brand" href="<?= base_url('/') ?>">
       <img src="<?= base_url('assets/img/logo.png') ?>" alt="Mechanical Academy">
     </a>
-
+    <div class="login-card">
     <h1 class="login-card__title">Recuperar senha</h1>
     <p class="login-card__subtitle">Digite o seu email para receber o link de redefinição.</p>
 
@@ -217,6 +223,7 @@
     </form>
 
     <a class="login-back" href="<?= base_url('login') ?>">← Voltar para login</a>
+    </div>
   </div>
 </div>
 
