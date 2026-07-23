@@ -820,6 +820,23 @@ $courseIconBg = !empty($course->icon_course)
       color: var(--ink-soft);
     }
 
+    .pay-option__hint {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--ink-soft);
+      line-height: 1.35;
+    }
+
+    .sapp-help-box {
+      background: rgba(22, 163, 74, 0.12);
+      border: 1px solid rgba(22, 163, 74, 0.35);
+      color: #86efac;
+      border-radius: 0.375rem;
+      padding: 0.95rem 1.1rem;
+      font-size: 0.88rem;
+    }
+
     .mpesa-help,
     .transfer-help-box,
     .whatsapp-help-box {
@@ -1332,20 +1349,15 @@ $courseIconBg = !empty($course->icon_course)
                       <input class="form-check-input" type="radio" name="payment_method_ui" id="pay_mpesa" value="mpesa" checked>
                       <span class="pay-option__body">
                         <strong>M-Pesa</strong>
+                        <small class="pay-option__hint">Automático — confirmação imediata</small>
                       </span>
                     </label>
 
-                    <label class="pay-option" for="pay_transfer">
-                      <input class="form-check-input" type="radio" name="payment_method_ui" id="pay_transfer" value="transfer">
+                    <label class="pay-option" for="pay_sapp">
+                      <input class="form-check-input" type="radio" name="payment_method_ui" id="pay_sapp" value="sapp">
                       <span class="pay-option__body">
-                        <strong>Transferência</strong>
-                      </span>
-                    </label>
-
-                    <label class="pay-option" for="pay_whatsapp">
-                      <input class="form-check-input" type="radio" name="payment_method_ui" id="pay_whatsapp" value="whatsapp">
-                      <span class="pay-option__body">
-                        <strong>WhatsApp · +258 84 272 6761</strong>
+                        <strong>SAPP</strong>
+                        <small class="pay-option__hint">Outros métodos · apoio via WhatsApp</small>
                       </span>
                     </label>
                   </fieldset>
@@ -1358,18 +1370,13 @@ $courseIconBg = !empty($course->icon_course)
                     </div>
                   </div>
 
-                  <div id="transfer-help" class="transfer-help-box mb-3 d-none" style="background:var(--accent-soft); border:1px solid var(--accent-border); color:var(--ink);">
-                    <?php if ($user): ?>
-                      <a class="btn-mech btn-mech-outline" style="width:auto; padding:0.5rem 1rem; font-size:0.85rem;" href="<?= site_url('student/dashboard/checkout/' . (int) $course->id_course) ?>">Enviar comprovativo</a>
-                    <?php else: ?>
-                      <span>Faça login e envie o comprovativo no painel.</span>
-                    <?php endif; ?>
-                  </div>
-
-                  <div id="whatsapp-help" class="whatsapp-help-box mb-3 d-none" style="background:rgba(22,163,74,0.12); border:1px solid rgba(22,163,74,0.35); color:#86efac;">
-                      <a class="btn-mech btn-mech-success" style="width:auto; padding:0.5rem 1rem; font-size:0.85rem;" href="<?= esc($whatsappUrl) ?>" target="_blank" rel="noopener">
-                        WhatsApp +258 84 272 6761
-                      </a>
+                  <div id="sapp-help" class="sapp-help-box mb-3 d-none">
+                    <p class="mb-2" style="font-size:0.88rem;color:var(--ink-soft);margin:0 0 0.75rem;">
+                      Para pagar com <strong>SAPP</strong> (ou outros métodos), fale connosco no WhatsApp e enviamos as instruções.
+                    </p>
+                    <a class="btn-mech btn-mech-success" style="width:auto; padding:0.5rem 1rem; font-size:0.85rem;" href="<?= esc($whatsappUrl) ?>" target="_blank" rel="noopener">
+                      Continuar no WhatsApp · SAPP
+                    </a>
                   </div>
 
                   <input type="hidden" name="id_course" value="<?= (int) $course->id_course ?>">
@@ -1409,8 +1416,7 @@ $courseIconBg = !empty($course->icon_course)
     (function () {
       const radios = document.querySelectorAll('input[name="payment_method_ui"]');
       const mpesaFields = document.getElementById('mpesa-fields');
-      const transferHelp = document.getElementById('transfer-help');
-      const whatsappHelp = document.getElementById('whatsapp-help');
+      const sappHelp = document.getElementById('sapp-help');
       const submitBtn = document.getElementById('checkout-submit-btn');
       const clientNumber = document.getElementById('client_number');
       const form = document.getElementById('checkout-form');
@@ -1419,8 +1425,7 @@ $courseIconBg = !empty($course->icon_course)
       const syncPaymentUi = () => {
         const selected = document.querySelector('input[name="payment_method_ui"]:checked')?.value || 'mpesa';
         mpesaFields?.classList.toggle('d-none', selected !== 'mpesa');
-        transferHelp?.classList.toggle('d-none', selected !== 'transfer');
-        whatsappHelp?.classList.toggle('d-none', selected !== 'whatsapp');
+        sappHelp?.classList.toggle('d-none', selected !== 'sapp');
         if (clientNumber) {
           clientNumber.required = selected === 'mpesa';
           clientNumber.disabled = selected !== 'mpesa';
@@ -1428,12 +1433,10 @@ $courseIconBg = !empty($course->icon_course)
         if (submitBtn) {
           if (selected === 'mpesa') {
             submitBtn.classList.remove('d-none');
-            submitBtn.textContent = 'Finalizar a minha compra';
-          } else if (selected === 'transfer') {
-            submitBtn.classList.add('d-none');
+            submitBtn.innerHTML = 'Finalizar compra <i class="bi bi-arrow-right"></i>';
           } else {
             submitBtn.classList.remove('d-none');
-            submitBtn.innerHTML = 'Continuar no WhatsApp <i class="fas fa-arrow-right ms-2"></i>';
+            submitBtn.innerHTML = 'Continuar no WhatsApp · SAPP <i class="bi bi-whatsapp"></i>';
           }
         }
       };
@@ -1443,12 +1446,9 @@ $courseIconBg = !empty($course->icon_course)
 
       form?.addEventListener('submit', (event) => {
         const selected = document.querySelector('input[name="payment_method_ui"]:checked')?.value || 'mpesa';
-        if (selected === 'whatsapp') {
+        if (selected === 'sapp') {
           event.preventDefault();
           window.open(whatsappUrl, '_blank', 'noopener');
-        }
-        if (selected === 'transfer') {
-          event.preventDefault();
         }
       });
     })();
