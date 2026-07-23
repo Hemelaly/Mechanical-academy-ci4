@@ -1399,7 +1399,7 @@ $learnMoreCount = 0;
         <div class="video-frame mx-auto">
           <iframe id="vimeoPlayerOverview"
             title="Vimeo player"
-            src="https://player.vimeo.com/video/<?= esc($overviewVideoId) ?>?badge=0&autopause=0&player_id=<?= esc($overviewPlayerId) ?>&app_id=58479&title=0&byline=0&portrait=0&autoplay=0"
+            src="https://player.vimeo.com/video/<?= esc($overviewVideoId) ?>?badge=0&autopause=0&player_id=<?= esc($overviewPlayerId) ?>&app_id=58479&title=0&byline=0&portrait=0&autoplay=0&outro=nothing&dnt=1"
             frameborder="0"
             allow="autoplay; fullscreen; picture-in-picture"
             allowfullscreen
@@ -1482,7 +1482,7 @@ $learnMoreCount = 0;
                           if ($isPreviewLesson && !empty($lesson->preview_video_id)) {
                             $previewSrc = 'https://player.vimeo.com/video/' . rawurlencode((string) $lesson->preview_video_id)
                               . '?badge=0&autopause=0&player_id=' . (int) ($lesson->id_lesson ?? 0)
-                              . '&app_id=58479&title=0&byline=0&portrait=0&autoplay=1';
+                              . '&app_id=58479&title=0&byline=0&portrait=0&autoplay=1&outro=nothing&dnt=1';
                           }
                           ?>
                           <li>

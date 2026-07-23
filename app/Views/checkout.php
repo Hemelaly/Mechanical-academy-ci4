@@ -169,7 +169,7 @@ if ($overviewVideoUrlRaw !== '') {
   if (preg_match('/vimeo\.com\/(?:video\/)?([0-9]+)/', $overviewVideoUrlRaw, $vimeoMatch)) {
     $overviewVideoEmbedSrc = 'https://player.vimeo.com/video/' . rawurlencode((string) $vimeoMatch[1])
       . '?badge=0&autopause=0&player_id=' . $overviewPlayerId
-      . '&app_id=58479&title=0&byline=0&portrait=0&autoplay=0';
+      . '&app_id=58479&title=0&byline=0&portrait=0&autoplay=0&outro=nothing&dnt=1';
   } elseif (preg_match('/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/', $overviewVideoUrlRaw, $youtubeMatch)) {
     $overviewVideoEmbedSrc = 'https://www.youtube.com/embed/' . rawurlencode((string) $youtubeMatch[1])
       . '?rel=0&modestbranding=1';
