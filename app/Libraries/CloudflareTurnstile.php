@@ -46,6 +46,32 @@ class CloudflareTurnstile
     }
 
     /**
+     * Valida o token do formulário. Se Turnstile estiver desligado, passa.
+     *
+     * @return array{ok: bool, message: string}
+     */
+    public function verifyRequest(?\CodeIgniter\HTTP\IncomingRequest $request = null): array
+    {
+        if (! $this->isReady()) {
+            return ['ok' => true, 'message' => 'skipped'];
+        }
+
+        $request ??= service('request');
+        $token = (string) ($request->getPost('cf-turnstile-response')
+            ?? $request->getPost('cf_turnstile_response')
+            ?? '');
+
+        if ($token === '') {
+            $json = $request->getJSON(true);
+            if (is_array($json)) {
+                $token = (string) ($json['cf-turnstile-response'] ?? $json['token'] ?? '');
+            }
+        }
+
+        return $this->verifyToken($token, $request->getIPAddress());
+    }
+
+    /**
      * @return array{ok: bool, message: string, codes?: list<string>}
      */
     public function verifyToken(string $token, ?string $remoteIp = null): array

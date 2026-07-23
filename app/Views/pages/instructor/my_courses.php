@@ -96,7 +96,7 @@
                         </h3>
 
                         <p class="text-slate-600 dark:text-slate-400 text-sm mb-4 line-clamp-2">
-                            <?= esc($course->description_course) ?>
+                            <?= esc(trim(preg_replace('/\s+/u', ' ', strip_tags((string) ($course->description_course ?? ''))))) ?>
                         </p>
 
                         <!-- Estatísticas -->

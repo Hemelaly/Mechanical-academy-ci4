@@ -75,7 +75,7 @@ if (empty($learningItems) && $isCcnaCourse) {
 }
 
 $learningItems = array_values(array_unique(array_filter($learningItems)));
-$learningItems = array_slice($learningItems, 0, 4);
+// Mostrar todos os itens (sem limitar a 4/6)
 
 $summarySource = trim((string) ($course->description_course ?? ''));
 if ($summarySource === '' && $courseSubtitle !== '') {
@@ -500,6 +500,73 @@ $courseIconBg = !empty($course->icon_course)
       justify-content: center;
       font-size: 0.72rem;
       margin-top: 0.1rem;
+    }
+
+    .checkout-curriculum {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      margin: 0 0 1.5rem;
+    }
+    .checkout-curriculum__mod {
+      border: 1px solid var(--line);
+      border-radius: 0.35rem;
+      background: rgba(255,255,255,0.02);
+      overflow: hidden;
+    }
+    .checkout-curriculum__mod summary {
+      list-style: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.7rem 0.85rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+    .checkout-curriculum__mod summary::-webkit-details-marker { display: none; }
+    .checkout-curriculum__idx {
+      width: 1.4rem;
+      height: 1.4rem;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      flex-shrink: 0;
+    }
+    .checkout-curriculum__title { flex: 1; min-width: 0; }
+    .checkout-curriculum__count {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--ink-soft);
+      white-space: nowrap;
+    }
+    .checkout-curriculum__lessons {
+      list-style: none;
+      margin: 0;
+      padding: 0 0.85rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      border-top: 1px solid var(--line);
+      padding-top: 0.65rem;
+    }
+    .checkout-curriculum__lessons li {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.82rem;
+      color: var(--ink-soft);
+    }
+    .checkout-curriculum__lessons i { color: var(--accent); }
+    .checkout-curriculum__lessons em {
+      margin-left: auto;
+      font-style: normal;
+      font-size: 0.72rem;
+      opacity: 0.75;
     }
 
     .free-lessons-note {
@@ -1042,6 +1109,17 @@ $courseIconBg = !empty($course->icon_course)
       }
     }
   </style>
+  <?= view('partials/meta_pixel', [
+      'trackInitiateCheckout' => true,
+      'initiatePayload' => [
+          'content_ids'  => [(string) (int) ($course->id_course ?? 0)],
+          'content_name' => (string) ($course->title_course ?? ''),
+          'content_type' => 'product',
+          'value'        => (float) $effectivePrice,
+          'currency'     => 'MZN',
+          'num_items'    => 1,
+      ],
+  ]) ?>
 </head>
 
 <body
@@ -1127,10 +1205,38 @@ $courseIconBg = !empty($course->icon_course)
           <?php if (! empty($learningItems)): ?>
             <p class="summary-block-heading">O que você vai aprender</p>
             <ul class="learn-list-checkout">
-              <?php foreach (array_slice($learningItems, 0, 6) as $learningItem): ?>
+              <?php foreach ($learningItems as $learningItem): ?>
                 <li><i class="bi bi-check-lg"></i><span><?= esc($learningItem) ?></span></li>
               <?php endforeach; ?>
             </ul>
+          <?php endif; ?>
+
+          <?php if (! empty($modules)): ?>
+            <p class="summary-block-heading" style="margin-top:1.25rem;">Conteúdo do curso</p>
+            <div class="checkout-curriculum">
+              <?php foreach ($modules as $key => $module): ?>
+                <details class="checkout-curriculum__mod" <?= $key === 0 ? 'open' : '' ?>>
+                  <summary>
+                    <span class="checkout-curriculum__idx"><?= (int) $key + 1 ?></span>
+                    <span class="checkout-curriculum__title"><?= esc($module->title_module ?? 'Módulo') ?></span>
+                    <span class="checkout-curriculum__count"><?= count($module->lessons ?? []) ?> aulas</span>
+                  </summary>
+                  <?php if (! empty($module->lessons)): ?>
+                    <ul class="checkout-curriculum__lessons">
+                      <?php foreach ($module->lessons as $lesson): ?>
+                        <li>
+                          <i class="bi bi-play-circle"></i>
+                          <span><?= esc($lesson->title_lesson ?? 'Aula') ?></span>
+                          <?php if (! empty($lesson->duration_lesson)): ?>
+                            <em><?= (int) $lesson->duration_lesson ?> min</em>
+                          <?php endif; ?>
+                        </li>
+                      <?php endforeach; ?>
+                    </ul>
+                  <?php endif; ?>
+                </details>
+              <?php endforeach; ?>
+            </div>
           <?php endif; ?>
 
           <div class="price-line">
@@ -1268,6 +1374,8 @@ $courseIconBg = !empty($course->icon_course)
 
                   <input type="hidden" name="id_course" value="<?= (int) $course->id_course ?>">
                   <input type="hidden" name="amount_payment" value="<?= $effectivePrice ?>">
+
+                  <?= view('partials/turnstile_widget', ['theme' => 'dark']) ?>
 
                   <button type="submit" id="checkout-submit-btn" class="btn-mech btn-mech-primary">
                     Finalizar compra
@@ -1457,6 +1565,26 @@ $courseIconBg = !empty($course->icon_course)
               status: payload?.status || 'approved',
               requires_password_setup: !!requiresPasswordSetup,
               method: 'mpesa'
+            });
+          } else if (window.posthog) {
+            window.posthog.capture('purchase', {
+              funnel: 'course_purchase',
+              course_id: courseId,
+              course_title: courseTitle,
+              amount: amount,
+              payment_id: payload?.payment_id || undefined,
+              status: payload?.status || 'approved',
+              method: 'mpesa'
+            });
+          }
+          if (window.MetaPixel && typeof window.MetaPixel.purchase === 'function') {
+            window.MetaPixel.purchase({
+              content_ids: courseId ? [String(courseId)] : [],
+              content_name: courseTitle || undefined,
+              content_type: 'product',
+              value: amount || 0,
+              currency: 'MZN',
+              num_items: 1
             });
           }
           renderSuccessMessage({
@@ -1680,6 +1808,21 @@ $courseIconBg = !empty($course->icon_course)
             amount: Number(document.body?.getAttribute('data-analytics-amount') || 0) || undefined,
             method: 'mpesa'
           });
+        } else if (window.posthog) {
+          window.posthog.capture('payment_start', {
+            funnel: 'course_purchase',
+            course_id: Number(document.body?.getAttribute('data-analytics-course-id') || 0) || undefined,
+            amount: Number(document.body?.getAttribute('data-analytics-amount') || 0) || undefined,
+            method: 'mpesa'
+          });
+        }
+        if (window.MetaPixel && typeof window.MetaPixel.addPaymentInfo === 'function') {
+          window.MetaPixel.addPaymentInfo({
+            content_ids: [String(document.body?.getAttribute('data-analytics-course-id') || '')].filter(Boolean),
+            content_type: 'product',
+            value: Number(document.body?.getAttribute('data-analytics-amount') || 0) || 0,
+            currency: 'MZN'
+          });
         }
 
         if (submitButton) {
@@ -1773,7 +1916,16 @@ $courseIconBg = !empty($course->icon_course)
 </div>
   <script>window.ANALYTICS_COLLECT_URL = <?= json_encode(site_url('analytics/collect')) ?>;</script>
   <script src="<?= base_url('assets/js/analytics-tracker.js') ?>" defer></script>
-  <?= view('partials/posthog') ?>
+  <?= view('partials/posthog', [
+      'analyticsPageEvent' => 'checkout_view',
+      'analyticsPageProps' => [
+          'course_id'    => (int) ($course->id_course ?? 0),
+          'course_title' => (string) ($course->title_course ?? ''),
+          'amount'       => (float) $effectivePrice,
+          'path'         => '/checkout/' . (int) ($course->id_course ?? 0),
+          'funnel'       => 'course_purchase',
+      ],
+  ]) ?>
 </body>
 
 </html>

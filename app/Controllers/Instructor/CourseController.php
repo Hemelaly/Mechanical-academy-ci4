@@ -27,6 +27,33 @@ class CourseController extends BaseController
         return in_array(strtolower($column), $this->getCourseColumns(), true);
     }
 
+    /**
+     * Limpa caches de ficheiros/páginas após publicar ou actualizar curso.
+     */
+    private function clearAppCaches(): void
+    {
+        try {
+            cache()->clean();
+        } catch (\Throwable $e) {
+            log_message('warning', 'Falha ao limpar cache: {msg}', ['msg' => $e->getMessage()]);
+        }
+
+        $paths = [
+            WRITEPATH . 'cache',
+            WRITEPATH . 'debugbar',
+        ];
+        foreach ($paths as $dir) {
+            if (! is_dir($dir)) {
+                continue;
+            }
+            foreach (glob(rtrim($dir, '/\\') . DIRECTORY_SEPARATOR . '*') ?: [] as $file) {
+                if (is_file($file)) {
+                    @unlink($file);
+                }
+            }
+        }
+    }
+
     private function normalizeCoursePayload(array $payload): array
     {
         if (array_key_exists('learning_course', $payload)) {
@@ -571,6 +598,10 @@ class CourseController extends BaseController
             }
         }
 
+        if ($status === 'Ativo') {
+            $this->clearAppCaches();
+        }
+
         return redirect()->to('instructor/dashboard/meus_cursos')->with('success', 'Curso criado com sucesso!');
     }
 
@@ -678,8 +709,10 @@ class CourseController extends BaseController
 
         $data = $this->request->getPost();
 
-        // Auto-save deve sempre permanecer como rascunho.
-        $status = 'Rascunho';
+        // Autosave: preservar status se já estiver publicado
+        $currentStatus = strtolower(trim((string) ($course->status_course ?? '')));
+        $isPublished = in_array($currentStatus, ['ativo', 'published', 'publicado'], true);
+        $status = $isPublished ? 'Ativo' : 'Rascunho';
 
         $isPaid = ($data['courseType'] ?? 'free') === 'paid';
         $updateData = [
@@ -1046,6 +1079,10 @@ class CourseController extends BaseController
         if (! $db->transStatus()) {
             return redirect()->back()->withInput()
                 ->with('error', 'Falha ao persistir alteracoes do curso. Nenhuma alteracao foi salva.');
+        }
+
+        if (! $isDraft) {
+            $this->clearAppCaches();
         }
 
         return redirect()->to('instructor/dashboard/meus_cursos')

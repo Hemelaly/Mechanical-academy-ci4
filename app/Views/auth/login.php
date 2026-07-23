@@ -266,6 +266,8 @@ $user = service('auth')->user();
         <a class="login-forgot" href="<?= base_url('reset-password') ?>">Esqueci a senha</a>
       </div>
 
+      <?= view('partials/turnstile_widget', ['theme' => 'dark']) ?>
+
       <button type="submit" class="login-submit"><?= lang('Auth.login') ?></button>
     </form>
 

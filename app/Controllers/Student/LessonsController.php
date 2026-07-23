@@ -182,12 +182,14 @@ class LessonsController extends BaseController
 
         $mime = $this->mimeForExtension($realExt);
 
+        // Download robusto (evita redirects/JSON quando o browser espera ficheiro)
         return $this->response
-            ->download($fullPath, null)
-            ->setFileName($downloadName)
             ->setHeader('Content-Type', $mime)
+            ->setHeader('Content-Disposition', 'attachment; filename="' . str_replace('"', '', $downloadName) . '"')
+            ->setHeader('Content-Length', (string) filesize($fullPath))
             ->setHeader('X-Content-Type-Options', 'nosniff')
-            ->setHeader('Cache-Control', 'private, no-store');
+            ->setHeader('Cache-Control', 'private, no-store')
+            ->setBody(file_get_contents($fullPath));
     }
 
     /**
@@ -199,28 +201,49 @@ class LessonsController extends BaseController
             return null;
         }
 
+        $relative = str_replace(['../', '..\\'], '', $relative);
+        $relativeNormalized = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $relative);
+        $basename = basename($relativeNormalized);
         $candidates = [];
 
-        // Novo local (uploads protegidos)
-        $candidates[] = rtrim(WRITEPATH, '/\\') . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'lesson_files' . DIRECTORY_SEPARATOR . basename($relative);
+        // Nome do ficheiro em writable/uploads/lesson_files
+        $uploadDir = rtrim(WRITEPATH, '/\\') . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'lesson_files';
+        $candidates[] = $uploadDir . DIRECTORY_SEPARATOR . $basename;
 
-        // Legado: public/assets/instructor/lesson_files
-        $candidates[] = rtrim(FCPATH, '/\\') . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'instructor' . DIRECTORY_SEPARATOR . 'lesson_files' . DIRECTORY_SEPARATOR . basename($relative);
+        // Legado público
+        $legacyDir = rtrim(FCPATH, '/\\') . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'instructor' . DIRECTORY_SEPARATOR . 'lesson_files';
+        $candidates[] = $legacyDir . DIRECTORY_SEPARATOR . $basename;
 
-        // Se a BD já tiver um caminho relativo completo
-        if (str_contains($relative, DIRECTORY_SEPARATOR) || str_contains($relative, '/') || str_contains($relative, '\\')) {
-            $candidates[] = rtrim(FCPATH, '/\\') . DIRECTORY_SEPARATOR . $relative;
-            $candidates[] = rtrim(ROOTPATH, '/\\') . DIRECTORY_SEPARATOR . $relative;
-            $candidates[] = rtrim(WRITEPATH, '/\\') . DIRECTORY_SEPARATOR . $relative;
+        // Caminho relativo completo tal como na BD
+        if (str_contains($relativeNormalized, DIRECTORY_SEPARATOR)) {
+            $candidates[] = rtrim(FCPATH, '/\\') . DIRECTORY_SEPARATOR . ltrim($relativeNormalized, DIRECTORY_SEPARATOR);
+            $candidates[] = rtrim(ROOTPATH, '/\\') . DIRECTORY_SEPARATOR . ltrim($relativeNormalized, DIRECTORY_SEPARATOR);
+            $candidates[] = rtrim(WRITEPATH, '/\\') . DIRECTORY_SEPARATOR . ltrim($relativeNormalized, DIRECTORY_SEPARATOR);
+            $candidates[] = $uploadDir . DIRECTORY_SEPARATOR . ltrim($relativeNormalized, DIRECTORY_SEPARATOR);
         }
 
-        foreach ($candidates as $path) {
-            $real = realpath($path);
+        // Absolute path already stored
+        if (preg_match('#^[A-Za-z]:\\\\#', $relative) === 1 || str_starts_with($relative, '/')) {
+            $candidates[] = $relative;
+        }
+
+        foreach (array_unique($candidates) as $path) {
+            $real = @realpath($path);
             if ($real !== false && is_file($real)) {
                 return $real;
             }
             if (is_file($path)) {
                 return $path;
+            }
+        }
+
+        // Última tentativa: procurar por basename na pasta de uploads
+        if (is_dir($uploadDir) && $basename !== '') {
+            $matches = glob($uploadDir . DIRECTORY_SEPARATOR . '*' . $basename) ?: [];
+            foreach ($matches as $match) {
+                if (is_file($match)) {
+                    return $match;
+                }
             }
         }
 

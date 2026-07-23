@@ -1046,7 +1046,12 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
                 onKeyup: function() {
                     window.dispatchEvent(new Event("course-editor-input"));
                 },
-                onPaste: function() {
+                onPaste: function(e) {
+                    e.preventDefault();
+                    const clipboard = ((e.originalEvent || e).clipboardData || window.clipboardData);
+                    let text = clipboard ? (clipboard.getData("text/plain") || "") : "";
+                    text = String(text).replace(/\r\n/g, "\n").trim();
+                    document.execCommand("insertText", false, text);
                     window.dispatchEvent(new Event("course-editor-input"));
                 }
             }

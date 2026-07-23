@@ -56,10 +56,9 @@ class Filters extends BaseFilters
     public array $required = [
         'before' => [
             'forcehttps', // Force Global Secure Requests
-            'pagecache',  // Web Page Caching
+            // pagecache desactivado: LMS tem conteúdo personalizado e stale cache
         ],
         'after' => [
-            'pagecache',   // Web Page Caching
             'performance', // Performance Metrics
             'toolbar',     // Debug Toolbar
         ],
@@ -79,19 +78,7 @@ class Filters extends BaseFilters
             // 'honeypot',
             // 'csrf',
             // 'invalidchars',
-            'cf-turnstile' => [
-                'except' => [
-                    'cf-challenge',
-                    'cf-challenge/*',
-                    'analytics/collect',
-                    'materials/*',
-                    'student/lessons/download/*',
-                    'certificados/download/*',
-                    'mpesa/callback',
-                    'mpesa/status',
-                    'newsletter/subscribe',
-                ],
-            ],
+            // Cloudflare Turnstile: só em formulários (ver $filters)
         ],
         'after' => [
             // 'honeypot',
@@ -134,5 +121,7 @@ class Filters extends BaseFilters
      *
      * @var array<string, array<string, list<string>>>
      */
-    public array $filters = [];
+    public array $filters = [
+        // Turnstile validado nos controllers dos formulários (widget + verifyToken)
+    ];
 }

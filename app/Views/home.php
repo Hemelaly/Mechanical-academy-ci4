@@ -1362,6 +1362,7 @@ $formatMzn = static function ($value): string {
         <div>
           <form class="news__form" id="newsletterForm" action="<?= site_url('newsletter/subscribe') ?>" method="post">
             <input class="news__input" type="email" name="email" placeholder="O seu email" aria-label="Email" required autocomplete="email">
+            <?= view('partials/turnstile_widget', ['theme' => 'dark']) ?>
             <button class="btn-mech btn-mech-dark" type="submit" id="newsletterBtn">Notificar-me</button>
           </form>
           <p class="news__msg" id="newsletterMsg" hidden role="status"></p>

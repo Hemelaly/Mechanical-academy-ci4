@@ -523,6 +523,12 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
 <div class="player-shell min-w-0 text-gray-900 dark:text-gray-100 transition-colors duration-300 <?= ($accessBlocked || (bool) session('blocked_access')) ? 'blocked-access' : '' ?>">
     <div class="container mx-auto" data-enrollment-id="<?= (int)($enrollment->id_enrollment) ?>" data-enrollment-status="<?= esc($enrollmentStatus) ?>">
 
+        <?php if (session('error')): ?>
+            <div class="mb-4 rounded-md border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-700 dark:text-rose-200">
+                <?= esc(session('error')) ?>
+            </div>
+        <?php endif; ?>
+
         <?php if (! $accessBlocked && $isDemoAccess && $demoRemainingSeconds > 0): ?>
             <div class="mb-4 rounded-md border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-200 flex flex-wrap items-center justify-between gap-2">
                 <span><i class="bi bi-clock-history me-1"></i> Acesso demo — expira em <strong id="demoCountdown"><?= esc(gmdate('H:i:s', $demoRemainingSeconds)) ?></strong></span>
@@ -2188,7 +2194,34 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
         player.off('ended');
         player.off('timeupdate');
 
+        const resumeKey = 'academy_vimeo_resume_' + String(currentLessonId || '');
+
+        const saveResume = (seconds) => {
+            try {
+                if (!resumeKey || !seconds || seconds < 3) return;
+                localStorage.setItem(resumeKey, String(Math.floor(seconds)));
+            } catch (e) { /* ignore */ }
+        };
+
+        const clearResume = () => {
+            try { localStorage.removeItem(resumeKey); } catch (e) { /* ignore */ }
+        };
+
+        player.ready().then(async () => {
+            try {
+                const saved = parseFloat(localStorage.getItem(resumeKey) || '0');
+                const duration = (await player.getDuration()) || 0;
+                // Retomar se houver progresso válido (não no fim)
+                if (saved >= 5 && duration > 0 && saved < (duration - 8)) {
+                    await player.setCurrentTime(saved);
+                }
+            } catch (e) {
+                // Silent
+            }
+        }).catch(() => {});
+
         player.on('ended', async function() {
+            clearResume();
             try {
                 await markCompletedOnEnd();
             } catch (e) {
@@ -2203,6 +2236,7 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
                 const duration = (await player.getDuration()) || 0;
                 const watched = data.seconds || 0;
                 currentVideoProgress = duration > 0 ? (watched / duration) * 100 : 0;
+                saveResume(watched);
 
                 if (duration > 0 && currentVideoProgress >= 95 && !hasReached95Percent) {
                     const checkbox = document.querySelector(`.lesson-row[data-lesson-id="${currentLessonId}"] .lesson-check`);
@@ -2211,11 +2245,16 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
                         await toggleLessonComplete(currentLessonId, true, checkbox);
                         hasReached95Percent = true;
                     }
+                    clearResume();
                 }
             } catch (error) {
                 // Silent fail
             }
         });
+
+        window.addEventListener('pagehide', function() {
+            player.getCurrentTime().then(saveResume).catch(() => {});
+        }, { once: false });
     }
 
     async function loadLesson(url) {

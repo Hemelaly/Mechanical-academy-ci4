@@ -81,22 +81,11 @@ foreach ($normalizedLearningItems as $itemText) {
     $learningHtml .= '<li><i class="fa-solid fa-check text-primary me-3"></i><span>' . esc($itemText) . '</span></li>';
 }
 
-$descriptionHtml = trim($course->description_course ?? '');
-if ($descriptionHtml === '') {
-    $descriptionHtml = <<<'HTML'
-<p class="fs-5 mb-4">
-  Este é um curso aprofundado de 40+ horas que o levará desde o início absoluto do Excel, aprendendo desde
-  fórmulas básicas até recursos avançados como tabelas dinâmicas, gráficos e automação com macros.
-  Você aprenderá a criar planilhas profissionais, organizar e analisar grandes volumes de dados e aplicar
-  técnicas de produtividade para o uso no ambiente corporativo.
-</p>
-<p class="fs-5 mb-4">
-  Também exploraremos o uso de funções complexas como PROCX, SOMASES, ÍNDICE e CORRESP, além de recursos
-  de validação de dados, proteção de planilhas e dashboards interativos.
-  No final, você dominará as ferramentas para transformar dados brutos em insights claros e visuais
-  profissionais.
-</p>
-HTML;
+$descriptionHtml = trim((string) ($course->description_course ?? ''));
+$descriptionPlain = trim(html_entity_decode(strip_tags($descriptionHtml), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+$descriptionPlain = trim(preg_replace('/\s+/u', ' ', $descriptionPlain) ?? '');
+if ($descriptionPlain === '') {
+    $descriptionPlain = '';
 }
 
 $courseTitleEsc = esc($course->title_course);
@@ -167,8 +156,8 @@ $accentSoft   = mechHexToRgba($accentColor, 0.16);
 $accentBorder = mechHexToRgba($accentColor, 0.38);
 $accentGlow   = mechHexToRgba($accentColor, 0.28);
 
-$learnPreviewItems = array_slice($normalizedLearningItems, 0, 6);
-$learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewItems));
+$learnPreviewItems = $normalizedLearningItems;
+$learnMoreCount = 0;
 ?>
 
 <!doctype html>
@@ -1423,6 +1412,19 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
     </section>
   <?php endif; ?>
 
+  <?php if ($descriptionPlain !== ''): ?>
+    <section class="section section-tight">
+      <div class="container-mech">
+        <div class="section-heading">
+          <h2>Sobre o curso</h2>
+        </div>
+        <p style="max-width:48rem;color:var(--ink-soft);font-size:1rem;line-height:1.65;margin:0;">
+          <?= esc($descriptionPlain) ?>
+        </p>
+      </div>
+    </section>
+  <?php endif; ?>
+
   <!-- O QUE VAI APRENDER -->
   <section id="learn" class="section">
     <div class="container-mech">
@@ -1709,7 +1711,15 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
   </script>
   <script>window.ANALYTICS_COLLECT_URL = <?= json_encode(site_url('analytics/collect')) ?>;</script>
   <script src="<?= base_url('assets/js/analytics-tracker.js') ?>" defer></script>
-  <?= view('partials/posthog') ?>
+  <?= view('partials/posthog', [
+      'analyticsPageEvent' => 'course_view',
+      'analyticsPageProps' => [
+          'course_id'    => (int) ($course->id_course ?? 0),
+          'course_title' => (string) ($course->title_course ?? ''),
+          'path'         => '/courses/' . (int) ($course->id_course ?? 0),
+          'funnel'       => 'course_purchase',
+      ],
+  ]) ?>
 </body>
 
 </html>

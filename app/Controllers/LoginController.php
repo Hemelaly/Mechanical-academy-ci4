@@ -43,6 +43,12 @@ class LoginController extends ShieldLoginController
             return redirect()->to(config('Auth')->loginRedirect());
         }
 
+        $cf = new \App\Libraries\CloudflareTurnstile();
+        $cfCheck = $cf->verifyRequest($this->request);
+        if (! $cfCheck['ok']) {
+            return redirect()->back()->withInput()->with('error', $cfCheck['message'] ?? 'Verificação Cloudflare falhou.');
+        }
+
         /** @var Session $authenticator */
         $authenticator = auth('session')->getAuthenticator();
 

@@ -22,6 +22,19 @@ class MpesaController extends Controller
     {
         helper(['form']);
 
+        $cf = new \App\Libraries\CloudflareTurnstile();
+        $cfCheck = $cf->verifyRequest($this->request);
+        if (! $cfCheck['ok']) {
+            return $this->jsonResponse(422, [
+                'ok'   => false,
+                'swal' => [
+                    'icon'  => 'error',
+                    'title' => 'Verificação necessária',
+                    'text'  => $cfCheck['message'] ?? 'Complete a verificação Cloudflare e tente novamente.',
+                ],
+            ]);
+        }
+
         $authenticatedUser = auth()->user();
         $rules = [
             'id_course'     => 'required|integer',

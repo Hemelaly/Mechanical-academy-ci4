@@ -56,6 +56,15 @@ class Home extends BaseController
    */
   public function subscribe(): ResponseInterface
   {
+    $cf = new \App\Libraries\CloudflareTurnstile();
+    $cfCheck = $cf->verifyRequest($this->request);
+    if (! $cfCheck['ok']) {
+      return $this->response->setStatusCode(422)->setJSON([
+        'ok' => false,
+        'message' => $cfCheck['message'] ?? 'Verificação Cloudflare falhou.',
+      ]);
+    }
+
     $email = strtolower(trim((string) $this->request->getPost('email')));
 
     if ($email === '' || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {

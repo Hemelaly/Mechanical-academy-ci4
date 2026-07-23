@@ -96,6 +96,29 @@ class PageController extends BaseController
 
         $checkoutStats = $this->getCourseContentStats((int) $course->id_course, $course);
 
+        $moduleModel = new ModuleModel();
+        $lessonModel = new LessonModel();
+        $modules = $moduleModel
+            ->select('id_module, title_module, position_module')
+            ->where('id_course_module', (int) $course->id_course)
+            ->orderBy('position_module', 'ASC')
+            ->findAll();
+        $moduleIds = array_map(static fn ($m) => (int) $m->id_module, $modules);
+        $lessonsByModule = [];
+        if ($moduleIds !== []) {
+            $lessons = $lessonModel
+                ->select('id_lesson, id_module_lesson, title_lesson, duration_lesson, type_lesson, position_lesson')
+                ->whereIn('id_module_lesson', $moduleIds)
+                ->orderBy('position_lesson', 'ASC')
+                ->findAll();
+            foreach ($lessons as $lesson) {
+                $lessonsByModule[(int) $lesson->id_module_lesson][] = $lesson;
+            }
+        }
+        foreach ($modules as $module) {
+            $module->lessons = $lessonsByModule[(int) $module->id_module] ?? [];
+        }
+
         $enrollmentModel = new \App\Models\EnrollmentModel();
         $userId = $user ? $user->id : null;
 
@@ -113,6 +136,7 @@ class PageController extends BaseController
             'user' => $user,
             'isEnrolled' => $isEnrolled,
             'checkoutStats' => $checkoutStats,
+            'modules' => $modules,
             'commerce' => new \App\Services\CourseCommerceService(),
         ]);
     }

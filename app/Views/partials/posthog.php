@@ -41,3 +41,31 @@ posthog.identify(<?= json_encode($distinctId) ?>, <?= json_encode($personProps) 
 <?php endif; ?>
 </script>
 <script src="<?= base_url('assets/js/academy-analytics.js') ?>" defer></script>
+<?php
+$pageEvent = trim((string) ($analyticsPageEvent ?? ''));
+$pageProps = is_array($analyticsPageProps ?? null) ? $analyticsPageProps : [];
+if ($pageEvent !== ''):
+?>
+<script>
+(function () {
+  var eventName = <?= json_encode($pageEvent) ?>;
+  var props = <?= json_encode($pageProps, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+  function send() {
+    try {
+      if (window.posthog && typeof window.posthog.capture === 'function') {
+        window.posthog.capture(eventName, props || {});
+        return true;
+      }
+    } catch (e) {}
+    return false;
+  }
+  if (!send()) {
+    var n = 0;
+    var t = setInterval(function () {
+      n += 1;
+      if (send() || n > 40) clearInterval(t);
+    }, 250);
+  }
+})();
+</script>
+<?php endif; ?>
