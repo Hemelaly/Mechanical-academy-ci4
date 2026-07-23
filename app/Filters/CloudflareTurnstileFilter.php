@@ -27,8 +27,13 @@ class CloudflareTurnstileFilter implements FilterInterface
 
         $path = trim((string) $request->getUri()->getPath(), '/');
 
+        // Normalizar se CI estiver num subdirectório
+        if (str_starts_with($path, 'index.php/')) {
+            $path = substr($path, strlen('index.php/'));
+        }
+
         // Já na página de challenge / verify
-        if ($path === 'cf-challenge' || $path === 'cf-challenge/verify') {
+        if ($path === 'cf-challenge' || str_starts_with($path, 'cf-challenge/')) {
             return null;
         }
 

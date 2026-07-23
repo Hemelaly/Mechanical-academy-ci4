@@ -89,6 +89,7 @@ class Filters extends BaseFilters
                     'certificados/download/*',
                     'mpesa/callback',
                     'mpesa/status',
+                    'newsletter/subscribe',
                 ],
             ],
         ],

@@ -1309,7 +1309,10 @@ $learnMoreCount = max(0, count($normalizedLearningItems) - count($learnPreviewIt
   </style>
 </head>
 
-<body>
+<body
+  data-analytics-course-id="<?= (int) ($course->id_course ?? 0) ?>"
+  data-analytics-course-title="<?= esc($course->title_course ?? '') ?>"
+>
 
   <?= view('partials/promo_urgency', [
       'hasPromo' => !empty($hasPromo),

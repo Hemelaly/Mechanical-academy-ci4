@@ -1044,7 +1044,11 @@ $courseIconBg = !empty($course->icon_course)
   </style>
 </head>
 
-<body>
+<body
+  data-analytics-course-id="<?= (int) ($course->id_course ?? 0) ?>"
+  data-analytics-course-title="<?= esc($course->title_course ?? '') ?>"
+  data-analytics-amount="<?= esc((string) $effectivePrice) ?>"
+>
 
   <div class="checkout-icon-bg" aria-hidden="true">
     <?php for ($i = 0; $i < 8; $i++): ?>
@@ -1424,6 +1428,9 @@ $courseIconBg = !empty($course->icon_course)
         const isApproved = payload?.status === 'approved';
         const requiresPasswordSetup = payload?.status === 'password_setup_pending' || payload?.requires_password_setup === true;
         const isSuccessfulCheckout = isApproved || requiresPasswordSetup;
+        const courseId = Number(document.body?.getAttribute('data-analytics-course-id') || 0) || undefined;
+        const amount = Number(document.body?.getAttribute('data-analytics-amount') || 0) || undefined;
+        const courseTitle = document.body?.getAttribute('data-analytics-course-title') || undefined;
 
         const swalData = payload?.swal || {
           icon: isSuccessfulCheckout ? 'success' : 'error',
@@ -1441,10 +1448,32 @@ $courseIconBg = !empty($course->icon_course)
         });
 
         if (isSuccessfulCheckout) {
+          if (window.AcademyAnalytics) {
+            window.AcademyAnalytics.purchase({
+              course_id: courseId,
+              course_title: courseTitle,
+              amount: amount,
+              payment_id: payload?.payment_id || undefined,
+              status: payload?.status || 'approved',
+              requires_password_setup: !!requiresPasswordSetup,
+              method: 'mpesa'
+            });
+          }
           renderSuccessMessage({
             requiresPasswordSetup
           });
           return;
+        }
+
+        if (window.AcademyAnalytics) {
+          window.AcademyAnalytics.paymentFailed({
+            course_id: courseId,
+            course_title: courseTitle,
+            amount: amount,
+            payment_id: payload?.payment_id || undefined,
+            status: payload?.status || 'failed',
+            method: 'mpesa'
+          });
         }
 
         if (payload?.redirect_url) {
@@ -1644,6 +1673,15 @@ $courseIconBg = !empty($course->icon_course)
 
         form.classList.add('was-validated');
 
+        if (window.AcademyAnalytics) {
+          window.AcademyAnalytics.paymentStart({
+            course_id: Number(document.body?.getAttribute('data-analytics-course-id') || 0) || undefined,
+            course_title: document.body?.getAttribute('data-analytics-course-title') || undefined,
+            amount: Number(document.body?.getAttribute('data-analytics-amount') || 0) || undefined,
+            method: 'mpesa'
+          });
+        }
+
         if (submitButton) {
           submitButton.disabled = true;
         }
@@ -1693,6 +1731,15 @@ $courseIconBg = !empty($course->icon_course)
           await showResult(payload);
         } catch (error) {
           Swal.close();
+          if (window.AcademyAnalytics) {
+            window.AcademyAnalytics.paymentFailed({
+              course_id: Number(document.body?.getAttribute('data-analytics-course-id') || 0) || undefined,
+              course_title: document.body?.getAttribute('data-analytics-course-title') || undefined,
+              amount: Number(document.body?.getAttribute('data-analytics-amount') || 0) || undefined,
+              method: 'mpesa',
+              reason: 'network_or_parse'
+            });
+          }
           await Swal.fire({
             icon: 'error',
             title: 'Falha na comunicação',

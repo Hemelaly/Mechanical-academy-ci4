@@ -6,7 +6,7 @@
     <title>Verificação de segurança · Mechanical Academy</title>
     <link rel="shortcut icon" href="<?= base_url('assets/img/favicon.png') ?>" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
     <style>
         :root {
             --ink: #f5f7fa;
@@ -15,7 +15,6 @@
             --surface: #141414;
             --line: rgba(255, 255, 255, 0.09);
             --accent: #0d6efd;
-            --danger: #f43f5e;
         }
         * { box-sizing: border-box; }
         body {
@@ -42,15 +41,8 @@
             box-shadow: 0 28px 60px -36px rgba(0, 0, 0, 0.75);
             text-align: center;
         }
-        .logo {
-            display: inline-flex;
-            margin: 0 auto 1.5rem;
-        }
-        .logo img {
-            height: 42px;
-            width: auto;
-            display: block;
-        }
+        .logo { display: inline-flex; margin: 0 auto 1.5rem; }
+        .logo img { height: 42px; width: auto; display: block; }
         h1 {
             margin: 0 0 0.5rem;
             font-size: 1.2rem;
@@ -107,7 +99,7 @@
             <img src="<?= esc(base_url('assets/img/logo.png')) ?>" alt="Mechanical Academy">
         </a>
         <h1>Verificação de segurança</h1>
-        <p>Confirme que é um humano para continuar a usar a Mechanical Academy. Esta verificação é feita pela Cloudflare.</p>
+        <p>Confirme que é um humano para continuar. Protegido pela Cloudflare.</p>
 
         <?php if (! empty($error)): ?>
             <div class="error"><?= esc($error) ?></div>
@@ -115,46 +107,95 @@
 
         <form id="cf-form" method="post" action="<?= esc(site_url('cf-challenge/verify')) ?>">
             <?= csrf_field() ?>
+            <input type="hidden" name="cf-turnstile-response" id="cf-token" value="">
             <div class="widget">
-                <div
-                    class="cf-turnstile"
-                    data-sitekey="<?= esc($siteKey) ?>"
-                    data-theme="dark"
-                    data-size="normal"
-                    data-callback="onTurnstileSuccess"
-                    data-error-callback="onTurnstileError"
-                    data-expired-callback="onTurnstileExpired"
-                ></div>
+                <div id="cf-widget"></div>
             </div>
             <button type="submit" class="submit" id="cf-submit">Continuar</button>
         </form>
-        <p class="hint">Protegido por Cloudflare Turnstile</p>
+        <p class="hint">Cloudflare Turnstile</p>
     </div>
 
     <script>
-        function onTurnstileSuccess() {
-            var btn = document.getElementById('cf-submit');
-            if (btn) {
-                btn.classList.add('is-on');
-                btn.disabled = true;
+        (function () {
+            var sitekey = <?= json_encode((string) $siteKey) ?>;
+            var form = document.getElementById('cf-form');
+            var tokenInput = document.getElementById('cf-token');
+            var submitBtn = document.getElementById('cf-submit');
+            var submitting = false;
+
+            function submitWithToken(token) {
+                if (submitting) return;
+                token = String(token || '').trim();
+                if (!token) {
+                    if (submitBtn) {
+                        submitBtn.classList.add('is-on');
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Tentar novamente';
+                    }
+                    return;
+                }
+                submitting = true;
+                tokenInput.value = token;
+                if (submitBtn) {
+                    submitBtn.classList.add('is-on');
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'A verificar…';
+                }
+                form.submit();
             }
-            document.getElementById('cf-form').submit();
-        }
-        function onTurnstileError() {
-            var btn = document.getElementById('cf-submit');
-            if (btn) {
-                btn.classList.add('is-on');
-                btn.disabled = false;
-                btn.textContent = 'Tentar novamente';
+
+            window.onTurnstileSuccess = submitWithToken;
+            window.onTurnstileError = function () {
+                submitting = false;
+                tokenInput.value = '';
+                if (submitBtn) {
+                    submitBtn.classList.add('is-on');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Tentar novamente';
+                }
+            };
+            window.onTurnstileExpired = function () {
+                submitting = false;
+                tokenInput.value = '';
+                if (submitBtn) submitBtn.classList.remove('is-on');
+            };
+
+            function renderWidget() {
+                if (!window.turnstile || !sitekey) return;
+                window.turnstile.render('#cf-widget', {
+                    sitekey: sitekey,
+                    theme: 'dark',
+                    callback: window.onTurnstileSuccess,
+                    'error-callback': window.onTurnstileError,
+                    'expired-callback': window.onTurnstileExpired
+                });
             }
-        }
-        function onTurnstileExpired() {
-            var btn = document.getElementById('cf-submit');
-            if (btn) {
-                btn.classList.remove('is-on');
-                btn.disabled = false;
+
+            if (window.turnstile) {
+                renderWidget();
+            } else {
+                window.onloadTurnstileCallback = renderWidget;
+                var previous = window.onload;
+                window.onload = function () {
+                    if (typeof previous === 'function') previous();
+                    if (window.turnstile) renderWidget();
+                };
+                var check = setInterval(function () {
+                    if (window.turnstile) {
+                        clearInterval(check);
+                        renderWidget();
+                    }
+                }, 200);
+                setTimeout(function () { clearInterval(check); }, 15000);
             }
-        }
+
+            form.addEventListener('submit', function (e) {
+                if (!tokenInput.value) {
+                    e.preventDefault();
+                }
+            });
+        })();
     </script>
 </body>
 </html>

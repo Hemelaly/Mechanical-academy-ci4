@@ -39,7 +39,15 @@ class CloudflareChallenge extends BaseController
 
         $token = (string) ($this->request->getPost('cf-turnstile-response')
             ?? $this->request->getPost('cf_turnstile_response')
+            ?? $this->request->getVar('cf-turnstile-response')
             ?? '');
+
+        if ($token === '') {
+            $json = $this->request->getJSON(true);
+            if (is_array($json)) {
+                $token = (string) ($json['cf-turnstile-response'] ?? $json['token'] ?? '');
+            }
+        }
 
         $result = $turnstile->verifyToken($token, $this->request->getIPAddress());
 

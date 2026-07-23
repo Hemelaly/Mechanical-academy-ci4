@@ -1,7 +1,7 @@
 <?php
 
 /**
- * PostHog — snippet oficial inline (sem defer / sem race).
+ * PostHog + Academy analytics events.
  */
 $posthog = config(\Config\Posthog::class);
 if (! $posthog->isReady()) {
@@ -40,3 +40,4 @@ posthog.init(<?= json_encode($apiKey) ?>, {
 posthog.identify(<?= json_encode($distinctId) ?>, <?= json_encode($personProps) ?>);
 <?php endif; ?>
 </script>
+<script src="<?= base_url('assets/js/academy-analytics.js') ?>" defer></script>
