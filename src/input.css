@@ -56,26 +56,45 @@
 
   /* —— Academy dashboard primitives —— */
   .dash-page {
-    @apply space-y-6;
+    @apply min-w-0 space-y-4 sm:space-y-5;
   }
 
+  .dash-page-header {
+    @apply flex min-w-0 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between;
+  }
+
+  .dash-page-title {
+    @apply text-lg font-semibold tracking-tight text-slate-900 dark:text-white sm:text-xl;
+  }
+
+  .dash-page-desc {
+    @apply mt-0.5 text-sm text-slate-500 dark:text-slate-400;
+  }
+
+  /* Compact header — replaces heavy hero banners */
   .dash-hero {
-    @apply relative overflow-hidden rounded-md border border-white/10 bg-[#0b1220] p-6 text-white sm:p-8;
-    background-image:
-      radial-gradient(700px 280px at 100% 0%, rgba(13, 110, 253, 0.28), transparent 60%),
-      linear-gradient(135deg, #0b1220 0%, #101826 55%, #0a101a 100%);
+    @apply relative overflow-hidden rounded-md border border-slate-200/80 bg-white p-4 text-slate-900 dark:border-white/10 dark:bg-[#11151c] dark:text-white sm:p-5;
+    background-image: none;
   }
 
   .dash-hero h1 {
-    @apply text-2xl font-semibold tracking-tight sm:text-3xl;
+    @apply text-lg font-semibold tracking-tight sm:text-xl;
   }
 
   .dash-hero p {
-    @apply mt-2 max-w-2xl text-sm text-white/65;
+    @apply mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400;
+  }
+
+  .dash-hero .dash-btn-soft {
+    @apply border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10;
+  }
+
+  .dash-hero .dash-btn-ghost {
+    @apply border border-slate-200 text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:text-slate-200 dark:hover:bg-white/5;
   }
 
   .dash-card {
-    @apply rounded-md border border-slate-200/80 bg-white p-5 shadow-none dark:border-white/10 dark:bg-[#11151c];
+    @apply min-w-0 rounded-md border border-slate-200/80 bg-white p-3.5 shadow-none dark:border-white/10 dark:bg-[#11151c] sm:p-4;
   }
 
   .dash-card-title {
@@ -83,39 +102,40 @@
   }
 
   .dash-card-desc {
-    @apply mt-1 text-xs text-slate-500 dark:text-white/45;
-  }
-
-  .dash-stat {
-    @apply flex items-start gap-3 rounded-md border border-slate-200/80 bg-white p-4 dark:border-white/10 dark:bg-[#11151c];
-  }
-
-  .dash-stat-icon {
-    @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-blue-600/15 text-blue-600 dark:text-blue-400;
-  }
-
-  .dash-stat-label {
-    @apply text-[11px] font-medium uppercase tracking-[0.08em] text-slate-500 dark:text-white/45;
-  }
-
-  .dash-stat-value {
-    @apply mt-1 text-xl font-semibold tracking-tight text-slate-900 dark:text-white;
-  }
-
-  .dash-stat-meta {
     @apply mt-0.5 text-xs text-slate-500 dark:text-white/45;
   }
 
+  .dash-stat {
+    @apply flex min-w-0 items-start gap-2.5 rounded-md border border-slate-200/80 bg-white p-3 dark:border-white/10 dark:bg-[#11151c] sm:gap-3 sm:p-3.5;
+  }
+
+  .dash-stat-icon {
+    @apply flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-600/15 text-sm text-blue-600 dark:text-blue-400 sm:h-9 sm:w-9;
+  }
+
+  .dash-stat-label {
+    @apply text-[10px] font-medium uppercase tracking-[0.06em] text-slate-500 dark:text-white/45 sm:text-[11px];
+  }
+
+  .dash-stat-value {
+    @apply mt-0.5 break-words text-base font-semibold tracking-tight text-slate-900 dark:text-white sm:text-xl;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .dash-stat-meta {
+    @apply mt-0.5 text-[11px] leading-snug text-slate-500 dark:text-white/45 sm:text-xs;
+  }
+
   .dash-panel {
-    @apply rounded-md border border-slate-200/80 bg-white dark:border-white/10 dark:bg-[#11151c];
+    @apply min-w-0 overflow-hidden rounded-md border border-slate-200/80 bg-white dark:border-white/10 dark:bg-[#11151c];
   }
 
   .dash-panel-head {
-    @apply flex flex-col gap-3 border-b border-slate-200/80 px-4 py-4 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between sm:px-5;
+    @apply flex flex-col gap-2 border-b border-slate-200/80 px-3 py-3 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between sm:px-4;
   }
 
   .dash-btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition;
+    @apply inline-flex h-9 items-center justify-center gap-1.5 rounded-md px-3 text-xs font-medium whitespace-nowrap transition sm:h-9 sm:px-3.5 sm:text-sm;
   }
 
   .dash-btn-primary {
@@ -127,7 +147,15 @@
   }
 
   .dash-btn-soft {
-    @apply bg-white/10 text-white hover:bg-white/15;
+    @apply border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10;
+  }
+
+  .dash-stats-grid {
+    @apply grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 xl:grid-cols-4;
+  }
+
+  .dash-chart-wrap {
+    @apply relative mt-3 h-[180px] w-full min-w-0 sm:h-[200px];
   }
 
   .dash-input {

@@ -4,6 +4,7 @@ namespace Config;
 
 use App\Libraries\AuditLogger;
 use App\Libraries\JitsiJwtService;
+use App\Services\VimeoService;
 use CodeIgniter\Config\BaseService;
 use CodeIgniter\Email\Email;
 use Config\Email as EmailConfig;
@@ -39,6 +40,15 @@ class Services extends BaseService
         }
 
         return new JitsiJwtService();
+    }
+
+    public static function vimeo(bool $getShared = true): VimeoService
+    {
+        if ($getShared) {
+            return static::getSharedInstance('vimeo');
+        }
+
+        return new VimeoService();
     }
 
     /**

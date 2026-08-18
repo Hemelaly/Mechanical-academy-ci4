@@ -544,16 +544,25 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                                     </p>
                                 </div>
 
-                                <div class="flex items-center justify-between mb-4">
+                                <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
                                     <h4 class="text-sm font-semibold text-slate-800 dark:text-white">
                                         Módulos e Aulas
                                     </h4>
-                                    <button type="button"
-                                        id="add-module"
-                                        class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl transition-all duration-300">
-                                        <i class="bi bi-plus-circle"></i>
-                                        Adicionar Módulo
-                                    </button>
+                                    <div class="flex flex-wrap gap-2">
+                                        <button type="button"
+                                            id="btn-import-vimeo"
+                                            class="inline-flex items-center gap-2 px-4 py-2 text-white text-sm font-medium rounded-md transition-all duration-200"
+                                            style="background:#1ab7ea">
+                                            <i class="bi bi-vimeo"></i>
+                                            Importar do Vimeo
+                                        </button>
+                                        <button type="button"
+                                            id="add-module"
+                                            class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-all duration-200">
+                                            <i class="bi bi-plus-circle"></i>
+                                            Adicionar Módulo
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div id="modules-container" class="space-y-4">
@@ -1087,6 +1096,8 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
 
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script src="<?= base_url('assets/instructor/js/curriculum-builder.js') ?>?v=2"></script>
 <script>
     $(function() {
         if (typeof $.fn.summernote !== "function") {
@@ -1881,72 +1892,14 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
         if (modulesContainer) {
             const addModuleBtn = document.getElementById("add-module");
 
-            addModuleBtn?.addEventListener("click", () => {
-                const moduleHtml = `
-                <div class="module-card mb-4 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 bg-white dark:bg-slate-900">
-                    <div class="flex justify-between items-center mb-3 gap-2">
-                        <input type="text"
-                               name="modules[${moduleIndex}][title]"
-                               class="flex-1 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-sm text-slate-800 dark:text-slate-100"
-                               placeholder="Nome do módulo">
-                        <button type="button"
-                                class="remove-module text-red-500 hover:text-red-600 text-lg"
-                                title="Remover módulo">
-                            <i class="bi bi-x-circle"></i>
-                        </button>
-                    </div>
-                    <textarea name="modules[${moduleIndex}][description]"
-                              class="w-full px-3 py-2 mb-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-sm text-slate-800 dark:text-slate-100"
-                              placeholder="Descrição do módulo (opcional)"></textarea>
+            function createLessonHTML(moduleId, lessonCount, lessonData = {}) {
+                const title = lessonData.title || "";
+                const type = lessonData.type || "video";
+                const duration = lessonData.duration || "";
+                const video_url = lessonData.video_url || "";
+                const isPreview = Number(lessonData.is_preview ?? 0) === 1;
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
-                                Nota mínima do quiz (%)
-                            </label>
-                            <input type="number"
-                                   name="modules[${moduleIndex}][min_score]"
-                                   min="0"
-                                   max="100"
-                                   value="80"
-                                   class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
-                                   placeholder="Ex: 80">
-                        </div>
-                    </div>
-
-                    <div class="lessons-container space-y-2 mb-3"></div>
-
-                    <button type="button"
-                            class="btn-add-lesson inline-flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-xl"
-                            data-module="${moduleIndex}">
-                        <i class="bi bi-plus-circle"></i>
-                        Adicionar Aula
-                    </button>
-                </div>
-            `;
-                modulesContainer.insertAdjacentHTML("beforeend", moduleHtml);
-                moduleIndex++;
-                scheduleAutoSave();
-            });
-
-            modulesContainer.addEventListener("click", (e) => {
-                const target = e.target;
-
-                // remover módulo
-                if (target.closest(".remove-module")) {
-                    target.closest(".module-card").remove();
-                    scheduleAutoSave();
-                    return;
-                }
-
-                // adicionar aula
-                if (target.closest(".btn-add-lesson")) {
-                    const btn = target.closest(".btn-add-lesson");
-                    const moduleId = btn.dataset.module;
-                    const lessonsContainer = btn.previousElementSibling;
-                    const lessonCount = lessonsContainer.querySelectorAll(".lesson-item").length;
-
-                    const lessonHtml = `
+                return `
                     <div class="lesson-item border border-slate-200 dark:border-slate-700 rounded-xl p-3 bg-slate-50 dark:bg-slate-800" draggable="true">
                         <div class="flex justify-between items-center mb-2 gap-2">
                             <span class="drag-handle text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-grab select-none px-1" title="Arraste para ordenar" draggable="true">
@@ -1955,7 +1908,8 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                             <input type="text"
                                    name="modules[${moduleId}][lessons][${lessonCount}][title]"
                                    class="flex-1 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
-                                   placeholder="Título da aula">
+                                   placeholder="Título da aula"
+                                   value="${CourseCurriculum.esc(title)}">
                             <button type="button"
                                     class="remove-lesson text-red-500 hover:text-red-600 text-base"
                                     title="Remover aula">
@@ -1965,20 +1919,22 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-2">
                             <select name="modules[${moduleId}][lessons][${lessonCount}][type]"
                                     class="lesson-type px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100">
-                                <option value="video">Vídeo</option>
-                                <option value="text">Texto</option>
-                                <option value="quiz">Quiz</option>
-                                <option value="exercise">Exercício</option>
+                                <option value="video" ${type==='video'?'selected':''}>Vídeo</option>
+                                <option value="text" ${type==='text'?'selected':''}>Texto</option>
+                                <option value="quiz" ${type==='quiz'?'selected':''}>Quiz</option>
+                                <option value="exercise" ${type==='exercise'?'selected':''}>Exercício</option>
                             </select>
                             <input type="number"
                                    name="modules[${moduleId}][lessons][${lessonCount}][duration]"
                                    class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
-                                   placeholder="Duração (min)">
+                                   placeholder="Duração (min)"
+                                   value="${duration}">
                             <div class="video-fields">
                                 <input type="url"
                                        name="modules[${moduleId}][lessons][${lessonCount}][video_url]"
                                        class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
-                                       placeholder="Link do vídeo (opcional)">
+                                       placeholder="Link do vídeo (opcional)"
+                                       value="${CourseCurriculum.esc(video_url)}">
                             </div>
                         </div>
                         <div class="mb-2 rounded-xl border border-emerald-300 bg-emerald-100 px-3 py-2 shadow-sm dark:border-emerald-500/70 dark:bg-emerald-950/85">
@@ -1989,7 +1945,8 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                                 <input type="checkbox"
                                        name="modules[${moduleId}][lessons][${lessonCount}][is_preview]"
                                        value="1"
-                                       class="lesson-preview-toggle mt-0.5 h-4 w-4 rounded border-emerald-400 bg-white text-emerald-600 focus:ring-emerald-500 dark:border-emerald-400 dark:bg-emerald-950">
+                                       class="lesson-preview-toggle mt-0.5 h-4 w-4 rounded border-emerald-400 bg-white text-emerald-600 focus:ring-emerald-500 dark:border-emerald-400 dark:bg-emerald-950"
+                                       ${isPreview ? "checked" : ""}>
                                 <span>
                                     <span class="inline-flex items-center gap-2 text-xs font-semibold text-emerald-950 dark:text-emerald-100">
                                         <i class="bi bi-unlock-fill text-emerald-700 dark:text-emerald-300"></i>
@@ -2033,8 +1990,103 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                         </div>
                     </div>
                 `;
+            }
 
-                    lessonsContainer.insertAdjacentHTML("beforeend", lessonHtml);
+            function addModule(moduleData = null) {
+                const currentIndex = moduleIndex++;
+                let lessonsHtml = "";
+                if (moduleData?.lessons?.length) {
+                    moduleData.lessons.forEach((lesson, lIndex) => {
+                        lessonsHtml += createLessonHTML(currentIndex, lIndex, lesson);
+                    });
+                }
+
+                const moduleHtml = `
+                <div class="module-card mb-4 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 bg-white dark:bg-slate-900">
+                    <div class="flex justify-between items-center mb-3 gap-2">
+                        <input type="text"
+                               name="modules[${currentIndex}][title]"
+                               class="flex-1 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-sm text-slate-800 dark:text-slate-100"
+                               placeholder="Nome do módulo"
+                               value="${CourseCurriculum.esc(moduleData?.title || "")}">
+                        <button type="button"
+                                class="remove-module text-red-500 hover:text-red-600 text-lg"
+                                title="Remover módulo">
+                            <i class="bi bi-x-circle"></i>
+                        </button>
+                    </div>
+                    <textarea name="modules[${currentIndex}][description]"
+                              class="w-full px-3 py-2 mb-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-sm text-slate-800 dark:text-slate-100"
+                              placeholder="Descrição do módulo (opcional)">${CourseCurriculum.esc(moduleData?.description || "")}</textarea>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
+                                Nota mínima do quiz (%)
+                            </label>
+                            <input type="number"
+                                   name="modules[${currentIndex}][min_score]"
+                                   min="0"
+                                   max="100"
+                                   value="${moduleData?.min_score ?? 80}"
+                                   class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-xs text-slate-800 dark:text-slate-100"
+                                   placeholder="Ex: 80">
+                        </div>
+                    </div>
+
+                    <div class="lessons-container space-y-2 mb-3">${lessonsHtml}</div>
+
+                    <button type="button"
+                            class="btn-add-lesson inline-flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-xl"
+                            data-module="${currentIndex}">
+                        <i class="bi bi-plus-circle"></i>
+                        Adicionar Aula
+                    </button>
+                </div>
+            `;
+                modulesContainer.insertAdjacentHTML("beforeend", moduleHtml);
+
+                modulesContainer.querySelectorAll(".lesson-item").forEach((lessonEl) => {
+                    if (typeof syncQuizFields === "function") syncQuizFields(lessonEl);
+                    if (typeof syncVideoFields === "function") syncVideoFields(lessonEl);
+                });
+                scheduleAutoSave();
+            }
+
+            addModuleBtn?.addEventListener("click", () => addModule());
+
+            if (window.CourseCurriculum) {
+                CourseCurriculum.init({
+                    container: modulesContainer,
+                    onChange: function () {
+                        if (typeof updateCourseStats === "function") updateCourseStats();
+                        scheduleAutoSave();
+                    },
+                    createModule: addModule,
+                    createLessonHtml: createLessonHTML,
+                });
+            }
+
+            modulesContainer.addEventListener("click", (e) => {
+                const target = e.target;
+
+                // remover módulo
+                if (target.closest(".remove-module")) {
+                    target.closest(".module-card").remove();
+                    scheduleAutoSave();
+                    return;
+                }
+
+                // adicionar aula
+                if (target.closest(".btn-add-lesson")) {
+                    const btn = target.closest(".btn-add-lesson");
+                    const moduleId = btn.dataset.module;
+                    const lessonsContainer = btn.previousElementSibling;
+                    const lessonCount = lessonsContainer.querySelectorAll(".lesson-item").length;
+                    lessonsContainer.insertAdjacentHTML("beforeend", createLessonHTML(moduleId, lessonCount));
+                    const lessonEl = lessonsContainer.querySelector(".lesson-item:last-child");
+                    if (lessonEl && typeof syncQuizFields === "function") syncQuizFields(lessonEl);
+                    if (lessonEl && typeof syncVideoFields === "function") syncVideoFields(lessonEl);
                     scheduleAutoSave();
                     return;
                 }
@@ -2687,5 +2739,7 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
         renderPreviewProjects();
     }
 </script>
+
+<?= view('partials/vimeo_import_modal') ?>
 
 <?= $this->endSection() ?>

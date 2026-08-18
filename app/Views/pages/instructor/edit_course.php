@@ -684,10 +684,18 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
                                 <?php endforeach; ?>
                             </div>
 
-                            <button type="button" id="add-module" class="mt-4 px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl">
-                                <i class="bi bi-plus-circle mr-2"></i>
-                                Adicionar Módulo
-                            </button>
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <button type="button" id="btn-import-vimeo"
+                                    class="px-4 py-2.5 text-white font-medium rounded-md transition-all duration-200"
+                                    style="background:#1ab7ea">
+                                    <i class="bi bi-vimeo mr-2"></i>
+                                    Importar do Vimeo
+                                </button>
+                                <button type="button" id="add-module" class="px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-md transition-all duration-200">
+                                    <i class="bi bi-plus-circle mr-2"></i>
+                                    Adicionar Módulo
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -1085,6 +1093,8 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
         });
     });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script src="<?= base_url('assets/instructor/js/curriculum-builder.js') ?>?v=2"></script>
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         // ======================
@@ -2110,6 +2120,18 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
             }
         });
 
+        if (window.CourseCurriculum && modulesContainer) {
+            CourseCurriculum.init({
+                container: modulesContainer,
+                onChange: function () {
+                    updateCourseStats();
+                    scheduleAutoSave();
+                },
+                createModule: addModule,
+                createLessonHtml: createLessonHTML,
+            });
+        }
+
         updateCourseStats();
 
         document.querySelectorAll(".lesson-item").forEach((lessonEl) => {
@@ -2118,7 +2140,7 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
         });
 
         // ======================
-        // Cor primÃ¡ria
+        // Cor primária
         // ======================
         const hexPattern = /^#([0-9a-f]{6})$/i;
         if (colorTextInput && colorPickerInput) {
@@ -2561,5 +2583,7 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
   tick();
 })();
 </script>
+
+<?= view('partials/vimeo_import_modal') ?>
 
 <?= $this->endSection() ?>

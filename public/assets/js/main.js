@@ -60,15 +60,13 @@ function applyCollapsedState() {
     const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
     const effectiveCollapsed = isCollapsed && isDesktop;
 
-    sidebar.classList.toggle("lg:w-80", !effectiveCollapsed);
-    // Usar width exato no modo colapsado (75px), sem depender de classes Tailwind custom
+    sidebar.classList.toggle("lg:w-60", !effectiveCollapsed);
     if (effectiveCollapsed) {
-        sidebar.style.width = "75px";
+        sidebar.style.width = "4.25rem";
     } else {
         sidebar.style.width = "";
     }
-    // Mantido por compatibilidade caso existam estilos antigos no build
-    sidebar.classList.remove("lg:w-20");
+    sidebar.classList.remove("lg:w-80", "lg:w-72", "lg:w-20");
     favicon?.classList.toggle("hidden", !effectiveCollapsed);
 
     navlink.forEach(link => {

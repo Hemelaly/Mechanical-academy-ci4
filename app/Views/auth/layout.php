@@ -25,6 +25,7 @@
     </style>
 
     <?= $this->renderSection('pageStyles') ?>
+    <?= view('partials/meta_pixel') ?>
 </head>
 
 <body class="d-flex flex-column min-vh-100">

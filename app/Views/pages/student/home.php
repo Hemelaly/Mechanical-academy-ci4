@@ -4,26 +4,26 @@
 
 <?= $this->section('home_student') ?>
 
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+
 <div class="dash-page">
-    <section class="dash-hero">
-        <div class="relative z-10 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-                <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/45">Painel do estudante</p>
-                <h1 class="mt-2">Olá, <?= esc($user->username) ?></h1>
-                <p>Acompanhe o seu desempenho e continue a jornada de aprendizado.</p>
-            </div>
-            <div class="flex flex-wrap gap-2">
-                <a href="/student/dashboard/inscricoes" class="dash-btn dash-btn-primary">
-                    <i class="bi bi-play-circle text-sm"></i>
-                    Meus cursos
-                </a>
-                <a href="/student/dashboard/cursos" class="dash-btn dash-btn-soft">
-                    <i class="bi bi-collection text-sm"></i>
-                    Explorar
-                </a>
-            </div>
+    <div class="dash-page-header">
+        <div class="min-w-0">
+            <p class="text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500 dark:text-slate-400">Painel do aluno</p>
+            <h1 class="dash-page-title mt-1">Olá, <?= esc($user->username) ?></h1>
+            <p class="dash-page-desc">Continue a sua aprendizagem e acompanhe o progresso.</p>
         </div>
-    </section>
+        <div class="flex flex-wrap gap-2">
+            <a href="<?= site_url('student/dashboard/inscricoes') ?>" class="dash-btn dash-btn-primary">
+                <i class="bi bi-play-circle text-sm"></i>
+                Meus cursos
+            </a>
+            <a href="<?= site_url('student/dashboard/cursos') ?>" class="dash-btn dash-btn-soft">
+                <i class="bi bi-collection text-sm"></i>
+                Explorar
+            </a>
+        </div>
+    </div>
 
     <?php
     $totalProgress = 0;
@@ -37,7 +37,7 @@
     $avgProgress = $activeCount > 0 ? round($totalProgress / $activeCount) : 0;
     ?>
 
-    <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+    <div class="grid grid-cols-1 gap-3 min-[420px]:grid-cols-3">
         <div class="dash-stat">
             <div class="dash-stat-icon">
                 <i class="bi bi-book"></i>
@@ -162,37 +162,37 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <a href="/student/dashboard/inscricoes"
-            class="dash-card group text-center transition hover:border-blue-500/40">
-            <div class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-md bg-blue-600/15 text-blue-500 transition group-hover:scale-105">
+    <div class="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+        <a href="<?= site_url('student/dashboard/inscricoes') ?>"
+            class="dash-card group text-center transition hover:border-blue-500/40 !p-3">
+            <div class="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-md bg-blue-600/15 text-blue-500">
                 <i class="bi bi-collection-play"></i>
             </div>
-            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Meus cursos</span>
+            <span class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Meus cursos</span>
         </a>
 
-        <a href="/student/dashboard/cursos"
-            class="dash-card group text-center transition hover:border-emerald-500/40">
-            <div class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-md bg-emerald-500/15 text-emerald-500 transition group-hover:scale-105">
+        <a href="<?= site_url('student/dashboard/cursos') ?>"
+            class="dash-card group text-center transition hover:border-emerald-500/40 !p-3">
+            <div class="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-md bg-emerald-500/15 text-emerald-500">
                 <i class="bi bi-compass"></i>
             </div>
-            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Descobrir</span>
+            <span class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Descobrir</span>
         </a>
 
-        <a href="/student/profile"
-            class="dash-card group text-center transition hover:border-violet-500/40">
-            <div class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-md bg-violet-500/15 text-violet-400 transition group-hover:scale-105">
+        <a href="<?= site_url('student/dashboard/perfil') ?>"
+            class="dash-card group text-center transition hover:border-violet-500/40 !p-3">
+            <div class="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-md bg-violet-500/15 text-violet-400">
                 <i class="bi bi-person"></i>
             </div>
-            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Perfil</span>
+            <span class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Perfil</span>
         </a>
 
-        <a href="/student/settings"
-            class="dash-card group text-center transition hover:border-amber-500/40">
-            <div class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-md bg-amber-500/15 text-amber-400 transition group-hover:scale-105">
-                <i class="bi bi-gear"></i>
+        <a href="<?= site_url('student/dashboard/certificados') ?>"
+            class="dash-card group text-center transition hover:border-amber-500/40 !p-3">
+            <div class="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-md bg-amber-500/15 text-amber-400">
+                <i class="bi bi-award"></i>
             </div>
-            <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Configurações</span>
+            <span class="text-xs font-medium text-slate-700 dark:text-slate-300 sm:text-sm">Certificados</span>
         </a>
     </div>
 </div>

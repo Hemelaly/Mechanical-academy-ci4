@@ -9,26 +9,22 @@ use Faker\Provider\Base;
 </div>
 
 <!-- SIDEBAR -->
-<aside id="sidebar" class="fixed inset-y-0 left-0 z-40 flex w-72 -translate-x-full flex-col border-r border-slate-200 bg-white text-slate-700 transition-transform duration-200 ease-in-out dark:border-white/10 dark:bg-[#0c1017] dark:text-slate-100 lg:static lg:translate-x-0 lg:w-72">
+<aside id="sidebar" class="fixed inset-y-0 left-0 z-40 flex w-[min(16.5rem,88vw)] -translate-x-full flex-col border-r border-slate-200 bg-white text-slate-700 transition-transform duration-200 ease-in-out dark:border-white/10 dark:bg-[#0c1017] dark:text-slate-100 lg:static lg:w-60 lg:translate-x-0">
     <!-- TOPO: LOGO + BOTÕES -->
-    <div class="flex h-16 items-center justify-between px-4">
-        <div class="gap-2">
-            <div class="w-11">
-                <img id="favicon" class="hidden" src="<?= base_url('assets/img/favicon.png') ?>" alt="">
+    <div class="flex h-14 shrink-0 items-center justify-between gap-2 px-3">
+        <div class="min-w-0 flex-1">
+            <div class="w-9 shrink-0">
+                <img id="favicon" class="hidden h-8 w-8 object-contain" src="<?= base_url('assets/img/favicon.png') ?>" alt="">
             </div>
 
-            <div id="logo-text" class="flex flex-col">
-                <!-- Logo para tema claro -->
-                <span id="logo-light" class="font-semibold leading-tight w-36">
-                    <img src="<?= base_url('assets/img/logo.png') ?>" alt="">
+            <div id="logo-text" class="flex min-w-0 flex-col">
+                <span id="logo-light" class="block w-full max-w-[8.5rem]">
+                    <img src="<?= base_url('assets/img/logo.png') ?>" alt="" class="h-8 w-auto max-w-full object-contain">
                 </span>
-
-                <!-- Logo para tema escuro -->
-                <span id="logo-dark" class="font-semibold leading-tight w-36 hidden">
-                    <img src="<?= base_url('assets/img/logo-blue.png') ?>" alt="">
+                <span id="logo-dark" class="hidden w-full max-w-[8.5rem]">
+                    <img src="<?= base_url('assets/img/logo-blue.png') ?>" alt="" class="h-8 w-auto max-w-full object-contain">
                 </span>
             </div>
-
         </div>
 
         <div class="flex items-center gap-2">

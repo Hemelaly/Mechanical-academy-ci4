@@ -106,6 +106,13 @@ $routes->group('instructor', ['namespace' => 'App\Controllers\Instructor', 'filt
     $routes->post('dashboard/certificados', '\App\Controllers\Certificates::upload');
     $routes->post('dashboard/certificados/delete', '\App\Controllers\Certificates::deleteCertificate');
     $routes->post('dashboard/meus_estudantes/(:num)/(:num)', 'Dashboard::approveEnrollment/$1/$2');
+
+    $routes->group('vimeo', static function ($routes) {
+        $routes->get('status', 'VimeoController::status');
+        $routes->get('folders', 'VimeoController::folders');
+        $routes->get('folders/(:segment)/curriculum', 'VimeoController::folderCurriculum/$1');
+        $routes->get('video', 'VimeoController::video');
+    });
 });
 
 // Student

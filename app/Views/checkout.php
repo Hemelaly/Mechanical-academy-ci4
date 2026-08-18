@@ -203,7 +203,7 @@ $courseIconBg = !empty($course->icon_course)
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <!-- kept: existing checkout JS toggles the WhatsApp button icon using a Font Awesome class -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
-  <link rel="shortcut icon" href="<?= base_url('assets/img/favicon.png') ?>" type="image/x-icon">
+  <link rel="icon" href="<?= base_url('favicon.png') ?>" type="image/png">
 
   <style>
     :root {
@@ -1126,17 +1126,7 @@ $courseIconBg = !empty($course->icon_course)
       }
     }
   </style>
-  <?= view('partials/meta_pixel', [
-      'trackInitiateCheckout' => true,
-      'initiatePayload' => [
-          'content_ids'  => [(string) (int) ($course->id_course ?? 0)],
-          'content_name' => (string) ($course->title_course ?? ''),
-          'content_type' => 'product',
-          'value'        => (float) $effectivePrice,
-          'currency'     => 'MZN',
-          'num_items'    => 1,
-      ],
-  ]) ?>
+  <?= view('partials/meta_pixel') ?>
 </head>
 
 <body
@@ -1356,7 +1346,7 @@ $courseIconBg = !empty($course->icon_course)
                     <label class="pay-option" for="pay_sapp">
                       <input class="form-check-input" type="radio" name="payment_method_ui" id="pay_sapp" value="sapp">
                       <span class="pay-option__body">
-                        <strong>SAPP</strong>
+                        <strong>WhatsApp</strong>
                         <small class="pay-option__hint">Outros métodos · apoio via WhatsApp</small>
                       </span>
                     </label>
@@ -1575,16 +1565,6 @@ $courseIconBg = !empty($course->icon_course)
               payment_id: payload?.payment_id || undefined,
               status: payload?.status || 'approved',
               method: 'mpesa'
-            });
-          }
-          if (window.MetaPixel && typeof window.MetaPixel.purchase === 'function') {
-            window.MetaPixel.purchase({
-              content_ids: courseId ? [String(courseId)] : [],
-              content_name: courseTitle || undefined,
-              content_type: 'product',
-              value: amount || 0,
-              currency: 'MZN',
-              num_items: 1
             });
           }
           renderSuccessMessage({
@@ -1816,15 +1796,6 @@ $courseIconBg = !empty($course->icon_course)
             method: 'mpesa'
           });
         }
-        if (window.MetaPixel && typeof window.MetaPixel.addPaymentInfo === 'function') {
-          window.MetaPixel.addPaymentInfo({
-            content_ids: [String(document.body?.getAttribute('data-analytics-course-id') || '')].filter(Boolean),
-            content_type: 'product',
-            value: Number(document.body?.getAttribute('data-analytics-amount') || 0) || 0,
-            currency: 'MZN'
-          });
-        }
-
         if (submitButton) {
           submitButton.disabled = true;
         }

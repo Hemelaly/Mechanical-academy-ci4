@@ -5,37 +5,35 @@ $user = service('auth')->user();
 ?>
 
 <header
-    class="academy-nav flex shrink-0 py-3 items-center justify-between border-b border-slate-200/80 bg-white/90 backdrop-blur-sm dark:border-white/10 dark:bg-[#0c1017]/80 px-4 transition-colors duration-300">
-    <div class="flex items-center gap-2">
+    class="academy-nav flex h-14 shrink-0 items-center justify-between gap-2 border-b border-slate-200/80 bg-white/90 px-3 backdrop-blur-sm transition-colors duration-200 dark:border-white/10 dark:bg-[#0c1017]/80 sm:px-4">
+    <div class="flex min-w-0 items-center gap-2">
 
-        <!-- COLAPSAR DESKTOP -->
         <button
             id="collapse-desktop"
-            class="hidden lg:inline-flex w-10 h-10 transition-all duration-300 ease-in-out items-center border border-slate-200 text-slate-500 dark:border-white/10 justify-center rounded-md hover:bg-slate-100 dark:hover:bg-white/5 dark:text-white"
+            class="hidden h-9 w-9 items-center justify-center rounded-md border border-slate-200 text-slate-500 transition hover:bg-slate-100 dark:border-white/10 dark:text-white dark:hover:bg-white/5 lg:inline-flex"
             title="Colapsar sidebar">
             <i class="bi bi-list"></i>
         </button>
 
-        <!-- ABRIR SIDEBAR NO MOBILE -->
         <button
             id="open-sidebar"
-            class="inline-flex lg:hidden h-9 w-9 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-[#11151c] dark:text-slate-100 dark:hover:bg-white/5">
-            &#9776;
+            class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-[#11151c] dark:text-slate-100 dark:hover:bg-white/5 lg:hidden"
+            aria-label="Abrir menu">
+            <i class="bi bi-list"></i>
         </button>
 
-        <div class="hidden md:flex items-center gap-2">
+        <div class="hidden min-w-0 md:block">
             <input
-                type="text"
+                type="search"
                 placeholder="Pesquisar..."
-                class="w-72 rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs text-slate-700 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-white/10 dark:bg-[#11151c] dark:text-white" />
+                class="h-9 w-44 rounded-md border border-slate-200 bg-slate-50 px-3 text-xs text-slate-700 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-white/10 dark:bg-[#11151c] dark:text-white xl:w-64" />
         </div>
     </div>
 
-    <div class="flex items-center gap-2">
+    <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
         <button
             id="theme-toggle"
-            class="inline-flex px-[11px] py-1.5 items-center cursor-pointer justify-center rounded-md border border-slate-200 dark:border-white/10
-                            bg-white dark:bg-[#11151c] text-slate-700 dark:text-slate-400 text-lg hover:bg-slate-50 dark:hover:bg-white/5"
+            class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-[#11151c] dark:text-slate-400 dark:hover:bg-white/5"
             aria-label="Trocar tema"
             title="Trocar tema">
             <i id="theme-toggle-icon" class="bi bi-sun"></i>
@@ -121,7 +119,6 @@ $user = service('auth')->user();
                             </div>
                         </div>
                     </div>
-
                     <!-- Notificação 4 -->
                     <div class="p-4 hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors duration-150">
                         <div class="flex gap-3">
@@ -153,14 +150,14 @@ $user = service('auth')->user();
         </div>
 
         <a href="<?= site_url('/student/dashboard/perfil') ?>"
-            class="flex shrink-0 items-center gap-3 rounded-md px-1.5 py-1.5 text-xs hover:bg-slate-100 dark:hover:bg-white/5">
+            class="flex shrink-0 items-center gap-2 rounded-md px-1 py-1 text-xs hover:bg-slate-100 dark:hover:bg-white/5">
             <span
-                class="flex h-9 w-9 items-center justify-center rounded-full bg-slate-200 text-[13px] font-semibold text-slate-700 dark:bg-slate-700 dark:text-white">
+                class="flex h-8 w-8 items-center justify-center rounded-md bg-slate-200 text-[12px] font-semibold text-slate-700 dark:bg-slate-700 dark:text-white">
                 <?= esc(mb_strtoupper(mb_substr((string) ($user->username ?? 'U'), 0, 2))) ?>
             </span>
-            <div class="sidebar-label hidden sm:block text-left">
-                <p class="text-xs font-medium text-slate-800 dark:text-white"><?= esc($user->username) ?></p>
-                <p class="text-[11px] text-slate-500 dark:text-slate-400">Ver Perfil</p>
+            <div class="sidebar-label hidden min-w-0 text-left sm:block">
+                <p class="truncate text-xs font-medium text-slate-800 dark:text-white"><?= esc($user->username) ?></p>
+                <p class="truncate text-[11px] text-slate-500 dark:text-slate-400">Perfil</p>
             </div>
         </a>
     </div>

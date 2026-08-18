@@ -22,31 +22,29 @@ $pendingLabel = (int) ($pendingRequestsThisWeek ?? 0) > 0
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
 
 <div class="dash-page">
-        <section class="dash-hero">
-            <div class="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-                <div>
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/45">Painel do instrutor</p>
-                    <h1 class="mt-2">Olá, Professor <?= esc($user->username) ?></h1>
-                    <p>Acompanhe cursos, matrículas, pagamentos e pedidos pendentes.</p>
-                </div>
-                <div class="flex flex-col gap-2 sm:flex-row">
-                    <a href="<?= site_url('instructor/dashboard/novo_curso') ?>" class="dash-btn dash-btn-primary">
-                        <i class="bi bi-plus-lg"></i>
-                        Criar curso
-                    </a>
-                    <a href="<?= site_url('instructor/dashboard/meus_cursos') ?>" class="dash-btn dash-btn-soft">
-                        <i class="bi bi-gear"></i>
-                        Gerir cursos
-                    </a>
-                    <a href="<?= site_url('instructor/dashboard/meus_estudantes') ?>" class="dash-btn dash-btn-ghost !border-white/15 !text-white hover:!bg-white/10">
-                        <i class="bi bi-people"></i>
-                        Estudantes
-                    </a>
-                </div>
+        <div class="dash-page-header">
+            <div class="min-w-0">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500 dark:text-slate-400">Painel do formador</p>
+                <h1 class="dash-page-title mt-1">Olá, <?= esc($user->username) ?></h1>
+                <p class="dash-page-desc">Cursos, matrículas, pagamentos e pedidos pendentes.</p>
             </div>
-        </section>
+            <div class="flex flex-wrap gap-2">
+                <a href="<?= site_url('instructor/dashboard/novo_curso') ?>" class="dash-btn dash-btn-primary">
+                    <i class="bi bi-plus-lg"></i>
+                    Criar curso
+                </a>
+                <a href="<?= site_url('instructor/dashboard/meus_cursos') ?>" class="dash-btn dash-btn-soft">
+                    <i class="bi bi-gear"></i>
+                    Gerir
+                </a>
+                <a href="<?= site_url('instructor/dashboard/meus_estudantes') ?>" class="dash-btn dash-btn-ghost">
+                    <i class="bi bi-people"></i>
+                    Alunos
+                </a>
+            </div>
+        </div>
 
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div class="dash-stats-grid">
             <div class="dash-stat">
                 <div class="dash-stat-icon bg-emerald-500/15 text-emerald-500">
                     <i class="bi bi-journal-text"></i>
@@ -105,7 +103,7 @@ $pendingLabel = (int) ($pendingRequestsThisWeek ?? 0) > 0
             </div>
 
             <?php if (! empty($featuredCourses)): ?>
-                <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     <?php foreach ($featuredCourses as $course): ?>
                         <?php
                         $status = strtolower(trim((string) ($course->status_course ?? '')));

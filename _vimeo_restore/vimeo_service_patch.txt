@@ -1,0 +1,148 @@
+    /**
+     * Lista itens (vídeos + subpastas) dentro de uma pasta.
+     *
+     * @return array{folders:list<array{id:string,name:string}>,videos:list<array<string,mixed>>}
+     */
+    public function listFolderItems(string $folderId, int $page = 1, int $perPage = 100): array
+    {
+        $folderId = $this->extractNumericId($folderId);
+        if ($folderId === '') {
+            throw new RuntimeException('ID de pasta Vimeo inválido.');
+        }
+
+        $path = $this->userPath('projects/' . $folderId . '/items');
+        $data = $this->get($path, [
+            'page'      => max(1, $page),
+            'per_page'  => min(100, max(1, $perPage)),
+            'fields'    => 'type,folder.uri,folder.name,video.uri,video.name,video.description,video.duration,video.link,video.pictures.sizes,video.privacy.name',
+        ]);
+
+        $folders = [];
+        $videos = [];
+
+        foreach ($data['data'] ?? [] as $item) {
+            $type = strtolower((string) ($item['type'] ?? ''));
+            if ($type === 'folder' && isset($item['folder']) && is_array($item['folder'])) {
+                $mapped = $this->mapFolder($item['folder']);
+                if ($mapped['id'] !== '') {
+                    $folders[] = $mapped;
+                }
+                continue;
+            }
+            if (($type === 'video' || isset($item['video'])) && isset($item['video']) && is_array($item['video'])) {
+                $videos[] = $this->mapVideo($item['video']);
+            }
+        }
+
+        return [
+            'folders' => $folders,
+            'videos'  => $videos,
+        ];
+    }
+
+    /**
+     * Monta currículo a partir de uma pasta Vimeo.
+     * - Com subpastas: cada subpasta = 1 módulo (+ vídeos na raiz, se houver).
+     * - Sem subpastas: 1 módulo com todos os vídeos.
+     *
+     * @return array{folder_id:string,folder_name:string,has_subfolders:bool,modules:list<array{title:string,description:string,lessons:list<array<string,mixed>>}>,module_title:string,lessons:list<array<string,mixed>>,lesson_count:int}
+     */
+    public function buildCurriculumFromFolder(string $folderId, ?string $moduleTitle = null): array
+    {
+        $folderId = $this->extractNumericId($folderId);
+        $folderName = $moduleTitle !== null && trim($moduleTitle) !== ''
+            ? trim($moduleTitle)
+            : $this->resolveFolderName($folderId);
+
+        $items = $this->listFolderItems($folderId);
+        $subfolders = $items['folders'];
+        $rootVideos = $items['videos'];
+
+        // Fallback se /items não devolver vídeos (algumas contas)
+        if ($subfolders === [] && $rootVideos === []) {
+            $rootVideos = $this->listFolderVideos($folderId);
+        }
+
+        $modules = [];
+
+        if ($subfolders !== []) {
+            foreach ($subfolders as $sub) {
+                $subVideos = $this->listFolderVideos((string) $sub['id']);
+                $modules[] = [
+                    'title'       => (string) ($sub['name'] ?: 'Módulo'),
+                    'description' => 'Importado do Vimeo',
+                    'lessons'     => $this->videosToLessons($subVideos),
+                ];
+            }
+            if ($rootVideos !== []) {
+                array_unshift($modules, [
+                    'title'       => $folderName !== '' ? ($folderName . ' — Geral') : 'Geral',
+                    'description' => 'Vídeos na raiz da pasta',
+                    'lessons'     => $this->videosToLessons($rootVideos),
+                ]);
+            }
+        } else {
+            $modules[] = [
+                'title'       => $folderName !== '' ? $folderName : 'Módulo importado do Vimeo',
+                'description' => 'Importado do Vimeo',
+                'lessons'     => $this->videosToLessons($rootVideos),
+            ];
+        }
+
+        $flatLessons = [];
+        foreach ($modules as $mod) {
+            foreach ($mod['lessons'] as $lesson) {
+                $flatLessons[] = $lesson;
+            }
+        }
+
+        return [
+            'folder_id'       => $folderId,
+            'folder_name'     => $folderName,
+            'has_subfolders'  => $subfolders !== [],
+            'modules'         => $modules,
+            // legado (1º módulo)
+            'module_title'    => (string) ($modules[0]['title'] ?? $folderName),
+            'lessons'         => $modules[0]['lessons'] ?? [],
+            'lesson_count'    => count($flatLessons),
+        ];
+    }
+
+    private function resolveFolderName(string $folderId): string
+    {
+        try {
+            $folders = $this->listFolders(1, 100);
+            foreach ($folders as $folder) {
+                if ($folder['id'] === $folderId) {
+                    return (string) $folder['name'];
+                }
+            }
+            $row = $this->get($this->userPath('projects/' . $folderId), ['fields' => 'name']);
+            return (string) ($row['name'] ?? '');
+        } catch (\Throwable $e) {
+            return '';
+        }
+    }
+
+    /**
+     * @param list<array<string,mixed>> $videos
+     * @return list<array<string,mixed>>
+     */
+    private function videosToLessons(array $videos): array
+    {
+        $lessons = [];
+        foreach ($videos as $video) {
+            $lessons[] = [
+                'title'       => (string) ($video['title'] ?? 'Aula'),
+                'type'        => 'video',
+                'duration'    => (int) ($video['duration_minutes'] ?? 0),
+                'video_url'   => (string) ($video['link'] ?? $video['player_url'] ?? ''),
+                'description' => (string) ($video['description'] ?? ''),
+                'is_preview'  => 0,
+                'vimeo_id'    => (string) ($video['id'] ?? ''),
+                'thumbnail'   => (string) ($video['thumbnail'] ?? ''),
+            ];
+        }
+
+        return $lessons;
+    }

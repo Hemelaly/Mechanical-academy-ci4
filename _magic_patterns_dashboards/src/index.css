@@ -1,0 +1,111 @@
+/* @import url() FONT IMPORTS MUST ALWAYS BE AT THE VERY TOP OF THIS FILE, ABOVE THE TAILWIND IMPORTS — DO NOT DELETE THIS COMMENT */
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap');
+
+/* CRITICAL: THE FOLLOWING TAILWIND IMPORTS MUST NEVER BE DELETED OR REORDERED — DO NOT DELETE THIS COMMENT */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* END TAILWIND IMPORTS — ALL OTHER CSS MUST GO BELOW THIS LINE */
+
+:root {
+  /* Surfaces & neutrals — cool slate / graphite */
+  --canvas: #f5f7f9;
+  --surface: #ffffff;
+  --surface-2: #f1f4f7;
+  --surface-3: #e8ecf1;
+  --line: #e2e7ed;
+  --line-strong: #cfd6df;
+  /* Text */
+  --fg: #0f172a;
+  --fg-muted: #5b6779;
+  --fg-subtle: #8b96a6;
+  /* Accent — strong blue */
+  --accent: #2563eb;
+  --accent-hover: #1d4fd7;
+  --accent-active: #1a45bd;
+  --accent-soft: #e8efff;
+  --accent-fg: #ffffff;
+  --ring: #2563eb;
+  --ring-soft: rgba(37, 99, 235, 0.22);
+  --ring-danger: rgba(194, 42, 42, 0.22);
+  /* Semantic */
+  --success: #17803d;
+  --success-soft: #e4f5ea;
+  --warn: #a35a07;
+  --warn-soft: #fdf1de;
+  --danger: #c22a2a;
+  --danger-soft: #fbe8e8;
+  --info: #1a6fa8;
+  --info-soft: #e4f1fa;
+  color-scheme: light;
+}
+.dark {
+  --canvas: #07090d;
+  --surface: #0c1017;
+  --surface-2: #11151c;
+  --surface-3: #171c25;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.14);
+  --fg: #e7ebf1;
+  --fg-muted: #97a2b3;
+  --fg-subtle: #6b7788;
+  --accent: #2f6ff0;
+  --accent-hover: #3d7bf7;
+  --accent-active: #2760da;
+  --accent-soft: rgba(47, 111, 240, 0.14);
+  --accent-fg: #ffffff;
+  --ring: #4d86ff;
+  --ring-soft: rgba(77, 134, 255, 0.28);
+  --ring-danger: rgba(234, 106, 106, 0.28);
+  --success: #46c37b;
+  --success-soft: rgba(70, 195, 123, 0.13);
+  --warn: #e0a33c;
+  --warn-soft: rgba(224, 163, 60, 0.13);
+  --danger: #ea6a6a;
+  --danger-soft: rgba(234, 106, 106, 0.13);
+  --info: #58aee6;
+  --info-soft: rgba(88, 174, 230, 0.13);
+  color-scheme: dark;
+}
+html,
+body,
+#root {
+  height: 100%;
+}
+body {
+  background-color: var(--canvas);
+  color: var(--fg);
+  font-family: 'Sora', ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'tnum' 0;
+}
+/* Compact, unobtrusive scrollbars for the independently scrolling main area */
+.scroll-area {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+.scroll-area::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.scroll-area::-webkit-scrollbar-thumb {
+  background-color: var(--line-strong);
+  border-radius: 6px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+.scroll-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

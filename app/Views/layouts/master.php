@@ -28,18 +28,19 @@
     <script src="https://www.youtube.com/iframe_api"></script>
     <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
     <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
-    <link rel="shortcut icon" href="<?= base_url('assets/img/favicon.png') ?>" type="image/x-icon">
+    <link rel="icon" href="<?= base_url('favicon.png') ?>" type="image/png">
 
     <?= $this->renderSection('page_styles') ?>
+    <?= view('partials/meta_pixel') ?>
 
     <style>
         body { font-family: 'Sora', system-ui, sans-serif !important; }
     </style>
 </head>
 
-<body class="academy-shell bg-slate-50 text-slate-800 dark:bg-[#07090d] dark:text-slate-100 transition-colors duration-300 overflow-hidden prevent-overflow">
+<body class="academy-shell overflow-hidden bg-slate-50 text-slate-800 transition-colors duration-200 dark:bg-[#07090d] dark:text-slate-100">
 
-    <div class="flex h-screen min-h-0 flex-container">
+    <div class="flex h-[100dvh] min-h-0 w-full overflow-hidden">
 
         <?php if (isset($user)): ?>
 
@@ -47,24 +48,22 @@
 
                 <?= $this->include('pages/student/partials/sidebar') ?>
 
-                <div id="main-content" class="flex min-w-0 min-h-0 flex-1 flex-col transition-all duration-200 prevent-overflow academy-main">
+                <div id="main-content" class="academy-main flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
 
                     <?= $this->include('pages/student/partials/navbar') ?>
 
-                    <main class="flex min-w-0 min-h-0 flex-1 flex-col overflow-y-auto p-5 md:p-8 space-y-6 w-full max-w-full overflow-x-hidden pb-10">
-
-                        <?= $this->renderSection('home_admin') ?>
-                        <?= $this->renderSection('home_student') ?>
-                        <?= $this->renderSection('my_courses') ?>
-                        <?= $this->renderSection('jitsi') ?>
-                        <?= $this->renderSection('all_courses') ?>
-                        <?= $this->renderSection('profile') ?>
-                        <?= $this->renderSection('lessons') ?>
-                        <?= $this->renderSection('certificates') ?>
-
+                    <main class="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto">
+                        <div class="dash-content mx-auto w-full max-w-[1200px] space-y-4 px-3 py-4 sm:space-y-5 sm:px-5 sm:py-5 lg:px-6 lg:py-6">
+                            <?= $this->renderSection('home_admin') ?>
+                            <?= $this->renderSection('home_student') ?>
+                            <?= $this->renderSection('my_courses') ?>
+                            <?= $this->renderSection('jitsi') ?>
+                            <?= $this->renderSection('all_courses') ?>
+                            <?= $this->renderSection('profile') ?>
+                            <?= $this->renderSection('lessons') ?>
+                            <?= $this->renderSection('certificates') ?>
+                        </div>
                     </main>
-
-                    <?= $this->include('pages/student/partials/footer') ?>
 
                 </div>
 
@@ -72,24 +71,24 @@
 
                 <?= $this->include('pages/instructor/partials/sidebar') ?>
 
-                <div id="main-content" class="flex min-w-0 min-h-0 flex-1 flex-col transition-all duration-200 prevent-overflow academy-main">
+                <div id="main-content" class="academy-main flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
 
                     <?= $this->include('pages/instructor/partials/navbar') ?>
 
-                    <main class="flex min-w-0 min-h-0 flex-1 flex-col overflow-y-auto p-5 md:p-8 space-y-6 w-full max-w-full overflow-x-hidden pb-10">
-
-                        <?= $this->renderSection('home_instructor') ?>
-                        <?= $this->renderSection('my_courses') ?>
-                        <?= $this->renderSection('add_course') ?>
-                        <?= $this->renderSection('edit_course') ?>
-                        <?= $this->renderSection('profile') ?>
-                        <?= $this->renderSection('financial') ?>
-                        <?= $this->renderSection('jitsi') ?>
-                        <?= $this->renderSection('students') ?>
-                        <?= $this->renderSection('logs') ?>
-                        <?= $this->renderSection('lessons') ?>
-                        <?= $this->renderSection('certificates') ?>
-
+                    <main class="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto">
+                        <div class="dash-content mx-auto w-full max-w-[1200px] space-y-4 px-3 py-4 sm:space-y-5 sm:px-5 sm:py-5 lg:px-6 lg:py-6">
+                            <?= $this->renderSection('home_instructor') ?>
+                            <?= $this->renderSection('my_courses') ?>
+                            <?= $this->renderSection('add_course') ?>
+                            <?= $this->renderSection('edit_course') ?>
+                            <?= $this->renderSection('profile') ?>
+                            <?= $this->renderSection('financial') ?>
+                            <?= $this->renderSection('jitsi') ?>
+                            <?= $this->renderSection('students') ?>
+                            <?= $this->renderSection('logs') ?>
+                            <?= $this->renderSection('lessons') ?>
+                            <?= $this->renderSection('certificates') ?>
+                        </div>
                     </main>
                 </div>
 
@@ -97,26 +96,24 @@
 
                 <?= $this->include('pages/admin/partials/sidebar') ?>
 
-                <div id="main-content" class="flex min-w-0 min-h-0 flex-1 flex-col transition-all duration-200 prevent-overflow academy-main">
+                <div id="main-content" class="academy-main flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
 
                     <?= $this->include('pages/admin/partials/navbar') ?>
 
-                    <main class="flex min-w-0 min-h-0 flex-1 flex-col overflow-y-auto p-5 md:p-8 space-y-6 w-full max-w-full overflow-x-hidden pb-10">
-
-                        <?= $this->renderSection('home_admin') ?>
-                        <?= $this->renderSection('courses') ?>
-                        <?= $this->renderSection('all_courses') ?>
-                        <?= $this->renderSection('students') ?>
-                        <?= $this->renderSection('instructors') ?>
-                        <?= $this->renderSection('profile') ?>
-                        <?= $this->renderSection('financial') ?>
-                        <?= $this->renderSection('analytics') ?>
-                        <?= $this->renderSection('lessons') ?>
-                        <?= $this->renderSection('certificates') ?>
-
+                    <main class="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto">
+                        <div class="dash-content mx-auto w-full max-w-[1200px] space-y-4 px-3 py-4 sm:space-y-5 sm:px-5 sm:py-5 lg:px-6 lg:py-6">
+                            <?= $this->renderSection('home_admin') ?>
+                            <?= $this->renderSection('courses') ?>
+                            <?= $this->renderSection('all_courses') ?>
+                            <?= $this->renderSection('students') ?>
+                            <?= $this->renderSection('instructors') ?>
+                            <?= $this->renderSection('profile') ?>
+                            <?= $this->renderSection('financial') ?>
+                            <?= $this->renderSection('analytics') ?>
+                            <?= $this->renderSection('lessons') ?>
+                            <?= $this->renderSection('certificates') ?>
+                        </div>
                     </main>
-
-                    <?= $this->include('pages/student/partials/footer') ?>
 
                 </div>
 
