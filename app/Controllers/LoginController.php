@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Libraries\AuthRedirect;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\Shield\Authentication\Authenticators\Session;
 use CodeIgniter\Shield\Controllers\LoginController as ShieldLoginController;
@@ -20,6 +21,7 @@ class LoginController extends ShieldLoginController
     public function loginView()
     {
         $this->prepareLoginSession();
+        AuthRedirect::fromRequest();
 
         if (auth()->loggedIn()) {
             return redirect()->to(config('Auth')->loginRedirect());

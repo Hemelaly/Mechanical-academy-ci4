@@ -184,6 +184,7 @@ else
         log "[dry-run] git add -A && git commit -m '${COMMIT_MSG}' && git push ${REMOTE_NAME} ${BRANCH_NAME}"
       else
         git add -A
+        git reset HEAD -- .env .env.* >/dev/null 2>&1 || true
         if git diff --cached --quiet; then
           log "Sem alteracoes para commit. Pulando commit/push."
         else
@@ -365,104 +366,87 @@ else
 fi
 
 # -----------------------------------------------------------------------------
-# 5) Permissoes CloudPanel
+# 5–9) Pos-deploy remoto (uma unica sessao SSH = uma password no Git Bash)
 # -----------------------------------------------------------------------------
-log "Ajustando permissoes para CloudPanel"
+log "Pos-deploy no servidor (permissoes, composer, migrations, cache)"
 
-remote_exec_mutating "
+REMOTE_POST_DEPLOY="
 set -e
 cd '${REMOTE_PATH}'
 
-mkdir -p writable/uploads
-mkdir -p writable/logs
-mkdir -p writable/cache
-mkdir -p writable/session
-mkdir -p writable/debugbar
+# --- permissoes (CloudPanel: nao fazer chown -R na raiz; sessoes/cache sao do www-data) ---
+mkdir -p writable/uploads writable/logs writable/cache writable/session writable/debugbar
+chmod -R ug+rwX writable 2>/dev/null || chmod -R 775 writable 2>/dev/null || true
 
-chmod -R 775 writable || true
+fix_writable_ownership() {
+  local target=\"\$1\"
+  if chown -R '${SITE_OWNER}:www-data' \"\${target}\" 2>/dev/null; then
+    return 0
+  fi
+  if chown -R '${SITE_OWNER}:${SITE_OWNER}' \"\${target}\" 2>/dev/null; then
+    return 0
+  fi
+  return 1
+}
 
-if id '${SITE_OWNER}' >/dev/null 2>&1; then
-  chown -R '${SITE_OWNER}:${SITE_OWNER}' '${REMOTE_PATH}' || true
-fi
-
-if id 'www-data' >/dev/null 2>&1 && id '${SITE_OWNER}' >/dev/null 2>&1; then
-  chown -R '${SITE_OWNER}:www-data' writable || true
-  chmod -R 775 writable || true
+if id 'www-data' >/dev/null 2>&1; then
+  fix_writable_ownership writable/uploads || true
+  fix_writable_ownership writable/logs || true
+  fix_writable_ownership writable/cache || true
+  fix_writable_ownership writable/session || true
+  fix_writable_ownership writable/debugbar || true
 fi
 "
 
-# -----------------------------------------------------------------------------
-# 6) Composer
-# -----------------------------------------------------------------------------
 if [[ "${RUN_COMPOSER}" == "yes" ]]; then
-  log "Executando composer install no servidor"
-
-  remote_exec_mutating "
-set -e
-cd '${REMOTE_PATH}'
-
+  REMOTE_POST_DEPLOY+="
+echo '>>> composer install'
 if ! command -v '${COMPOSER_BIN}' >/dev/null 2>&1; then
   echo 'Erro: ${COMPOSER_BIN} nao encontrado no servidor.'
   exit 1
 fi
-
 COMPOSER_ALLOW_SUPERUSER=1 '${COMPOSER_BIN}' install --no-dev --optimize-autoloader --prefer-dist --no-interaction
 "
-else
-  log "Composer ignorado (RUN_COMPOSER=${RUN_COMPOSER})."
 fi
 
-# -----------------------------------------------------------------------------
-# 7) Migrations
-# -----------------------------------------------------------------------------
 if [[ "${RUN_MIGRATIONS}" == "yes" ]]; then
-  log "Executando migrations"
-
-  remote_exec_mutating "
-set -e
-cd '${REMOTE_PATH}'
-
+  REMOTE_POST_DEPLOY+="
+echo '>>> migrations'
 if ! command -v '${PHP_BIN}' >/dev/null 2>&1; then
   echo 'Erro: ${PHP_BIN} nao encontrado no servidor.'
   exit 1
 fi
-
 '${PHP_BIN}' spark migrate --all
 "
-else
-  log "Migrations ignoradas (RUN_MIGRATIONS=${RUN_MIGRATIONS})."
 fi
 
-# -----------------------------------------------------------------------------
-# 8) Cache
-# -----------------------------------------------------------------------------
-log "Limpando cache da aplicacao"
-
-remote_exec_mutating "
-cd '${REMOTE_PATH}'
+REMOTE_POST_DEPLOY+="
+echo '>>> cache clear'
 '${PHP_BIN}' spark cache:clear || true
 "
 
-# -----------------------------------------------------------------------------
-# 9) Nginx reload (opcional)
-# -----------------------------------------------------------------------------
 if [[ "${RESTART_WEBSERVER}" == "yes" ]]; then
-  log "Recarregando Nginx (se disponivel / com permissao)"
-
-  remote_exec_mutating "
-set +e
-
-if command -v nginx >/dev/null 2>&1; then
-  if nginx -t 2>/dev/null; then
-    systemctl reload nginx 2>/dev/null || service nginx reload 2>/dev/null || echo 'Aviso: sem permissao para recarregar Nginx (CloudPanel pode gerir isso).'
-  else
-    echo 'Aviso: nginx -t falhou; recarga ignorada.'
-  fi
+  REMOTE_POST_DEPLOY+="
+echo '>>> nginx reload (opcional)'
+if command -v sudo >/dev/null 2>&1 && sudo -n nginx -t >/dev/null 2>&1; then
+  sudo nginx -t && sudo systemctl reload nginx 2>/dev/null || sudo service nginx reload 2>/dev/null || true
+elif command -v nginx >/dev/null 2>&1 && nginx -t >/dev/null 2>&1; then
+  systemctl reload nginx 2>/dev/null || service nginx reload 2>/dev/null || true
 else
-  echo 'Aviso: Nginx nao detectado neste utilizador; recarga manual pode ser necessaria.'
+  echo 'Aviso: recarga Nginx ignorada (CloudPanel gere o Nginx; nao e necessario no deploy PHP).'
 fi
 "
-else
+fi
+
+remote_exec_mutating "${REMOTE_POST_DEPLOY}"
+
+if [[ "${RUN_COMPOSER}" != "yes" ]]; then
+  log "Composer ignorado (RUN_COMPOSER=${RUN_COMPOSER})."
+fi
+if [[ "${RUN_MIGRATIONS}" != "yes" ]]; then
+  log "Migrations ignoradas (RUN_MIGRATIONS=${RUN_MIGRATIONS})."
+fi
+if [[ "${RESTART_WEBSERVER}" != "yes" ]]; then
   log "Recarga do servidor web ignorada (RESTART_WEBSERVER=${RESTART_WEBSERVER})."
 fi
 

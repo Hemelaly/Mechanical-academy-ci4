@@ -1337,6 +1337,7 @@ $learnMoreCount = 0;
         <?php else: ?>
           <li><a href="<?= base_url('/') ?>#cursos">Cursos</a></li>
           <li><a href="https://www.youtube.com/@MechanicalTecnologia" target="_blank" rel="noopener noreferrer">Youtube</a></li>
+          <li><a href="<?= base_url('register') ?>">Criar conta</a></li>
           <li><a class="site-nav__cta" href="<?= base_url('login') ?>">Entrar</a></li>
         <?php endif; ?>
       </ul>

@@ -207,7 +207,7 @@
             </div>
         <?php endif ?>
 
-        <form id="instructor-create-form" action="<?= url_to('register') ?>" method="post" class="space-y-4">
+        <form id="instructor-create-form" action="<?= site_url('admin/dashboard/usuarios/create') ?>" method="post" class="space-y-4">
             <?= csrf_field() ?>
             <input type="hidden" name="role" value="instructor">
 

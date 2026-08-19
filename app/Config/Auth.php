@@ -74,8 +74,8 @@ class Auth extends ShieldAuth
      * to apply any logic you may need.
      */
     public array $redirects = [
-        'register'          => '/',
-        'login'             => 'dashboard',
+        'register'          => 'student/dashboard',
+        'login'             => 'student/dashboard',
         'logout'            => 'login',
         'force_reset'       => '/',
         'permission_denied' => '/',
@@ -228,7 +228,7 @@ class Auth extends ShieldAuth
             'required',
             'max_length[30]',
             'min_length[3]',
-            'regex_match[/\A[a-zA-Z0-9\.]+\z/]',
+            'regex_match[/\A[a-zA-ZÀ-ÿ0-9][a-zA-ZÀ-ÿ0-9 ._-]{1,28}\z/]',
         ],
     ];
 
@@ -477,6 +477,20 @@ class Auth extends ShieldAuth
      */
     public function registerRedirect(): string
     {
+        $session = session();
+        $before  = $session->getTempdata('beforeLoginUrl');
+        if (is_string($before) && trim($before) !== '') {
+            return $this->getUrl(trim($before));
+        }
+
+        $user = auth()->user();
+        if ($user && ! empty($user->role)) {
+            $role = trim((string) $user->role);
+            if ($role !== '') {
+                return $this->getUrl($role . '/dashboard');
+            }
+        }
+
         $url = setting('Auth.redirects')['register'];
 
         return $this->getUrl($url);

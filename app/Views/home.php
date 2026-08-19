@@ -1135,6 +1135,7 @@ $formatMzn = static function ($value): string {
           <li><a href="#cursos">Cursos</a></li>
           <li><a href="#como-funciona">Como funciona</a></li>
           <li><a href="https://www.youtube.com/@MechanicalTecnologia" target="_blank" rel="noopener noreferrer">YouTube</a></li>
+          <li><a href="<?= base_url('register') ?>">Criar conta</a></li>
           <li><a class="site-nav__cta" href="<?= base_url('login') ?>">Entrar</a></li>
         <?php endif; ?>
       </ul>

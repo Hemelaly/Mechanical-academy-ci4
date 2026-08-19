@@ -219,6 +219,50 @@ $user = service('auth')->user();
   .login-back:hover {
     color: #fff;
   }
+
+  .oauth-google {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 0.375rem;
+    padding: 0.78rem 1rem;
+    background: #fff;
+    color: #1f1f1f;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .oauth-google:hover { filter: brightness(0.97); color: #1f1f1f; }
+
+  .oauth-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 1rem 0 1.1rem;
+    color: var(--ink-soft);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .oauth-divider::before, .oauth-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+
+  .login-switch {
+    margin: 1.15rem 0 0;
+    color: var(--ink-soft);
+    font-size: 0.84rem;
+  }
+
+  .login-switch a { color: #fff; text-decoration: none; font-weight: 600; }
 </style>
 
 <div class="login">
@@ -246,6 +290,8 @@ $user = service('auth')->user();
     <?php if (session('message') !== null) : ?>
       <div class="login-alert login-alert--ok" role="alert"><?= esc(session('message')) ?></div>
     <?php endif ?>
+
+    <?= view('partials/google_auth_button', ['label' => 'Continuar com Google']) ?>
 
     <form action="<?= url_to('login') ?>" method="post">
       <?= csrf_field() ?>
@@ -277,6 +323,7 @@ $user = service('auth')->user();
       <button type="submit" class="login-submit"><?= lang('Auth.login') ?></button>
     </form>
 
+    <p class="login-switch">Ainda não tem conta? <a href="<?= url_to('register') ?>">Criar conta grátis</a></p>
     <a class="login-back" href="<?= base_url('/') ?>">← Voltar ao início</a>
     </div>
   </div>

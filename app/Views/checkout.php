@@ -332,21 +332,21 @@ $courseIconBg = !empty($course->icon_course)
 
     /* ---------- Page header ---------- */
     .checkout-header {
-      padding: 2.75rem 0 0.5rem;
+      padding: 1.1rem 0 0.15rem;
     }
 
     .checkout-header .kicker {
-      font-size: 0.78rem;
+      font-size: 0.72rem;
       font-weight: 700;
-      letter-spacing: 0.22em;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
       color: var(--accent);
-      margin-bottom: 0.6rem;
+      margin-bottom: 0.35rem;
     }
 
     .checkout-header h1 {
       font-weight: 700;
-      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-size: clamp(1.2rem, 2.4vw, 1.55rem);
       letter-spacing: -0.01em;
       margin-bottom: 0;
       color: #fff;
@@ -354,14 +354,14 @@ $courseIconBg = !empty($course->icon_course)
 
     /* ---------- Layout ---------- */
     .checkout-section {
-      padding: 2rem 0 5rem;
+      padding: 1.15rem 0 3rem;
     }
 
     .checkout-grid {
       display: grid;
       grid-template-columns: minmax(0, 1fr);
-      gap: 2.5rem;
-      align-items: stretch;
+      gap: 1.25rem;
+      align-items: start;
     }
 
     .checkout-summary {
@@ -374,7 +374,7 @@ $courseIconBg = !empty($course->icon_course)
 
     @media (min-width: 992px) {
       .checkout-grid {
-        grid-template-columns: minmax(0, 1fr) 400px;
+        grid-template-columns: minmax(0, 1fr) 380px;
       }
 
       .checkout-summary {
@@ -392,9 +392,9 @@ $courseIconBg = !empty($course->icon_course)
     .course-thumb {
       border-radius: 0.375rem;
       overflow: hidden;
-      margin-bottom: 1.5rem;
+      margin-bottom: 0.9rem;
       background: #05070b;
-      box-shadow: 0 20px 45px -25px rgba(0, 0, 0, 0.55);
+      box-shadow: 0 16px 36px -24px rgba(0, 0, 0, 0.55);
       aspect-ratio: 16 / 9;
     }
 
@@ -419,21 +419,21 @@ $courseIconBg = !empty($course->icon_course)
 
     .summary-title {
       font-weight: 700;
-      font-size: 1.5rem;
+      font-size: 1.2rem;
       letter-spacing: -0.01em;
-      margin-bottom: 0.9rem;
+      margin-bottom: 0.55rem;
       color: #fff;
     }
 
     .summary-meta {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.5rem 1.1rem;
+      gap: 0.4rem 0.85rem;
       color: var(--ink-soft);
-      font-size: 0.92rem;
+      font-size: 0.82rem;
       font-weight: 500;
-      margin-bottom: 1.5rem;
-      padding-bottom: 1.5rem;
+      margin-bottom: 0.9rem;
+      padding-bottom: 0.9rem;
       border-bottom: 1px solid var(--line);
     }
 
@@ -472,19 +472,19 @@ $courseIconBg = !empty($course->icon_course)
 
     .learn-list-checkout {
       list-style: none;
-      margin: 0 0 2rem;
+      margin: 0 0 1rem;
       padding: 0;
       display: flex;
       flex-direction: column;
-      gap: 0.9rem;
+      gap: 0.5rem;
     }
 
     .learn-list-checkout li {
       display: flex;
       align-items: flex-start;
-      gap: 0.75rem;
-      font-size: 0.96rem;
-      line-height: 1.5;
+      gap: 0.55rem;
+      font-size: 0.86rem;
+      line-height: 1.4;
       color: var(--ink);
     }
 
@@ -591,9 +591,9 @@ $courseIconBg = !empty($course->icon_course)
     .price-line {
       display: flex;
       align-items: baseline;
-      gap: 0.7rem;
+      gap: 0.55rem;
       flex-wrap: wrap;
-      margin-bottom: 2rem;
+      margin-bottom: 0.9rem;
     }
 
     .price-line .list-price,
@@ -626,11 +626,11 @@ $courseIconBg = !empty($course->icon_course)
     .trust-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 1.4rem;
-      padding-top: 1.75rem;
+      gap: 0.85rem;
+      padding-top: 0.9rem;
       border-top: 1px solid var(--line);
       color: var(--ink-soft);
-      font-size: 0.86rem;
+      font-size: 0.78rem;
     }
 
     .trust-row .item {
@@ -647,12 +647,12 @@ $courseIconBg = !empty($course->icon_course)
     /* ---------- Right: purchase card / form ---------- */
     .checkout-card {
       position: sticky;
-      top: 5.5rem;
-      background: #161616;
-      border: 1px solid var(--line);
-      border-radius: 0.375rem;
-      padding: 1.85rem;
-      box-shadow: 0 30px 70px -35px rgba(0, 0, 0, 0.7);
+      top: 4.4rem;
+      background: linear-gradient(180deg, #1b1b1b 0%, #141414 42%);
+      border: 1px solid var(--accent-border);
+      border-radius: 0.5rem;
+      padding: 1.15rem 1.15rem 1.2rem;
+      box-shadow: 0 24px 50px -28px var(--accent-glow);
     }
 
     @media (max-width: 991.98px) {
@@ -663,7 +663,7 @@ $courseIconBg = !empty($course->icon_course)
     }
 
     .checkout-card .price-block {
-      margin-bottom: 1.4rem;
+      margin-bottom: 0.85rem;
     }
 
     .checkout-card .price-block .list-price {
@@ -676,7 +676,7 @@ $courseIconBg = !empty($course->icon_course)
 
     .checkout-card .price-block .effective-price {
       font-weight: 700;
-      font-size: 2.1rem;
+      font-size: 1.7rem;
       letter-spacing: -0.01em;
       color: #fff;
       display: flex;
@@ -738,7 +738,7 @@ $courseIconBg = !empty($course->icon_course)
     }
 
     .coupon-group {
-      margin-bottom: 1.4rem;
+      margin-bottom: 0.85rem;
     }
 
     .coupon-group .input-group {
@@ -770,11 +770,11 @@ $courseIconBg = !empty($course->icon_course)
     .pay-option {
       display: flex;
       align-items: flex-start;
-      gap: 0.75rem;
+      gap: 0.65rem;
       border: 1px solid var(--line);
       border-radius: 0.375rem;
-      padding: 0.85rem 1rem;
-      margin-bottom: 0.6rem;
+      padding: 0.65rem 0.8rem;
+      margin-bottom: 0.45rem;
       cursor: pointer;
       transition: none;
     }
@@ -851,15 +851,75 @@ $courseIconBg = !empty($course->icon_course)
       justify-content: center;
       gap: 0.55rem;
       border-radius: 0.375rem;
-      padding: 0.85rem 1.5rem;
+      padding: 0.78rem 1.15rem;
       font-weight: 600;
-      font-size: 0.96rem;
+      font-size: 0.92rem;
       text-decoration: none;
       border: 1px solid transparent;
       transition: none;
       cursor: pointer;
       line-height: 1.2;
       width: 100%;
+    }
+
+    .checkout-card-kicker {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 0.35rem;
+    }
+
+    .auth-links {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin: 0 0 0.75rem;
+      font-size: 0.78rem;
+    }
+
+    .auth-links a {
+      color: #6ea8fe;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .oauth-google {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 0.375rem;
+      padding: 0.65rem 0.9rem;
+      background: #fff;
+      color: #1f1f1f;
+      text-decoration: none;
+      font-size: 0.84rem;
+      font-weight: 600;
+      margin-bottom: 0.15rem;
+    }
+
+    .oauth-google:hover { filter: brightness(0.97); color: #1f1f1f; }
+
+    .oauth-divider {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin: 0.7rem 0 0.8rem;
+      color: var(--ink-soft);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .oauth-divider::before, .oauth-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--line);
     }
 
     .btn-mech-primary {
@@ -1212,7 +1272,7 @@ $courseIconBg = !empty($course->icon_course)
           <?php if (! empty($learningItems)): ?>
             <p class="summary-block-heading">O que você vai aprender</p>
             <ul class="learn-list-checkout">
-              <?php foreach ($learningItems as $learningItem): ?>
+              <?php foreach (array_slice($learningItems, 0, 5) as $learningItem): ?>
                 <li><i class="bi bi-check-lg"></i><span><?= esc($learningItem) ?></span></li>
               <?php endforeach; ?>
             </ul>
@@ -1246,16 +1306,6 @@ $courseIconBg = !empty($course->icon_course)
             </div>
           <?php endif; ?>
 
-          <div class="price-line">
-            <?php if ($hasPromo): ?>
-              <span class="list-price"><?= number_format($listPrice, 2, ",", ".") ?> MZN</span>
-              <span class="effective-price"><?= number_format($effectivePrice, 2, ",", ".") ?> MZN</span>
-              <span class="promo-badge">−<?= $discountPercent ?>% OFF</span>
-            <?php else: ?>
-              <span class="effective-price"><?= number_format($effectivePrice, 2, ",", ".") ?> MZN</span>
-            <?php endif; ?>
-          </div>
-
           <div class="trust-row">
             <span class="item"><i class="bi bi-shield-check"></i> Seguro</span>
             <span class="item"><i class="bi bi-infinity"></i> Vitalício</span>
@@ -1266,6 +1316,7 @@ $courseIconBg = !empty($course->icon_course)
         <!-- RIGHT: FORM -->
         <div class="checkout-form-col">
           <div class="checkout-card">
+            <p class="checkout-card-kicker">Checkout</p>
             <div class="price-block">
               <?php if ($hasPromo): ?>
                 <span class="list-price"><?= number_format($listPrice, 2, ",", ".") ?> MZN</span>
@@ -1309,13 +1360,18 @@ $courseIconBg = !empty($course->icon_course)
                     <input type="hidden" name="email" value="<?= esc($user->email) ?>">
                     <input type="hidden" name="username" value="<?= esc($user->username) ?>">
                   <?php else: ?>
-                    <div class="d-flex justify-content-end mb-2">
-                      <a href="<?= base_url('/login') ?>" class="fw-bold text-decoration-none" style="color:var(--accent); font-size:0.86rem;">
-                        Já tem conta? Fazer login
-                      </a>
+                    <?php $checkoutReturn = '/checkout/' . (int) ($course->id_course ?? 0); ?>
+                    <div class="auth-links">
+                      <a href="<?= base_url('register?redirect=' . rawurlencode($checkoutReturn)) ?>">Criar conta grátis</a>
+                      <a href="<?= base_url('login?redirect=' . rawurlencode($checkoutReturn)) ?>">Já tem conta? Entrar</a>
                     </div>
 
-                    <div class="mb-3">
+                    <?= view('partials/google_auth_button', [
+                        'label' => 'Continuar com Google',
+                        'redirect' => $checkoutReturn,
+                    ]) ?>
+
+                    <div class="mb-2">
                       <label class="field-label" for="email">E-mail</label>
                       <input type="email" name="email" class="form-control" id="email" placeholder="seuemail@exemplo.com" required>
                       <div class="invalid-feedback">
@@ -1323,7 +1379,7 @@ $courseIconBg = !empty($course->icon_course)
                       </div>
                     </div>
 
-                    <div class="mb-3">
+                    <div class="mb-2">
                       <label class="field-label" for="name">Nome</label>
                       <input type="text" name="username" class="form-control" id="name" placeholder="O seu nome" required>
                       <div class="invalid-feedback">

@@ -22,7 +22,12 @@ service('auth')->routes($routes, ['except' => ['register', 'login', 'logout']]);
 $routes->get('login', '\App\Controllers\LoginController::loginView', ['as' => 'login']);
 $routes->post('login', '\App\Controllers\LoginController::loginAction');
 $routes->get('logout', '\App\Controllers\LoginController::logoutAction', ['as' => 'logout']);
-$routes->get('novo_usuario', '\CodeIgniter\Shield\Controllers\RegisterController::registerView', ['as' => 'register', 'filter' => 'role:admin']);
+$routes->get('register', '\App\Controllers\RegisterController::registerView', ['as' => 'register']);
+$routes->post('register', '\App\Controllers\RegisterController::registerAction');
+$routes->get('criar-conta', '\App\Controllers\RegisterController::registerView');
+$routes->get('auth/google', '\App\Controllers\GoogleAuthController::redirect');
+$routes->get('auth/google/callback', '\App\Controllers\GoogleAuthController::callback');
+$routes->get('novo_usuario', '\CodeIgniter\Shield\Controllers\RegisterController::registerView', ['as' => 'admin-register', 'filter' => 'role:admin']);
 $routes->post('novo_usuario', '\CodeIgniter\Shield\Controllers\RegisterController::registerAction', ['filter' => 'role:admin']);
 
 $routes->get('reset-password',  'ResetPassword::showResetForm');

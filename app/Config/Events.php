@@ -6,7 +6,6 @@ use CodeIgniter\Events\Events;
 use CodeIgniter\Exceptions\FrameworkException;
 use CodeIgniter\Shield\Authentication\Events\AuthEvents;
 use CodeIgniter\HotReloader\HotReloader;
-use App\Models\StudentModel;
 use App\Models\InstructorModel;
 use App\Models\ExtendedUserModel;
 
@@ -35,6 +34,11 @@ Events::on('register', function ($user) {
     $username = $post['username'] ?? null;
     $role     = $post['role'] ?? 'student';
 
+    $adminCreating = auth()->loggedIn() && strtolower((string) (auth()->user()->role ?? '')) === 'admin';
+    if (! $adminCreating) {
+        $role = 'student';
+    }
+
     $allowedRoles = ['student', 'instructor', 'admin'];
     if (! in_array($role, $allowedRoles, true)) {
         $role = 'student';
@@ -45,13 +49,11 @@ Events::on('register', function ($user) {
     $userModel->update($user->id, ['role' => $role]);
 
     if ($role === 'student') {
-        // Inserir na tabela students
-        $studentModel = new StudentModel();
-        $studentModel->insert([
-            'id_user_student' => $user->id,  // chave estrangeira para tabela users
-            'email_student'   => $email,
-            'name_student'    => $username
-        ]);
+        (new \App\Services\StudentAccountService())->ensureStudentProfile(
+            $user,
+            (string) ($username ?: $user->username),
+            (string) ($email ?: $user->email)
+        );
     } elseif ($role === 'instructor') {
         // Inserir na tabela instructors
         $instructorModel = new InstructorModel();
