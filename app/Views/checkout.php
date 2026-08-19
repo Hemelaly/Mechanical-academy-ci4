@@ -203,7 +203,7 @@ $courseIconBg = !empty($course->icon_course)
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <!-- kept: existing checkout JS toggles the WhatsApp button icon using a Font Awesome class -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
-  <link rel="icon" href="<?= base_url('favicon.png') ?>" type="image/png">
+  <?= view('partials/favicon') ?>
 
   <style>
     :root {

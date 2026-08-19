@@ -8,6 +8,7 @@
 <head>
     <meta charset="utf-8">
     <title><?= lang('Errors.pageNotFound') ?></title>
+    <?= view('partials/favicon') ?>
 
     <style>
         div.logo {

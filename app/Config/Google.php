@@ -31,14 +31,52 @@ class Google extends BaseConfig
     {
         parent::__construct();
 
-        $this->clientId     = trim((string) env('google.clientId', $this->clientId));
-        $this->clientSecret = trim((string) env('google.clientSecret', $this->clientSecret));
-        $this->redirectUri  = trim((string) env('google.redirectUri', $this->redirectUri));
+        $clientId     = $this->firstEnv(['google.clientId', 'GOOGLE_CLIENT_ID'], $this->clientId);
+        $clientSecret = $this->firstEnv(['google.clientSecret', 'GOOGLE_CLIENT_SECRET'], $this->clientSecret);
+        $redirectUri  = $this->firstEnv(['google.redirectUri', 'GOOGLE_REDIRECT_URI'], $this->redirectUri);
+
+        if ($clientId !== '') {
+            $this->clientId = $clientId;
+        }
+        if ($clientSecret !== '') {
+            $this->clientSecret = $clientSecret;
+        }
+        if ($redirectUri !== '') {
+            $this->redirectUri = $redirectUri;
+        }
     }
 
     public function isConfigured(): bool
     {
         return $this->clientId !== '' && $this->clientSecret !== '';
+    }
+
+    /**
+     * O botão pode aparecer só com o Client ID; o secret é obrigatório no callback.
+     */
+    public function hasClientId(): bool
+    {
+        return $this->clientId !== '';
+    }
+
+    /**
+     * @param list<string> $keys
+     */
+    private function firstEnv(array $keys, string $fallback = ''): string
+    {
+        foreach ($keys as $key) {
+            $raw = env($key);
+            if ($raw === null || $raw === false) {
+                continue;
+            }
+
+            $value = trim((string) $raw, " \t\n\r\0\x0B'\"");
+            if ($value !== '') {
+                return $value;
+            }
+        }
+
+        return trim($fallback);
     }
 
     public function callbackUrl(): string

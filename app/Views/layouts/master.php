@@ -28,7 +28,7 @@
     <script src="https://www.youtube.com/iframe_api"></script>
     <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
     <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
-    <link rel="icon" href="<?= base_url('favicon.png') ?>" type="image/png">
+    <?= view('partials/favicon') ?>
 
     <?= $this->renderSection('page_styles') ?>
     <?= view('partials/meta_pixel') ?>

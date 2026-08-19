@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title><?= lang('Errors.badRequest') ?></title>
+    <?= view('partials/favicon') ?>
 
     <style>
         div.logo {

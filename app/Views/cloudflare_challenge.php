@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verificação de segurança · Mechanical Academy</title>
-    <link rel="icon" href="<?= base_url('favicon.png') ?>" type="image/png">
+    <?= view('partials/favicon') ?>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
     <?= view('partials/meta_pixel') ?>

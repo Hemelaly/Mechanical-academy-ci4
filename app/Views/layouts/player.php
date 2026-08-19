@@ -25,7 +25,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://player.vimeo.com/api/player.js"></script>
-    <link rel="icon" href="<?= base_url('favicon.png') ?>" type="image/png">
+    <?= view('partials/favicon') ?>
     <?= $this->renderSection('page_styles') ?>
     <?= view('partials/meta_pixel') ?>
     <style>

@@ -11,6 +11,7 @@ $errorId = uniqid('error', true);
     <meta name="robots" content="noindex">
 
     <title><?= esc($title) ?></title>
+    <?= view('partials/favicon') ?>
     <style>
         <?= preg_replace('#[\r\n\t ]+#', ' ', file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'debug.css')) ?>
     </style>

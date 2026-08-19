@@ -24,6 +24,7 @@
         }
     </style>
 
+    <?= view('partials/favicon') ?>
     <?= $this->renderSection('pageStyles') ?>
     <?= view('partials/meta_pixel') ?>
 </head>

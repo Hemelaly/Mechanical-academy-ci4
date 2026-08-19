@@ -365,6 +365,45 @@ else
   log ".env nao enviado. Mantendo .env existente no servidor."
 fi
 
+# Envia só as chaves Google (o .env completo continua fora do Git/rsync).
+SYNC_GOOGLE_ENV="${SYNC_GOOGLE_ENV:-yes}"
+read_dotenv_value() {
+  local key="$1"
+  local file="$2"
+  [[ -f "${file}" ]] || return 0
+  grep -E "^[[:space:]]*${key}[[:space:]]*=" "${file}" | tail -1 | sed -E 's/^[^=]+=//; s/^[[:space:]]+//; s/[[:space:]]+$//; s/^["'\'']//; s/["'\'']$//'
+}
+
+if [[ "${SYNC_GOOGLE_ENV}" == "yes" && -f "${SOURCE_DIR}/.env" ]]; then
+  GOOGLE_ID_SYNC="$(read_dotenv_value 'google.clientId' "${SOURCE_DIR}/.env")"
+  GOOGLE_SECRET_SYNC="$(read_dotenv_value 'google.clientSecret' "${SOURCE_DIR}/.env")"
+  GOOGLE_REDIRECT_SYNC="$(read_dotenv_value 'google.redirectUri' "${SOURCE_DIR}/.env")"
+
+  if [[ -n "${GOOGLE_ID_SYNC}" && -n "${GOOGLE_SECRET_SYNC}" ]]; then
+    log "A gravar chaves Google no .env remoto (sem enviar o ficheiro .env)"
+
+    GOOGLE_PAYLOAD_B64="$(
+      GOOGLE_ID_SYNC="${GOOGLE_ID_SYNC}" \
+      GOOGLE_SECRET_SYNC="${GOOGLE_SECRET_SYNC}" \
+      GOOGLE_REDIRECT_SYNC="${GOOGLE_REDIRECT_SYNC}" \
+      php -r 'echo base64_encode(json_encode(array_filter([
+        "google.clientId" => getenv("GOOGLE_ID_SYNC") ?: "",
+        "google.clientSecret" => getenv("GOOGLE_SECRET_SYNC") ?: "",
+        "google.redirectUri" => getenv("GOOGLE_REDIRECT_SYNC") ?: "",
+      ], static fn ($v) => $v !== "")));'
+    )"
+
+    remote_exec_mutating "
+set -e
+cd '${REMOTE_PATH}'
+touch .env
+'${PHP_BIN}' scripts/upsert_env.php .env '${GOOGLE_PAYLOAD_B64}'
+"
+  else
+    log "Aviso: google.clientId/google.clientSecret ausentes no .env local; botao Google no servidor pode falhar."
+  fi
+fi
+
 # -----------------------------------------------------------------------------
 # 5–9) Pos-deploy remoto (uma unica sessao SSH = uma password no Git Bash)
 # -----------------------------------------------------------------------------
