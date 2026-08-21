@@ -511,12 +511,14 @@ $nextModuleUrl = !empty($nextModuleLessonId)
 
 <?php
 $enrollmentStatus = strtolower((string) ($enrollment->status_enrollment ?? ''));
-$accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada');
-$paywallRequired = (bool) ($paywallRequired ?? false);
+$enrollmentExpired = (new \App\Services\EnrollmentValidityService())->isExpired($enrollment);
+$accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada') || $enrollmentExpired;
+$paywallRequired = (bool) ($paywallRequired ?? false) || $enrollmentExpired;
 $freeLessonsAllowed = (int) ($freeLessonsAllowed ?? 0);
 $isDemoAccess = (bool) ($isDemoAccess ?? false);
 $demoRemainingSeconds = (int) ($demoRemainingSeconds ?? 0);
 $demoExpired = $isDemoAccess && $paywallRequired && $accessBlocked;
+$enrollmentYearExpired = $enrollmentExpired && ! $isDemoAccess;
 $checkoutUrl = (string) ($checkoutUrl ?? site_url('checkout/' . (int) ($course->id_course ?? 0)));
 $whatsappUrl = (string) ($whatsappUrl ?? '#');
 ?>
@@ -561,16 +563,28 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
                             <i class="bi <?= $paywallRequired ? 'bi-credit-card' : 'bi-lock-fill' ?> text-2xl <?= $paywallRequired ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400' ?>"></i>
                         </div>
                         <?php if ($paywallRequired): ?>
-                            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2"><?= !empty($demoExpired) ? 'Acesso demo expirado' : 'Aulas de teste concluídas' ?></h3>
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                                <?php if (! empty($enrollmentYearExpired)): ?>
+                                    Matrícula expirada
+                                <?php elseif (! empty($demoExpired)): ?>
+                                    Acesso demo expirado
+                                <?php else: ?>
+                                    Aulas de teste concluídas
+                                <?php endif; ?>
+                            </h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm">
-                                <?php if (!empty($demoExpired)): ?>
+                                <?php if (! empty($enrollmentYearExpired)): ?>
+                                    O seu acesso de 1 ano a este curso terminou. Renove a matrícula para continuar a assistir.
+                                <?php elseif (! empty($demoExpired)): ?>
                                     O seu acesso demo de 2 horas terminou. Conclua o pagamento para continuar ou fale com a equipa comercial.
                                 <?php else: ?>
                                     Já utilizou as <?= $freeLessonsAllowed ?> aulas grátis. Conclua o pagamento para continuar ou fale com a equipa comercial.
                                 <?php endif; ?>
                             </p>
                             <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                                <a href="<?= esc($checkoutUrl) ?>" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-md transition-colors text-sm">Pagar agora</a>
+                                <a href="<?= esc($checkoutUrl) ?>" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-md transition-colors text-sm">
+                                    <?= ! empty($enrollmentYearExpired) ? 'Renovar acesso' : 'Pagar agora' ?>
+                                </a>
                                 <a href="<?= esc($whatsappUrl) ?>" target="_blank" rel="noopener" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 px-6 rounded-md transition-colors text-sm">WhatsApp</a>
                             </div>
                         <?php else: ?>

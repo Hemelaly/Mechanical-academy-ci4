@@ -1079,7 +1079,10 @@ class Dashboard extends BaseController
             ->first();
 
         if ($existing) {
-            $updates = [];
+            $updates = array_merge(
+                (new \App\Services\EnrollmentValidityService())->paidAccessPayload(),
+                []
+            );
             if (strtolower((string) ($existing->status_enrollment ?? '')) !== 'ativa') {
                 $updates['status_enrollment'] = 'ativa';
             }
@@ -1108,14 +1111,14 @@ class Dashboard extends BaseController
             ]);
         }
 
-        $inserted = $enrollmentModel->insert([
+        $inserted = $enrollmentModel->insert(array_merge([
             'id_course_enrollment'   => $courseId,
             'id_student_enrollment'  => $userId,
             'status_enrollment'      => 'ativa',
             'progress_enrollment'    => 0,
             'enrolled_at_enrollment' => date('Y-m-d'),
             'is_manual_enrollment'   => 1,
-        ], true);
+        ], (new \App\Services\EnrollmentValidityService())->paidAccessPayload()), true);
 
         if ($inserted === false) {
             return $this->response->setStatusCode(422)->setJSON([
@@ -2986,13 +2989,13 @@ class Dashboard extends BaseController
                 return $this->jsonMessage('Usuario ja inscrito neste curso.', 409);
             }
 
-            $newEnrollmentId = $enrollmentModel->insert([
+            $newEnrollmentId = $enrollmentModel->insert(array_merge([
                 'id_course_enrollment'   => $courseId,
                 'id_student_enrollment'  => $existingUser->id,
                 'status_enrollment'      => 'ativa',
                 'progress_enrollment'    => 0.00,
                 'enrolled_at_enrollment' => date('Y-m-d H:i:s'),
-            ]);
+            ], (new \App\Services\EnrollmentValidityService())->paidAccessPayload()));
 
             $paymentRow = $paymentModel
                 ->where('id_user_payment', $pendingId)
@@ -3078,13 +3081,13 @@ class Dashboard extends BaseController
             'email_student'   => $pendingUser->email,
         ]);
 
-        $result = $enrollmentModel->insert([
+        $result = $enrollmentModel->insert(array_merge([
             'id_course_enrollment'   => $courseId,
             'id_student_enrollment'  => $userId,
             'status_enrollment'      => 'ativa',
             'progress_enrollment'    => 0.00,
             'enrolled_at_enrollment' => date('Y-m-d H:i:s'),
-        ]);
+        ], (new \App\Services\EnrollmentValidityService())->paidAccessPayload()));
 
         $paymentRow = $paymentModel
             ->where('id_user_payment', $pendingId)

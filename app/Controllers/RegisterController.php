@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Libraries\AuthRedirect;
+use App\Services\SingleDeviceSessionService;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\Shield\Controllers\RegisterController as ShieldRegisterController;
 
@@ -42,6 +43,15 @@ class RegisterController extends ShieldRegisterController
         $post['role'] = 'student';
         $this->request->setGlobal('post', $post);
 
-        return parent::registerAction();
+        $response = parent::registerAction();
+
+        if (auth()->loggedIn()) {
+            $user = auth()->user();
+            if ($user) {
+                (new SingleDeviceSessionService())->claimOrReject((int) $user->id);
+            }
+        }
+
+        return $response;
     }
 }

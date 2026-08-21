@@ -203,13 +203,13 @@ class Register extends Controller
             $paymentModel->update($idPayment, ['reference_payment' => $reference]);
 
             // 4) Enrollment (ativa)
-            $enroll = $enrollModel->insert([
+            $enroll = $enrollModel->insert(array_merge([
                 'id_course_enrollment'   => $idCourse,
                 'id_student_enrollment'  => $userId,
                 'status_enrollment'      => 'ativa',
                 'progress_enrollment'    => 0.00,
                 'enrolled_at_enrollment' => date('Y-m-d H:i:s'),
-            ]);
+            ], (new \App\Services\EnrollmentValidityService())->paidAccessPayload()));
 
             $db->transComplete();
             if ($db->transStatus() === false) {

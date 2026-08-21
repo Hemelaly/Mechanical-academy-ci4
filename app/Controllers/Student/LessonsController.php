@@ -150,8 +150,9 @@ class LessonsController extends BaseController
                 ->where('id_student_enrollment', (int) $user->id)
                 ->where('id_course_enrollment', (int) $row['id_course'])
                 ->get()
-                ->getRowArray();
-            $allowed = ! empty($enrollment);
+                ->getRow();
+            $allowed = $enrollment
+                && (new \App\Services\EnrollmentValidityService())->isActiveAccess($enrollment);
         }
 
         if (! $allowed) {

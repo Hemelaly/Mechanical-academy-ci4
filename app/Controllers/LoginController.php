@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Libraries\AuthRedirect;
+use App\Services\SingleDeviceSessionService;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\Shield\Authentication\Authenticators\Session;
 use CodeIgniter\Shield\Controllers\LoginController as ShieldLoginController;
@@ -12,6 +13,7 @@ use CodeIgniter\Shield\Controllers\LoginController as ShieldLoginController;
 /**
  * Evita LogicException do Shield quando a sessão ainda tem user info
  * (login pendente / sessão órfã / reenvio do formulário já autenticado).
+ * Impõe uma sessão activa por conta (anti partilha de dispositivos).
  */
 class LoginController extends ShieldLoginController
 {
@@ -58,12 +60,57 @@ class LoginController extends ShieldLoginController
             return redirect()->route('auth-action-show');
         }
 
-        return parent::loginAction();
+        $rules = $this->getValidationRules();
+        if (! $this->validateData($this->request->getPost(), $rules, [], config('Auth')->DBGroup)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        /** @var array $credentials */
+        $credentials             = $this->request->getPost(setting('Auth.validFields')) ?? [];
+        $credentials             = array_filter($credentials);
+        $credentials['password'] = $this->request->getPost('password');
+        $remember                = (bool) $this->request->getPost('remember');
+
+        $result = $authenticator->remember($remember)->attempt($credentials);
+        if (! $result->isOK()) {
+            return redirect()->route('login')->withInput()->with('error', $result->reason());
+        }
+
+        if ($authenticator->hasAction()) {
+            return redirect()->route('auth-action-show')->withCookies();
+        }
+
+        $user = auth()->user();
+        if ($user) {
+            $devices = new SingleDeviceSessionService();
+            $claim   = $devices->claimOrReject((int) $user->id);
+            if (! ($claim['ok'] ?? false)) {
+                try {
+                    auth()->logout();
+                } catch (\Throwable $e) {
+                    // ignore
+                }
+                $this->purgeAuthSession();
+                session()->remove(SingleDeviceSessionService::SESSION_KEY);
+
+                return redirect()->route('login')->withInput()->with(
+                    'error',
+                    $claim['message'] ?? 'Esta conta já está em uso noutro dispositivo.'
+                );
+            }
+        }
+
+        return redirect()->to(config('Auth')->loginRedirect())->withCookies();
     }
 
     public function logoutAction(): RedirectResponse
     {
         $url = config('Auth')->logoutRedirect();
+        $userId = auth()->loggedIn() ? (int) (auth()->user()->id ?? 0) : 0;
+
+        if ($userId > 0) {
+            (new SingleDeviceSessionService())->release($userId);
+        }
 
         try {
             auth()->logout();
@@ -72,19 +119,16 @@ class LoginController extends ShieldLoginController
         }
 
         $this->purgeAuthSession();
+        session()->remove(SingleDeviceSessionService::SESSION_KEY);
 
         return redirect()->to($url)->with('message', lang('Auth.successLogout'));
     }
 
-    /**
-     * Garante que não fica user_id na sessão antes de um novo attempt().
-     */
     private function prepareLoginSession(): void
     {
         /** @var Session $authenticator */
         $authenticator = auth('session')->getAuthenticator();
 
-        // Já autenticado ou a meio de 2FA/activação — não limpar.
         if (auth()->loggedIn() || $authenticator->isPending() || $authenticator->hasAction()) {
             return;
         }

@@ -1308,7 +1308,7 @@ $courseIconBg = !empty($course->icon_course)
 
           <div class="trust-row">
             <span class="item"><i class="bi bi-shield-check"></i> Seguro</span>
-            <span class="item"><i class="bi bi-infinity"></i> Vitalício</span>
+            <span class="item"><i class="bi bi-calendar-check"></i> Acesso 1 ano</span>
             <span class="item"><i class="bi bi-mortarboard"></i> Certificado</span>
           </div>
         </div>

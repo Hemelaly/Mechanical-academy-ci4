@@ -214,7 +214,7 @@
                     ? site_url('student/dashboard/inscricoes/' . $course->courseSlug . '/' . $course->resumeLessonSlug)
                     : site_url('student/dashboard/ver_aulas/' . $course->resumeLessonId);
                 $enrollmentStatus = strtolower((string) ($course->enrollmentStatus ?? $course->status_enrollment ?? ''));
-                $isBlocked = $enrollmentStatus === 'cancelada';
+                $isBlocked = $enrollmentStatus === 'cancelada' || ! empty($course->enrollment_expired);
                 $autoSuffix = (!$isBlocked && (int) $courseProgress < 100) ? '?autoplay=1' : '';
                 ?>
                 <a href="<?= $lessonUrl ?><?= $autoSuffix ?>"

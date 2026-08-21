@@ -47,11 +47,13 @@ class CheckoutEnrollmentService
 
     public function hasActiveEnrollment(int $userId, int $courseId): bool
     {
-        return (new EnrollmentModel())
+        $enrollment = (new EnrollmentModel())
             ->where('id_student_enrollment', $userId)
             ->where('id_course_enrollment', $courseId)
             ->where('status_enrollment', 'ativa')
-            ->first() !== null;
+            ->first();
+
+        return (new EnrollmentValidityService())->isActiveAccess($enrollment);
     }
 
     public function buildCourseAccessPath(int $courseId): string
@@ -530,14 +532,13 @@ class CheckoutEnrollmentService
             ->where('id_course_enrollment', $courseId)
             ->first();
 
+        $validity = new EnrollmentValidityService();
+
         if ($enrollment) {
             $updates = array_merge([
-                'status_enrollment' => 'ativa',
-            ], (new DemoEnrollmentService())->clearedDemoPayload());
-
-            if (empty($enrollment->enrolled_at_enrollment)) {
-                $updates['enrolled_at_enrollment'] = date('Y-m-d');
-            }
+                'status_enrollment'      => 'ativa',
+                'enrolled_at_enrollment' => date('Y-m-d'),
+            ], $validity->paidAccessPayload(), (new DemoEnrollmentService())->clearedDemoPayload());
 
             $updated = $enrollmentModel->update((int) $enrollment->id_enrollment, $updates);
             if (! $updated) {
@@ -555,7 +556,7 @@ class CheckoutEnrollmentService
             'id_course_enrollment'   => $courseId,
             'status_enrollment'      => 'ativa',
             'enrolled_at_enrollment' => date('Y-m-d'),
-        ], (new DemoEnrollmentService())->clearedDemoPayload()), true);
+        ], $validity->paidAccessPayload(), (new DemoEnrollmentService())->clearedDemoPayload()), true);
 
         if ($inserted === false) {
             throw new \RuntimeException(implode(', ', $enrollmentModel->errors() ?: ['Nao foi possivel criar a matricula.']));

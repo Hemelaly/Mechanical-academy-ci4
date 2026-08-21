@@ -1179,7 +1179,7 @@ class Dashboard extends BaseController
             $updates = array_merge([
                 'status_enrollment'    => 'ativa',
                 'is_manual_enrollment' => 1,
-            ], (new \App\Services\DemoEnrollmentService())->clearedDemoPayload());
+            ], (new \App\Services\EnrollmentValidityService())->paidAccessPayload(), (new \App\Services\DemoEnrollmentService())->clearedDemoPayload());
             if (empty($existing->enrolled_at_enrollment)) {
                 $updates['enrolled_at_enrollment'] = date('Y-m-d');
             }
@@ -1203,7 +1203,7 @@ class Dashboard extends BaseController
             'progress_enrollment'    => 0,
             'enrolled_at_enrollment' => date('Y-m-d'),
             'is_manual_enrollment'   => 1,
-        ], (new \App\Services\DemoEnrollmentService())->clearedDemoPayload()), true);
+        ], (new \App\Services\EnrollmentValidityService())->paidAccessPayload(), (new \App\Services\DemoEnrollmentService())->clearedDemoPayload()), true);
 
         if ($inserted === false) {
             return $this->jsonMessage(implode(', ', $enrollmentModel->errors() ?: ['Falha ao criar matricula.']), 422);
@@ -2326,13 +2326,13 @@ class Dashboard extends BaseController
             }
 
             // Criar nova inscriÃƒÂ§ÃƒÂ£o
-            $newEnrollmentId = $enrollmentModel->insert([
+            $newEnrollmentId = $enrollmentModel->insert(array_merge([
                 'id_course_enrollment'   => $courseId,
                 'id_student_enrollment'  => $existingUser->id,
                 'status_enrollment'      => 'ativa',
                 'progress_enrollment'    => 0.00,
                 'enrolled_at_enrollment' => date('Y-m-d H:i:s'),
-            ]);
+            ], (new \App\Services\EnrollmentValidityService())->paidAccessPayload()));
 
             // Atualizar pagamento
             $paymentRow = $paymentModel
@@ -2435,13 +2435,13 @@ class Dashboard extends BaseController
         ]);
 
         // 5. Criar inscriÃƒÂ§ÃƒÂ£o
-        $result = $enrollmentModel->insert([
+        $result = $enrollmentModel->insert(array_merge([
             'id_course_enrollment'   => $courseId,
             'id_student_enrollment'  => $userId,
             'status_enrollment'      => 'ativa',
             'progress_enrollment'    => 0.00,
             'enrolled_at_enrollment' => date('Y-m-d H:i:s'),
-        ]);
+        ], (new \App\Services\EnrollmentValidityService())->paidAccessPayload()));
 
         // 6. Atualizar pagamento
         $paymentRow = $paymentModel

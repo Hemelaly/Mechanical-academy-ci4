@@ -14,5 +14,6 @@ class ExtendedUserModel extends ShieldUserModel
 
         // Seus campos extras:
         'img', 'country', 'province', 'city', 'phone', 'role',
+        'active_device_token', 'active_device_at',
     ];
 }

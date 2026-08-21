@@ -103,9 +103,14 @@ class Dashboard extends BaseController
             $courseId = (int) $enr->id_course_enrollment;
             $enrollmentByCourseId[$courseId] = $enr;
             $status = strtolower((string) $enr->status_enrollment);
+            $expired = (new \App\Services\EnrollmentValidityService())->isExpired($enr);
 
-            if ($status === 'ativa')    $activeCourseIds[]  = $courseId;
-            if ($status === 'pendente') $pendingCourseIds[] = $courseId;
+            if ($status === 'ativa' && ! $expired) {
+                $activeCourseIds[] = $courseId;
+            }
+            if ($status === 'pendente' || ($status === 'ativa' && $expired)) {
+                $pendingCourseIds[] = $courseId;
+            }
         }
 
         // === OBJETO DE PROGRESSO POR CURSO ===
@@ -180,6 +185,11 @@ class Dashboard extends BaseController
             $courseRow->progress = isset($progressByCourseArr[$courseId])
                 ? $progressByCourseArr[$courseId]->progress
                 : 0.0;
+
+            $courseRow->expires_at_enrollment = $enrollment->expires_at_enrollment ?? null;
+            $courseRow->enrollment_expired = $enrollment
+                ? (new \App\Services\EnrollmentValidityService())->isExpired($enrollment)
+                : false;
         }
         unset($courseRow);
 
@@ -213,11 +223,13 @@ class Dashboard extends BaseController
 
         // Mapas: curso -> (id_enrollment, progress, etc.)
         $enrollmentByCourse = [];   // [id_course => id_enrollment]
+        $enrollmentRows = [];
         $progressByCourseArr = [];  // [id_course => (object)progress info]
 
         foreach ($enrollments as $enr) {
             $courseId = (int) $enr->id_course_enrollment;
             $enrollmentByCourse[$courseId] = (int) $enr->id_enrollment;
+            $enrollmentRows[$courseId] = $enr;
 
             $progressByCourseArr[$courseId] = (object) [
                 'courseId'     => $courseId,
@@ -279,6 +291,10 @@ class Dashboard extends BaseController
             // se quiser, tambÃ©m pode anexar enrollmentId/status
             $course->enrollmentId = isset($progressByCourseArr[$courseId]) ? $progressByCourseArr[$courseId]->enrollmentId : null;
             $course->enrollmentStatus = isset($progressByCourseArr[$courseId]) ? $progressByCourseArr[$courseId]->status : null;
+            $course->expires_at_enrollment = $enrollmentRows[$courseId]->expires_at_enrollment ?? ($course->expires_at_enrollment ?? null);
+            $course->enrollment_expired = isset($enrollmentRows[$courseId])
+                ? (new \App\Services\EnrollmentValidityService())->isExpired($enrollmentRows[$courseId])
+                : false;
         }
         unset($course);
 
@@ -374,7 +390,9 @@ class Dashboard extends BaseController
                     ->with('warning', 'VocÃª precisa estar inscrito neste curso.');
             }
 
-            if (strtolower((string) ($enrollment->status_enrollment ?? '')) === 'cancelada') {
+            if (strtolower((string) ($enrollment->status_enrollment ?? '')) === 'cancelada'
+                || (new \App\Services\EnrollmentValidityService())->isExpired($enrollment)
+            ) {
                 [$resumeId, $orderedIds] = $calcResume((int) $course->id_course, (int) $enrollment->id_enrollment);
                 $targetId = $resumeId ?: ($orderedIds[0] ?? null);
                 if ($targetId) {
@@ -382,7 +400,7 @@ class Dashboard extends BaseController
                         ->with('blocked_access', true);
                 }
                 return redirect()->to('/student/dashboard/inscricoes')
-                    ->with('error', 'Seu acesso a este curso está bloqueado.');
+                    ->with('error', 'Seu acesso a este curso expirou ou está bloqueado.');
             }
 
             [$resumeId] = $calcResume((int) $course->id_course, (int) $enrollment->id_enrollment);
@@ -444,7 +462,9 @@ class Dashboard extends BaseController
         }
 
         $enrollmentStatus = strtolower((string) ($enrollment->status_enrollment ?? ''));
-        $accessBlocked = $enrollmentStatus === 'cancelada';
+        $validity = new \App\Services\EnrollmentValidityService();
+        $enrollmentExpired = $validity->isExpired($enrollment);
+        $accessBlocked = $enrollmentStatus === 'cancelada' || $enrollmentExpired;
         $paywallRequired = false;
         $freeLessonsAllowed = 0;
         $commerce = new \App\Services\CourseCommerceService();
@@ -463,6 +483,9 @@ class Dashboard extends BaseController
                 $accessBlocked = true;
                 $paywallRequired = true;
             }
+        } elseif ($enrollmentExpired) {
+            $accessBlocked = true;
+            $paywallRequired = true;
         } elseif ($enrollmentStatus === 'pendente') {
             $freeLessonsAllowed = $commerce->getFreeLessonsCount($course);
             if ($freeLessonsAllowed < 1) {

@@ -19,6 +19,7 @@ class EnrollmentModel extends Model
         'progress_enrollment',
         'completed_enrollment',
         'enrolled_at_enrollment',
+        'expires_at_enrollment',
         'is_manual_enrollment',
         'is_demo_enrollment',
         'demo_started_at',
@@ -86,11 +87,12 @@ class EnrollmentModel extends Model
         return $this->select('
                     enrollments.id_enrollment,
                     enrollments.enrolled_at_enrollment,
+                    enrollments.expires_at_enrollment,
                     enrollments.status_enrollment,
                     
                     students.id_student,
                     students.name_student,
-                    students.email_student,
+            students.email_student,
                     
                     courses.id_course,
                     courses.title_course,
