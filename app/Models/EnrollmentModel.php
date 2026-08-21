@@ -84,15 +84,14 @@ class EnrollmentModel extends Model
 
     public function getStudentEnrolledCourses($studentId)
     {
-        return $this->select('
+        $select = '
                     enrollments.id_enrollment,
                     enrollments.enrolled_at_enrollment,
-                    enrollments.expires_at_enrollment,
                     enrollments.status_enrollment,
                     
                     students.id_student,
                     students.name_student,
-            students.email_student,
+                    students.email_student,
                     
                     courses.id_course,
                     courses.title_course,
@@ -102,7 +101,31 @@ class EnrollmentModel extends Model
                     
                     users.id,
                     users.username,
-                ')
+                ';
+
+        if ($this->db->fieldExists('expires_at_enrollment', $this->table)) {
+            $select = '
+                    enrollments.id_enrollment,
+                    enrollments.enrolled_at_enrollment,
+                    enrollments.expires_at_enrollment,
+                    enrollments.status_enrollment,
+                    
+                    students.id_student,
+                    students.name_student,
+                    students.email_student,
+                    
+                    courses.id_course,
+                    courses.title_course,
+                    courses.image_course,
+                    courses.description_course,
+                    courses.price_course,
+                    
+                    users.id,
+                    users.username,
+                ';
+        }
+
+        return $this->select($select)
             ->join('students', 'students.id_user_student = enrollments.id_student_enrollment')
             ->join('courses', 'courses.id_course = enrollments.id_course_enrollment')
             ->join('users', 'users.id = courses.id_instructor_course') // join com instrutor

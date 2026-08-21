@@ -23,6 +23,10 @@ class EnrollmentValidityService
      */
     public function paidAccessPayload(?string $from = null): array
     {
+        if (! $this->hasExpiresColumn()) {
+            return [];
+        }
+
         return [
             'expires_at_enrollment' => $this->expiresAt($from),
         ];
@@ -45,6 +49,10 @@ class EnrollmentValidityService
         }
 
         if ($status !== 'ativa') {
+            return false;
+        }
+
+        if (! $this->hasExpiresColumn()) {
             return false;
         }
 
@@ -81,6 +89,10 @@ class EnrollmentValidityService
 
     public function remainingDays(?object $enrollment): ?int
     {
+        if (! $this->hasExpiresColumn()) {
+            return null;
+        }
+
         $expiresAt = trim((string) ($enrollment->expires_at_enrollment ?? ''));
         if ($expiresAt === '') {
             return null;
@@ -92,5 +104,21 @@ class EnrollmentValidityService
         }
 
         return (int) ceil(($ts - time()) / 86400);
+    }
+
+    private function hasExpiresColumn(): bool
+    {
+        static $ok = null;
+        if ($ok !== null) {
+            return $ok;
+        }
+
+        try {
+            $ok = db_connect()->fieldExists('expires_at_enrollment', 'enrollments');
+        } catch (\Throwable $e) {
+            $ok = false;
+        }
+
+        return $ok;
     }
 }

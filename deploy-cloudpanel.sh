@@ -379,7 +379,7 @@ if [[ "${SYNC_GOOGLE_ENV}" == "yes" && -f "${SOURCE_DIR}/.env" ]]; then
   GOOGLE_SECRET_SYNC="$(read_dotenv_value 'google.clientSecret' "${SOURCE_DIR}/.env")"
   GOOGLE_REDIRECT_SYNC="$(read_dotenv_value 'google.redirectUri' "${SOURCE_DIR}/.env")"
 
-  if [[ -n "${GOOGLE_ID_SYNC}" && -n "${GOOGLE_SECRET_SYNC}" ]]; then
+    if [[ -n "${GOOGLE_ID_SYNC}" && -n "${GOOGLE_SECRET_SYNC}" ]]; then
     log "A gravar chaves Google no .env remoto (sem enviar o ficheiro .env)"
 
     GOOGLE_PAYLOAD_B64="$(
@@ -390,15 +390,23 @@ if [[ "${SYNC_GOOGLE_ENV}" == "yes" && -f "${SOURCE_DIR}/.env" ]]; then
         "google.clientId" => getenv("GOOGLE_ID_SYNC") ?: "",
         "google.clientSecret" => getenv("GOOGLE_SECRET_SYNC") ?: "",
         "google.redirectUri" => getenv("GOOGLE_REDIRECT_SYNC") ?: "",
-      ], static fn ($v) => $v !== "")));'
+      ], static function ($v) { return $v !== ""; })));' 2>/dev/null || true
     )"
 
-    remote_exec_mutating "
-set -e
+    if [[ -z "${GOOGLE_PAYLOAD_B64}" ]]; then
+      log "Aviso: nao foi possivel preparar payload Google; a continuar o deploy."
+    else
+      remote_exec_mutating "
+set +e
 cd '${REMOTE_PATH}'
 touch .env
-'${PHP_BIN}' scripts/upsert_env.php .env '${GOOGLE_PAYLOAD_B64}'
-"
+if [[ -f scripts/upsert_env.php ]]; then
+  '${PHP_BIN}' scripts/upsert_env.php .env '${GOOGLE_PAYLOAD_B64}'
+else
+  echo 'Aviso: scripts/upsert_env.php em falta; sync Google ignorado.'
+fi
+" || log "Aviso: sync Google no servidor falhou; a continuar o deploy."
+    fi
   else
     log "Aviso: google.clientId/google.clientSecret ausentes no .env local; botao Google no servidor pode falhar."
   fi
