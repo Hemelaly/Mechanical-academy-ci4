@@ -889,6 +889,20 @@ $formatMzn = static function ($value): string {
       display: flex;
       gap: 0.65rem;
       flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .news__form .cf-turnstile-wrap {
+      margin: 0;
+      flex: 0 0 auto;
+      align-self: center;
+    }
+
+    .news__form > .btn-mech {
+      flex: 0 0 auto;
+      align-self: center;
+      height: auto;
+      min-height: 0;
     }
 
     .news__input {

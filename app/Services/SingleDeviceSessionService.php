@@ -2,19 +2,19 @@
 
 namespace App\Services;
 
-use App\Models\ExtendedUserModel;
-
 /**
- * Uma sessão/dispositivo activo por conta.
- * O 2.º dispositivo só entra depois do logout do 1.º (ou se a sessão expirar).
+ * Um dispositivo "primário" por conta para assistir vídeos.
+ *
+ * - Login/logout no mesmo dispositivo: sempre permitido (cookie persistente).
+ * - 2.º/3.º dispositivo: podem entrar na conta, mas não assistem vídeos
+ *   até o dispositivo primário fazer logout (ou a sessão expirar).
  */
 class SingleDeviceSessionService
 {
     public const SESSION_KEY = 'active_device_token';
 
-    /**
-     * Segundos sem actividade após os quais se considera a sessão abandonada.
-     */
+    public const DEVICE_COOKIE = 'ma_watch_device';
+
     public function lockTtlSeconds(): int
     {
         $expiration = (int) (config('Session')->expiration ?? 7200);
@@ -27,159 +27,206 @@ class SingleDeviceSessionService
         return bin2hex(random_bytes(32));
     }
 
-    public function claimOrReject(int $userId): array
+    /**
+     * Identidade estável deste browser (sobrevive a logout/login).
+     */
+    public function deviceId(): string
     {
-        if ($userId <= 0) {
-            return ['ok' => false, 'message' => 'Utilizador inválido.'];
-        }
+        $fromSession = trim((string) (session()->get(self::SESSION_KEY) ?? ''));
+        $fromCookie  = trim((string) (service('request')->getCookie(self::DEVICE_COOKIE) ?? ''));
 
-        if (! $this->hasColumns()) {
-            // Migração ainda não aplicada — não bloquear o site.
-            return ['ok' => true, 'token' => $this->generateToken()];
-        }
-
-        $users = new ExtendedUserModel();
-        $row   = $users->select('id, active_device_token, active_device_at')->find($userId);
-
-        if (! $row) {
-            return ['ok' => false, 'message' => 'Utilizador não encontrado.'];
-        }
-
-        $storedToken = trim((string) ($row->active_device_token ?? ''));
-        $storedAt    = trim((string) ($row->active_device_at ?? ''));
-        $current     = trim((string) (session()->get(self::SESSION_KEY) ?? ''));
-
-        if ($storedToken !== '' && $this->isLockActive($storedAt)) {
-            // Mesmo browser a renovar / re-login na mesma sessão.
-            if ($current !== '' && hash_equals($storedToken, $current)) {
-                $this->touch($userId, $storedToken);
-
-                return ['ok' => true, 'token' => $storedToken];
+        if ($fromCookie !== '' && preg_match('/^[a-f0-9]{64}$/', $fromCookie)) {
+            if ($fromSession !== $fromCookie) {
+                session()->set(self::SESSION_KEY, $fromCookie);
             }
 
-            return [
-                'ok'      => false,
-                'message' => 'Esta conta já está ligada noutro dispositivo. Faça logout nesse dispositivo antes de entrar aqui.',
-            ];
+            return $fromCookie;
+        }
+
+        if ($fromSession !== '' && preg_match('/^[a-f0-9]{64}$/', $fromSession)) {
+            $this->writeDeviceCookie($fromSession);
+
+            return $fromSession;
         }
 
         $token = $this->generateToken();
-        $this->bind($userId, $token);
-
-        return ['ok' => true, 'token' => $token];
-    }
-
-    public function bind(int $userId, string $token): void
-    {
-        if (! $this->hasColumns() || $userId <= 0 || $token === '') {
-            return;
-        }
-
-        (new ExtendedUserModel())->update($userId, [
-            'active_device_token' => $token,
-            'active_device_at'    => date('Y-m-d H:i:s'),
-        ]);
-
         session()->set(self::SESSION_KEY, $token);
+        $this->writeDeviceCookie($token);
+
+        return $token;
     }
 
-    public function touch(int $userId, ?string $token = null): void
+    /**
+     * Regista este browser. Nunca bloqueia o login.
+     * Torna-se primário se não houver outro activo, ou se já era o primário.
+     */
+    public function registerOnLogin(int $userId): string
     {
-        if (! $this->hasColumns() || $userId <= 0) {
-            return;
+        $token = $this->deviceId();
+
+        if ($userId <= 0 || ! $this->hasColumns()) {
+            return $token;
         }
 
-        $token ??= trim((string) (session()->get(self::SESSION_KEY) ?? ''));
-        if ($token === '') {
-            return;
+        $row = $this->readUser($userId);
+        $stored = trim((string) ($row['active_device_token'] ?? ''));
+        $storedAt = trim((string) ($row['active_device_at'] ?? ''));
+
+        if ($stored === '' || ! $this->isLockActive($storedAt) || hash_equals($stored, $token)) {
+            $this->setPrimary($userId, $token);
         }
 
-        (new ExtendedUserModel())->update($userId, [
-            'active_device_token' => $token,
-            'active_device_at'    => date('Y-m-d H:i:s'),
-        ]);
+        return $token;
     }
 
+    /**
+     * Pode este dispositivo assistir vídeos?
+     * Se não houver primário activo, este dispositivo passa a ser o primário.
+     */
+    public function canWatchVideos(int $userId): bool
+    {
+        if ($userId <= 0 || ! $this->hasColumns()) {
+            return true;
+        }
+
+        $local = $this->deviceId();
+
+        $row = $this->readUser($userId);
+        $stored = trim((string) ($row['active_device_token'] ?? ''));
+        $storedAt = trim((string) ($row['active_device_at'] ?? ''));
+
+        if ($stored === '' || ! $this->isLockActive($storedAt)) {
+            $this->setPrimary($userId, $local);
+
+            return true;
+        }
+
+        if (hash_equals($stored, $local)) {
+            $this->touchPrimary($userId);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Logout: se este dispositivo era o primário, limpa o lock na BD.
+     */
     public function release(int $userId): void
     {
-        if (! $this->hasColumns() || $userId <= 0) {
-            return;
+        $local = $this->deviceId();
+
+        if ($userId > 0 && $this->hasColumns()) {
+            $row = $this->readUser($userId);
+            $stored = trim((string) ($row['active_device_token'] ?? ''));
+
+            if ($stored === '' || hash_equals($stored, $local)) {
+                $this->clearPrimary($userId);
+            }
         }
 
-        $current = trim((string) (session()->get(self::SESSION_KEY) ?? ''));
-        $users   = new ExtendedUserModel();
-        $row     = $users->select('id, active_device_token')->find($userId);
+        // Mantém o cookie do dispositivo; só limpa o token de sessão PHP se necessário.
+        session()->remove(self::SESSION_KEY);
+    }
 
-        if ($row) {
-            $stored = trim((string) ($row->active_device_token ?? ''));
-            // Só limpa se for o dispositivo que tem o token (evita o 2.º dispositivo limpar o 1.º).
-            if ($current === '' || $stored === '' || hash_equals($stored, $current)) {
-                $users->update($userId, [
-                    'active_device_token' => null,
-                    'active_device_at'    => null,
-                ]);
-            }
+    /**
+     * Força limpeza completa do lock desta conta.
+     */
+    public function forceRelease(int $userId): void
+    {
+        if ($userId > 0 && $this->hasColumns()) {
+            $this->clearPrimary($userId);
         }
 
         session()->remove(self::SESSION_KEY);
     }
 
-    /**
-     * true = sessão válida neste dispositivo; false = desalojado / outro dispositivo.
-     */
-    public function assertCurrentDevice(int $userId): bool
+    public function touchIfPrimary(int $userId): void
     {
-        if (! $this->hasColumns() || $userId <= 0) {
-            return true;
+        if ($userId <= 0 || ! $this->hasColumns()) {
+            return;
         }
 
-        $users = new ExtendedUserModel();
-        $row   = $users->select('id, active_device_token, active_device_at')->find($userId);
-        if (! $row) {
-            return false;
+        $local = trim((string) (session()->get(self::SESSION_KEY) ?? ''));
+        if ($local === '') {
+            $cookie = trim((string) (service('request')->getCookie(self::DEVICE_COOKIE) ?? ''));
+            if ($cookie === '' || ! preg_match('/^[a-f0-9]{64}$/', $cookie)) {
+                return;
+            }
+            $local = $cookie;
+            session()->set(self::SESSION_KEY, $local);
         }
 
-        $stored = trim((string) ($row->active_device_token ?? ''));
-        $at     = trim((string) ($row->active_device_at ?? ''));
-        $local  = trim((string) (session()->get(self::SESSION_KEY) ?? ''));
-
-        if ($stored === '') {
-            // Conta sem lock (legado / após expiração) — reivindica este dispositivo.
-            $token = $local !== '' ? $local : $this->generateToken();
-            $this->bind($userId, $token);
-
-            return true;
+        $row = $this->readUser($userId);
+        $stored = trim((string) ($row['active_device_token'] ?? ''));
+        if ($stored !== '' && hash_equals($stored, $local)) {
+            $this->touchPrimary($userId);
         }
+    }
 
-        if ($local === '' || ! hash_equals($stored, $local)) {
-            return false;
-        }
+    private function writeDeviceCookie(string $token): void
+    {
+        service('response')->setCookie([
+            'name'     => self::DEVICE_COOKIE,
+            'value'    => $token,
+            'expire'   => 365 * 24 * 60 * 60,
+            'httponly' => true,
+            'secure'   => (bool) (config('Cookie')->secure ?? false),
+            'samesite' => (string) (config('Cookie')->samesite ?? 'Lax'),
+            'path'     => (string) (config('Cookie')->path ?? '/'),
+        ]);
+    }
 
-        if (! $this->isLockActive($at)) {
-            // Lock expirou: renovar neste dispositivo.
-            $this->touch($userId, $stored);
+    private function setPrimary(int $userId, string $token): void
+    {
+        db_connect()->table('users')->where('id', $userId)->update([
+            'active_device_token' => $token,
+            'active_device_at'    => date('Y-m-d H:i:s'),
+        ]);
+        session()->set(self::SESSION_KEY, $token);
+        $this->writeDeviceCookie($token);
+    }
 
-            return true;
-        }
+    private function touchPrimary(int $userId): void
+    {
+        db_connect()->table('users')->where('id', $userId)->update([
+            'active_device_at' => date('Y-m-d H:i:s'),
+        ]);
+    }
 
-        // Mantém o heartbeat do dispositivo activo.
-        $this->touch($userId, $stored);
+    private function clearPrimary(int $userId): void
+    {
+        db_connect()->query(
+            'UPDATE users SET active_device_token = NULL, active_device_at = NULL WHERE id = ?',
+            [$userId]
+        );
+    }
 
-        return true;
+    /**
+     * @return array{active_device_token?: string|null, active_device_at?: string|null}
+     */
+    private function readUser(int $userId): array
+    {
+        $row = db_connect()
+            ->table('users')
+            ->select('active_device_token, active_device_at')
+            ->where('id', $userId)
+            ->get()
+            ->getRowArray();
+
+        return is_array($row) ? $row : [];
     }
 
     private function isLockActive(string $activeAt): bool
     {
-        if ($activeAt === '' || $activeAt === '0000-00-00 00:00:00') {
+        if ($activeAt === '' || str_starts_with($activeAt, '0000-00-00')) {
             return false;
         }
 
         $ts = strtotime($activeAt);
-        if ($ts === false) {
-            return false;
-        }
 
-        return (time() - $ts) < $this->lockTtlSeconds();
+        return $ts !== false && (time() - $ts) < $this->lockTtlSeconds();
     }
 
     private function hasColumns(): bool

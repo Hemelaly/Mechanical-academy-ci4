@@ -513,6 +513,7 @@ $nextModuleUrl = !empty($nextModuleLessonId)
 $enrollmentStatus = strtolower((string) ($enrollment->status_enrollment ?? ''));
 $enrollmentExpired = (new \App\Services\EnrollmentValidityService())->isExpired($enrollment);
 $accessBlocked = ($accessBlocked ?? false) || ($enrollmentStatus === 'cancelada') || $enrollmentExpired;
+$deviceBlocked = (bool) ($deviceBlocked ?? false);
 $paywallRequired = (bool) ($paywallRequired ?? false) || $enrollmentExpired;
 $freeLessonsAllowed = (int) ($freeLessonsAllowed ?? 0);
 $isDemoAccess = (bool) ($isDemoAccess ?? false);
@@ -559,8 +560,8 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
             <div id="blockedAccessModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
                 <div class="bg-white dark:bg-gray-800 rounded-md p-6 max-w-md mx-4 shadow-xl">
                     <div class="text-center">
-                        <div class="w-16 h-16 <?= $paywallRequired ? 'bg-amber-100 dark:bg-amber-900' : 'bg-red-100 dark:bg-red-900' ?> rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i class="bi <?= $paywallRequired ? 'bi-credit-card' : 'bi-lock-fill' ?> text-2xl <?= $paywallRequired ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400' ?>"></i>
+                        <div class="w-16 h-16 <?= $paywallRequired ? 'bg-amber-100 dark:bg-amber-900' : ($deviceBlocked ? 'bg-sky-100 dark:bg-sky-900' : 'bg-red-100 dark:bg-red-900') ?> rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="bi <?= $paywallRequired ? 'bi-credit-card' : ($deviceBlocked ? 'bi-phone' : 'bi-lock-fill') ?> text-2xl <?= $paywallRequired ? 'text-amber-600 dark:text-amber-400' : ($deviceBlocked ? 'text-sky-600 dark:text-sky-400' : 'text-red-600 dark:text-red-400') ?>"></i>
                         </div>
                         <?php if ($paywallRequired): ?>
                             <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
@@ -586,6 +587,16 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
                                     <?= ! empty($enrollmentYearExpired) ? 'Renovar acesso' : 'Pagar agora' ?>
                                 </a>
                                 <a href="<?= esc($whatsappUrl) ?>" target="_blank" rel="noopener" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 px-6 rounded-md transition-colors text-sm">WhatsApp</a>
+                            </div>
+                        <?php elseif ($deviceBlocked): ?>
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Vídeos em outro dispositivo</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+                                Esta conta já está a assistir aulas noutro dispositivo. Pode usar o painel normalmente, mas os vídeos só ficam disponíveis depois do outro dispositivo fazer logout.
+                            </p>
+                            <div class="flex justify-center">
+                                <a href="<?= esc(site_url('student/dashboard')) ?>" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-md transition-colors text-sm">
+                                    Ir ao painel
+                                </a>
                             </div>
                         <?php else: ?>
                             <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Acesso bloqueado</h3>
@@ -615,7 +626,7 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
                 };
                 blockedBtn?.addEventListener('click', goBack);
                 blockedModal?.addEventListener('click', (e) => {
-                    if (e.target === blockedModal && !<?= $paywallRequired ? 'true' : 'false' ?>) goBack();
+                    if (e.target === blockedModal && !<?= ($paywallRequired || $deviceBlocked) ? 'true' : 'false' ?>) goBack();
                 });
             </script>
         <?php endif; ?>

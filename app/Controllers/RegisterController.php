@@ -48,7 +48,7 @@ class RegisterController extends ShieldRegisterController
         if (auth()->loggedIn()) {
             $user = auth()->user();
             if ($user) {
-                (new SingleDeviceSessionService())->claimOrReject((int) $user->id);
+                (new SingleDeviceSessionService())->registerOnLogin((int) $user->id);
             }
         }
 

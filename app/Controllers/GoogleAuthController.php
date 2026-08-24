@@ -98,22 +98,7 @@ class GoogleAuthController extends BaseController
 
             $accounts->linkGoogle($user, $googleId, $email);
             $accounts->completeLogin($user);
-
-            $devices = new SingleDeviceSessionService();
-            $claim   = $devices->claimOrReject((int) $user->id);
-            if (! ($claim['ok'] ?? false)) {
-                try {
-                    auth()->logout();
-                } catch (\Throwable $e) {
-                    // ignore
-                }
-                session()->remove(SingleDeviceSessionService::SESSION_KEY);
-
-                return redirect()->to(site_url('login'))->with(
-                    'error',
-                    $claim['message'] ?? 'Esta conta já está ligada noutro dispositivo.'
-                );
-            }
+            (new SingleDeviceSessionService())->registerOnLogin((int) $user->id);
         } catch (\Throwable $e) {
             log_message('error', 'Google login/cadastro falhou: {error}', ['error' => $e->getMessage()]);
 

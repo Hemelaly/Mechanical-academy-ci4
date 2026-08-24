@@ -517,6 +517,17 @@ class Dashboard extends BaseController
             }
         }
 
+        // 2.º dispositivo: pode navegar na conta, mas não assiste vídeos.
+        $deviceBlocked = false;
+        $role = strtolower((string) ($authUser->role ?? ''));
+        if ($role === 'student' && ! $accessBlocked) {
+            $devices = new \App\Services\SingleDeviceSessionService();
+            if (! $devices->canWatchVideos((int) $userId)) {
+                $accessBlocked = true;
+                $deviceBlocked = true;
+            }
+        }
+
         // Bloqueia o mÃ³dulo seguinte atÃ© atingir a nota mÃ­nima no quiz do mÃ³dulo anterior
         $moduleIndex = null;
         foreach ($moduleList as $idx => $mod) {
@@ -671,6 +682,7 @@ class Dashboard extends BaseController
             'course'             => $course,
             'enrollment'         => (object) $enrollment,
             'accessBlocked'      => $accessBlocked ?? false,
+            'deviceBlocked'      => $deviceBlocked ?? false,
             'paywallRequired'    => $paywallRequired ?? false,
             'freeLessonsAllowed' => $freeLessonsAllowed ?? 0,
             'isDemoAccess'       => $isDemoAccess ?? false,

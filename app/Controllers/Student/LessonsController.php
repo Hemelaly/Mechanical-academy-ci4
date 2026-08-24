@@ -11,6 +11,16 @@ class LessonsController extends BaseController
 {
     public function complete()
     {
+        $user = auth()->user();
+        if ($user && strtolower((string) ($user->role ?? '')) === 'student') {
+            if (! (new \App\Services\SingleDeviceSessionService())->canWatchVideos((int) $user->id)) {
+                return $this->response->setStatusCode(403)->setJSON([
+                    'ok' => false,
+                    'message' => 'Os vídeos estão activos noutro dispositivo. Faça logout nesse dispositivo para continuar aqui.',
+                ]);
+            }
+        }
+
         $payload      = $this->request->getJSON(true);
         $idLesson     = (int)($payload['lesson_id'] ?? 0);
         $idEnrollment = (int)($payload['enrollment_id'] ?? 0);
@@ -146,6 +156,9 @@ class LessonsController extends BaseController
         } elseif ($role === 'instructor' && (int) $row['id_instructor_course'] === (int) $user->id) {
             $allowed = true;
         } elseif ($role === 'student') {
+            if (! (new \App\Services\SingleDeviceSessionService())->canWatchVideos((int) $user->id)) {
+                return $this->attachmentNotFound('Os vídeos/materiais estão activos noutro dispositivo. Faça logout nesse dispositivo para continuar aqui.', 403);
+            }
             $enrollment = $db->table('enrollments')
                 ->where('id_student_enrollment', (int) $user->id)
                 ->where('id_course_enrollment', (int) $row['id_course'])

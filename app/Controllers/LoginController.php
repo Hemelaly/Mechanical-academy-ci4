@@ -11,9 +11,8 @@ use CodeIgniter\Shield\Authentication\Authenticators\Session;
 use CodeIgniter\Shield\Controllers\LoginController as ShieldLoginController;
 
 /**
- * Evita LogicException do Shield quando a sessão ainda tem user info
- * (login pendente / sessão órfã / reenvio do formulário já autenticado).
- * Impõe uma sessão activa por conta (anti partilha de dispositivos).
+ * Login livre em qualquer dispositivo.
+ * O limite de 1 dispositivo aplica-se só à visualização de vídeos.
  */
 class LoginController extends ShieldLoginController
 {
@@ -82,22 +81,7 @@ class LoginController extends ShieldLoginController
 
         $user = auth()->user();
         if ($user) {
-            $devices = new SingleDeviceSessionService();
-            $claim   = $devices->claimOrReject((int) $user->id);
-            if (! ($claim['ok'] ?? false)) {
-                try {
-                    auth()->logout();
-                } catch (\Throwable $e) {
-                    // ignore
-                }
-                $this->purgeAuthSession();
-                session()->remove(SingleDeviceSessionService::SESSION_KEY);
-
-                return redirect()->route('login')->withInput()->with(
-                    'error',
-                    $claim['message'] ?? 'Esta conta já está em uso noutro dispositivo.'
-                );
-            }
+            (new SingleDeviceSessionService())->registerOnLogin((int) $user->id);
         }
 
         return redirect()->to(config('Auth')->loginRedirect())->withCookies();
@@ -108,9 +92,9 @@ class LoginController extends ShieldLoginController
         $url = config('Auth')->logoutRedirect();
         $userId = auth()->loggedIn() ? (int) (auth()->user()->id ?? 0) : 0;
 
-        if ($userId > 0) {
-            (new SingleDeviceSessionService())->release($userId);
-        }
+        // Liberta o lock de vídeos só se este dispositivo for o primário
+        // (2.º dispositivo a fazer logout não deve desbloquear o 1.º).
+        (new SingleDeviceSessionService())->release($userId);
 
         try {
             auth()->logout();

@@ -21,21 +21,8 @@ class RoleFilter implements FilterInterface
             return redirect()->to(site_url('login'));
         }
 
-        $devices = new SingleDeviceSessionService();
-        if (! $devices->assertCurrentDevice((int) $user->id)) {
-            try {
-                $auth->logout();
-            } catch (\Throwable $e) {
-                // ignore
-            }
-            $session->remove(SingleDeviceSessionService::SESSION_KEY);
-            $session->setFlashdata(
-                'error',
-                'Esta conta está activa noutro dispositivo. Faça logout lá para entrar aqui.'
-            );
-
-            return redirect()->to(site_url('login'));
-        }
+        // Não desloga o 2.º dispositivo — só mantém heartbeat se for o primário dos vídeos.
+        (new SingleDeviceSessionService())->touchIfPrimary((int) $user->id);
 
         if (! in_array($user->role, $arguments ?? [], true)) {
             $session->setFlashdata('error', 'Acesso negado. Você não tem permissão para acessar esta página.');
