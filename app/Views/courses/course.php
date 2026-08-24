@@ -619,6 +619,7 @@ $learnMoreCount = 0;
 
     /* ---------- Overview video ---------- */
     .video-frame {
+      position: relative;
       width: 100%;
       max-width: 860px;
       aspect-ratio: 16 / 9;
@@ -634,6 +635,52 @@ $learnMoreCount = 0;
       height: 100%;
       display: block;
       border: 0;
+    }
+
+    .video-end-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.92);
+      padding: 1.25rem;
+    }
+
+    .video-end-overlay.is-visible {
+      display: flex;
+    }
+
+    .video-end-overlay__card {
+      text-align: center;
+      color: #fff;
+      max-width: 20rem;
+    }
+
+    .video-end-overlay__card p {
+      margin: 0 0 1rem;
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .video-end-overlay__btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      border: 0;
+      border-radius: 0.375rem;
+      padding: 0.75rem 1.35rem;
+      background: #0d6efd;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+
+    .video-end-overlay__btn:hover {
+      background: #0b5ed7;
     }
 
     /* ---------- Curriculum layout ---------- */
@@ -1398,10 +1445,10 @@ $learnMoreCount = 0;
         <div class="section-heading centered">
           <h2>Apresentação do curso</h2>
         </div>
-        <div class="video-frame mx-auto">
+        <div class="video-frame mx-auto" id="overviewVideoFrame">
           <iframe id="vimeoPlayerOverview"
             title="Vimeo player"
-            src="https://player.vimeo.com/video/<?= esc($overviewVideoId) ?>?badge=0&autopause=0&player_id=<?= esc($overviewPlayerId) ?>&app_id=58479&title=0&byline=0&portrait=0&autoplay=0&outro=nothing&dnt=1"
+            src="https://player.vimeo.com/video/<?= esc($overviewVideoId) ?>?badge=0&autopause=0&player_id=<?= esc($overviewPlayerId) ?>&app_id=58479&title=0&byline=0&portrait=0&autoplay=0&outro=nothing&controls=1&dnt=1"
             frameborder="0"
             allow="autoplay; fullscreen; picture-in-picture"
             allowfullscreen
@@ -1409,6 +1456,15 @@ $learnMoreCount = 0;
             loading="lazy"
             sandbox="allow-same-origin allow-scripts allow-presentation"
             oncontextmenu="return false"></iframe>
+          <div id="overviewEndOverlay" class="video-end-overlay" hidden>
+            <div class="video-end-overlay__card">
+              <p>Fim da apresentação. Pode repetir o vídeo.</p>
+              <button type="button" id="overviewReplayBtn" class="video-end-overlay__btn">
+                <i class="bi bi-arrow-counterclockwise"></i>
+                Repetir vídeo
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -1484,7 +1540,7 @@ $learnMoreCount = 0;
                           if ($isPreviewLesson && !empty($lesson->preview_video_id)) {
                             $previewSrc = 'https://player.vimeo.com/video/' . rawurlencode((string) $lesson->preview_video_id)
                               . '?badge=0&autopause=0&player_id=' . (int) ($lesson->id_lesson ?? 0)
-                              . '&app_id=58479&title=0&byline=0&portrait=0&autoplay=1&outro=nothing&dnt=1';
+                              . '&app_id=58479&title=0&byline=0&portrait=0&autoplay=1&outro=nothing&controls=1&dnt=1';
                           }
                           ?>
                           <li>
@@ -1711,6 +1767,57 @@ $learnMoreCount = 0;
       }
     })();
   </script>
+  <?php if ($overviewVideoId): ?>
+  <script src="https://player.vimeo.com/api/player.js"></script>
+  <script>
+    (function () {
+      const iframe = document.getElementById('vimeoPlayerOverview');
+      const overlay = document.getElementById('overviewEndOverlay');
+      const replayBtn = document.getElementById('overviewReplayBtn');
+      if (!iframe || !window.Vimeo) return;
+
+      const player = new Vimeo.Player(iframe);
+
+      const exitFs = async () => {
+        try {
+          if (await player.getFullscreen()) await player.exitFullscreen();
+        } catch (e) {}
+        try {
+          if (document.fullscreenElement) await document.exitFullscreen();
+        } catch (e) {}
+      };
+
+      const showOverlay = () => {
+        if (!overlay) return;
+        overlay.hidden = false;
+        overlay.classList.add('is-visible');
+      };
+
+      const hideOverlay = () => {
+        if (!overlay) return;
+        overlay.hidden = true;
+        overlay.classList.remove('is-visible');
+      };
+
+      player.on('ended', async () => {
+        await exitFs();
+        try {
+          await player.pause();
+          await player.setCurrentTime(0);
+        } catch (e) {}
+        showOverlay();
+      });
+
+      replayBtn?.addEventListener('click', async () => {
+        hideOverlay();
+        try {
+          await player.setCurrentTime(0);
+          await player.play();
+        } catch (e) {}
+      });
+    })();
+  </script>
+  <?php endif; ?>
   <script>window.ANALYTICS_COLLECT_URL = <?= json_encode(site_url('analytics/collect')) ?>;</script>
   <script src="<?= base_url('assets/js/analytics-tracker.js') ?>" defer></script>
   <?= view('partials/posthog', [

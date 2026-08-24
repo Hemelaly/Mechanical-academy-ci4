@@ -11,8 +11,11 @@
           var saved = localStorage.getItem('theme');
           var dark = saved ? saved === 'dark' : true;
           document.documentElement.classList.toggle('dark', dark);
+          document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+          document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
         } catch (e) {
           document.documentElement.classList.add('dark');
+          document.documentElement.setAttribute('data-theme', 'dark');
         }
       })();
     </script>
@@ -50,16 +53,19 @@
                 </div>
             </div>
             <div class="flex shrink-0 items-center gap-2">
-                <button id="theme-toggle" type="button"
+                <button id="theme-toggle" type="button" data-theme-toggle
                     class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 text-slate-600 hover:bg-slate-100 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5"
                     aria-label="Trocar tema"
                     title="Trocar tema">
-                    <i id="theme-toggle-icon" class="bi bi-sun"></i>
+                    <i id="theme-toggle-icon" data-theme-icon class="bi bi-sun"></i>
                 </button>
                 <button id="player-toc-toggle" type="button"
-                    class="inline-flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:text-slate-200 dark:hover:bg-white/5 lg:hidden">
+                    class="inline-flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:text-slate-200 dark:hover:bg-white/5"
+                    aria-controls="courseDrawer"
+                    aria-expanded="false"
+                    title="Conteúdo do curso">
                     <i class="bi bi-list-ul"></i>
-                    Aulas
+                    <span class="hidden sm:inline">Aulas</span>
                 </button>
             </div>
         </header>
@@ -69,7 +75,7 @@
         </main>
     </div>
 
-    <script src="<?= base_url('assets/js/theme.js') ?>"></script>
+    <script src="<?= base_url('assets/js/theme.js') ?>?v=2"></script>
     <script>window.ANALYTICS_COLLECT_URL = <?= json_encode(site_url('analytics/collect')) ?>;</script>
     <script src="<?= base_url('assets/js/analytics-tracker.js') ?>" defer></script>
     <?= view('partials/posthog') ?>

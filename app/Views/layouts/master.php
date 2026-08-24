@@ -11,8 +11,11 @@
           var saved = localStorage.getItem('theme');
           var dark = saved ? saved === 'dark' : true;
           document.documentElement.classList.toggle('dark', dark);
+          document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+          document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
         } catch (e) {
           document.documentElement.classList.add('dark');
+          document.documentElement.setAttribute('data-theme', 'dark');
         }
       })();
     </script>

@@ -102,10 +102,15 @@ $nextModuleUrl = !empty($nextModuleLessonId)
     .player-shell {
         min-height: 100%;
         padding: 1rem 1rem 2rem;
+        --course-drawer-w: min(100vw, 20.5rem);
+        transition: padding-left 0.28s ease;
     }
     @media (min-width: 1024px) {
         .player-shell {
             padding: 1.25rem 1.5rem 2rem;
+        }
+        .player-shell.is-drawer-open {
+            padding-left: calc(var(--course-drawer-w) + 1rem);
         }
     }
 
@@ -463,6 +468,77 @@ $nextModuleUrl = !empty($nextModuleLessonId)
         overflow-y: auto;
     }
 
+    /* Drawer de aulas (esquerda, colapsável) */
+    #courseDrawer {
+        position: fixed;
+        top: 3.35rem;
+        left: 0;
+        bottom: 0;
+        width: var(--course-drawer-w, min(100vw, 20.5rem));
+        z-index: 45;
+        display: flex;
+        flex-direction: column;
+        background: var(--academy-surface, #fff);
+        color: var(--academy-text, #0f172a);
+        border-right: 1px solid var(--academy-border, #e2e8f0);
+        box-shadow: 8px 0 28px -18px rgba(15, 23, 42, 0.45);
+        transform: translateX(-105%);
+        transition: transform 0.28s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        will-change: transform;
+    }
+
+    html.dark #courseDrawer {
+        box-shadow: 8px 0 28px -16px rgba(0, 0, 0, 0.65);
+    }
+
+    #courseDrawer.is-open {
+        transform: translateX(0);
+    }
+
+    #drawerBackdrop {
+        position: fixed;
+        inset: 3.35rem 0 0 0;
+        z-index: 40;
+        background: rgba(0, 0, 0, 0.45);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.28s ease;
+    }
+
+    #drawerBackdrop.is-visible {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .course-drawer__head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0.9rem 1rem;
+        border-bottom: 1px solid var(--academy-border, #e2e8f0);
+        flex-shrink: 0;
+    }
+
+    .course-drawer__body {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        padding: 0.85rem;
+    }
+
+    .course-drawer__progress {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--academy-border, #e2e8f0);
+        flex-shrink: 0;
+    }
+
+    @media (min-width: 1024px) {
+        #drawerBackdrop {
+            display: none !important;
+        }
+    }
+
     @media (max-width: 640px) {
         .forum-post--reply { margin-left: 1rem; }
         .lesson-forum__actions { gap: 0.5rem; }
@@ -683,8 +759,8 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
             </div>
         </div>
 
-        <!-- Main Content Grid -->
-        <div class="grid grid-cols-1 items-start lg:grid-cols-3 gap-6">
+        <!-- Main Content -->
+        <div class="max-w-5xl mx-auto">
 
             <!-- Video Section -->
             <?php
@@ -701,7 +777,7 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
                 data-quiz-score="<?= $quizScore !== null ? esc($quizScore) : '' ?>"
                 data-is-last-module="<?= $isLastInModule ? '1' : '0' ?>"
                 data-next-module-url="<?= esc($nextModuleUrl) ?>"
-                class="lg:col-span-2 space-y-6">
+                class="space-y-6">
                 <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden shadow-md">
                     <?php if (!$isQuiz): ?>
                         <!-- Video Player -->
@@ -716,7 +792,7 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
                             ?>
                             <?php if ($videoId): ?>
                                 <iframe id="vimeoPlayer"
-                                    src="https://player.vimeo.com/video/<?= esc($videoId) ?>?badge=0&autopause=0&player_id=<?= esc($lesson->id_lesson) ?>&app_id=58479&title=0&byline=0&portrait=0&autoplay=<?= $auto ?>&outro=nothing&dnt=1"
+                                    src="https://player.vimeo.com/video/<?= esc($videoId) ?>?badge=0&autopause=0&player_id=<?= esc($lesson->id_lesson) ?>&app_id=58479&title=0&byline=0&portrait=0&autoplay=<?= $auto ?>&outro=nothing&controls=1&dnt=1"
                                     allow="autoplay; fullscreen; picture-in-picture"
                                     allowfullscreen referrerpolicy="no-referrer" loading="lazy"
                                     sandbox="allow-same-origin allow-scripts allow-presentation"
@@ -733,14 +809,14 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
                                 </div>
                             <?php endif; ?>
 
-                            <!-- End Overlay -->
-                            <?php if ($nextLesson): ?>
-                                <div id="endOverlay" class="absolute inset-0 hidden items-center justify-center backdrop-blur-sm bg-black bg-opacity-70 z-10">
-                                    <div class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md p-6 max-w-md w-[90%] text-center shadow-xl">
-                                        <div class="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                                            <i class="bi bi-check-lg text-2xl text-green-600 dark:text-green-400"></i>
-                                        </div>
-                                        <h4 class="text-xl font-bold mb-3 text-gray-900 dark:text-white">Aula concluída</h4>
+                            <!-- Cobre o ecrã final do Vimeo (sugestões); em fullscreen sai primeiro via JS -->
+                            <div id="endOverlay" class="absolute inset-0 hidden items-center justify-center bg-black/95 z-30">
+                                <div class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md p-6 max-w-md w-[90%] text-center shadow-xl">
+                                    <div class="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <i class="bi bi-check-lg text-2xl text-green-600 dark:text-green-400"></i>
+                                    </div>
+                                    <h4 class="text-xl font-bold mb-3 text-gray-900 dark:text-white">Aula concluída</h4>
+                                    <?php if ($nextLesson): ?>
                                         <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm">Avance para a próxima aula quando quiser.</p>
                                         <div class="flex flex-col sm:flex-row gap-3 justify-center mb-4">
                                             <?php
@@ -758,12 +834,20 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
                                                 <i class="bi bi-arrow-right"></i>
                                             </a>
                                             <button id="stayBtn" type="button" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2.5 px-6 rounded-md transition-colors text-sm">
-                                                Ficar aqui
+                                                Repetir vídeo
                                             </button>
                                         </div>
-                                    </div>
+                                    <?php else: ?>
+                                        <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm">Pode repetir esta aula quando quiser.</p>
+                                        <div class="flex justify-center mb-4">
+                                            <button id="stayBtn" type="button" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-md transition-colors text-sm flex items-center justify-center gap-2">
+                                                <i class="bi bi-arrow-counterclockwise"></i>
+                                                Repetir vídeo
+                                            </button>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
-                            <?php endif; ?>
+                            </div>
                         </div>
                     <?php endif; ?>
 
@@ -1120,166 +1204,40 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
                 </div>
             </div>
 
-            <!-- Sidebar - Desktop -->
-            <div class="hidden lg:block course-toc-sticky">
-                <div class="course-toc-panel bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md p-4 shadow-sm">
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Conteúdo do Curso</h3>
-
-                    <!-- Course Sidebar Content -->
-                    <div class="course-toc-scroll space-y-3 pr-2">
-                        <?php foreach ($modules as $index => $m): ?>
-                            <div class="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md overflow-hidden">
-                                <!-- Module Header -->
-                                <button class="module-header w-full flex justify-between items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                                    onclick="toggleModule(<?= $index ?>)">
-                                    <div class="flex items-center gap-3">
-                                        <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
-                                        <span class="font-medium text-gray-900 dark:text-white text-left text-sm"><?= esc($m->title_module) ?></span>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-gray-600 dark:text-gray-400 text-xs"><?= count($m->lessons) ?> aulas</span>
-                                        <i class="bi bi-chevron-down text-gray-500 text-xs transition-transform duration-300"></i>
-                                    </div>
-                                </button>
-
-                                <!-- Module Content -->
-                                <div id="module-<?= $index ?>" class="module-content hidden">
-                                    <?php foreach ($m->lessons as $l): ?>
-                                        <?php $isCurrent = ($l->id_lesson == $lesson->id_lesson); ?>
-                                        <?php $isDone = in_array($l->id_lesson, $completedLessonIds ?? [], true); ?>
-                                        <?php $isQuizLessonRow = ($l->type_lesson === 'quiz'); ?>
-                                        <div class="lesson-row flex items-center justify-between p-3 border-t border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors <?= $isCurrent ? 'bg-blue-50 dark:bg-blue-900/30 border-l-2 border-blue-500' : '' ?>"
-                                            data-lesson-id="<?= (int)$l->id_lesson ?>"
-                                            data-lesson-type="<?= esc($l->type_lesson) ?>">
-
-                                            <div class="flex items-center gap-3 flex-1 min-w-0">
-                                                <div class="relative">
-                                                    <input type="checkbox"
-                                                        class="lesson-check w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-                                                        <?= $isDone ? 'checked' : '' ?>
-                                                        aria-label="Marcar aula como conclu?da"
-                                                        <?= $isQuizLessonRow ? 'disabled title="A conclusão deste quiz é controlada pelas respostas."' : '' ?>>
-                                                </div>
-
-                                                <?php $lessonSlug = url_title($l->title_lesson, '-', true); ?>
-                                                <?php
-                                                $lessonSlug = $lessonSlugById[(int) $l->id_lesson] ?? '';
-                                                $iconClass = in_array($l->type_lesson, ['quiz', 'text'], true) ? 'bi-file-text' : 'bi-camera-video';
-                                                ?>
-                                                <?php $lessonUrl = $resolveLessonUrl((int) $l->id_lesson, $lessonSlug ?: null); ?>
-                                                <a class="lesson-link flex items-center gap-2 text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex-1 min-w-0"
-                                                    href="<?= $lessonUrl ?>">
-                                                    <i class="bi <?= $iconClass ?> text-slate-400"></i>
-                                                    <span class="truncate text-sm"><?= esc($l->title_lesson) ?></span>
-                                                    <?php if (!empty($l->attachment_path_lesson)): ?>
-                                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-200 text-slate-700 dark:bg-slate-600 dark:text-slate-100 rounded-full text-[10px] font-medium">
-                                                            <i class="bi bi-paperclip"></i>
-                                                            Arquivo
-                                                        </span>
-                                                    <?php endif; ?>
-                                                    <?php if ($isCurrent): ?>
-                                                        <span class="badge-current font-medium px-2 py-0.5 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 rounded-full whitespace-nowrap text-xs">
-                                                            Atual
-                                                        </span>
-                                                    <?php endif; ?>
-                                                </a>
-                                            </div>
-
-                                            <span class="text-gray-500 dark:text-gray-400 ml-2 whitespace-nowrap text-xs">
-                                                <?= esc($l->duration_lesson) ?> min
-                                            </span>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-            </div>
         </div>
 
-        <!-- Mobile Drawer -->
-        <div id="mobileDrawer" class="fixed inset-y-0 right-0 w-full max-w-sm bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 transform translate-x-full transition-transform duration-300 z-50 lg:hidden shadow-xl">
-            <div class="p-4 h-full flex flex-col">
-                <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-200 dark:border-gray-700">
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">Conteúdo do Curso</h3>
-                    <button id="closeDrawer" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                        <i class="bi bi-x-lg text-lg"></i>
-                    </button>
+        <!-- Drawer de conteúdo (esquerda, colapsável) -->
+        <aside id="courseDrawer" class="course-drawer" aria-label="Conteúdo do curso" aria-hidden="true">
+            <div class="course-drawer__head">
+                <div class="min-w-0">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Conteúdo</p>
+                    <h3 class="text-base font-bold text-gray-900 dark:text-white truncate"><?= esc($course->title_course) ?></h3>
                 </div>
-                <div class="flex-1 overflow-y-auto pb-4">
-                    <!-- Course Sidebar Content for Mobile -->
-                    <div class="space-y-3">
-                        <?php foreach ($modules as $index => $m): ?>
-                            <div class="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md overflow-hidden">
-                                <!-- Module Header -->
-                                <button class="module-header w-full flex justify-between items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                                    onclick="toggleModuleMobile(<?= $index ?>)">
-                                    <div class="flex items-center gap-3">
-                                        <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
-                                        <span class="font-medium text-gray-900 dark:text-white text-left text-sm"><?= esc($m->title_module) ?></span>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-gray-600 dark:text-gray-400 text-xs"><?= count($m->lessons) ?> aulas</span>
-                                        <i class="bi bi-chevron-down text-gray-500 text-xs transition-transform duration-300"></i>
-                                    </div>
-                                </button>
-
-                                <!-- Module Content -->
-                                <div id="module-mobile-<?= $index ?>" class="module-content-mobile hidden">
-                                    <?php foreach ($m->lessons as $l): ?>
-                                        <?php $isCurrent = ($l->id_lesson == $lesson->id_lesson); ?>
-                                        <?php $isDone = in_array($l->id_lesson, $completedLessonIds ?? [], true); ?>
-                                        <?php $isQuizLessonRow = ($l->type_lesson === 'quiz'); ?>
-                                        <div class="lesson-row flex items-center justify-between p-3 border-t border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors <?= $isCurrent ? 'bg-blue-50 dark:bg-blue-900/30 border-l-2 border-blue-500' : '' ?>"
-                                            data-lesson-id="<?= (int)$l->id_lesson ?>"
-                                            data-lesson-type="<?= esc($l->type_lesson) ?>">
-
-                                            <div class="flex items-center gap-3 flex-1 min-w-0">
-                                                <div class="relative">
-                                                    <input type="checkbox"
-                                                        class="lesson-check w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-                                                        <?= $isDone ? 'checked' : '' ?>
-                                                        aria-label="Marcar aula como concluída"
-                                                        <?= $isQuizLessonRow ? 'disabled title="A conclusão deste quiz é controlada pelas respostas."' : '' ?>>
-                                                </div>
-
-                                                <?php
-                                                $lessonSlug = $lessonSlugById[(int) $l->id_lesson] ?? '';
-                                                $iconClass = in_array($l->type_lesson, ['quiz', 'text'], true) ? 'bi-file-text' : 'bi-camera-video';
-                                                ?>
-                                                <?php $lessonUrl = $resolveLessonUrl((int) $l->id_lesson, $lessonSlug ?: null); ?>
-                                                <a class="lesson-link flex items-center gap-2 text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex-1 min-w-0"
-                                                    href="<?= $lessonUrl ?>" onclick="closeDrawerFunc()">
-                                                    <i class="bi <?= $iconClass ?> text-slate-400"></i>
-                                                    <span class="truncate text-sm"><?= esc($l->title_lesson) ?></span>
-                                                    <?php if (!empty($l->attachment_path_lesson)): ?>
-                                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-200 text-slate-700 dark:bg-slate-600 dark:text-slate-100 rounded-full text-[10px] font-medium">
-                                                            <i class="bi bi-paperclip"></i>
-                                                            Arquivo
-                                                        </span>
-                                                    <?php endif; ?>
-                                                    <?php if ($isCurrent): ?>
-                                                        <span class="badge-current font-medium px-2 py-0.5 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 rounded-full whitespace-nowrap text-xs">
-                                                            Atual
-                                                        </span>
-                                                    <?php endif; ?>
-                                                </a>
-                                            </div>
-
-                                            <span class="text-gray-500 dark:text-gray-400 ml-2 whitespace-nowrap text-xs">
-                                                <?= esc($l->duration_lesson) ?> min
-                                            </span>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
+                <button type="button" id="closeDrawer" class="inline-flex h-9 w-9 items-center justify-center rounded-md text-gray-500 hover:text-gray-800 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/10" aria-label="Fechar conteúdo">
+                    <i class="bi bi-chevron-left text-lg"></i>
+                </button>
+            </div>
+            <div class="course-drawer__progress">
+                <div class="flex justify-between items-center mb-1.5">
+                    <span class="text-xs font-medium text-gray-600 dark:text-gray-300">Progresso</span>
+                    <span id="drawerProgressPercentage" class="text-xs font-bold text-blue-600 dark:text-blue-400"><?= (int) $initialProgress ?>%</span>
+                </div>
+                <div class="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div id="drawerProgressBar" class="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-500" style="width: <?= (int) $initialProgress ?>%"></div>
                 </div>
             </div>
-        </div>
-        <div id="drawerBackdrop" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40 lg:hidden"></div>
+            <div class="course-drawer__body">
+                <?= view('partials/course_toc_list', [
+                    'modules' => $modules,
+                    'lesson' => $lesson,
+                    'completedLessonIds' => $completedLessonIds ?? [],
+                    'lessonSlugById' => $lessonSlugById ?? [],
+                    'resolveLessonUrl' => $resolveLessonUrl,
+                    'closeOnNavigate' => true,
+                ]) ?>
+            </div>
+        </aside>
+        <div id="drawerBackdrop" aria-hidden="true"></div>
     </div>
 </div>
 
@@ -1320,29 +1278,32 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
 
         const ppEl = document.getElementById('progressPercentage');
         const barEl = document.getElementById('progressBar');
+        const drawerPpEl = document.getElementById('drawerProgressPercentage');
+        const drawerBarEl = document.getElementById('drawerProgressBar');
 
         if (barEl) barEl.style.width = pct + '%';
+        if (drawerBarEl) drawerBarEl.style.width = pct + '%';
 
-        if (!ppEl || !barEl) return;
-
-        if (pct >= 100) {
-            // Texto "Concluído"
-            ppEl.innerHTML = `
+        const doneHtml = `
       <span class="inline-flex items-center gap-1 text-green-600 dark:text-green-400 font-bold">
         <i class="bi bi-check-circle"></i> Concluído
       </span>
     `;
 
-            // Muda a barra para verde (remove o gradiente azul)
-            barEl.classList.remove('from-blue-500', 'to-blue-600');
-            barEl.classList.add('from-green-500', 'to-green-600');
+        if (pct >= 100) {
+            if (ppEl) ppEl.innerHTML = doneHtml;
+            if (drawerPpEl) drawerPpEl.textContent = '100%';
+            barEl?.classList.remove('from-blue-500', 'to-blue-600');
+            barEl?.classList.add('from-green-500', 'to-green-600');
+            drawerBarEl?.classList.remove('from-blue-500', 'to-blue-600');
+            drawerBarEl?.classList.add('from-green-500', 'to-green-600');
         } else {
-            // Volta ao normal (percentual)
-            ppEl.textContent = pct + '%';
-
-            // Garante gradiente azul quando n?o est? conclu?do
-            barEl.classList.remove('from-green-500', 'to-green-600');
-            barEl.classList.add('from-blue-500', 'to-blue-600');
+            if (ppEl) ppEl.textContent = pct + '%';
+            if (drawerPpEl) drawerPpEl.textContent = pct + '%';
+            barEl?.classList.remove('from-green-500', 'to-green-600');
+            barEl?.classList.add('from-blue-500', 'to-blue-600');
+            drawerBarEl?.classList.remove('from-green-500', 'to-green-600');
+            drawerBarEl?.classList.add('from-blue-500', 'to-blue-600');
         }
     }
 
@@ -1990,116 +1951,129 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
 
 
     /* =========================
-       Module Accordion - Desktop
+       Module Accordion
        ========================= */
     function toggleModule(index) {
         const moduleContent = document.getElementById(`module-${index}`);
         const moduleHeader = document.querySelector(`button[onclick="toggleModule(${index})"]`);
-        const chevron = moduleHeader.querySelector('i.bi-chevron-down');
+        const chevron = moduleHeader?.querySelector('i.bi-chevron-down');
+        if (!moduleContent || !moduleHeader) return;
 
         if (moduleContent.classList.contains('hidden')) {
-            // Close all other modules
             document.querySelectorAll('.module-content').forEach(content => {
                 content.classList.add('hidden');
             });
             document.querySelectorAll('.module-header i.bi-chevron-down').forEach(icon => {
                 icon.classList.remove('rotate-180');
             });
-            // Open this module
+            document.querySelectorAll('.module-header').forEach(btn => {
+                btn.setAttribute('aria-expanded', 'false');
+            });
             moduleContent.classList.remove('hidden');
-            chevron.classList.add('rotate-180');
+            chevron?.classList.add('rotate-180');
+            moduleHeader.setAttribute('aria-expanded', 'true');
         } else {
             moduleContent.classList.add('hidden');
-            chevron.classList.remove('rotate-180');
-        }
-    }
-
-    /* =========================
-       Module Accordion - Mobile
-       ========================= */
-    function toggleModuleMobile(index) {
-        const moduleContent = document.getElementById(`module-mobile-${index}`);
-        const moduleHeader = document.querySelector(`button[onclick="toggleModuleMobile(${index})"]`);
-        const chevron = moduleHeader.querySelector('i.bi-chevron-down');
-
-        if (moduleContent.classList.contains('hidden')) {
-            // Close all other mobile modules
-            document.querySelectorAll('.module-content-mobile').forEach(content => {
-                content.classList.add('hidden');
-            });
-            document.querySelectorAll('.module-header i.bi-chevron-down').forEach(icon => {
-                icon.classList.remove('rotate-180');
-            });
-            // Open this module
-            moduleContent.classList.remove('hidden');
-            chevron.classList.add('rotate-180');
-        } else {
-            moduleContent.classList.add('hidden');
-            chevron.classList.remove('rotate-180');
+            chevron?.classList.remove('rotate-180');
+            moduleHeader.setAttribute('aria-expanded', 'false');
         }
     }
 
     // Auto-expand module containing current lesson
     document.addEventListener('DOMContentLoaded', () => {
-        // Desktop
-        const currentLesson = document.querySelector('.lesson-row.bg-blue-50, .lesson-row.dark\\:bg-blue-900');
-        if (currentLesson) {
-            const module = currentLesson.closest('.module-content');
-            if (module) {
-                module.classList.remove('hidden');
-                const moduleIndex = module.id.split('-')[1];
-                const moduleHeader = document.querySelector(`button[onclick="toggleModule(${moduleIndex})"]`);
-                const chevron = moduleHeader?.querySelector('i.bi-chevron-down');
-                if (chevron) {
-                    chevron.classList.add('rotate-180');
-                }
-            }
-        }
-
-        // Mobile
-        const currentLessonMobile = document.querySelector('.lesson-row.bg-blue-50, .lesson-row.dark\\:bg-blue-900');
-        if (currentLessonMobile) {
-            const moduleMobile = currentLessonMobile.closest('.module-content-mobile');
-            if (moduleMobile) {
-                moduleMobile.classList.remove('hidden');
-                const moduleIndex = moduleMobile.id.split('-')[2];
-                const moduleHeader = document.querySelector(`button[onclick="toggleModuleMobile(${moduleIndex})"]`);
-                const chevron = moduleHeader?.querySelector('i.bi-chevron-down');
-                if (chevron) {
-                    chevron.classList.add('rotate-180');
-                }
-            }
-        }
+        const currentRow = document.querySelector('#courseDrawer .lesson-row.bg-blue-50');
+        if (!currentRow) return;
+        const module = currentRow.closest('.module-content');
+        if (!module) return;
+        module.classList.remove('hidden');
+        const moduleIndex = module.id.replace('module-', '');
+        const moduleHeader = document.querySelector(`button[onclick="toggleModule(${moduleIndex})"]`);
+        moduleHeader?.querySelector('i.bi-chevron-down')?.classList.add('rotate-180');
+        moduleHeader?.setAttribute('aria-expanded', 'true');
+        currentRow.scrollIntoView({ block: 'nearest' });
     });
 
     /* =========================
-       Mobile Drawer
+       Course drawer (esquerda)
        ========================= */
-    const mobileDrawer = document.getElementById('mobileDrawer');
+    const courseDrawer = document.getElementById('courseDrawer');
     const closeDrawer = document.getElementById('closeDrawer');
     const drawerBackdrop = document.getElementById('drawerBackdrop');
+    const playerShell = document.querySelector('.player-shell');
+    const tocToggle = document.getElementById('player-toc-toggle');
+    const DRAWER_LS_KEY = 'academy_course_drawer_open';
+
+    function isDesktopDrawer() {
+        return window.matchMedia('(min-width: 1024px)').matches;
+    }
+
+    function setDrawerOpen(open) {
+        if (!courseDrawer) return;
+        courseDrawer.classList.toggle('is-open', open);
+        courseDrawer.setAttribute('aria-hidden', open ? 'false' : 'true');
+        playerShell?.classList.toggle('is-drawer-open', open);
+        tocToggle?.setAttribute('aria-expanded', open ? 'true' : 'false');
+
+        if (!isDesktopDrawer()) {
+            drawerBackdrop?.classList.toggle('is-visible', open);
+            document.body.style.overflow = open ? 'hidden' : '';
+        } else {
+            drawerBackdrop?.classList.remove('is-visible');
+            document.body.style.overflow = '';
+            try {
+                localStorage.setItem(DRAWER_LS_KEY, open ? '1' : '0');
+            } catch (e) { /* ignore */ }
+        }
+    }
 
     function openDrawer() {
-        mobileDrawer?.classList.remove('translate-x-full');
-        drawerBackdrop?.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
+        setDrawerOpen(true);
     }
 
     function closeDrawerFunc() {
-        mobileDrawer?.classList.add('translate-x-full');
-        drawerBackdrop?.classList.add('hidden');
-        document.body.style.overflow = '';
+        setDrawerOpen(false);
     }
 
-    document.getElementById('player-toc-toggle')?.addEventListener('click', openDrawer);
-
-    if (closeDrawer) {
-        closeDrawer.addEventListener('click', closeDrawerFunc);
+    function toggleDrawer() {
+        const open = !courseDrawer?.classList.contains('is-open');
+        setDrawerOpen(open);
     }
 
-    if (drawerBackdrop) {
-        drawerBackdrop.addEventListener('click', closeDrawerFunc);
-    }
+    tocToggle?.addEventListener('click', toggleDrawer);
+    closeDrawer?.addEventListener('click', closeDrawerFunc);
+    drawerBackdrop?.addEventListener('click', closeDrawerFunc);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && courseDrawer?.classList.contains('is-open')) {
+            closeDrawerFunc();
+        }
+    });
+
+    // Desktop: restaurar preferência; mobile: fechado
+    (function initDrawerState() {
+        if (isDesktopDrawer()) {
+            let preferOpen = true;
+            try {
+                const saved = localStorage.getItem(DRAWER_LS_KEY);
+                if (saved === '0') preferOpen = false;
+                if (saved === '1') preferOpen = true;
+            } catch (e) { /* ignore */ }
+            setDrawerOpen(preferOpen);
+        } else {
+            setDrawerOpen(false);
+        }
+    })();
+
+    window.addEventListener('resize', () => {
+        if (isDesktopDrawer()) {
+            drawerBackdrop?.classList.remove('is-visible');
+            document.body.style.overflow = '';
+            playerShell?.classList.toggle('is-drawer-open', courseDrawer?.classList.contains('is-open'));
+        } else if (courseDrawer?.classList.contains('is-open')) {
+            drawerBackdrop?.classList.add('is-visible');
+            playerShell?.classList.remove('is-drawer-open');
+        }
+    });
 
     /* =========================
        Vimeo Player & Navigation
@@ -2193,7 +2167,9 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
         }
 
         if (stayBtn) {
-            stayBtn.addEventListener('click', hideEndOverlay);
+            stayBtn.addEventListener('click', () => {
+                replayLessonVideo();
+            });
         }
 
         if (nextLessonBtn) {
@@ -2210,6 +2186,31 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
         initQuizStepper();
 
         bindVideoPlayer();
+    }
+
+    async function exitPlayerFullscreen(p) {
+        try {
+            if (p && typeof p.getFullscreen === 'function' && await p.getFullscreen()) {
+                await p.exitFullscreen();
+            }
+        } catch (e) { /* ignore */ }
+        try {
+            if (document.fullscreenElement) {
+                await document.exitFullscreen();
+            }
+        } catch (e) { /* ignore */ }
+    }
+
+    async function replayLessonVideo() {
+        hideEndOverlay();
+        if (!player) return;
+        try {
+            await exitPlayerFullscreen(player);
+            await player.setCurrentTime(0);
+            await player.play();
+        } catch (e) {
+            // Silent
+        }
     }
 
     function bindVideoPlayer() {
@@ -2247,12 +2248,19 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
 
         player.on('ended', async function() {
             clearResume();
+            // Sair do fullscreen do Vimeo para o nosso popup ficar visível
+            await exitPlayerFullscreen(player);
+            try {
+                await player.pause();
+                await player.setCurrentTime(0);
+            } catch (e) { /* ignore */ }
+
             try {
                 await markCompletedOnEnd();
             } catch (e) {
-                console.warn('Falha ao marcar conclu?da no t?rmino:', e);
+                console.warn('Falha ao marcar concluída no término:', e);
             }
-            if (hasNext && nextUrl) showEndOverlay();
+            showEndOverlay();
         });
 
         // Track progress and mark as completed at 95%

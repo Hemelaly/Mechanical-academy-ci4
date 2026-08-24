@@ -134,12 +134,23 @@
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
       <?php if ($courses && count($courses) > 0): ?>
         <?php foreach ($courses as $course): ?>
-            <div class="course-card bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 group">
+            <?php
+            $courseProgress = (int) ($progress->{$course->id_course}->progress ?? 0);
+            $lessonUrl = (!empty($course->courseSlug) && !empty($course->resumeLessonSlug))
+                ? site_url('student/dashboard/inscricoes/' . $course->courseSlug . '/' . $course->resumeLessonSlug)
+                : site_url('student/dashboard/ver_aulas/' . $course->resumeLessonId);
+            $enrollmentStatus = strtolower((string) ($course->enrollmentStatus ?? $course->status_enrollment ?? ''));
+            $isBlocked = $enrollmentStatus === 'cancelada' || ! empty($course->enrollment_expired);
+            $autoSuffix = (!$isBlocked && $courseProgress < 100) ? '?autoplay=1' : '';
+            $cardHref = $lessonUrl . $autoSuffix;
+            ?>
+            <a href="<?= esc($cardHref) ?>"
+              class="course-card block bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 group cursor-pointer no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900">
 
               <!-- Course Image -->
               <div class="relative overflow-hidden">
                 <img src="<?= base_url('assets/instructor/img/courses/' . $course->image_course) ?>"
-                  alt="<?= $course->title_course ?>"
+                  alt="<?= esc($course->title_course) ?>"
                   class="w-full h-52 object-cover group-hover:scale-105 transition-transform duration-500">
 
                 <!-- Overlay with Rating -->
@@ -154,11 +165,11 @@
                 <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
                   <div class="flex justify-between items-center text-white text-sm mb-2">
                     <span class="font-medium">Progresso</span>
-                    <span class="font-bold"><?= (int) $progress->{$course->id_course}->progress ?>%</span>
+                    <span class="font-bold"><?= $courseProgress ?>%</span>
                   </div>
                   <div class="w-full h-2 bg-white/30 rounded-full overflow-hidden">
                     <div class="h-2 bg-gradient-to-r from-sky-400 to-cyan-400 rounded-full transition-all duration-500"
-                      style="width: <?= (int) $progress->{$course->id_course}->progress ?>%"></div>
+                      style="width: <?= $courseProgress ?>%"></div>
                   </div>
                 </div>
               </div>
@@ -189,7 +200,6 @@
                   </span>
 
                   <!-- Status Indicator -->
-                  <?php $courseProgress = (int) $progress->{$course->id_course}->progress; ?>
                   <?php if ($courseProgress == 0): ?>
                     <span class="inline-flex items-center gap-1 px-2 py-1 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300 text-xs font-medium rounded-full">
                       <i class="fas fa-clock"></i>
@@ -208,17 +218,9 @@
                   <?php endif; ?>
                 </div>
 
-                <!-- Action Button -->
-                <?php
-                $lessonUrl = (!empty($course->courseSlug) && !empty($course->resumeLessonSlug))
-                    ? site_url('student/dashboard/inscricoes/' . $course->courseSlug . '/' . $course->resumeLessonSlug)
-                    : site_url('student/dashboard/ver_aulas/' . $course->resumeLessonId);
-                $enrollmentStatus = strtolower((string) ($course->enrollmentStatus ?? $course->status_enrollment ?? ''));
-                $isBlocked = $enrollmentStatus === 'cancelada' || ! empty($course->enrollment_expired);
-                $autoSuffix = (!$isBlocked && (int) $courseProgress < 100) ? '?autoplay=1' : '';
-                ?>
-                <a href="<?= $lessonUrl ?><?= $autoSuffix ?>"
-                  class="group/btn w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-blue-500/25">
+                <!-- Action (visual only — o card inteiro é o link) -->
+                <span
+                  class="group/btn w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 group-hover:from-blue-600 group-hover:to-blue-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg group-hover:shadow-blue-500/25">
                   <?php if (!empty($course->resumeLessonId) && $courseProgress > 0): ?>
                     <i class="fas fa-play-circle group-hover/btn:scale-110 transition-transform"></i>
                     Continuar Assistindo
@@ -226,9 +228,9 @@
                     <i class="fas fa-play group-hover/btn:scale-110 transition-transform"></i>
                     Começar Curso
                   <?php endif; ?>
-                </a>
+                </span>
               </div>
-            </div>
+            </a>
         <?php endforeach ?>
       <?php else: ?>
         <!-- Empty State -->

@@ -408,3 +408,131 @@ html.dark footer {
   border-color: rgba(255, 255, 255, 0.08);
   background: #07090d;
 }
+
+/* —— Player (assistir aulas): respeitar theme switcher —— */
+html:not(.dark) body.academy-player,
+html:not(.dark) .academy-player {
+  background: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+html.dark body.academy-player,
+html.dark .academy-player {
+  background: #07090d !important;
+  color: #f1f5f9 !important;
+}
+
+html:not(.dark) .academy-player main {
+  background: #f8fafc !important;
+}
+
+html.dark .academy-player main {
+  background: #07090d !important;
+}
+
+html:not(.dark) .academy-player .academy-nav {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+  position: relative;
+  z-index: 50;
+}
+
+html.dark .academy-player .academy-nav {
+  background: rgba(12, 16, 23, 0.96) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  position: relative;
+  z-index: 50;
+}
+
+html:not(.dark) #courseDrawer {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+  box-shadow: 8px 0 28px -18px rgba(15, 23, 42, 0.2) !important;
+}
+
+html.dark #courseDrawer {
+  background: #0f172a !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #f1f5f9 !important;
+}
+
+html:not(.dark) #courseDrawer .course-drawer__head,
+html:not(.dark) #courseDrawer .course-drawer__progress {
+  border-color: #e2e8f0 !important;
+}
+
+html.dark #courseDrawer .course-drawer__head,
+html.dark #courseDrawer .course-drawer__progress {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+html:not(.dark) #courseDrawer .lesson-link,
+html:not(.dark) #courseDrawer .module-header .font-medium {
+  color: #0f172a !important;
+}
+
+html.dark #courseDrawer .lesson-link,
+html.dark #courseDrawer .module-header .font-medium {
+  color: #f8fafc !important;
+}
+
+html:not(.dark) #courseDrawer .bg-gray-50,
+html:not(.dark) #courseDrawer .dark\:bg-gray-700\/80 {
+  background-color: #f8fafc !important;
+}
+
+html.dark #courseDrawer .bg-gray-50,
+html.dark #courseDrawer .dark\:bg-gray-700\/80,
+html.dark #courseDrawer .dark\:bg-gray-700 {
+  background-color: rgba(51, 65, 85, 0.55) !important;
+}
+
+html:not(.dark) .academy-player .bg-white,
+html:not(.dark) .academy-player .dark\:bg-gray-800 {
+  background-color: #ffffff !important;
+  color: #0f172a;
+}
+
+html.dark .academy-player .bg-white,
+html.dark .academy-player .dark\:bg-gray-800 {
+  background-color: #11151c !important;
+}
+
+html:not(.dark) .academy-player .border-gray-200,
+html:not(.dark) .academy-player .dark\:border-gray-700 {
+  border-color: #e2e8f0 !important;
+}
+
+html.dark .academy-player .border-gray-200,
+html.dark .academy-player .dark\:border-gray-700 {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+html:not(.dark) .academy-player .text-gray-900,
+html:not(.dark) .academy-player .dark\:text-white {
+  color: #0f172a !important;
+}
+
+html.dark .academy-player .text-gray-900,
+html.dark .academy-player .dark\:text-white {
+  color: #f8fafc !important;
+}
+
+html:not(.dark) .academy-player .text-gray-700,
+html:not(.dark) .academy-player .text-gray-600,
+html:not(.dark) .academy-player .dark\:text-gray-300,
+html:not(.dark) .academy-player .dark\:text-gray-400 {
+  color: #475569 !important;
+}
+
+html.dark .academy-player .text-gray-700,
+html.dark .academy-player .dark\:text-gray-300 {
+  color: #cbd5e1 !important;
+}
+
+html.dark .academy-player .text-gray-600,
+html.dark .academy-player .dark\:text-gray-400 {
+  color: #94a3b8 !important;
+}

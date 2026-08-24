@@ -33,8 +33,10 @@
 
   function applyTheme(theme) {
     const next = theme === 'light' ? 'light' : 'dark';
-    document.documentElement.classList.toggle('dark', next === 'dark');
-    document.documentElement.style.colorScheme = next;
+    const root = document.documentElement;
+    root.classList.toggle('dark', next === 'dark');
+    root.setAttribute('data-theme', next);
+    root.style.colorScheme = next;
 
     try {
       localStorage.setItem(STORAGE_KEY, next);

@@ -11,6 +11,23 @@
 
 @layer base {
   :root {
+    --academy-bg: #f8fafc;
+    --academy-surface: #ffffff;
+    --academy-surface-2: #f1f5f9;
+    --academy-border: #e2e8f0;
+    --academy-text: #0f172a;
+    --academy-muted: #64748b;
+    --academy-accent: #0d6efd;
+    --academy-accent-soft: rgba(13, 110, 253, 0.12);
+    --academy-radius: 0.25rem;
+  }
+
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
     --academy-bg: #07090d;
     --academy-surface: #11151c;
     --academy-surface-2: #171c25;
@@ -19,11 +36,6 @@
     --academy-muted: rgba(243, 246, 251, 0.58);
     --academy-accent: #0d6efd;
     --academy-accent-soft: rgba(13, 110, 253, 0.16);
-    --academy-radius: 0.25rem;
-  }
-
-  html {
-    color-scheme: dark;
   }
 
   body {
