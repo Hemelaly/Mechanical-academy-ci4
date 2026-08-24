@@ -202,17 +202,48 @@ $formatMzn = static function ($value): string {
 
     .site-nav__links a:hover { color: #fff; }
 
-    .site-nav__cta {
-      color: #fff !important;
-      border: 1px solid rgba(255, 255, 255, 0.28);
-      border-radius: 0.375rem;
-      padding: 0.5rem 1.15rem !important;
-      transition: none;
+    .site-nav__auth {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
     }
 
-    .site-nav__cta:hover {
-      border-color: rgba(255, 255, 255, 0.6);
-      transform: translateY(-1px);
+    .site-nav__cta {
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.375rem;
+      padding: 0.5rem 1.15rem !important;
+      font-size: 0.92rem;
+      font-weight: 600;
+      line-height: 1.2;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: none;
+      box-sizing: border-box;
+    }
+
+    .site-nav__cta--primary {
+      color: #fff !important;
+      background: #0d6efd !important;
+      border: 1px solid #0d6efd !important;
+    }
+
+    .site-nav__cta--primary:hover {
+      background: #0b5ed7 !important;
+      border-color: #0b5ed7 !important;
+      color: #fff !important;
+    }
+
+    .site-nav__cta--light {
+      color: #0f172a !important;
+      background: #fff !important;
+      border: 1px solid #fff !important;
+    }
+
+    .site-nav__cta--light:hover {
+      background: #f8fafc !important;
+      color: #0f172a !important;
     }
 
     .nav-avatar {
@@ -1038,6 +1069,32 @@ $formatMzn = static function ($value): string {
         border-radius: 0.375rem;
       }
       .site-nav__links a:hover { background: rgba(255, 255, 255, 0.06); }
+      .site-nav__links a.site-nav__cta {
+        padding: 0.5rem 1.15rem !important;
+      }
+
+      .site-nav__auth {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+        width: 100%;
+      }
+
+      .site-nav__cta {
+        margin-top: 0;
+        justify-content: center;
+        text-align: center;
+        flex: 1 1 auto;
+        min-width: 7.5rem;
+      }
+
+      .site-nav__links a.site-nav__cta--primary:hover {
+        background: #0b5ed7 !important;
+      }
+
+      .site-nav__links a.site-nav__cta--light:hover {
+        background: #f8fafc !important;
+      }
 
       .hero { min-height: auto; align-items: center; }
       .hero__inner { padding-top: 5.75rem; padding-bottom: 2.75rem; }
@@ -1149,8 +1206,10 @@ $formatMzn = static function ($value): string {
           <li><a href="#cursos">Cursos</a></li>
           <li><a href="#como-funciona">Como funciona</a></li>
           <li><a href="https://www.youtube.com/@MechanicalTecnologia" target="_blank" rel="noopener noreferrer">YouTube</a></li>
-          <li><a href="<?= base_url('register') ?>">Criar conta</a></li>
-          <li><a class="site-nav__cta" href="<?= base_url('login') ?>">Entrar</a></li>
+          <li class="site-nav__auth">
+            <a class="site-nav__cta site-nav__cta--light" href="<?= base_url('register') ?>">Criar conta</a>
+            <a class="site-nav__cta site-nav__cta--primary" href="<?= base_url('login') ?>">Entrar</a>
+          </li>
         <?php endif; ?>
       </ul>
     </div>
@@ -1596,6 +1655,9 @@ $formatMzn = static function ($value): string {
   <script>window.ANALYTICS_COLLECT_URL = <?= json_encode(site_url('analytics/collect')) ?>;</script>
   <script src="<?= base_url('assets/js/analytics-tracker.js') ?>" defer></script>
   <?= view('partials/posthog') ?>
+  <?php if (! empty($promoFeatured)): ?>
+    <?= view('partials/promo_side_panel', ['promoFeatured' => $promoFeatured]) ?>
+  <?php endif; ?>
 </body>
 
 </html>

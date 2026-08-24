@@ -8,6 +8,13 @@
 
 <?= $this->section('all_courses') ?>
 
+<?php
+$enrolledByCourseId = [];
+foreach (($lesson ?? []) as $enrolledRow) {
+    $enrolledByCourseId[(int) ($enrolledRow->id_course ?? 0)] = $enrolledRow;
+}
+?>
+
 <!-- Bootstrap Icons -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
 
@@ -115,6 +122,7 @@
                         <div class="grid gap-4">
                             <?php foreach ($courses as $key => $course): ?>
                                 <?php if (in_array($course->id_course, $activeCourseIds)): ?>
+                                    <?php $enrolled = $enrolledByCourseId[(int) $course->id_course] ?? null; ?>
                                     <div class="group p-5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300 hover:shadow-md">
                                         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                                             <!-- Course Info -->
@@ -134,7 +142,7 @@
                                                         </div>
                                                         <div class="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm">
                                                             <i class="bi bi-person"></i>
-                                                            <span>Instrutor: <?= esc($lesson[$key]->username ?? 'N/A') ?></span>
+                                                            <span>Instrutor: <?= esc($enrolled->username ?? $course->name_instructor ?? 'N/A') ?></span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -144,28 +152,28 @@
                                                     <div class="flex justify-between text-sm">
                                                         <span class="text-slate-600 dark:text-slate-400">Seu progresso</span>
                                                         <span class="font-semibold text-slate-800 dark:text-white">
-                                                            <?= (int) ($lesson[$key]->progress ?? 0) ?>%
+                                                            <?= (int) ($enrolled->progress ?? $progress->{$course->id_course}->progress ?? 0) ?>%
                                                         </span>
                                                     </div>
                                                     <div class="w-full h-2.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                                                         <div
                                                             class="h-2.5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full transition-all duration-500 ease-out"
-                                                            style="width: <?= (int) ($lesson[$key]->progress ?? 0) ?>%"></div>
+                                                            style="width: <?= (int) ($enrolled->progress ?? $progress->{$course->id_course}->progress ?? 0) ?>%"></div>
                                                     </div>
                                                 </div>
                                             </div>
 
                                             <!-- Action Button -->
                                             <?php
-                                            $lessonUrl = (!empty($lesson[$key]->courseSlug) && !empty($lesson[$key]->resumeLessonSlug))
-                                                ? site_url('student/dashboard/inscricoes/' . $lesson[$key]->courseSlug . '/' . $lesson[$key]->resumeLessonSlug)
-                                                : site_url('student/dashboard/ver_aulas/' . ($lesson[$key]->resumeLessonId ?? ''));
-                                            $statusEnrollment = strtolower((string) ($lesson[$key]->status_enrollment ?? $lesson[$key]->enrollmentStatus ?? ''));
-                                            $isBlocked = $statusEnrollment === 'cancelada';
-                                            $progressPct = (int) ($lesson[$key]->progress ?? 0);
+                                            $lessonUrl = ($enrolled && !empty($enrolled->courseSlug) && !empty($enrolled->resumeLessonSlug))
+                                                ? site_url('student/dashboard/inscricoes/' . $enrolled->courseSlug . '/' . $enrolled->resumeLessonSlug)
+                                                : site_url('student/dashboard/ver_aulas/' . ($enrolled->resumeLessonId ?? ''));
+                                            $statusEnrollment = strtolower((string) ($enrolled->status_enrollment ?? $enrolled->enrollmentStatus ?? ''));
+                                            $isBlocked = $statusEnrollment === 'cancelada' || ! empty($enrolled->enrollment_expired);
+                                            $progressPct = (int) ($enrolled->progress ?? $progress->{$course->id_course}->progress ?? 0);
                                             $autoSuffix = (!$isBlocked && $progressPct < 100) ? '?autoplay=1' : '';
                                             ?>
-                                            <a href="<?= $lessonUrl ?><?= $autoSuffix ?>"
+                                            <a href="<?= esc($lessonUrl) ?><?= $autoSuffix ?>"
                                                 class="group/btn px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-blue-500/25 flex items-center gap-2 whitespace-nowrap">
                                                 <i class="bi bi-play-circle group-hover/btn:scale-110 transition-transform"></i>
                                                 Continuar
@@ -252,7 +260,8 @@
                                         </h3>
                                         <div class="flex items-center gap-2 text-slate-600 dark:text-slate-400 text-sm mb-3">
                                             <i class="bi bi-person"></i>
-                                            <span>Prof. <?= esc($lesson[$key]->username ?? 'N/A') ?></span>
+                                            <?php $cardEnrolled = $enrolledByCourseId[(int) $course->id_course] ?? null; ?>
+                                            <span>Prof. <?= esc($cardEnrolled->username ?? $course->name_instructor ?? 'N/A') ?></span>
                                         </div>
                                         <p class="text-slate-600 dark:text-slate-400 text-sm line-clamp-2">
                                             <?= esc($course->description_course) ?>
@@ -270,15 +279,16 @@
                                         <div class="flex gap-2">
                                             <?php if (in_array($course->id_course, $activeCourseIds)): ?>
                                                 <?php
-                                                $lessonUrl = (!empty($lesson[$key]->courseSlug) && !empty($lesson[$key]->resumeLessonSlug))
-                                                    ? site_url('student/dashboard/inscricoes/' . $lesson[$key]->courseSlug . '/' . $lesson[$key]->resumeLessonSlug)
-                                                    : site_url('student/dashboard/ver_aulas/' . ($lesson[$key]->resumeLessonId ?? ''));
-                                                $statusEnrollment = strtolower((string) ($lesson[$key]->status_enrollment ?? $lesson[$key]->enrollmentStatus ?? ''));
-                                                $isBlocked = $statusEnrollment === 'cancelada';
-                                                $progressPct = (int) ($lesson[$key]->progress ?? 0);
+                                                $enrolled = $enrolledByCourseId[(int) $course->id_course] ?? null;
+                                                $lessonUrl = ($enrolled && !empty($enrolled->courseSlug) && !empty($enrolled->resumeLessonSlug))
+                                                    ? site_url('student/dashboard/inscricoes/' . $enrolled->courseSlug . '/' . $enrolled->resumeLessonSlug)
+                                                    : site_url('student/dashboard/ver_aulas/' . ($enrolled->resumeLessonId ?? ''));
+                                                $statusEnrollment = strtolower((string) ($enrolled->status_enrollment ?? $enrolled->enrollmentStatus ?? ''));
+                                                $isBlocked = $statusEnrollment === 'cancelada' || ! empty($enrolled->enrollment_expired);
+                                                $progressPct = (int) ($enrolled->progress ?? $progress->{$course->id_course}->progress ?? 0);
                                                 $autoSuffix = (!$isBlocked && $progressPct < 100) ? '?autoplay=1' : '';
                                                 ?>
-                                                <a href="<?= $lessonUrl ?><?= $autoSuffix ?>"
+                                                <a href="<?= esc($lessonUrl) ?><?= $autoSuffix ?>"
                                                     class="group/btn inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-green-500/25">
                                                     <i class="bi bi-play-circle group-hover/btn:scale-110 transition-transform"></i>
                                                     Continuar

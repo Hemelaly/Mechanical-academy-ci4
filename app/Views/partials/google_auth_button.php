@@ -1,5 +1,16 @@
 <?php
+
+/**
+ * Botão Google OAuth (só aparece se estiver configurado).
+ *
+ * @var string|null $redirect
+ * @var string|null $label
+ */
 $google = config(\Config\Google::class);
+if (! $google->isConfigured()) {
+    return;
+}
+
 $redirect = trim((string) ($redirect ?? service('request')->getGet('redirect') ?? ''));
 $googleHref = site_url('auth/google') . ($redirect !== '' ? ('?redirect=' . rawurlencode($redirect)) : '');
 $label = $label ?? 'Continuar com Google';

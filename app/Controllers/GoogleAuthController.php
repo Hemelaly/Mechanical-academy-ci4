@@ -88,12 +88,22 @@ class GoogleAuthController extends BaseController
 
         $accounts = new StudentAccountService();
         $user     = $accounts->findByGoogleId($googleId) ?: $accounts->findByEmail($email);
+        $isNew    = $user === null;
 
         try {
-            if (! $user) {
+            if ($isNew) {
                 $user = $accounts->createStudent($email, $name !== '' ? $name : $email);
+                log_message('info', 'Conta criada via Google OAuth: user_id={id} email={email}', [
+                    'id'    => (int) ($user->id ?? 0),
+                    'email' => $email,
+                ]);
             } else {
-                $accounts->ensureStudentProfile($user, $name !== '' ? $name : (string) ($user->username ?? $email), $email);
+                $accounts->ensureStudentProfile(
+                    $user,
+                    $name !== '' ? $name : (string) ($user->username ?? $email),
+                    $email,
+                    true
+                );
             }
 
             $accounts->linkGoogle($user, $googleId, $email);
@@ -102,11 +112,20 @@ class GoogleAuthController extends BaseController
         } catch (\Throwable $e) {
             log_message('error', 'Google login/cadastro falhou: {error}', ['error' => $e->getMessage()]);
 
-            return redirect()->to(site_url('login'))->with('error', 'Não foi possível criar ou entrar na conta Google.');
+            return redirect()->to(site_url('login'))->with(
+                'error',
+                $isNew
+                    ? 'Não foi possível criar a sua conta com Google. Tente novamente ou use o registo por email.'
+                    : 'Não foi possível entrar com Google. Tente novamente.'
+            );
         }
 
+        $message = $isNew
+            ? 'Conta criada com Google. Bem-vindo!'
+            : 'Sessão iniciada com Google.';
+
         return redirect()->to(config('Auth')->loginRedirect())
-            ->with('message', 'Sessão iniciada com Google.');
+            ->with('message', $message);
     }
 
     /**

@@ -45,9 +45,65 @@ class Home extends BaseController
       $course->free_lessons = (int) ($course->free_lessons_count_course ?? $course->free_lessons_course ?? 0);
     }
 
+    // Melhor promoção activa para o painel lateral (maior %, depois a que termina primeiro).
+    $promoFeatured = null;
+    $enrolledCourseIds = [];
+    if ($user) {
+      $enrolledCourseIds = array_map(
+        'intval',
+        array_column(
+          db_connect()->table('enrollments')
+            ->select('id_course_enrollment')
+            ->where('id_student_enrollment', (int) $user->id)
+            ->whereIn('status_enrollment', ['ativa', 'pendente'])
+            ->get()
+            ->getResultArray(),
+          'id_course_enrollment'
+        )
+      );
+    }
+
+    foreach ($courses as $course) {
+      if (empty($course->has_promo)) {
+        continue;
+      }
+      // Sem data de fim: promo válida; com data: só se ainda houver tempo.
+      $remaining = (int) ($course->promo_remaining_seconds ?? 0);
+      $endsAt = $course->promo_ends_at ?? null;
+      if ($endsAt !== null && $endsAt !== '' && $remaining <= 0) {
+        continue;
+      }
+      if (in_array((int) $course->id_course, $enrolledCourseIds, true)) {
+        continue;
+      }
+
+      if ($promoFeatured === null) {
+        $promoFeatured = $course;
+        continue;
+      }
+
+      $bestPct = (int) ($promoFeatured->discount_percent ?? 0);
+      $candPct = (int) ($course->discount_percent ?? 0);
+      if ($candPct > $bestPct) {
+        $promoFeatured = $course;
+        continue;
+      }
+      if ($candPct < $bestPct) {
+        continue;
+      }
+
+      $bestLeft = (int) ($promoFeatured->promo_remaining_seconds ?? 0);
+      $candLeft = (int) ($course->promo_remaining_seconds ?? 0);
+      // 0 = sem deadline → deixa para o fim; preferir a que acaba mais cedo.
+      if ($candLeft > 0 && ($bestLeft <= 0 || $candLeft < $bestLeft)) {
+        $promoFeatured = $course;
+      }
+    }
+
     return view('home', [
       'courses' => $courses,
       'user' => $user,
+      'promoFeatured' => $promoFeatured,
     ]);
   }
 

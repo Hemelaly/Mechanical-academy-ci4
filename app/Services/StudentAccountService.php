@@ -45,44 +45,83 @@ class StudentAccountService
         return (new ShieldUserModel())->find((int) $row->user_id);
     }
 
+    /**
+     * Cria user Shield + perfil de aluno. Usado no registo normal e no Google OAuth.
+     */
     public function createStudent(string $email, string $fullName, ?string $plainPassword = null): object
     {
         $users = new ShieldUserModel();
         $normalizedEmail = trim(strtolower($email));
+        if ($normalizedEmail === '' || ! filter_var($normalizedEmail, FILTER_VALIDATE_EMAIL)) {
+            throw new \RuntimeException('Email inválido para criar conta.');
+        }
+
+        $existing = $this->findByEmail($normalizedEmail);
+        if ($existing) {
+            $this->ensureStudentProfile($existing, $fullName, $normalizedEmail);
+
+            return $existing;
+        }
 
         $entity = new ShieldUser([
             'username' => $this->generateUniqueUsername($fullName, $normalizedEmail),
             'active'   => 1,
         ]);
         $entity->email    = $normalizedEmail;
-        $entity->password = $plainPassword ?: bin2hex(random_bytes(10));
+        $entity->password = $plainPassword ?: bin2hex(random_bytes(16));
 
-        if (! $users->save($entity)) {
-            $existing = $this->findByEmail($normalizedEmail);
-            if ($existing) {
-                $this->ensureStudentProfile($existing, $fullName, $normalizedEmail);
+        $db = db_connect();
+        $db->transStart();
 
-                return $existing;
+        try {
+            if (! $users->save($entity)) {
+                // Corrida: outro pedido criou o email entretanto
+                $existing = $this->findByEmail($normalizedEmail);
+                if ($existing) {
+                    $this->ensureStudentProfile($existing, $fullName, $normalizedEmail);
+                    $db->transComplete();
+
+                    return $existing;
+                }
+
+                throw new \RuntimeException(implode(', ', $users->errors() ?: ['Não foi possível criar a conta.']));
             }
 
-            throw new \RuntimeException(implode(', ', $users->errors() ?: ['Não foi possível criar a conta.']));
+            $userId = (int) $users->getInsertID();
+            $created = $users->find($userId);
+            if (! $created) {
+                throw new \RuntimeException('Não foi possível carregar a conta criada.');
+            }
+
+            $users->addToDefaultGroup($created);
+            $this->ensureStudentProfile($created, $fullName, $normalizedEmail, true);
+
+            $db->transComplete();
+            if ($db->transStatus() === false) {
+                throw new \RuntimeException('Falha na transação ao criar a conta.');
+            }
+
+            return $users->find($userId) ?: $created;
+        } catch (\Throwable $e) {
+            $db->transRollback();
+
+            throw $e;
         }
-
-        $created = $users->find((int) $users->getInsertID());
-        if (! $created) {
-            throw new \RuntimeException('Não foi possível carregar a conta criada.');
-        }
-
-        $users->addToDefaultGroup($created);
-        $this->ensureStudentProfile($created, $fullName, $normalizedEmail);
-
-        return $users->find((int) $created->id) ?: $created;
     }
 
-    public function ensureStudentProfile(object $user, string $fullName, string $email): void
+    /**
+     * Garante role=student e linha em `students`.
+     *
+     * @param bool $required Se true, falha se não conseguir criar o perfil de aluno.
+     */
+    public function ensureStudentProfile(object $user, string $fullName, string $email, bool $required = false): void
     {
         $userId = (int) ($user->id ?? 0);
         if ($userId <= 0) {
+            if ($required) {
+                throw new \RuntimeException('Utilizador inválido ao criar perfil de aluno.');
+            }
+
             return;
         }
 
@@ -91,7 +130,7 @@ class StudentAccountService
         $role     = strtolower(trim((string) ($current->role ?? $user->role ?? '')));
 
         if ($role === '' || $role === 'student') {
-            $extended->update($userId, [
+            $extended->skipValidation(true)->update($userId, [
                 'role'   => 'student',
                 'active' => 1,
             ]);
@@ -99,6 +138,10 @@ class StudentAccountService
         }
 
         if ($role !== 'student') {
+            if ($required) {
+                throw new \RuntimeException('Esta conta não pode ser usada como aluno.');
+            }
+
             return;
         }
 
@@ -107,26 +150,33 @@ class StudentAccountService
         $name            = $this->cleanName($fullName) ?: ($user->username ?? 'Aluno');
         $student         = $studentModel->where('id_user_student', $userId)->first();
 
+        if (! $student && $normalizedEmail !== '') {
+            $student = $studentModel->where('email_student', $normalizedEmail)->first();
+        }
+
         $data = [
             'id_user_student' => $userId,
-            'name_student'    => $name,
+            'name_student'    => $this->slice($name, 100),
             'email_student'   => $normalizedEmail,
         ];
 
         if ($student) {
             $studentModel->skipValidation(true)->update((int) $student->id_student, [
-                'name_student'  => $data['name_student'],
-                'email_student' => $data['email_student'],
+                'id_user_student' => $userId,
+                'name_student'    => $data['name_student'],
+                'email_student'   => $data['email_student'],
             ]);
 
             return;
         }
 
-        $inserted = $studentModel->insert($data, true);
+        $inserted = $studentModel->skipValidation(true)->insert($data, true);
         if ($inserted === false) {
-            log_message('warning', 'Falha ao criar perfil de aluno: {errors}', [
-                'errors' => implode(', ', $studentModel->errors() ?: ['desconhecido']),
-            ]);
+            $msg = implode(', ', $studentModel->errors() ?: ['desconhecido']);
+            log_message('error', 'Falha ao criar perfil de aluno: {errors}', ['errors' => $msg]);
+            if ($required) {
+                throw new \RuntimeException('Não foi possível criar o perfil de aluno: ' . $msg);
+            }
         }
     }
 
@@ -134,8 +184,23 @@ class StudentAccountService
     {
         $userId   = (int) ($user->id ?? 0);
         $googleId = trim($googleId);
+        $email    = trim(strtolower($email));
         if ($userId <= 0 || $googleId === '') {
-            return;
+            throw new \RuntimeException('Dados Google inválidos para ligar à conta.');
+        }
+
+        // Evitar que o mesmo Google ID fique ligado a outra conta
+        $taken = db_connect()
+            ->table('auth_identities')
+            ->select('user_id')
+            ->where('type', self::GOOGLE_IDENTITY)
+            ->where('secret', $googleId)
+            ->where('user_id !=', $userId)
+            ->get()
+            ->getRow();
+
+        if ($taken) {
+            throw new \RuntimeException('Esta conta Google já está ligada a outro utilizador.');
         }
 
         $identities = model(UserIdentityModel::class);
@@ -146,6 +211,10 @@ class StudentAccountService
             ->first();
 
         if ($existing) {
+            if ($email !== '') {
+                $identities->update((int) $existing->id, ['secret2' => $email]);
+            }
+
             return;
         }
 
@@ -155,12 +224,10 @@ class StudentAccountService
                 'type'    => self::GOOGLE_IDENTITY,
                 'name'    => 'google',
                 'secret'  => $googleId,
-                'secret2' => trim(strtolower($email)),
+                'secret2' => $email,
             ]);
         } catch (\Throwable $e) {
-            log_message('warning', 'Não foi possível ligar identidade Google: {error}', [
-                'error' => $e->getMessage(),
-            ]);
+            throw new \RuntimeException('Não foi possível ligar a identidade Google: ' . $e->getMessage(), 0, $e);
         }
     }
 
@@ -179,21 +246,31 @@ class StudentAccountService
 
     public function generateUniqueUsername(string $fullName, string $email): string
     {
-        $base = $this->cleanName($fullName);
+        $base = $this->sanitizeUsernameSource($fullName);
         if ($base === '') {
-            $base = trim((string) strstr($email, '@', true));
+            $base = $this->sanitizeUsernameSource((string) strstr($email, '@', true));
         }
         if ($base === '') {
             $base = 'Aluno';
         }
 
-        $base    = $this->slice($base, 30);
+        // Regra Shield: 3–30 chars, começa alfanumérico, permite espaço . _ -
+        $base = preg_replace('/[^a-zA-ZÀ-ÿ0-9 ._-]/u', '', $base) ?? '';
+        $base = trim((string) preg_replace('/\s+/', ' ', $base));
+        $base = $this->slice($base, 30);
+        if ($this->length($base) < 3) {
+            $base = 'Aluno';
+        }
+
         $db      = db_connect();
         $counter = 1;
 
         while (true) {
             $suffix    = $counter === 1 ? '' : ' ' . $counter;
             $candidate = $this->slice($base, 30 - $this->length($suffix)) . $suffix;
+            if ($this->length($candidate) < 3) {
+                $candidate = 'Aluno' . $suffix;
+            }
 
             $exists = $db->table('users')
                 ->select('id')
@@ -206,7 +283,19 @@ class StudentAccountService
             }
 
             $counter++;
+            if ($counter > 500) {
+                return 'Aluno ' . substr(bin2hex(random_bytes(4)), 0, 8);
+            }
         }
+    }
+
+    private function sanitizeUsernameSource(string $value): string
+    {
+        $value = $this->cleanName($value);
+        // Remove aspas/apóstrofos e símbolos que quebram a regex do Shield
+        $value = str_replace(["'", '"', '`', '´', '’', '‘'], '', $value);
+
+        return trim($value);
     }
 
     private function cleanName(string $value): string
@@ -216,6 +305,9 @@ class StudentAccountService
 
     private function slice(string $value, int $max): string
     {
+        if ($max < 1) {
+            return '';
+        }
         if (function_exists('mb_substr')) {
             return mb_substr($value, 0, $max);
         }

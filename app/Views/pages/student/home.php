@@ -84,17 +84,26 @@
         </div>
 
         <div class="space-y-3 p-4 sm:p-5">
+            <?php
+            $enrolledByCourseId = [];
+            foreach (($lesson ?? []) as $enrolledRow) {
+                $enrolledByCourseId[(int) ($enrolledRow->id_course ?? 0)] = $enrolledRow;
+            }
+            ?>
             <?php foreach ($courses as $course): ?>
                 <?php if (in_array($course->id_course, $activeCourseIds)): ?>
                     <?php
-                    $lessonUrl = (!empty($lesson[0]->courseSlug) && !empty($lesson[0]->resumeLessonSlug))
-                        ? site_url('student/dashboard/inscricoes/' . $lesson[0]->courseSlug . '/' . $lesson[0]->resumeLessonSlug)
-                        : site_url('student/dashboard/ver_aulas/' . $lesson[0]->resumeLessonId);
-                    $statusEnrollment = strtolower((string) ($lesson[0]->status_enrollment ?? $lesson[0]->enrollmentStatus ?? ''));
-                    $isBlocked = $statusEnrollment === 'cancelada';
-                    $progressPct = (int) ($lesson[0]->progress ?? 0);
-                    $autoSuffix = (!$isBlocked && $progressPct < 100) ? '?autoplay=1' : '';
-                    $courseProgress = (int) round($progress->{$course->id_course}->progress);
+                    $enrolled = $enrolledByCourseId[(int) $course->id_course] ?? null;
+                    if (! $enrolled) {
+                        continue;
+                    }
+                    $lessonUrl = (!empty($enrolled->courseSlug) && !empty($enrolled->resumeLessonSlug))
+                        ? site_url('student/dashboard/inscricoes/' . $enrolled->courseSlug . '/' . $enrolled->resumeLessonSlug)
+                        : site_url('student/dashboard/ver_aulas/' . ($enrolled->resumeLessonId ?? ''));
+                    $statusEnrollment = strtolower((string) ($enrolled->status_enrollment ?? $enrolled->enrollmentStatus ?? ''));
+                    $isBlocked = $statusEnrollment === 'cancelada' || ! empty($enrolled->enrollment_expired);
+                    $courseProgress = (int) round($progress->{$course->id_course}->progress ?? ($enrolled->progress ?? 0));
+                    $autoSuffix = (!$isBlocked && $courseProgress < 100) ? '?autoplay=1' : '';
                     ?>
                     <div class="group rounded-md border border-slate-200/80 bg-slate-50/80 p-4 transition hover:border-blue-500/40 dark:border-white/10 dark:bg-white/[0.03]">
                         <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -131,7 +140,7 @@
                             </div>
 
                             <div class="flex gap-2 lg:flex-col lg:items-end">
-                                <a href="<?= $lessonUrl ?><?= $autoSuffix ?>"
+                                <a href="<?= esc($lessonUrl) ?><?= $autoSuffix ?>"
                                     class="dash-btn dash-btn-primary whitespace-nowrap">
                                     <i class="bi bi-play-circle"></i>
                                     Continuar
