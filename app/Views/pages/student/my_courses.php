@@ -154,12 +154,14 @@
                   class="w-full h-52 object-cover group-hover:scale-105 transition-transform duration-500">
 
                 <!-- Overlay with Rating -->
+                <?php if (!empty($course->rating_total)): ?>
                 <div class="absolute top-4 right-4">
                   <span class="inline-flex items-center gap-1 px-3 py-1.5 bg-black/80 text-white text-sm font-semibold rounded-full backdrop-blur-sm">
                     <i class="fas fa-star text-yellow-400"></i>
-                    <span>9.8</span>
+                    <span><?= number_format((float) $course->rating_average, 1, ',', '.') ?></span>
                   </span>
                 </div>
+                <?php endif; ?>
 
                 <!-- Progress Overlay -->
                 <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">

@@ -131,6 +131,7 @@
     <script src="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.js" defer></script>
     <script src="<?= base_url('assets/js/theme.js') ?>"></script>
     <script src="<?= base_url('assets/js/main.js') ?>"></script>
+    <script src="<?= base_url('assets/js/password-toggle.js') ?>" defer></script>
     <script>window.ANALYTICS_COLLECT_URL = <?= json_encode(site_url('analytics/collect')) ?>;</script>
     <script src="<?= base_url('assets/js/analytics-tracker.js') ?>" defer></script>
     <?= view('partials/posthog') ?>

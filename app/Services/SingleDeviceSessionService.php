@@ -28,25 +28,40 @@ class SingleDeviceSessionService
     }
 
     /**
+     * Lê a identidade local sem criar uma nova (não mintar).
+     */
+    public function peekDeviceId(): string
+    {
+        $fromCookie = trim((string) (service('request')->getCookie(self::DEVICE_COOKIE) ?? ''));
+        if ($fromCookie !== '' && preg_match('/^[a-f0-9]{64}$/', $fromCookie)) {
+            return $fromCookie;
+        }
+
+        $fromSession = trim((string) (session()->get(self::SESSION_KEY) ?? ''));
+        if ($fromSession !== '' && preg_match('/^[a-f0-9]{64}$/', $fromSession)) {
+            return $fromSession;
+        }
+
+        return '';
+    }
+
+    /**
      * Identidade estável deste browser (sobrevive a logout/login).
      */
     public function deviceId(): string
     {
-        $fromSession = trim((string) (session()->get(self::SESSION_KEY) ?? ''));
-        $fromCookie  = trim((string) (service('request')->getCookie(self::DEVICE_COOKIE) ?? ''));
-
-        if ($fromCookie !== '' && preg_match('/^[a-f0-9]{64}$/', $fromCookie)) {
-            if ($fromSession !== $fromCookie) {
-                session()->set(self::SESSION_KEY, $fromCookie);
+        $existing = $this->peekDeviceId();
+        if ($existing !== '') {
+            if (session()->get(self::SESSION_KEY) !== $existing) {
+                session()->set(self::SESSION_KEY, $existing);
+            }
+            // Garante cookie persistente se só existia na sessão.
+            $fromCookie = trim((string) (service('request')->getCookie(self::DEVICE_COOKIE) ?? ''));
+            if ($fromCookie !== $existing) {
+                $this->writeDeviceCookie($existing);
             }
 
-            return $fromCookie;
-        }
-
-        if ($fromSession !== '' && preg_match('/^[a-f0-9]{64}$/', $fromSession)) {
-            $this->writeDeviceCookie($fromSession);
-
-            return $fromSession;
+            return $existing;
         }
 
         $token = $this->generateToken();
@@ -74,6 +89,10 @@ class SingleDeviceSessionService
 
         if ($stored === '' || ! $this->isLockActive($storedAt) || hash_equals($stored, $token)) {
             $this->setPrimary($userId, $token);
+        } else {
+            // Mantém identidade local estável mesmo sem ser o primário.
+            session()->set(self::SESSION_KEY, $token);
+            $this->writeDeviceCookie($token);
         }
 
         return $token;
@@ -111,22 +130,28 @@ class SingleDeviceSessionService
     }
 
     /**
-     * Logout: se este dispositivo era o primário, limpa o lock na BD.
+     * Logout: se este dispositivo era o primário (ou não há identidade local),
+     * limpa o lock na BD. Nunca cria um token novo só para comparar.
      */
     public function release(int $userId): void
     {
-        $local = $this->deviceId();
+        $local = $this->peekDeviceId();
 
         if ($userId > 0 && $this->hasColumns()) {
             $row = $this->readUser($userId);
             $stored = trim((string) ($row['active_device_token'] ?? ''));
 
-            if ($stored === '' || hash_equals($stored, $local)) {
+            if ($stored === '') {
+                // já livre
+            } elseif ($local !== '' && hash_equals($stored, $local)) {
+                $this->clearPrimary($userId);
+            } elseif ($local === '') {
+                // Sem cookie/sessão: logout explícito deve libertar o lock
+                // para o mesmo browser poder voltar a assistir após login.
                 $this->clearPrimary($userId);
             }
         }
 
-        // Mantém o cookie do dispositivo; só limpa o token de sessão PHP se necessário.
         session()->remove(self::SESSION_KEY);
     }
 
@@ -148,15 +173,12 @@ class SingleDeviceSessionService
             return;
         }
 
-        $local = trim((string) (session()->get(self::SESSION_KEY) ?? ''));
+        $local = $this->peekDeviceId();
         if ($local === '') {
-            $cookie = trim((string) (service('request')->getCookie(self::DEVICE_COOKIE) ?? ''));
-            if ($cookie === '' || ! preg_match('/^[a-f0-9]{64}$/', $cookie)) {
-                return;
-            }
-            $local = $cookie;
-            session()->set(self::SESSION_KEY, $local);
+            return;
         }
+
+        session()->set(self::SESSION_KEY, $local);
 
         $row = $this->readUser($userId);
         $stored = trim((string) ($row['active_device_token'] ?? ''));

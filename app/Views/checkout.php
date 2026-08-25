@@ -1247,7 +1247,7 @@ $courseIconBg = !empty($course->icon_course)
                 allow="autoplay; fullscreen; picture-in-picture"
                 allowfullscreen
                 loading="lazy"
-                referrerpolicy="no-referrer"
+                referrerpolicy="strict-origin-when-cross-origin"
               ></iframe>
             <?php else: ?>
               <img src="<?= esc($courseImageSrc) ?>" alt="<?= esc($course->title_course ?? 'Curso') ?>">

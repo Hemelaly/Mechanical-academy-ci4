@@ -105,7 +105,7 @@ class LoginController extends ShieldLoginController
         $this->purgeAuthSession();
         session()->remove(SingleDeviceSessionService::SESSION_KEY);
 
-        return redirect()->to($url)->with('message', lang('Auth.successLogout'));
+        return redirect()->to($url)->with('message', lang('Auth.successLogout'))->withCookies();
     }
 
     private function prepareLoginSession(): void

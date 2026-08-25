@@ -231,16 +231,20 @@ class Dashboard extends BaseController
             $enrollmentByCourse[$courseId] = (int) $enr->id_enrollment;
             $enrollmentRows[$courseId] = $enr;
 
+            // Recalcula a partir das aulas actuais (cura % desactualizado após edições de curso)
+            $liveProgress = (new \App\Services\ProgressService($db))->recalcAndSave((int) $enr->id_enrollment);
+
             $progressByCourseArr[$courseId] = (object) [
                 'courseId'     => $courseId,
                 'enrollmentId' => (int) $enr->id_enrollment,
                 'status'       => strtolower((string) $enr->status_enrollment),
-                // se sua coluna jÃ¡ Ã© % inteiro (0â€“100), mantenha (int). Se for decimal (0â€“100.x), use (float)
-                'progress'     => (int) ($enr->progress_enrollment ?? 0),
+                'progress'     => $liveProgress,
                 'updatedAt'    => $enr->updated_at ?? null,
             ];
         }
         $progressByCourse = (object) $progressByCourseArr;
+
+        $ratingModel = new \App\Models\CourseRatingModel();
 
         // Helper: retorna a aula de retomada (primeira nÃ£o concluÃ­da; se todas, a Ãºltima)
         $calcResume = function (int $courseId, int $enrollmentId) use ($db) {
@@ -295,6 +299,10 @@ class Dashboard extends BaseController
             $course->enrollment_expired = isset($enrollmentRows[$courseId])
                 ? (new \App\Services\EnrollmentValidityService())->isExpired($enrollmentRows[$courseId])
                 : false;
+
+            $rating = $ratingModel->getCourseSummary($courseId);
+            $course->rating_average = (float) ($rating['average'] ?? 0);
+            $course->rating_total = (int) ($rating['total'] ?? 0);
         }
         unset($course);
 

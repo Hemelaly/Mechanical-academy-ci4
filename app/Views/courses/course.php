@@ -1508,7 +1508,7 @@ $learnMoreCount = 0;
             frameborder="0"
             allow="autoplay; fullscreen; picture-in-picture"
             allowfullscreen
-            referrerpolicy="no-referrer"
+            referrerpolicy="strict-origin-when-cross-origin"
             loading="lazy"
             sandbox="allow-same-origin allow-scripts allow-presentation"
             oncontextmenu="return false"></iframe>
@@ -1730,7 +1730,7 @@ $learnMoreCount = 0;
               title="Pre-visualizacao da aula"
               allow="autoplay; fullscreen; picture-in-picture"
               allowfullscreen
-              referrerpolicy="no-referrer"
+              referrerpolicy="strict-origin-when-cross-origin"
               loading="lazy"
               sandbox="allow-same-origin allow-scripts allow-presentation"></iframe>
           </div>

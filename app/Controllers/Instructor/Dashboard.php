@@ -397,9 +397,27 @@ class Dashboard extends BaseController
 
     public function my_courses()
     {
-        $courseModel = new CourseModel();
         $user = service('auth')->user();
-        $courses = $courseModel->getCoursesByInstructor($user->id);
+        $db = db_connect();
+        $commerce = new \App\Services\CourseCommerceService();
+
+        $courses = $db->table('courses c')
+            ->select([
+                'c.*',
+            ])
+            ->select('(SELECT COUNT(*) FROM enrollments e WHERE e.id_course_enrollment = c.id_course) AS student_count', false)
+            ->select('(SELECT COALESCE(SUM(l.duration_lesson), 0) FROM lessons l INNER JOIN modules m ON m.id_module = l.id_module_lesson WHERE m.id_course_module = c.id_course) AS total_minutes', false)
+            ->select('(SELECT COUNT(*) FROM lessons l INNER JOIN modules m ON m.id_module = l.id_module_lesson WHERE m.id_course_module = c.id_course) AS lesson_count', false)
+            ->where('c.id_instructor_course', $user->id)
+            ->orderBy('c.updated_at', 'DESC')
+            ->get()
+            ->getResult();
+
+        foreach ($courses as $course) {
+            $course->student_count = (int) ($course->student_count ?? 0);
+            $course->lesson_count = (int) ($course->lesson_count ?? 0);
+            $course->hours_label = $commerce->resolveHoursLabel($course, (int) ($course->total_minutes ?? 0));
+        }
 
         return view('pages/instructor/my_courses', [
             'user' => $user,
@@ -1700,6 +1718,23 @@ class Dashboard extends BaseController
             ? ($chartSeries[$currentMonth - 1] - $chartSeries[$currentMonth - 2])
             : 0;
 
+        // Metas dinâmicas
+        $monthlyGoalTarget = max(1.0, (float) $averageMonth > 0 ? (float) $averageMonth : max(1000.0, (float) $monthRevenue));
+        $monthlyGoalPercent = (int) min(100, round(($monthRevenue / $monthlyGoalTarget) * 100));
+
+        $totalEnrollments = (int) $db->table('enrollments e')
+            ->join('courses c', 'c.id_course = e.id_course_enrollment')
+            ->where('c.id_instructor_course', $user->id)
+            ->countAllResults();
+        $activeEnrollments = (int) $db->table('enrollments e')
+            ->join('courses c', 'c.id_course = e.id_course_enrollment')
+            ->where('c.id_instructor_course', $user->id)
+            ->where('e.status_enrollment', 'ativa')
+            ->countAllResults();
+        $activeStudentsPercent = $totalEnrollments > 0
+            ? (int) round(($activeEnrollments / $totalEnrollments) * 100)
+            : 0;
+
         return view('pages/instructor/financial', [
             'user' => $user,
             'sidebarLinks' => $this->sidebarLinks(),
@@ -1717,6 +1752,8 @@ class Dashboard extends BaseController
             'chartMax' => $chartMax,
             'chartAvg' => $chartAvg,
             'chartGrowth' => $chartGrowth,
+            'monthlyGoalPercent' => $monthlyGoalPercent,
+            'activeStudentsPercent' => $activeStudentsPercent,
         ]);
     }
 

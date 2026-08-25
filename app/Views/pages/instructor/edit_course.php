@@ -477,6 +477,7 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
                             <div id="modules-container" class="space-y-4">
                                 <?php foreach ($modules as $mIndex => $module): ?>
                                     <div class="module-card border border-slate-300 dark:border-slate-700 rounded-2xl p-4 bg-slate-50 dark:bg-slate-900" data-index="<?= $mIndex ?>">
+                                        <input type="hidden" name="modules[<?= $mIndex ?>][id_module]" value="<?= (int) $module->id_module ?>">
                                         <div class="flex items-center justify-between mb-3">
                                             <input type="text" name="modules[<?= $mIndex ?>][title]"
                                                 placeholder="Nome do Módulo"
@@ -508,6 +509,7 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
                                         <div class="lessons-container space-y-3 mb-3">
                                             <?php foreach ($module->lessons as $lIndex => $lesson): ?>
                                                 <div class="lesson-item border border-slate-200 dark:border-slate-700 rounded-xl p-3 bg-white dark:bg-slate-800" data-index="<?= $lIndex ?>" draggable="true">
+                                                    <input type="hidden" name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][id_lesson]" value="<?= (int) $lesson->id_lesson ?>">
                                                     <?php
                                                     $quizQuestions = [];
                                                     if (($lesson->type_lesson ?? '') === 'quiz' && !empty($lesson->content_lesson)) {
@@ -1445,6 +1447,8 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
                 const lessons = [];
 
                 modCard.querySelectorAll(".lesson-item").forEach((lessonEl, j) => {
+                    const id_lesson =
+                        lessonEl.querySelector('input[name$="[id_lesson]"]')?.value || "";
                     const title =
                         lessonEl.querySelector('input[name$="[title]"]')?.value || `Aula ${j + 1}`;
                     const type =
@@ -1488,6 +1492,7 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
                     }
 
                     lessons.push({
+                        id_lesson,
                         title,
                         type,
                         duration,
@@ -1501,7 +1506,10 @@ $courseLearningValue = str_replace('</textarea>', '&lt;/textarea&gt;', $course->
                 });
 
                 const minScoreValue = parseInt(moduleMinScore, 10);
+                const id_module =
+                    modCard.querySelector('input[name$="[id_module]"]')?.value || "";
                 modules.push({
+                    id_module,
                     title: moduleTitle,
                     description: moduleDescription,
                     min_score: Number.isFinite(minScoreValue) ? minScoreValue : 80,

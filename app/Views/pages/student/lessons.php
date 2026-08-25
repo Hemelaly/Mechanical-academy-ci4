@@ -794,7 +794,7 @@ $whatsappUrl = (string) ($whatsappUrl ?? '#');
                                 <iframe id="vimeoPlayer"
                                     src="https://player.vimeo.com/video/<?= esc($videoId) ?>?badge=0&autopause=0&player_id=<?= esc($lesson->id_lesson) ?>&app_id=58479&title=0&byline=0&portrait=0&autoplay=<?= $auto ?>&outro=nothing&controls=1&dnt=1"
                                     allow="autoplay; fullscreen; picture-in-picture"
-                                    allowfullscreen referrerpolicy="no-referrer" loading="lazy"
+                                    allowfullscreen referrerpolicy="strict-origin-when-cross-origin" loading="lazy"
                                     sandbox="allow-same-origin allow-scripts allow-presentation"
                                     class="absolute inset-0 w-full h-full"
                                     oncontextmenu="return false">

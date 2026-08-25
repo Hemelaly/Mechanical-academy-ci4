@@ -52,6 +52,10 @@ class RegisterController extends ShieldRegisterController
             }
         }
 
+        if ($response instanceof RedirectResponse) {
+            return $response->withCookies();
+        }
+
         return $response;
     }
 }

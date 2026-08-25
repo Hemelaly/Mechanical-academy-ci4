@@ -125,7 +125,8 @@ class GoogleAuthController extends BaseController
             : 'Sessão iniciada com Google.';
 
         return redirect()->to(config('Auth')->loginRedirect())
-            ->with('message', $message);
+            ->with('message', $message)
+            ->withCookies();
     }
 
     /**

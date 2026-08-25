@@ -242,19 +242,19 @@
           <div>
             <div class="flex justify-between text-sm mb-1">
               <span class="text-slate-600 dark:text-slate-400">Meta Mensal</span>
-              <span class="font-semibold text-slate-800 dark:text-white">75%</span>
+              <span class="font-semibold text-slate-800 dark:text-white"><?= (int) ($monthlyGoalPercent ?? 0) ?>%</span>
             </div>
             <div class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full">
-              <div class="h-2 bg-green-500 rounded-full" style="width: 75%"></div>
+              <div class="h-2 bg-green-500 rounded-full" style="width: <?= (int) ($monthlyGoalPercent ?? 0) ?>%"></div>
             </div>
           </div>
           <div>
             <div class="flex justify-between text-sm mb-1">
               <span class="text-slate-600 dark:text-slate-400">Alunos Ativos</span>
-              <span class="font-semibold text-slate-800 dark:text-white">68%</span>
+              <span class="font-semibold text-slate-800 dark:text-white"><?= (int) ($activeStudentsPercent ?? 0) ?>%</span>
             </div>
             <div class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full">
-              <div class="h-2 bg-blue-500 rounded-full" style="width: 68%"></div>
+              <div class="h-2 bg-blue-500 rounded-full" style="width: <?= (int) ($activeStudentsPercent ?? 0) ?>%"></div>
             </div>
           </div>
         </div>

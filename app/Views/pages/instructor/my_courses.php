@@ -103,15 +103,15 @@
                         <div class="flex items-center gap-4 text-slate-500 dark:text-slate-400 text-sm">
                             <div class="flex items-center gap-1">
                                 <i class="bi bi-people"></i>
-                                <span>234</span>
+                                <span><?= (int) ($course->student_count ?? 0) ?></span>
                             </div>
                             <div class="flex items-center gap-1">
                                 <i class="bi bi-clock"></i>
-                                <span>12h</span>
+                                <span><?= esc($course->hours_label ?? '0h') ?></span>
                             </div>
                             <div class="flex items-center gap-1">
-                                <i class="bi bi-check2-circle"></i>
-                                <span>Avançado</span>
+                                <i class="bi bi-collection-play"></i>
+                                <span><?= (int) ($course->lesson_count ?? 0) ?> aulas</span>
                             </div>
                         </div>
 

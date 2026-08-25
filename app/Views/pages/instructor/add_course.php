@@ -569,6 +569,7 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                                     <?php if (!empty($draftModules)): ?>
                                         <?php foreach ($draftModules as $mIndex => $module): ?>
                                             <div class="module-card mb-4 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 bg-white dark:bg-slate-900">
+                                                <input type="hidden" name="modules[<?= $mIndex ?>][id_module]" value="<?= (int) $module->id_module ?>">
                                                 <div class="flex justify-between items-center mb-3 gap-2">
                                                     <input type="text"
                                                         name="modules[<?= $mIndex ?>][title]"
@@ -603,6 +604,7 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                                                 <div class="lessons-container space-y-2 mb-3">
                                                     <?php foreach ($module->lessons as $lIndex => $lesson): ?>
                                                         <div class="lesson-item border border-slate-200 dark:border-slate-700 rounded-xl p-3 bg-slate-50 dark:bg-slate-800" draggable="true">
+                                                            <input type="hidden" name="modules[<?= $mIndex ?>][lessons][<?= $lIndex ?>][id_lesson]" value="<?= (int) $lesson->id_lesson ?>">
                                                             <?php
                                                             $quizQuestions = [];
                                                             if (($lesson->type_lesson ?? '') === 'quiz' && !empty($lesson->content_lesson)) {
@@ -1430,6 +1432,8 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                 const lessons = [];
 
                 modCard.querySelectorAll(".lesson-item").forEach((lessonEl, j) => {
+                    const id_lesson =
+                        lessonEl.querySelector('input[name$="[id_lesson]"]')?.value || "";
                     const title =
                         lessonEl.querySelector('input[name$="[title]"]')?.value || `Aula ${j + 1}`;
                     const type =
@@ -1473,6 +1477,7 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                     }
 
                     lessons.push({
+                        id_lesson,
                         title,
                         type,
                         duration,
@@ -1486,8 +1491,11 @@ $draftLearning = str_replace('</textarea>', '&lt;/textarea&gt;', $draft->learnin
                 });
 
                 const minScoreValue = parseInt(moduleMinScore, 10);
+                const id_module =
+                    modCard.querySelector('input[name$="[id_module]"]')?.value || "";
 
                 modules.push({
+                    id_module,
                     title: moduleTitle,
                     description: moduleDescription,
                     min_score: Number.isFinite(minScoreValue) ? minScoreValue : 80,

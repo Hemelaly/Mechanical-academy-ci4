@@ -492,76 +492,18 @@ class CourseController extends BaseController
             $courseId = $courseModel->insertID();
         }
 
-        // 2. Salvar módulos e aulas
-        if ($modulesProvided && $draftId) {
-                $oldModules = $moduleModel->where('id_course_module', $courseId)->findAll();
-                foreach ($oldModules as $mod) {
-                    $lessonModel->where('id_module_lesson', $mod->id_module)->delete();
-                }
-                $moduleModel->where('id_course_module', $courseId)->delete();
-        }
-
-        if (!empty($data['modules'])) {
-            foreach ($data['modules'] as $mIndex => $module) {
-                $zipIndex = $module['zip_input_index'] ?? $mIndex;
-                $zipFile = $this->request->getFile('modules_zip.' . $zipIndex);
-                $zipName = $this->moveModuleZip($zipFile);
-                if (! $zipName && ! empty($module['zip_existing'])) {
-                    $zipName = $module['zip_existing'];
-                }
-
-                $moduleInsert = [
-                    'id_course_module' => $courseId,
-                    'title_module' => $module['title'] ?? 'Módulo ' . ($mIndex + 1),
-                    'description_module' => $module['description'] ?? '',
-                    'content_zip_module' => $zipName,
-                    'min_score_module' => (int) ($module['min_score'] ?? self::DEFAULT_MIN_SCORE),
-                    'position_module' => $mIndex + 1,
-                ];
-
-                $moduleModel->insert($moduleInsert);
-                $moduleId = $moduleModel->insertID();
-
-                if (!empty($module['lessons'])) {
-                    foreach ($module['lessons'] as $lIndex => $lesson) {
-                        $fileIndex = $lesson['file_input_index'] ?? $lIndex;
-                        $file = $this->request->getFile('lesson_files.' . $mIndex . '.' . $fileIndex);
-                        $hasUpload = $file && $file->isValid() && ! $file->hasMoved();
-                        if ($this->lessonIsEmpty($lesson) && ! $hasUpload) {
-                            continue;
-                        }
-
-                        $quizQuestions = $lesson['quiz_questions'] ?? ($lesson['quiz'] ?? []);
-                        $lessonContent = null;
-                        if (($lesson['type'] ?? '') === 'quiz' && ! empty($quizQuestions)) {
-                            $normalized = $this->normalizeQuizQuestions((array) $quizQuestions);
-                            if (! empty($normalized)) {
-                                $lessonContent = json_encode(['questions' => $normalized], JSON_UNESCAPED_UNICODE);
-                            }
-                        }
-
-                        $fileIndex = $lesson['file_input_index'] ?? $lIndex;
-                        $file = $this->request->getFile('lesson_files.' . $mIndex . '.' . $fileIndex);
-                        $attachment = $this->moveLessonAttachment($file);
-                        $attachmentPath = $attachment['path'] ?? ($lesson['file_existing'] ?? null);
-                        $attachmentName = $attachment['name'] ?? ($lesson['file_existing_name'] ?? null);
-
-                        $lessonInsert = [
-                            'id_module_lesson' => $moduleId,
-                            'title_lesson' => $lesson['title'] ?? 'Aula sem título',
-                            'type_lesson' => $lesson['type'] ?? 'text',
-                            'content_lesson' => $lessonContent,
-                            'attachment_path_lesson' => $attachmentPath,
-                            'attachment_name_lesson' => $attachmentName,
-                            'duration_lesson' => $lesson['duration'] ?? 0,
-                            'position_lesson' => $lIndex + 1,
-                            'video_url_lesson' => $lesson['video_url'] ?? null,
-                            'is_preview_lesson' => $this->lessonPreviewFlag($lesson),
-                        ];
-                        $lessonModel->insert($lessonInsert);
-                    }
-                }
+        // 2. Salvar módulos e aulas (upsert — preserva IDs e progresso)
+        if ($modulesProvided) {
+            $syncError = $this->syncCourseModules(
+                (int) $courseId,
+                is_array($data['modules'] ?? null) ? $data['modules'] : [],
+                $moduleModel,
+                $lessonModel
+            );
+            if ($syncError !== null) {
+                return redirect()->back()->withInput()->with('error', $syncError);
             }
+            $this->recalcCourseEnrollments((int) $courseId);
         }
 
         // 3. Salvar projetos (se enviados)
@@ -759,71 +701,19 @@ class CourseController extends BaseController
         }
 
         if ($modulesProvided) {
-            // apagar e recriar
-            $oldModules = $moduleModel->where('id_course_module', $id)->findAll();
-            foreach ($oldModules as $mod) {
-                $lessonModel->where('id_module_lesson', $mod->id_module)->delete();
+            $syncError = $this->syncCourseModules(
+                (int) $id,
+                is_array($modules) ? $modules : [],
+                $moduleModel,
+                $lessonModel
+            );
+            if ($syncError !== null) {
+                return $this->response->setStatusCode(400)->setJSON([
+                    'ok' => false,
+                    'message' => $syncError,
+                ]);
             }
-            $moduleModel->where('id_course_module', $id)->delete();
-
-            if (!empty($modules)) {
-                foreach ($modules as $mIndex => $module) {
-                    $zipIndex = $module['zip_input_index'] ?? $mIndex;
-                    $zipFile = $this->request->getFile('modules_zip.' . $zipIndex);
-                    $zipName = $this->moveModuleZip($zipFile);
-                    if (! $zipName && ! empty($module['zip_existing'])) {
-                        $zipName = $module['zip_existing'];
-                    }
-
-                    $moduleModel->insert([
-                        'id_course_module' => $id,
-                        'title_module' => $module['title'] ?? 'Módulo ' . ($mIndex + 1),
-                        'description_module' => $module['description'] ?? '',
-                        'content_zip_module' => $zipName,
-                        'min_score_module' => (int) ($module['min_score'] ?? self::DEFAULT_MIN_SCORE),
-                        'position_module' => $mIndex + 1,
-                    ]);
-
-                    $moduleId = $moduleModel->insertID();
-
-                    foreach (($module['lessons'] ?? []) as $lIndex => $lesson) {
-                        $fileIndex = $lesson['file_input_index'] ?? $lIndex;
-                        $file = $this->request->getFile('lesson_files.' . $mIndex . '.' . $fileIndex);
-                        $hasUpload = $file && $file->isValid() && ! $file->hasMoved();
-                        if ($this->lessonIsEmpty($lesson) && ! $hasUpload) {
-                            continue;
-                        }
-
-                        $quizQuestions = $lesson['quiz_questions'] ?? ($lesson['quiz'] ?? []);
-                        $lessonContent = null;
-                        if (($lesson['type'] ?? '') === 'quiz' && ! empty($quizQuestions)) {
-                            $normalized = $this->normalizeQuizQuestions((array) $quizQuestions);
-                            if (! empty($normalized)) {
-                                $lessonContent = json_encode(['questions' => $normalized], JSON_UNESCAPED_UNICODE);
-                            }
-                        }
-
-                        $fileIndex = $lesson['file_input_index'] ?? $lIndex;
-                        $file = $this->request->getFile('lesson_files.' . $mIndex . '.' . $fileIndex);
-                        $attachment = $this->moveLessonAttachment($file);
-                        $attachmentPath = $attachment['path'] ?? ($lesson['file_existing'] ?? null);
-                        $attachmentName = $attachment['name'] ?? ($lesson['file_existing_name'] ?? null);
-
-                        $lessonModel->insert([
-                            'id_module_lesson' => $moduleId,
-                            'title_lesson' => $lesson['title'] ?? 'Aula',
-                            'type_lesson' => $lesson['type'] ?? 'text',
-                            'content_lesson' => $lessonContent,
-                            'attachment_path_lesson' => $attachmentPath,
-                            'attachment_name_lesson' => $attachmentName,
-                            'duration_lesson' => (int) ($lesson['duration'] ?? 0),
-                            'video_url_lesson' => $lesson['video_url'] ?? null,
-                            'is_preview_lesson' => $this->lessonPreviewFlag($lesson),
-                            'position_lesson' => $lIndex + 1,
-                        ]);
-                    }
-                }
-            }
+            $this->recalcCourseEnrollments((int) $id);
         }
 
         // Projetos (se enviados)
@@ -948,87 +838,16 @@ class CourseController extends BaseController
                 ->with('error', $this->modelErrorMessage($courseModel, 'Falha ao atualizar curso.'));
         }
 
-        // apagar e recriar
-        $oldModules = $moduleModel->where('id_course_module', $id)->findAll();
-        $oldModulesByPosition = [];
-        foreach ($oldModules as $oldModule) {
-            $oldModulesByPosition[(int) $oldModule->position_module] = $oldModule;
-        }
-        foreach ($oldModules as $mod) {
-            $lessonModel->where('id_module_lesson', $mod->id_module)->delete();
-        }
-        $moduleModel->where('id_course_module', $id)->delete();
-
-        foreach ($modules as $mIndex => $module) {
-            $zipIndex = $module['zip_input_index'] ?? $mIndex;
-            $zipFile = $this->request->getFile('modules_zip.' . $zipIndex);
-            $zipName = $this->moveModuleZip($zipFile);
-            if (! $zipName && ! empty($module['zip_existing'])) {
-                $zipName = $module['zip_existing'];
-            }
-            $oldModule = $oldModulesByPosition[$mIndex + 1] ?? null;
-            if (! $zipName && $oldModule) {
-                $zipName = $oldModule->content_zip_module ?? null;
-            }
-            $minScore = (int) ($module['min_score'] ?? ($oldModule->min_score_module ?? self::DEFAULT_MIN_SCORE));
-
-            $moduleInserted = $moduleModel->insert([
-                'id_course_module' => $id,
-                'title_module' => $module['title'] ?? 'Módulo ' . ($mIndex + 1),
-                'description_module' => $module['description'] ?? '',
-                'content_zip_module' => $zipName,
-                'min_score_module' => $minScore,
-                'position_module' => $mIndex + 1,
-            ]);
-            if (! $moduleInserted) {
-                $db->transRollback();
-                return redirect()->back()->withInput()
-                    ->with('error', $this->modelErrorMessage($moduleModel, 'Falha ao salvar modulo do curso.'));
-            }
-
-            $moduleId = $moduleModel->insertID();
-
-            foreach (($module['lessons'] ?? []) as $lIndex => $lesson) {
-                $fileIndex = $lesson['file_input_index'] ?? $lIndex;
-                $file = $this->request->getFile('lesson_files.' . $mIndex . '.' . $fileIndex);
-                $hasUpload = $file && $file->isValid() && ! $file->hasMoved();
-                if ($this->lessonIsEmpty($lesson) && ! $hasUpload) {
-                    continue;
-                }
-
-                $quizQuestions = $lesson['quiz_questions'] ?? ($lesson['quiz'] ?? []);
-                $lessonContent = null;
-                if (($lesson['type'] ?? '') === 'quiz' && ! empty($quizQuestions)) {
-                    $normalized = $this->normalizeQuizQuestions((array) $quizQuestions);
-                    if (! empty($normalized)) {
-                        $lessonContent = json_encode(['questions' => $normalized], JSON_UNESCAPED_UNICODE);
-                    }
-                }
-
-                $fileIndex = $lesson['file_input_index'] ?? $lIndex;
-                $file = $this->request->getFile('lesson_files.' . $mIndex . '.' . $fileIndex);
-                $attachment = $this->moveLessonAttachment($file);
-                $attachmentPath = $attachment['path'] ?? ($lesson['file_existing'] ?? null);
-                $attachmentName = $attachment['name'] ?? ($lesson['file_existing_name'] ?? null);
-
-                $lessonInserted = $lessonModel->insert([
-                    'id_module_lesson' => $moduleId,
-                    'title_lesson' => $lesson['title'] ?? 'Aula',
-                    'type_lesson' => $lesson['type'] ?? 'text',
-                    'content_lesson' => $lessonContent,
-                    'attachment_path_lesson' => $attachmentPath,
-                    'attachment_name_lesson' => $attachmentName,
-                    'duration_lesson' => (int) ($lesson['duration'] ?? 0),
-                    'video_url_lesson' => $lesson['video_url'] ?? null,
-                    'is_preview_lesson' => $this->lessonPreviewFlag($lesson),
-                    'position_lesson' => $lIndex + 1,
-                ]);
-                if (! $lessonInserted) {
-                    $db->transRollback();
-                    return redirect()->back()->withInput()
-                        ->with('error', $this->modelErrorMessage($lessonModel, 'Falha ao salvar aula do curso.'));
-                }
-            }
+        // Upsert módulos/aulas (preserva IDs e progresso dos alunos)
+        $syncError = $this->syncCourseModules(
+            (int) $id,
+            is_array($modules) ? $modules : [],
+            $moduleModel,
+            $lessonModel
+        );
+        if ($syncError !== null) {
+            $db->transRollback();
+            return redirect()->back()->withInput()->with('error', $syncError);
         }
 
         // Projetos (se enviados)
@@ -1081,12 +900,194 @@ class CourseController extends BaseController
                 ->with('error', 'Falha ao persistir alteracoes do curso. Nenhuma alteracao foi salva.');
         }
 
+        $this->recalcCourseEnrollments((int) $id);
+
         if (! $isDraft) {
             $this->clearAppCaches();
         }
 
         return redirect()->to('instructor/dashboard/meus_cursos')
             ->with('success', 'Curso atualizado com sucesso!');
+    }
+
+    /**
+     * Atualiza módulos/aulas por ID (upsert). Evita apagar e recriar —
+     * o CASCADE em progress.id_lesson_progress apagava o progresso dos alunos.
+     *
+     * @param list<array<string, mixed>> $modules
+     * @return string|null Mensagem de erro ou null se OK
+     */
+    private function syncCourseModules(int $courseId, array $modules, $moduleModel, $lessonModel): ?string
+    {
+        $db = \Config\Database::connect();
+
+        $existingModules = $moduleModel->where('id_course_module', $courseId)->findAll();
+        $modulesById = [];
+        foreach ($existingModules as $mod) {
+            $modulesById[(int) $mod->id_module] = $mod;
+        }
+
+        $existingLessons = $db->table('lessons l')
+            ->select('l.*')
+            ->join('modules m', 'm.id_module = l.id_module_lesson')
+            ->where('m.id_course_module', $courseId)
+            ->get()
+            ->getResult();
+        $lessonsById = [];
+        foreach ($existingLessons as $lessonRow) {
+            $lessonsById[(int) $lessonRow->id_lesson] = $lessonRow;
+        }
+
+        $keepModuleIds = [];
+        $keepLessonIds = [];
+
+        foreach ($modules as $mIndex => $module) {
+            if (! is_array($module)) {
+                continue;
+            }
+
+            $postedModuleId = (int) ($module['id_module'] ?? 0);
+            $existingModule = ($postedModuleId > 0 && isset($modulesById[$postedModuleId]))
+                ? $modulesById[$postedModuleId]
+                : null;
+
+            $zipIndex = $module['zip_input_index'] ?? $mIndex;
+            $zipFile  = $this->request->getFile('modules_zip.' . $zipIndex);
+            $zipName  = $this->moveModuleZip($zipFile);
+            if (! $zipName && ! empty($module['zip_existing'])) {
+                $zipName = $module['zip_existing'];
+            }
+            if (! $zipName && $existingModule) {
+                $zipName = $existingModule->content_zip_module ?? null;
+            }
+
+            $minScore = (int) ($module['min_score'] ?? ($existingModule->min_score_module ?? self::DEFAULT_MIN_SCORE));
+            $moduleData = [
+                'id_course_module'   => $courseId,
+                'title_module'       => $module['title'] ?? ('Módulo ' . ($mIndex + 1)),
+                'description_module' => $module['description'] ?? '',
+                'content_zip_module' => $zipName,
+                'min_score_module'   => $minScore,
+                'position_module'    => $mIndex + 1,
+            ];
+
+            if ($existingModule) {
+                if (! $moduleModel->update((int) $existingModule->id_module, $moduleData)) {
+                    return $this->modelErrorMessage($moduleModel, 'Falha ao salvar modulo do curso.');
+                }
+                $moduleId = (int) $existingModule->id_module;
+            } else {
+                if (! $moduleModel->insert($moduleData)) {
+                    return $this->modelErrorMessage($moduleModel, 'Falha ao salvar modulo do curso.');
+                }
+                $moduleId = (int) $moduleModel->insertID();
+            }
+            $keepModuleIds[] = $moduleId;
+
+            foreach (($module['lessons'] ?? []) as $lIndex => $lesson) {
+                if (! is_array($lesson)) {
+                    continue;
+                }
+
+                $fileIndex = $lesson['file_input_index'] ?? $lIndex;
+                $file      = $this->request->getFile('lesson_files.' . $mIndex . '.' . $fileIndex);
+                $hasUpload = $file && $file->isValid() && ! $file->hasMoved();
+                if ($this->lessonIsEmpty($lesson) && ! $hasUpload) {
+                    continue;
+                }
+
+                $postedLessonId = (int) ($lesson['id_lesson'] ?? 0);
+                $existingLesson = ($postedLessonId > 0 && isset($lessonsById[$postedLessonId]))
+                    ? $lessonsById[$postedLessonId]
+                    : null;
+
+                $quizQuestions = $lesson['quiz_questions'] ?? ($lesson['quiz'] ?? []);
+                $lessonContent = null;
+                if (($lesson['type'] ?? '') === 'quiz') {
+                    if (! empty($quizQuestions)) {
+                        $normalized = $this->normalizeQuizQuestions((array) $quizQuestions);
+                        if (! empty($normalized)) {
+                            $lessonContent = json_encode(['questions' => $normalized], JSON_UNESCAPED_UNICODE);
+                        }
+                    } elseif ($existingLesson) {
+                        $lessonContent = $existingLesson->content_lesson ?? null;
+                    }
+                }
+
+                $attachment     = $this->moveLessonAttachment($file);
+                $attachmentPath = $attachment['path'] ?? ($lesson['file_existing'] ?? null);
+                $attachmentName = $attachment['name'] ?? ($lesson['file_existing_name'] ?? null);
+                if (! $attachmentPath && $existingLesson) {
+                    $attachmentPath = $existingLesson->attachment_path_lesson ?? null;
+                    $attachmentName = $attachmentName ?: ($existingLesson->attachment_name_lesson ?? null);
+                }
+
+                $videoUrl = $lesson['video_url'] ?? null;
+                if ($videoUrl === '') {
+                    $videoUrl = null;
+                }
+
+                $lessonData = [
+                    'id_module_lesson'       => $moduleId,
+                    'title_lesson'           => $lesson['title'] ?? 'Aula',
+                    'type_lesson'            => $lesson['type'] ?? 'text',
+                    'content_lesson'         => $lessonContent,
+                    'attachment_path_lesson' => $attachmentPath,
+                    'attachment_name_lesson' => $attachmentName,
+                    'duration_lesson'        => (int) ($lesson['duration'] ?? 0),
+                    'video_url_lesson'       => $videoUrl,
+                    'is_preview_lesson'      => $this->lessonPreviewFlag($lesson),
+                    'position_lesson'        => $lIndex + 1,
+                ];
+
+                if ($existingLesson) {
+                    if (! $lessonModel->update((int) $existingLesson->id_lesson, $lessonData)) {
+                        return $this->modelErrorMessage($lessonModel, 'Falha ao salvar aula do curso.');
+                    }
+                    $lessonId = (int) $existingLesson->id_lesson;
+                } else {
+                    if (! $lessonModel->insert($lessonData)) {
+                        return $this->modelErrorMessage($lessonModel, 'Falha ao salvar aula do curso.');
+                    }
+                    $lessonId = (int) $lessonModel->insertID();
+                }
+                $keepLessonIds[] = $lessonId;
+            }
+        }
+
+        // Remover só aulas/módulos que saíram do formulário (progresso dessas aulas é apagado de propósito).
+        foreach ($lessonsById as $lessonId => $lessonRow) {
+            if (! in_array((int) $lessonId, $keepLessonIds, true)) {
+                $lessonModel->delete((int) $lessonId);
+            }
+        }
+        foreach ($modulesById as $moduleId => $mod) {
+            if (! in_array((int) $moduleId, $keepModuleIds, true)) {
+                $lessonModel->where('id_module_lesson', (int) $moduleId)->delete();
+                $moduleModel->delete((int) $moduleId);
+            }
+        }
+
+        return null;
+    }
+
+    private function recalcCourseEnrollments(int $courseId): void
+    {
+        $db  = \Config\Database::connect();
+        $rows = $db->table('enrollments')
+            ->select('id_enrollment')
+            ->where('id_course_enrollment', $courseId)
+            ->get()
+            ->getResultArray();
+
+        if ($rows === []) {
+            return;
+        }
+
+        $progress = new \App\Services\ProgressService($db);
+        foreach ($rows as $row) {
+            $progress->recalcAndSave((int) $row['id_enrollment']);
+        }
     }
 
     public function deletar($id = null)
