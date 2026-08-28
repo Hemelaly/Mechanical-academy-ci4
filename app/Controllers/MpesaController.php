@@ -809,66 +809,7 @@ class MpesaController extends Controller
 
     private function buildFailureSwal(array $mpesaData): array
     {
-        $gatewayError = trim((string) ($mpesaData['output_error'] ?? ''));
-        $gatewayErrorLower = strtolower($gatewayError);
-
-        if ($gatewayError !== '') {
-            if (str_contains($gatewayErrorLower, 'bad api key')) {
-                return [
-                    'icon'  => 'error',
-                    'title' => 'Configuracao invalida do M-Pesa',
-                    'text'  => 'O gateway recusou a API Key do ambiente atual. Verifique MPESA_API_KEY e MPESA_ENV.',
-                ];
-            }
-
-            if (str_contains($gatewayErrorLower, 'bad public key')) {
-                return [
-                    'icon'  => 'error',
-                    'title' => 'Chave publica invalida',
-                    'text'  => 'O gateway recusou a chave publica configurada para o M-Pesa. Verifique MPESA_PUBLIC_KEY e MPESA_ENV.',
-                ];
-            }
-
-            return [
-                'icon'  => 'error',
-                'title' => 'Falha no gateway M-Pesa',
-                'text'  => $gatewayError,
-            ];
-        }
-
-        $code = strtoupper(trim((string) ($mpesaData['output_ResponseCode'] ?? '')));
-        $description = trim((string) ($mpesaData['output_ResponseDesc'] ?? 'Pagamento rejeitado pelo M-Pesa.'));
-        $descriptionLower = strtolower($description);
-
-        if (str_contains($descriptionLower, 'insufficient') || str_contains($descriptionLower, 'saldo insuficiente')) {
-            return [
-                'icon'  => 'warning',
-                'title' => 'Saldo insuficiente',
-                'text'  => 'O pagamento foi negado por saldo insuficiente na conta M-Pesa.',
-            ];
-        }
-
-        if ($code === 'INS-2051' || str_contains($descriptionLower, 'msisdn invalid')) {
-            return [
-                'icon'  => 'error',
-                'title' => 'Numero invalido',
-                'text'  => 'O numero informado nao e valido para M-Pesa. Confira e tente novamente.',
-            ];
-        }
-
-        if (str_contains($descriptionLower, 'cancel') || str_contains($descriptionLower, 'declin') || str_contains($descriptionLower, 'failed')) {
-            return [
-                'icon'  => 'error',
-                'title' => 'Pagamento negado',
-                'text'  => $description,
-            ];
-        }
-
-        return [
-            'icon'  => 'error',
-            'title' => 'Pagamento rejeitado',
-            'text'  => $description !== '' ? $description : 'Nao foi possivel concluir o pagamento.',
-        ];
+        return $this->mpesaOutcome->failureSwal($mpesaData);
     }
 
     private function pendingConfirmationSwal(bool $asyncMode = false): array
