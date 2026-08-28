@@ -427,7 +427,10 @@ $exportBase = site_url('admin/dashboard/financas/export');
   let txPage = 1;
   let searchTimer = null;
 
-  const statusBadge = (status) => {
+  const statusBadge = (item) => {
+    const status = item.status_payment || '';
+    const display = item.status_display || status || '—';
+    const detail = item.status_detail || '';
     const map = {
       Aprovado: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
       Rejeitado: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
@@ -435,7 +438,11 @@ $exportBase = site_url('admin/dashboard/financas/export');
     };
     const cls = map[status] || 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200';
     const icon = status === 'Aprovado' ? 'bi-check-circle' : (status === 'Rejeitado' ? 'bi-x-circle' : 'bi-clock');
-    return `<span class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ${cls}"><i class="bi ${icon}"></i> ${escapeHtml(status || '—')}</span>`;
+    const title = detail ? ` title="${escapeHtml(detail)}"` : '';
+    const detailHtml = (status === 'Rejeitado' && detail)
+      ? `<div class="mt-1 max-w-[14rem] text-[11px] font-normal text-slate-500 dark:text-slate-400 line-clamp-2">${escapeHtml(detail)}</div>`
+      : '';
+    return `<div><span class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ${cls}"${title}><i class="bi ${icon}"></i> ${escapeHtml(display)}</span>${detailHtml}</div>`;
   };
 
   const methodIcon = (label) => {
@@ -491,7 +498,7 @@ $exportBase = site_url('admin/dashboard/financas/export');
             <td class="whitespace-nowrap px-4 py-3 text-slate-600 dark:text-slate-300">
               <span class="inline-flex items-center gap-1"><i class="bi ${methodIcon(item.method_payment_label)}"></i>${escapeHtml(item.method_payment_label)}</span>
             </td>
-            <td class="whitespace-nowrap px-4 py-3">${statusBadge(item.status_payment)}</td>
+            <td class="px-4 py-3">${statusBadge(item)}</td>
             <td class="whitespace-nowrap px-4 py-3 text-right font-semibold text-slate-900 dark:text-white">${formatMoney(item.amount_payment)}</td>
           </tr>
         `).join('');

@@ -174,12 +174,17 @@
                     <div class="flex flex-wrap items-center gap-2 mt-1">
                       <p class="<?= $amountColor ?> font-semibold text-sm">
                         <?= number_format((float) ($transaction->amount_payment ?? 0), 2, ',', '.') ?> MZN
-                        - <?= esc($transaction->status_payment ?? '') ?>
+                        - <?= esc($transaction->status_display ?? $transaction->status_payment ?? '') ?>
                       </p>
                       <span class="inline-flex items-center rounded-full bg-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-700 dark:bg-slate-700 dark:text-slate-200">
                         <?= esc($transaction->method_payment_label ?? 'Nao informado') ?>
                       </span>
                     </div>
+                    <?php if (! empty($transaction->status_detail) && ($transaction->status_payment ?? '') === 'Rejeitado'): ?>
+                      <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2" title="<?= esc($transaction->status_detail) ?>">
+                        <?= esc($transaction->status_detail) ?>
+                      </p>
+                    <?php endif; ?>
                   </div>
                 </div>
                 <div class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 bg-slate-200 dark:bg-slate-700 px-2 sm:px-3 py-1 rounded-lg whitespace-nowrap ml-2">

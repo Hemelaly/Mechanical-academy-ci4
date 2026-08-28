@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Models\CourseModel;
 use App\Models\PaymentModel;
 use App\Services\CheckoutEnrollmentService;
+use App\Services\MpesaOutcomeService;
 use CodeIgniter\Controller;
 
 class MpesaWebhookController extends Controller
@@ -39,6 +40,7 @@ class MpesaWebhookController extends Controller
 
         $paymentModel = new PaymentModel();
         $checkoutService = new CheckoutEnrollmentService();
+        $mpesaOutcome = new MpesaOutcomeService();
 
         $payment = $paymentModel
             ->where('reference_payment', $referencePayment)
@@ -147,10 +149,20 @@ class MpesaWebhookController extends Controller
             ]);
         }
 
-        $paymentModel->update($paymentId, [
-            'status_payment' => 'Rejeitado',
-            'updated_at'     => date('Y-m-d H:i:s'),
-        ]);
+        // Normaliza payload do webhook para o mesmo mapeamento do C2B/status.
+        $normalized = $data;
+        if (empty($normalized['output_ResponseDesc']) && ! empty($normalized['input_TransactionStatus'])) {
+            $normalized['output_ResponseDesc'] = (string) $normalized['input_TransactionStatus'];
+        }
+        if (empty($normalized['output_ResponseTransactionStatus'])) {
+            $normalized['output_ResponseTransactionStatus'] = (string) (
+                $normalized['input_TransactionStatus']
+                ?? $normalized['output_ResponseDesc']
+                ?? ''
+            );
+        }
+
+        $paymentModel->update($paymentId, $mpesaOutcome->rejectionUpdate($normalized));
 
         return $this->response->setStatusCode(200)->setJSON([
             'status'  => 'ok',

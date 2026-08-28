@@ -1486,10 +1486,14 @@ class Dashboard extends BaseController
             'Valor (MZN)',
             'Metodo',
             'Estado',
+            'Motivo',
+            'Codigo gateway',
+            'Mensagem gateway',
             'Referencia',
         ], ';');
 
         $total = 0.0;
+        $mpesaOutcome = new \App\Services\MpesaOutcomeService();
         foreach ($rows as $row) {
             $amount = (float) ($row['amount_payment'] ?? 0);
             if (($row['status_payment'] ?? '') === 'Aprovado') {
@@ -1504,7 +1508,10 @@ class Dashboard extends BaseController
                 (string) ($row['instructor_name'] ?? ''),
                 number_format($amount, 2, ',', ''),
                 $this->normalizePaymentMethod($row['method_payment'] ?? null),
-                (string) ($row['status_payment'] ?? ''),
+                $mpesaOutcome->displayStatus($row),
+                (string) ($row['failure_reason_payment'] ?? ''),
+                (string) ($row['gateway_code_payment'] ?? ''),
+                (string) ($row['gateway_message_payment'] ?? ''),
                 (string) ($row['reference_payment'] ?? ''),
             ], ';');
         }
@@ -2553,7 +2560,7 @@ class Dashboard extends BaseController
         $emailExpr = 'COALESCE(' . implode(', ', $emailParts) . ')';
 
         $builder = $db->table('payments p')
-            ->select('p.id_payment, p.amount_payment, p.status_payment, p.method_payment, p.reference_payment, p.created_at, p.id_user_payment, c.title_course', false)
+            ->select('p.id_payment, p.amount_payment, p.status_payment, p.method_payment, p.reference_payment, p.gateway_code_payment, p.gateway_message_payment, p.gateway_txn_status_payment, p.failure_reason_payment, p.created_at, p.id_user_payment, c.title_course', false)
             ->select("COALESCE(instr.username, '-') AS instructor_name", false)
             ->select("{$buyerExpr} AS buyer_label", false)
             ->select("{$emailExpr} AS buyer_email", false)
@@ -2618,7 +2625,8 @@ class Dashboard extends BaseController
                 ->get()
                 ->getResultArray();
 
-            $items = array_map(function (array $row): array {
+            $mpesaOutcome = new \App\Services\MpesaOutcomeService();
+            $items = array_map(function (array $row) use ($mpesaOutcome): array {
                 return [
                     'id_payment' => (int) ($row['id_payment'] ?? 0),
                     'created_at' => (string) ($row['created_at'] ?? ''),
@@ -2629,6 +2637,10 @@ class Dashboard extends BaseController
                     'method_payment' => (string) ($row['method_payment'] ?? ''),
                     'method_payment_label' => $this->normalizePaymentMethod($row['method_payment'] ?? null),
                     'status_payment' => (string) ($row['status_payment'] ?? ''),
+                    'status_display' => $mpesaOutcome->displayStatus($row),
+                    'status_detail' => $mpesaOutcome->displayDetail($row),
+                    'failure_reason_payment' => (string) ($row['failure_reason_payment'] ?? ''),
+                    'gateway_code_payment' => (string) ($row['gateway_code_payment'] ?? ''),
                     'amount_payment' => (float) ($row['amount_payment'] ?? 0),
                     'reference_payment' => (string) ($row['reference_payment'] ?? ''),
                 ];

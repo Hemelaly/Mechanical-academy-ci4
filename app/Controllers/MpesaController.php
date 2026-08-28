@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Models\CourseModel;
 use App\Models\PaymentModel;
 use App\Services\CheckoutEnrollmentService;
+use App\Services\MpesaOutcomeService;
 use CodeIgniter\Controller;
 use CodeIgniter\HTTP\ResponseInterface;
 use emagombe\Mpesa;
@@ -13,9 +14,12 @@ class MpesaController extends Controller
 {
     private CheckoutEnrollmentService $checkoutService;
 
+    private MpesaOutcomeService $mpesaOutcome;
+
     public function __construct()
     {
         $this->checkoutService = new CheckoutEnrollmentService();
+        $this->mpesaOutcome = new MpesaOutcomeService();
     }
 
     public function send(): ResponseInterface
@@ -246,12 +250,10 @@ class MpesaController extends Controller
             ], JSON_UNESCAPED_UNICODE));
 
             if ($this->hasGatewayError($mpesaData)) {
-                $paymentModel->update($paymentId, [
-                    'status_payment'        => 'Rejeitado',
-                    'id_enrollment_payment' => 0,
-                    'approved_by_payment'   => 0,
-                    'updated_at'            => date('Y-m-d H:i:s'),
-                ]);
+                $paymentModel->update($paymentId, $this->mpesaOutcome->rejectionUpdate(
+                    $mpesaData,
+                    MpesaOutcomeService::REASON_GATEWAY_ERROR
+                ));
 
                 log_message('error', 'Checkout M-Pesa retornou erro tecnico: ' . json_encode([
                     'payment_id' => $paymentId,
@@ -268,12 +270,7 @@ class MpesaController extends Controller
             }
 
             if (! $this->isAcceptedMpesaResponse($mpesaData)) {
-                $paymentModel->update($paymentId, [
-                    'status_payment'        => 'Rejeitado',
-                    'id_enrollment_payment' => 0,
-                    'approved_by_payment'   => 0,
-                    'updated_at'            => date('Y-m-d H:i:s'),
-                ]);
+                $paymentModel->update($paymentId, $this->mpesaOutcome->rejectionUpdate($mpesaData));
 
                 return $this->jsonResponse(409, [
                     'ok'     => false,
@@ -291,10 +288,7 @@ class MpesaController extends Controller
                 $mpesaData
             );
         } catch (\Throwable $e) {
-            $paymentModel->update($paymentId, [
-                'status_payment' => 'Rejeitado',
-                'updated_at'     => date('Y-m-d H:i:s'),
-            ]);
+            $paymentModel->update($paymentId, $this->mpesaOutcome->exceptionUpdate($e->getMessage()));
 
             log_message('error', 'Erro ao iniciar pagamento M-Pesa: ' . $e->getMessage());
 
@@ -378,13 +372,16 @@ class MpesaController extends Controller
         }
 
         if ($paymentStatus === 'rejeitado') {
+            $detail = $this->mpesaOutcome->displayDetail($payment);
+            $label = $this->mpesaOutcome->displayStatus($payment);
+
             return $this->jsonResponse(409, [
                 'ok'     => false,
                 'status' => 'rejected',
                 'swal'   => [
                     'icon'  => 'error',
-                    'title' => 'Pagamento rejeitado',
-                    'text'  => 'O pagamento foi rejeitado pelo M-Pesa.',
+                    'title' => $label !== '' ? $label : 'Pagamento rejeitado',
+                    'text'  => $detail !== '' ? $detail : 'O pagamento foi rejeitado pelo M-Pesa.',
                 ],
             ]);
         }
@@ -444,12 +441,7 @@ class MpesaController extends Controller
             }
 
             if ($this->isRejectedMpesaStatusResponse($mpesaData)) {
-                $paymentModel->update($paymentId, [
-                    'status_payment'        => 'Rejeitado',
-                    'id_enrollment_payment' => 0,
-                    'approved_by_payment'   => 0,
-                    'updated_at'            => date('Y-m-d H:i:s'),
-                ]);
+                $paymentModel->update($paymentId, $this->mpesaOutcome->rejectionUpdate($mpesaData));
 
                 return $this->jsonResponse(409, [
                     'ok'     => false,

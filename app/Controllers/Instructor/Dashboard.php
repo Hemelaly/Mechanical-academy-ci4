@@ -1650,6 +1650,10 @@ class Dashboard extends BaseController
             p.status_payment,
             p.method_payment,
             p.reference_payment,
+            p.gateway_code_payment,
+            p.gateway_message_payment,
+            p.gateway_txn_status_payment,
+            p.failure_reason_payment,
             p.created_at,
             c.title_course
         ')
@@ -1660,8 +1664,11 @@ class Dashboard extends BaseController
             ->get()
             ->getResult();
 
+        $mpesaOutcome = new \App\Services\MpesaOutcomeService();
         foreach ($latestTransactions as $transaction) {
             $transaction->method_payment_label = $this->normalizePaymentMethod($transaction->method_payment ?? null);
+            $transaction->status_display = $mpesaOutcome->displayStatus($transaction);
+            $transaction->status_detail = $mpesaOutcome->displayDetail($transaction);
         }
 
         $paymentMethods = $db->table('payments p')

@@ -121,13 +121,13 @@ class CheckoutEnrollmentService
         $enrollmentId = $enrollment['id'];
 
         $paymentModel = new PaymentModel();
-        $updated = $paymentModel->update($paymentId, [
+        $updated = $paymentModel->update($paymentId, array_merge([
             'id_user_payment'       => (int) $user->id,
             'id_enrollment_payment' => $enrollmentId,
             'status_payment'        => 'Aprovado',
             'approved_by_payment'   => 0,
             'updated_at'            => date('Y-m-d H:i:s'),
-        ]);
+        ], (new MpesaOutcomeService())->approvalClearFields()));
 
         if (! $updated) {
             throw new \RuntimeException('Nao foi possivel atualizar o pagamento aprovado.');
@@ -238,7 +238,7 @@ class CheckoutEnrollmentService
             }
         }
 
-        $updatedPayment = $paymentModel->update($paymentId, [
+        $updatedPayment = $paymentModel->update($paymentId, array_merge([
             'id_user_payment'       => $pendingId,
             'id_enrollment_payment' => 0,
             'status_payment'        => 'Aprovado',
@@ -246,7 +246,7 @@ class CheckoutEnrollmentService
             'guest_email_payment'   => $normalizedEmail,
             'guest_name_payment'    => $resolvedName,
             'updated_at'            => date('Y-m-d H:i:s'),
-        ]);
+        ], (new MpesaOutcomeService())->approvalClearFields()));
 
         if (! $updatedPayment) {
             throw new \RuntimeException('Nao foi possivel atualizar o pagamento aprovado para acesso pendente.');
@@ -321,13 +321,13 @@ class CheckoutEnrollmentService
         $enrollment = $this->ensureEnrollment((int) $user->id, (int) $pendingUser->course_id);
         $enrollmentId = $enrollment['id'];
 
-        $updated = $paymentModel->update((int) $payment->id_payment, [
+        $updated = $paymentModel->update((int) $payment->id_payment, array_merge([
             'id_user_payment'       => (int) $user->id,
             'id_enrollment_payment' => $enrollmentId,
             'status_payment'        => 'Aprovado',
             'approved_by_payment'   => 0,
             'updated_at'            => date('Y-m-d H:i:s'),
-        ]);
+        ], (new MpesaOutcomeService())->approvalClearFields()));
 
         if (! $updated) {
             throw new \RuntimeException('Nao foi possivel concluir a ativacao do pagamento.');
